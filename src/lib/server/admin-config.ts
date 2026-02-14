@@ -213,9 +213,14 @@ export async function updateAdminConfig(
   };
   const persisted = await writeAdminConfigToSupabase(next);
   if (persisted) return persisted;
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
-  return next;
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
+    return next;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown_persistence_error";
+    throw new Error(`admin_config_persistence_failed: ${message}`);
+  }
 }
 
 export async function replaceAdminConfig(
@@ -231,7 +236,12 @@ export async function replaceAdminConfig(
   };
   const persisted = await writeAdminConfigToSupabase(next);
   if (persisted) return persisted;
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
-  return next;
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
+    return next;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown_persistence_error";
+    throw new Error(`admin_config_persistence_failed: ${message}`);
+  }
 }

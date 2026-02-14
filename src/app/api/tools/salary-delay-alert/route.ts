@@ -1,6 +1,7 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireToolAccessOrResponse } from "@/lib/server/tool-access-enforcement";
 import { z } from "zod";
+import { recordToolUsage } from "@/lib/server/tool-usage-history";
 
 const schema = z.object({
   delayDays: z.number().int().min(0),
@@ -35,14 +36,18 @@ export async function POST(request: NextRequest) {
       "Risque contentieux pour l'employeur en cas de repetition.",
     ];
 
+    const result = {
+      riskScore,
+      level,
+      legalSteps,
+      possiblePenalties,
+    };
+
+    await recordToolUsage("salary_delay_alert", input, result);
+
     return NextResponse.json({
       ok: true,
-      result: {
-        riskScore,
-        level,
-        legalSteps,
-        possiblePenalties,
-      },
+      result,
     });
   } catch (error) {
     return NextResponse.json(
@@ -51,4 +56,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

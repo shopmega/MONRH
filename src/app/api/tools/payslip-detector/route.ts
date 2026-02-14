@@ -3,6 +3,7 @@ import { requireToolAccessOrResponse } from "@/lib/server/tool-access-enforcemen
 import { z } from "zod";
 import { simulateNetGross } from "@/lib/calculators/net-gross";
 import { getSmigRulesByDate } from "@/lib/rules/default-rules";
+import { recordToolUsage } from "@/lib/server/tool-usage-history";
 
 const schema = z.object({
   grossSalary: z.number().positive(),
@@ -112,19 +113,22 @@ export async function POST(request: NextRequest) {
           return acc + 8;
         }, 0),
     );
+    const result = {
+      riskScore: score,
+      expected: {
+        netSalary: expectedNet,
+        cnssEmployee: expectedCnss,
+        incomeTax: expectedTax,
+        smigEstimate: minSmig,
+      },
+      issues,
+    };
+
+    await recordToolUsage("payslip_detector", input, result);
 
     return NextResponse.json({
       ok: true,
-      result: {
-        riskScore: score,
-        expected: {
-          netSalary: expectedNet,
-          cnssEmployee: expectedCnss,
-          incomeTax: expectedTax,
-          smigEstimate: minSmig,
-        },
-        issues,
-      },
+      result,
     });
   } catch (error) {
     return NextResponse.json(

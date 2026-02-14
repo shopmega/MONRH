@@ -7,6 +7,7 @@ import { AdSlot } from "@/components/ad-slot";
 import { useLanguage } from "@/components/language-provider";
 import { localizeCalculatorTitle } from "@/lib/i18n/simulator-localization";
 import { calculatorTypeToPath } from "@/lib/simulations/calculator-path";
+import { TOOL_CATALOG } from "@/lib/tools/tool-catalog";
 
 type SimulationItem = {
   id: string;
@@ -48,6 +49,8 @@ type ActivityItem = {
   kind: "simulation" | "document" | "tool";
   href?: string;
 };
+
+const TOOL_LABEL_BY_ID = Object.fromEntries(TOOL_CATALOG.map((tool) => [tool.id, tool.label]));
 
 function formatDate(iso: string, locale: string): string {
   return new Date(iso).toLocaleDateString(locale);
@@ -137,7 +140,11 @@ export default function ComptePage() {
   const activity = useMemo<ActivityItem[]>(() => {
     const simulationActivity: ActivityItem[] = simulations.map((item) => ({
       id: `s-${item.id}`,
-      title: `${t("accountPage.simulationPrefix")} ${localizeCalculatorTitle(item.calculatorType, item.calculatorType, language)}`,
+      title: `${t("accountPage.simulationPrefix")} ${localizeCalculatorTitle(
+        item.calculatorType,
+        TOOL_LABEL_BY_ID[item.calculatorType] ?? item.calculatorType,
+        language,
+      )}`,
       date: item.createdAt,
       status: t("accountPage.saved"),
       kind: "simulation",

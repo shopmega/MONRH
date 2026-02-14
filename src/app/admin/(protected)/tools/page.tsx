@@ -92,12 +92,22 @@ export default function AdminToolsPage() {
       }),
     });
 
-    const data = (await response.json()) as { ok: boolean; config?: AdminConfig };
-    if (data.ok && data.config) {
+    const contentType = response.headers.get("content-type") ?? "";
+    const data = contentType.includes("application/json")
+      ? ((await response.json()) as {
+          ok?: boolean;
+          config?: AdminConfig;
+          error?: string;
+          message?: string;
+        })
+      : null;
+
+    if (response.ok && data?.ok && data.config) {
       setConfig(data.config);
       setStatus("Configuration mise a jour.");
     } else {
-      setStatus("Echec de mise a jour.");
+      const detail = data?.message ?? data?.error ?? `http_${response.status}`;
+      setStatus(`Echec de mise a jour. (${detail})`);
     }
     setSaving(false);
   }

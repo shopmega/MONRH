@@ -1,6 +1,7 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireToolAccessOrResponse } from "@/lib/server/tool-access-enforcement";
 import { z } from "zod";
+import { recordToolUsage } from "@/lib/server/tool-usage-history";
 
 const schema = z.object({
   hasWrittenContract: z.boolean(),
@@ -38,13 +39,17 @@ export async function POST(request: NextRequest) {
       !input.hasProofArchive ? "archive" : null,
     ].filter(Boolean);
 
+    const result = {
+      riskScore,
+      level,
+      recommendationCodes,
+    };
+
+    await recordToolUsage("compliance_risk_score", input, result);
+
     return NextResponse.json({
       ok: true,
-      result: {
-        riskScore,
-        level,
-        recommendationCodes,
-      },
+      result,
     });
   } catch (error) {
     return NextResponse.json(
@@ -53,4 +58,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

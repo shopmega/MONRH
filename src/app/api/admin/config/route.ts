@@ -103,13 +103,17 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ ok: true, config });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown_error";
     await addAdminAuditEvent({
       action: "admin_config_update",
       status: "failed",
       meta: {
-        error: error instanceof Error ? error.message : "unknown_error",
+        error: message,
       },
     });
-    return NextResponse.json({ ok: false, error: "config_update_failed" }, { status: 500 });
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ ok: false, error: "invalid_payload", message }, { status: 400 });
+    }
+    return NextResponse.json({ ok: false, error: "config_update_failed", message }, { status: 500 });
   }
 }
