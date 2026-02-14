@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
+import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
 import {
   getDefaultRulesBundle,
   invalidateRulesCache,
@@ -9,6 +10,7 @@ import {
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const RULES_PATH = path.join(DATA_DIR, "law-rules.json");
+const SETTINGS_KEY = "law_rules_bundle";
 
 const taxBracketSchema = z.object({
   min: z.number(),
@@ -112,7 +114,60 @@ async function ensureRulesFile() {
   }
 }
 
+async function readRulesFromSupabase(): Promise<LawRulesBundle | null> {
+  try {
+    const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
+      select: (
+        columns: string,
+      ) => {
+        eq: (column: string, value: string) => {
+          maybeSingle: () => Promise<{
+            data: { value?: unknown } | null;
+            error: unknown;
+          }>;
+        };
+      };
+    };
+    const { data, error } = await appSettings
+      .select("value")
+      .eq("name", SETTINGS_KEY)
+      .maybeSingle();
+    if (error) return null;
+    if (!data) return getDefaultRulesBundle();
+    const row = data as { value?: unknown };
+    return lawRulesBundleSchema.parse((row.value ?? {}) as unknown);
+  } catch {
+    return null;
+  }
+}
+
+async function writeRulesToSupabase(bundle: LawRulesBundle): Promise<boolean> {
+  try {
+    const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
+      upsert: (
+        values: { name: string; value: unknown; updated_at: string },
+        options: { onConflict: string },
+      ) => Promise<{ error: unknown }>;
+    };
+    const { error } = await appSettings
+      .upsert(
+        {
+          name: SETTINGS_KEY,
+          value: bundle,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "name" },
+      );
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 export async function readLawRulesBundle(): Promise<LawRulesBundle> {
+  const supabaseRules = await readRulesFromSupabase();
+  if (supabaseRules) return supabaseRules;
+
   await ensureRulesFile();
   const raw = await fs.readFile(RULES_PATH, "utf8");
   try {
@@ -124,6 +179,11 @@ export async function readLawRulesBundle(): Promise<LawRulesBundle> {
 
 export async function writeLawRulesBundle(payload: unknown): Promise<LawRulesBundle> {
   const parsed = lawRulesBundleSchema.parse(payload);
+  const persisted = await writeRulesToSupabase(parsed);
+  if (persisted) {
+    invalidateRulesCache();
+    return parsed;
+  }
   await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(RULES_PATH, JSON.stringify(parsed, null, 2), "utf8");
   invalidateRulesCache();

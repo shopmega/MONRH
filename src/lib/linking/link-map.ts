@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
 
 export type LinkSourceType = "article" | "simulator" | "document";
 
@@ -18,6 +19,7 @@ export type LinkMapData = {
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const STORE_PATH = path.join(DATA_DIR, "link-map.json");
+const SETTINGS_KEY = "link_map";
 
 const EMPTY_TARGETS: LinkTargets = {
   articleSlugs: [],
@@ -51,7 +53,88 @@ async function ensureStoreFile() {
   }
 }
 
+async function readLinkMapFromSupabase(): Promise<LinkMapData | null> {
+  try {
+    const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
+      select: (
+        columns: string,
+      ) => {
+        eq: (column: string, value: string) => {
+          maybeSingle: () => Promise<{
+            data: { value?: unknown } | null;
+            error: unknown;
+          }>;
+        };
+      };
+    };
+    const { data, error } = await appSettings
+      .select("value")
+      .eq("name", SETTINGS_KEY)
+      .maybeSingle();
+    if (error) return null;
+    if (!data) return DEFAULT_LINK_MAP;
+
+    const row = data as { value?: unknown };
+    const parsed = (row.value ?? {}) as Partial<LinkMapData>;
+    const normalizeRecord = (record?: Record<string, LinkTargets>) =>
+      Object.fromEntries(
+        Object.entries(record ?? {}).map(([key, value]) => [key, normalizeTargets(value)]),
+      );
+    return {
+      article: normalizeRecord(parsed.article),
+      simulator: normalizeRecord(parsed.simulator),
+      document: normalizeRecord(parsed.document),
+      updatedAt: parsed.updatedAt ?? DEFAULT_LINK_MAP.updatedAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function writeLinkMapToSupabase(map: LinkMapData): Promise<LinkMapData | null> {
+  try {
+    const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
+      upsert: (
+        values: { name: string; value: unknown; updated_at: string },
+        options: { onConflict: string },
+      ) => {
+        select: (columns: string) => {
+          single: () => Promise<{
+            data: { value?: unknown } | null;
+            error: unknown;
+          }>;
+        };
+      };
+    };
+    const { data, error } = await appSettings
+      .upsert(
+        {
+          name: SETTINGS_KEY,
+          value: map,
+          updated_at: map.updatedAt,
+        },
+        { onConflict: "name" },
+      )
+      .select("value")
+      .single();
+    if (error) return null;
+    const row = data as { value?: unknown };
+    const parsed = (row.value ?? {}) as Partial<LinkMapData>;
+    return {
+      article: (parsed.article ?? {}) as Record<string, LinkTargets>,
+      simulator: (parsed.simulator ?? {}) as Record<string, LinkTargets>,
+      document: (parsed.document ?? {}) as Record<string, LinkTargets>,
+      updatedAt: parsed.updatedAt ?? map.updatedAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function readLinkMap(): Promise<LinkMapData> {
+  const supabaseMap = await readLinkMapFromSupabase();
+  if (supabaseMap) return supabaseMap;
+
   await ensureStoreFile();
   const raw = await fs.readFile(STORE_PATH, "utf8");
   try {
@@ -100,6 +183,8 @@ export async function upsertLinkTargets(input: {
     updatedAt: new Date().toISOString(),
   };
 
+  const persisted = await writeLinkMapToSupabase(next);
+  if (persisted) return persisted;
   await fs.writeFile(STORE_PATH, JSON.stringify(next, null, 2), "utf8");
   return next;
 }
@@ -120,6 +205,8 @@ export async function deleteLinkTargets(input: {
     [input.sourceType]: record,
     updatedAt: new Date().toISOString(),
   };
+  const persisted = await writeLinkMapToSupabase(next);
+  if (persisted) return persisted;
   await fs.writeFile(STORE_PATH, JSON.stringify(next, null, 2), "utf8");
   return next;
 }

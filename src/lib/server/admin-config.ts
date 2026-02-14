@@ -109,9 +109,19 @@ function normalizeConfig(
 
 async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
   try {
-    const supabase = getSupabaseAdminClient() as any;
-    const { data, error } = await supabase
-      .from("app_settings")
+    const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
+      select: (
+        columns: string,
+      ) => {
+        eq: (column: string, value: string) => {
+          maybeSingle: () => Promise<{
+            data: { value?: unknown; updated_at?: string | null } | null;
+            error: unknown;
+          }>;
+        };
+      };
+    };
+    const { data, error } = await appSettings
       .select("value,updated_at")
       .eq("name", SETTINGS_KEY)
       .maybeSingle();
@@ -129,7 +139,19 @@ async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
 
 async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminConfig | null> {
   try {
-    const supabase = getSupabaseAdminClient() as any;
+    const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
+      upsert: (
+        values: { name: string; value: unknown; updated_at: string },
+        options: { onConflict: string },
+      ) => {
+        select: (columns: string) => {
+          single: () => Promise<{
+            data: { value?: unknown; updated_at?: string | null } | null;
+            error: unknown;
+          }>;
+        };
+      };
+    };
     const payload: Omit<AdminConfig, "updatedAt"> = {
       simulatorAdStepEnabled: config.simulatorAdStepEnabled,
       documentAdStepEnabled: config.documentAdStepEnabled,
@@ -137,8 +159,7 @@ async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminCon
       websiteSettings: config.websiteSettings,
       toolPolicies: config.toolPolicies,
     };
-    const { data, error } = await supabase
-      .from("app_settings")
+    const { data, error } = await appSettings
       .upsert(
         {
           name: SETTINGS_KEY,

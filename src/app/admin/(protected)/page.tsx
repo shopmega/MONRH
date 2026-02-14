@@ -2,6 +2,7 @@ import { listArticles } from "@/lib/server/articles-store";
 import { readAdminConfig } from "@/lib/server/admin-config";
 import { listDocuments, listSimulations } from "@/lib/server/app-store";
 import { listDocumentTemplatesWithOptions } from "@/lib/server/document-templates-store";
+import { AdminHealthCheck } from "@/components/admin-health-check";
 
 export default async function AdminDashboardPage() {
   const [simulations, documents, config, articles, documentTemplates] = await Promise.all([
@@ -108,6 +109,8 @@ export default async function AdminDashboardPage() {
           </div>
         </article>
       </section>
+
+      <AdminHealthCheck />
     </div>
   );
 }
