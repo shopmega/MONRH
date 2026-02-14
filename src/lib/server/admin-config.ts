@@ -109,7 +109,7 @@ function normalizeConfig(
 
 async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
   try {
-    const supabase = getSupabaseAdminClient();
+    const supabase = getSupabaseAdminClient() as any;
     const { data, error } = await supabase
       .from("app_settings")
       .select("value,updated_at")
@@ -118,9 +118,10 @@ async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
     if (error) return null;
     if (!data) return DEFAULT_ADMIN_CONFIG;
 
+    const row = data as unknown as { value?: unknown; updated_at?: string | null };
     const rawValue =
-      data.value && typeof data.value === "object" ? (data.value as Partial<AdminConfig>) : {};
-    return normalizeConfig(rawValue, data.updated_at ?? DEFAULT_ADMIN_CONFIG.updatedAt);
+      row.value && typeof row.value === "object" ? (row.value as Partial<AdminConfig>) : {};
+    return normalizeConfig(rawValue, row.updated_at ?? DEFAULT_ADMIN_CONFIG.updatedAt);
   } catch {
     return null;
   }
@@ -128,7 +129,7 @@ async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
 
 async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminConfig | null> {
   try {
-    const supabase = getSupabaseAdminClient();
+    const supabase = getSupabaseAdminClient() as any;
     const payload: Omit<AdminConfig, "updatedAt"> = {
       simulatorAdStepEnabled: config.simulatorAdStepEnabled,
       documentAdStepEnabled: config.documentAdStepEnabled,
@@ -149,9 +150,10 @@ async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminCon
       .select("value,updated_at")
       .single();
     if (error) return null;
+    const row = data as unknown as { value?: unknown; updated_at?: string | null };
     const rawValue =
-      data.value && typeof data.value === "object" ? (data.value as Partial<AdminConfig>) : {};
-    return normalizeConfig(rawValue, data.updated_at ?? config.updatedAt);
+      row.value && typeof row.value === "object" ? (row.value as Partial<AdminConfig>) : {};
+    return normalizeConfig(rawValue, row.updated_at ?? config.updatedAt);
   } catch {
     return null;
   }
