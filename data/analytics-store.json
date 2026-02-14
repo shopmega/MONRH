@@ -1,0 +1,2417 @@
+{
+  "events": [
+    {
+      "id": "e19baf89-69ca-488c-8b14-74b21c06df08",
+      "createdAt": "2026-02-14T19:40:54.268Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "abdce4e0-7d91-42cb-a7df-8446e541c1d9",
+      "createdAt": "2026-02-14T19:40:33.697Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "1bf105f0-be93-4e53-92b7-3a045ff8723e",
+      "createdAt": "2026-02-14T19:37:13.825Z",
+      "type": "page_view",
+      "path": "/admin/articles",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e5f1a9bf-dee3-4840-b2b1-8d250b0fc8c8",
+      "createdAt": "2026-02-14T19:36:47.588Z",
+      "type": "page_view",
+      "path": "/admin/analytics",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "5bbf6dfd-aadf-4689-9a38-4aab4e32dce3",
+      "createdAt": "2026-02-14T19:36:31.232Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b023b758-da5b-43a2-bfb8-62cbe5891a69",
+      "createdAt": "2026-02-14T19:32:36.131Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "202de3e3-1254-4f57-97b0-47a2ef24274f",
+      "createdAt": "2026-02-14T19:28:20.213Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "4c5f87aa-2052-406c-bf1a-2752805dfff7",
+      "createdAt": "2026-02-14T19:28:09.527Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "a0b1e8ae-20be-48b5-8091-0f3add6cdcd9",
+      "createdAt": "2026-02-14T19:24:42.332Z",
+      "type": "page_view",
+      "path": "/documents/resignation-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9f91fd9a-bcf7-4146-a863-07aa70393378",
+      "createdAt": "2026-02-14T19:24:29.236Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9af511bf-399b-46ef-a6a8-ec3f66d4972b",
+      "createdAt": "2026-02-14T19:24:25.948Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "cf47ef6a-07fa-4c28-83e2-0727ed9bccb1",
+      "createdAt": "2026-02-14T19:23:54.008Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "5cdfb975-b574-4532-bfeb-513f24711385",
+      "createdAt": "2026-02-14T19:23:41.836Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c58cddba-be5b-4e67-8d7f-bb0406d28f08",
+      "createdAt": "2026-02-14T19:20:46.671Z",
+      "type": "page_view",
+      "path": "/articles/accident-travail-demarches",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "8069bd06-4a04-4b82-a48c-947882f4410a",
+      "createdAt": "2026-02-14T19:20:35.326Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "51bfa8aa-fbf0-440e-adab-eb648e7ebb0d",
+      "createdAt": "2026-02-14T19:20:19.343Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e402e8f9-2f4b-4058-85e1-b1f9ccb9c034",
+      "createdAt": "2026-02-14T19:19:24.080Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "94861bb7-a7d0-4db2-84c5-09307bb18e04",
+      "createdAt": "2026-02-14T19:17:32.992Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "7dac3218-3c59-43f7-9624-62ff3d1fddbb",
+      "createdAt": "2026-02-14T19:17:17.703Z",
+      "type": "page_view",
+      "path": "/simulate/employer-total-cost/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d2beba17-150c-4fc4-a26e-54e6e041997d",
+      "createdAt": "2026-02-14T19:17:11.493Z",
+      "type": "simulation_run",
+      "path": "/simulate/employer-total-cost",
+      "locale": "fr-MA",
+      "meta": {
+        "calculatorType": "employer_total_cost"
+      }
+    },
+    {
+      "id": "247706b2-0bc7-49b6-ac1b-bb51b8dc2fa9",
+      "createdAt": "2026-02-14T19:16:55.773Z",
+      "type": "page_view",
+      "path": "/simulate/employer-total-cost",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "eaebfa61-1a50-4a54-b26f-35a55f3eb3cf",
+      "createdAt": "2026-02-14T19:16:41.142Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "8484a7b2-9ce7-4ac2-a630-ad82f04ec95d",
+      "createdAt": "2026-02-14T19:16:32.907Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "28df2369-8ab4-4d8b-a08d-1de854171ad5",
+      "createdAt": "2026-02-14T19:15:58.306Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "311ed26a-6748-44ba-9f4e-98ce0f9beba5",
+      "createdAt": "2026-02-14T19:15:54.566Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "5d410216-9822-4fe5-ac16-2eaf2f81cc74",
+      "createdAt": "2026-02-14T19:15:25.864Z",
+      "type": "page_view",
+      "path": "/articles/lire-fiche-paie-maroc",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c7e8d12e-3864-4ed9-b989-a1a81d7db128",
+      "createdAt": "2026-02-14T19:11:50.644Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2591b2f9-7237-4cf6-b8d4-df0daaeedd95",
+      "createdAt": "2026-02-14T19:11:36.338Z",
+      "type": "page_view",
+      "path": "/articles/lire-fiche-paie-maroc",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e49b0436-b94f-4e13-8bfe-ccc0e753b2ea",
+      "createdAt": "2026-02-14T19:09:14.687Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "5dcb9d35-86f8-49fc-8be6-23a73c4da4c5",
+      "createdAt": "2026-02-14T19:09:07.618Z",
+      "type": "page_view",
+      "path": "/admin/articles",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "47673613-c9b3-4e51-a62b-4c04ef4a8edc",
+      "createdAt": "2026-02-14T19:08:53.739Z",
+      "type": "page_view",
+      "path": "/admin/analytics",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "dd71292f-900d-435e-97e0-b6188e01125a",
+      "createdAt": "2026-02-14T19:04:28.633Z",
+      "type": "page_view",
+      "path": "/admin/analytics",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "45b6bad9-d334-4470-b5e4-3b66365fb82f",
+      "createdAt": "2026-02-14T19:04:26.428Z",
+      "type": "page_view",
+      "path": "/admin/analytics",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "17ac71be-3c44-4e3a-ac0b-7c6361be6b80",
+      "createdAt": "2026-02-14T19:04:15.235Z",
+      "type": "page_view",
+      "path": "/admin/analytics",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "5033f496-664f-4871-a50d-7768b7f0faa8",
+      "createdAt": "2026-02-14T19:04:11.664Z",
+      "type": "page_view",
+      "path": "/admin/audit",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ec69d0e8-8c3e-4dca-a0e5-d67ab8aaba29",
+      "createdAt": "2026-02-14T19:03:50.505Z",
+      "type": "page_view",
+      "path": "/admin/tools",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0c24f0f9-c8f3-4677-87a6-3b207664ef1e",
+      "createdAt": "2026-02-14T19:02:57.227Z",
+      "type": "page_view",
+      "path": "/admin/rules",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "66e16258-1f7f-491a-9b79-c27be6db2b57",
+      "createdAt": "2026-02-14T19:01:52.017Z",
+      "type": "page_view",
+      "path": "/admin/linking",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ee256bae-1d8d-4325-9814-43fce370c960",
+      "createdAt": "2026-02-14T19:01:37.970Z",
+      "type": "page_view",
+      "path": "/admin/articles",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "a888f293-dc42-47db-ad5e-282dd22acc0e",
+      "createdAt": "2026-02-14T19:01:33.444Z",
+      "type": "page_view",
+      "path": "/admin/activity",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ee1cbc77-1fcd-43f5-831a-9af5c14b466b",
+      "createdAt": "2026-02-14T19:01:23.215Z",
+      "type": "page_view",
+      "path": "/admin/analytics",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9b656ef1-825a-4e65-97d5-d1664ffc74ac",
+      "createdAt": "2026-02-14T19:01:13.700Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "07d33c0b-b02b-43c6-96a9-803e44a13816",
+      "createdAt": "2026-02-14T18:56:56.971Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2fc361e5-9769-43e2-b442-45ba293907e8",
+      "createdAt": "2026-02-14T18:56:47.276Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2c34ee25-0ef8-4cbd-9a91-40234907558e",
+      "createdAt": "2026-02-14T18:56:43.744Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "acc68287-bb80-4fe6-9ccd-dfb1abbd6621",
+      "createdAt": "2026-02-14T18:54:43.662Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "5035d895-fe22-4521-9854-4d897a510a15",
+      "createdAt": "2026-02-14T18:51:57.182Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e0b73108-6ec8-42e7-b270-6675de8bec0b",
+      "createdAt": "2026-02-14T18:51:28.242Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "072becd3-a345-4435-8994-c3b1d5f5c9c5",
+      "createdAt": "2026-02-14T18:51:20.934Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "fa5f2165-9174-45d4-9094-085a9d431d96",
+      "createdAt": "2026-02-14T18:50:10.330Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "4d8789a7-6a28-4345-97be-d9c06af83bf6",
+      "createdAt": "2026-02-14T18:49:39.135Z",
+      "type": "page_view",
+      "path": "/tools/payslip-detector",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "26d0c9e6-136c-45fa-bc0d-05c88d63ed3b",
+      "createdAt": "2026-02-14T18:49:19.653Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "45368869-bc78-4070-a3f3-4977143a22c2",
+      "createdAt": "2026-02-14T18:45:38.661Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "cb8036bc-0212-4bd1-a856-221fe7f003c1",
+      "createdAt": "2026-02-14T18:45:28.840Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6ddb9a17-80b7-41d9-8125-63409e97f960",
+      "createdAt": "2026-02-14T18:45:26.558Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "7fa97dae-c3f9-4dd5-9ba0-524125a82f14",
+      "createdAt": "2026-02-14T18:44:04.266Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "19f3c8d8-5617-4739-8ac0-511e81994d5a",
+      "createdAt": "2026-02-14T18:44:03.248Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b4e9d821-da27-4f3e-947d-758e4fc61d56",
+      "createdAt": "2026-02-14T18:44:01.114Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6a54d126-2eff-4e9f-b6f1-8911c5d50bae",
+      "createdAt": "2026-02-14T18:44:00.302Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "7f18c30f-501b-40ef-9157-d3ee4a78af86",
+      "createdAt": "2026-02-14T18:43:58.007Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "39a123f8-3511-497c-aed9-550da9fed7d8",
+      "createdAt": "2026-02-14T18:43:58.450Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "a31ce0f4-9aa3-404e-9f95-2a0075ecd99a",
+      "createdAt": "2026-02-14T18:43:56.432Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "f8f5fa29-8d76-4707-8daf-404c8c26875f",
+      "createdAt": "2026-02-14T18:43:56.798Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ebc81b5c-2749-41e7-a766-7f9c6a7cdbce",
+      "createdAt": "2026-02-14T18:43:54.606Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ec6cbeb1-bf88-4ad6-9694-dbcc5501369e",
+      "createdAt": "2026-02-14T18:43:55.031Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6f871749-e79f-401e-8083-28ecc6d14031",
+      "createdAt": "2026-02-14T18:43:52.567Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "3efe0051-3965-482f-9b3b-772bd8da7ac5",
+      "createdAt": "2026-02-14T18:43:52.983Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "cf99d353-4513-494f-bc9b-c3760a2fe728",
+      "createdAt": "2026-02-14T18:43:50.971Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "4153c2e6-d67f-4495-8076-21a0723d13f3",
+      "createdAt": "2026-02-14T18:43:51.348Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d869ce22-0e68-48fb-8e85-c4e462420ea4",
+      "createdAt": "2026-02-14T18:43:49.092Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c3e531b5-7e02-4dec-a7a3-f83ded471ec4",
+      "createdAt": "2026-02-14T18:43:49.505Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "27d7b1a2-86ff-4902-85fb-6cc9ea8cc552",
+      "createdAt": "2026-02-14T18:43:47.440Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d799993d-d5ea-472b-9f8d-b81e88ec17ba",
+      "createdAt": "2026-02-14T18:43:47.805Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "75049ddf-7921-4aa4-9b39-ec368eceace2",
+      "createdAt": "2026-02-14T18:43:45.094Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b233736d-a02d-432a-8122-2673ceb33e34",
+      "createdAt": "2026-02-14T18:43:45.509Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e3eaf4b2-fe56-4533-b0de-2987b880c9ce",
+      "createdAt": "2026-02-14T18:43:42.797Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "620a0dd7-01e9-4223-a2fa-a42d16d7b66f",
+      "createdAt": "2026-02-14T18:43:43.271Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6853ffff-be84-4e1f-bcd5-df0d972fe0e5",
+      "createdAt": "2026-02-14T18:43:40.635Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b344b2d2-567c-45d3-a039-7521a4572892",
+      "createdAt": "2026-02-14T18:43:41.099Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "537907ba-9e3b-455c-a77d-82cf2d3c816c",
+      "createdAt": "2026-02-14T18:43:38.351Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "52a4048e-2d7b-4d80-b3f1-4b3c2a9a7607",
+      "createdAt": "2026-02-14T18:43:38.849Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e3cc1618-32eb-4e24-87d7-4fba5aac1f38",
+      "createdAt": "2026-02-14T18:43:35.785Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6b564804-c70e-4a94-aa0e-4b1a088d3557",
+      "createdAt": "2026-02-14T18:43:36.416Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "a4346580-021f-41c6-abcd-f7c9bae68049",
+      "createdAt": "2026-02-14T18:43:33.795Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "fe70dec2-f185-459d-9cfd-75a63e689d8d",
+      "createdAt": "2026-02-14T18:43:34.245Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "99c0f205-8e03-48db-95b4-19312b169c1c",
+      "createdAt": "2026-02-14T18:43:31.553Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e4235a37-d83d-497c-b479-24228e0e6a6c",
+      "createdAt": "2026-02-14T18:43:32.111Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "7b704385-d6d9-42c8-a296-b3d8f9eaf3ad",
+      "createdAt": "2026-02-14T18:43:29.460Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9b55a92f-9a5d-48b9-8c2f-f30a9841513c",
+      "createdAt": "2026-02-14T18:43:29.936Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "97eeb89b-d3c5-4029-8bcd-4b103d96b033",
+      "createdAt": "2026-02-14T18:43:27.715Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0632cfcb-5056-4bce-b338-10ab63c437d7",
+      "createdAt": "2026-02-14T18:43:28.094Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "4ab169ef-68b2-4276-9022-d9b1d959b9ef",
+      "createdAt": "2026-02-14T18:43:26.195Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "349fc677-042e-4654-a408-c962089e7f8d",
+      "createdAt": "2026-02-14T18:43:26.568Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "11e135e5-4683-4b1e-b5fe-e06f21391bb8",
+      "createdAt": "2026-02-14T18:43:24.567Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "f85d443c-6501-462e-ba08-30f8a4eb82ff",
+      "createdAt": "2026-02-14T18:43:24.925Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0d745d75-69b8-42f8-b028-3e44e26fe031",
+      "createdAt": "2026-02-14T18:43:22.998Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "a484f67c-460e-4038-9eb6-4786992cfd2e",
+      "createdAt": "2026-02-14T18:43:23.314Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "4172bc86-ad08-41aa-a8e4-2fd669331029",
+      "createdAt": "2026-02-14T18:43:21.508Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "499ba863-f5b6-4413-ace1-8c24ec48192c",
+      "createdAt": "2026-02-14T18:43:21.877Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e0e5441a-7e5a-45e4-a7bb-93a07dc27301",
+      "createdAt": "2026-02-14T18:43:19.637Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "62b6549b-acd8-4853-8dc2-1598e4d19428",
+      "createdAt": "2026-02-14T18:43:20.050Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "bd992605-8fd9-4bcf-869e-4d5e09e81370",
+      "createdAt": "2026-02-14T18:43:17.869Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "fcaace77-193b-40ff-9eb7-05cf44396a59",
+      "createdAt": "2026-02-14T18:43:18.273Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "1f02af6e-372c-402b-9dd8-dce4132d3236",
+      "createdAt": "2026-02-14T18:43:15.812Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "26026036-af05-4d06-8721-34d95144e842",
+      "createdAt": "2026-02-14T18:43:16.127Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6f2a9ff1-cf5d-4d79-b8ea-295f765950cc",
+      "createdAt": "2026-02-14T18:43:14.067Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "63d1a6cb-9a7e-4690-8ce1-24840e5d3b7e",
+      "createdAt": "2026-02-14T18:43:14.391Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6437084b-51cb-48d6-a9df-54a9d339540c",
+      "createdAt": "2026-02-14T18:43:12.353Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2abef363-feea-496b-b875-114733bb6030",
+      "createdAt": "2026-02-14T18:43:12.740Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0257bf23-a712-400b-be7c-514485d87e80",
+      "createdAt": "2026-02-14T18:43:10.804Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "96987243-59cf-41d0-8229-76afe177dc63",
+      "createdAt": "2026-02-14T18:43:11.221Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9ae4fe3f-2a24-4a48-a328-b1264d258ed9",
+      "createdAt": "2026-02-14T18:43:09.183Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "aaea1540-c7a2-4f47-80c7-8a81213e67f4",
+      "createdAt": "2026-02-14T18:43:09.571Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "283f226c-e126-49f1-964e-d8778c0fccfa",
+      "createdAt": "2026-02-14T18:43:07.533Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "094073a6-8d06-4348-9db8-9d0ba6e7d61c",
+      "createdAt": "2026-02-14T18:43:08.038Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "25842b2b-0aa5-4cd8-a746-6d029802be02",
+      "createdAt": "2026-02-14T18:43:05.909Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b5dffa8c-ec1d-42bc-bf1a-c5484289ca0f",
+      "createdAt": "2026-02-14T18:43:06.296Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e27b4784-50ea-4dbc-adb5-d187c080e589",
+      "createdAt": "2026-02-14T18:43:03.578Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9c937f1f-03ca-479e-a381-699b468b7c02",
+      "createdAt": "2026-02-14T18:43:03.943Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "3ffb5ddb-3ffc-4c79-85fd-b172f2d43f1a",
+      "createdAt": "2026-02-14T18:43:01.599Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "13e2b2a7-2a17-42e4-8ab9-9da3ee1871de",
+      "createdAt": "2026-02-14T18:43:02.012Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "904b6b9d-4951-4bd4-9f37-6dd637766c58",
+      "createdAt": "2026-02-14T18:43:00.098Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "147c74ea-c188-41ee-a5a4-45b03d2bf949",
+      "createdAt": "2026-02-14T18:43:00.469Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "09b34b63-59fe-41f9-ac92-3a06723c86a5",
+      "createdAt": "2026-02-14T18:42:57.926Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "65389351-ce35-4316-8bd9-3447904295d3",
+      "createdAt": "2026-02-14T18:42:58.663Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "012007e8-380e-44eb-84eb-d651e8ff2efc",
+      "createdAt": "2026-02-14T18:42:56.030Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0b2c654e-bd55-4aba-b11b-9b180b03b054",
+      "createdAt": "2026-02-14T18:42:56.395Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2a97c0eb-27f5-4a3d-bf6d-4d81f10936c9",
+      "createdAt": "2026-02-14T18:42:53.606Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "7e1507ac-e5d8-4653-9563-4da8d55cca8d",
+      "createdAt": "2026-02-14T18:42:54.228Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6310831e-8f52-48fb-8041-b9ca8ed3f852",
+      "createdAt": "2026-02-14T18:42:51.688Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e23e5bda-1fc3-400e-85c3-ffdcd825a35b",
+      "createdAt": "2026-02-14T18:42:52.276Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "643925ef-4554-44f6-aa14-ec8cbe3cbb69",
+      "createdAt": "2026-02-14T18:42:49.026Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "29538ce1-8e47-47db-9680-35f80f283ea0",
+      "createdAt": "2026-02-14T18:42:49.429Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "505fb026-0bf2-4606-993f-299865db5186",
+      "createdAt": "2026-02-14T18:42:46.861Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "85c4d3bc-ee0f-4d11-8a24-f7282ae50f07",
+      "createdAt": "2026-02-14T18:42:47.396Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "50d73bb9-7ebf-481f-81ee-2eb53e0d252c",
+      "createdAt": "2026-02-14T18:42:44.598Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "f2b359f1-b286-47ad-a35d-6ac419f7889d",
+      "createdAt": "2026-02-14T18:42:45.099Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b286a075-7383-4222-b91d-757da692a795",
+      "createdAt": "2026-02-14T18:42:42.282Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "90ae0928-03d3-4221-bbb1-519ec0991e2d",
+      "createdAt": "2026-02-14T18:42:42.670Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "00a68292-169a-4267-81e8-3df81eb00413",
+      "createdAt": "2026-02-14T18:42:40.254Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "09835256-521a-4a53-a20e-e8fc7c87eafb",
+      "createdAt": "2026-02-14T18:42:40.690Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "72789046-ced8-48a8-9ea0-1674348f1547",
+      "createdAt": "2026-02-14T18:42:38.154Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "aa05c104-e02e-4fc3-913e-0c180da8ee37",
+      "createdAt": "2026-02-14T18:42:38.666Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "eb88999c-c17b-4adb-82ce-63987c905de0",
+      "createdAt": "2026-02-14T18:42:36.446Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "531a0105-38ed-492a-97a5-dd27ee28cd22",
+      "createdAt": "2026-02-14T18:42:25.658Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6b700202-230d-495a-8e7f-af3ce05e6e5c",
+      "createdAt": "2026-02-14T18:42:10.963Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "386bfe06-d2d9-4890-ad09-5cba9801dc84",
+      "createdAt": "2026-02-14T18:37:28.646Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "abc1d10f-1565-434b-a477-ba58b16a1c8a",
+      "createdAt": "2026-02-14T18:37:26.454Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "18489414-afd3-42fd-9b4b-173ae95268d9",
+      "createdAt": "2026-02-14T18:37:18.389Z",
+      "type": "page_view",
+      "path": "/admin/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "f3d06f65-5c4c-4ad6-b588-e268a40012d0",
+      "createdAt": "2026-02-14T18:37:08.935Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "eb4656c6-eef8-47b5-a0de-aae4af047792",
+      "createdAt": "2026-02-14T18:36:00.056Z",
+      "type": "page_view",
+      "path": "/admin/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c0521940-1f70-40f9-932a-fd75f7d3a56b",
+      "createdAt": "2026-02-14T18:19:20.994Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2f02ad80-873d-40aa-837c-c2ebef53b3f5",
+      "createdAt": "2026-02-14T18:13:00.806Z",
+      "type": "page_view",
+      "path": "/admin/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c817f74a-8ec4-4c0f-93d9-ea31dd53a236",
+      "createdAt": "2026-02-14T18:12:53.210Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "baa8373c-07f5-45da-b7c1-4158fcf55cd3",
+      "createdAt": "2026-02-14T18:12:50.548Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ee473d35-d1b5-4947-8a89-2f26de403312",
+      "createdAt": "2026-02-14T18:12:43.107Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "01276da4-99b2-4f73-a58d-110ddbb2a2d4",
+      "createdAt": "2026-02-14T18:12:40.952Z",
+      "type": "page_view",
+      "path": "/admin/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "445e4696-6df8-48e3-b33a-16fa3b077eb2",
+      "createdAt": "2026-02-14T18:11:03.960Z",
+      "type": "page_view",
+      "path": "/admin/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b5f68ef4-ba33-4a1a-8ec9-3efd9e99eb12",
+      "createdAt": "2026-02-14T18:10:53.045Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "5955dd30-c9db-40b2-b08e-743979fd527f",
+      "createdAt": "2026-02-14T18:10:05.616Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "56f69bb3-883b-4325-a011-a027376a9468",
+      "createdAt": "2026-02-14T18:05:56.649Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "daeb75ae-0473-461e-9378-8e9d7ef6591b",
+      "createdAt": "2026-02-14T18:05:57.011Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "59e8d2bf-ca1e-4210-ac2d-a0188035ea34",
+      "createdAt": "2026-02-14T18:05:49.549Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0695fe8b-48a0-435c-b07a-15bd88e1383f",
+      "createdAt": "2026-02-14T17:50:15.078Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6b7118e5-d225-491b-98b8-bd2a61c1d699",
+      "createdAt": "2026-02-14T17:49:19.055Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "feb5e1ce-e8bc-40b2-b050-c863b2ceb929",
+      "createdAt": "2026-02-14T17:45:29.767Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c6f70e4f-da96-40c5-b360-5fcdc5d89488",
+      "createdAt": "2026-02-14T17:45:17.454Z",
+      "type": "page_view",
+      "path": "/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "90acf2a6-374b-4045-b2ef-6e0231a0e591",
+      "createdAt": "2026-02-14T17:45:09.018Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2e6c9a47-f432-4695-bb74-76ac3d705fc9",
+      "createdAt": "2026-02-14T17:42:19.468Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c347568f-1467-4adb-b479-38e1dfab24a7",
+      "createdAt": "2026-02-14T17:42:19.701Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "bba51530-cbf7-4f49-b543-1a35a34260ae",
+      "createdAt": "2026-02-14T17:40:22.129Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ab21b4ff-5a1d-4051-a153-78afb20a7641",
+      "createdAt": "2026-02-14T17:40:22.516Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9409c15e-93ee-4ad2-8875-e370933ad33c",
+      "createdAt": "2026-02-14T17:37:12.130Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c1c968f9-f19d-4f02-b5e5-1019e7b63824",
+      "createdAt": "2026-02-14T17:37:07.683Z",
+      "type": "simulation_run",
+      "path": "/simulate/net-gross",
+      "locale": "fr-MA",
+      "meta": {
+        "calculatorType": "net_gross"
+      }
+    },
+    {
+      "id": "e7505888-492f-4e75-bd9d-f910f082f7df",
+      "createdAt": "2026-02-14T17:36:58.750Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "589b4c9a-97c3-4edf-97a9-bde02847f44c",
+      "createdAt": "2026-02-14T17:36:54.482Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "01adf454-42a1-447a-8345-920dc7631b8c",
+      "createdAt": "2026-02-14T17:36:38.494Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b38c9335-cfcb-4096-a3f4-db54bcbc4e0d",
+      "createdAt": "2026-02-14T17:36:36.492Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "26dbc61d-d01f-4ff9-9612-614766966477",
+      "createdAt": "2026-02-14T17:36:28.525Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b71916bf-fed9-405e-b57e-ccde5840f712",
+      "createdAt": "2026-02-14T17:36:19.378Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c179841b-460b-4dbc-aa00-425c50b507a5",
+      "createdAt": "2026-02-14T17:36:07.920Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0d692b6b-dfb9-477c-9d3b-a7424539ce8f",
+      "createdAt": "2026-02-14T17:35:51.659Z",
+      "type": "page_view",
+      "path": "/admin/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "69618711-8fdd-4eb9-a7bf-98edefbee5c9",
+      "createdAt": "2026-02-14T17:25:31.225Z",
+      "type": "page_view",
+      "path": "/admin/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0895556d-9f67-4e64-93ec-1c6ab8787a18",
+      "createdAt": "2026-02-14T17:24:58.472Z",
+      "type": "page_view",
+      "path": "/documents/employment-certificate-request",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6cac2d60-5772-4fc3-84d3-5e54544a8798",
+      "createdAt": "2026-02-14T17:24:41.968Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "22e90954-0ecb-4d1c-b752-d2bcf6974431",
+      "createdAt": "2026-02-14T17:23:44.234Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "95957cc4-b308-4c69-8b35-0e61c005e126",
+      "createdAt": "2026-02-14T16:34:22.323Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "f55ae9e8-f07c-411e-aefd-ecfc072d43bd",
+      "createdAt": "2026-02-14T16:05:50.679Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e41718ee-d594-4544-927c-5b1653e3bfaa",
+      "createdAt": "2026-02-14T16:05:19.412Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "74bae088-e98d-4519-8100-b78d88495c56",
+      "createdAt": "2026-02-14T16:05:11.426Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ea12b7ac-c711-4b0d-a653-b80396b889ef",
+      "createdAt": "2026-02-14T16:04:57.468Z",
+      "type": "page_view",
+      "path": "/journal/violations",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d991dff5-177b-4c9d-857a-1479c1aa9ae3",
+      "createdAt": "2026-02-14T15:06:41.387Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "fd74e7df-debf-46c6-8174-8c13cf677885",
+      "createdAt": "2026-02-14T14:34:05.053Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "dc05eccf-7336-4e93-962c-1f8d893a2e12",
+      "createdAt": "2026-02-14T14:33:54.605Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "dda5a737-244d-4cb2-8055-d50e8a326921",
+      "createdAt": "2026-02-14T14:20:56.609Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "824fab27-fc5a-4ea9-a1a1-14f048b32539",
+      "createdAt": "2026-02-14T14:20:41.035Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "c12efa26-d1d3-476d-a9e0-6e1e878a1bbb",
+      "createdAt": "2026-02-14T14:20:37.153Z",
+      "type": "page_view",
+      "path": "/vault",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "15774784-b99f-482f-848a-cf470627c56b",
+      "createdAt": "2026-02-14T14:20:25.205Z",
+      "type": "page_view",
+      "path": "/vault",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c3dfb70f-8579-4aa7-826f-065822cabf3f",
+      "createdAt": "2026-02-14T14:16:04.539Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "42ec42d7-f48d-4461-80f7-505340c18a51",
+      "createdAt": "2026-02-14T14:15:43.400Z",
+      "type": "page_view",
+      "path": "/admin/login",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "185c7498-90dc-414e-b8b6-49951b18557f",
+      "createdAt": "2026-02-14T14:15:30.809Z",
+      "type": "page_view",
+      "path": "/articles/licenciement-montants-obligatoires",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0a1e90c9-6375-434b-a9e7-168fc42d50b5",
+      "createdAt": "2026-02-14T14:15:27.016Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d929b83f-ea0b-4fb7-9e45-60a0810824f5",
+      "createdAt": "2026-02-14T14:14:36.132Z",
+      "type": "page_view",
+      "path": "/simulate/annual-income-tax/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "697a1e57-9d50-41c7-8a2c-74404f70ef72",
+      "createdAt": "2026-02-14T14:14:34.946Z",
+      "type": "simulation_run",
+      "path": "/simulate/annual-income-tax",
+      "locale": "fr-MA",
+      "meta": {
+        "calculatorType": "annual_income_tax"
+      }
+    },
+    {
+      "id": "075fbcbb-9c33-4892-84d3-867d2faa5f84",
+      "createdAt": "2026-02-14T14:14:21.070Z",
+      "type": "page_view",
+      "path": "/simulate/annual-income-tax",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "7dcb94da-bd94-4d3d-b186-b2e3211b80c5",
+      "createdAt": "2026-02-14T14:14:16.156Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "deb1bf7f-1492-4a84-b144-e6191fe72d98",
+      "createdAt": "2026-02-14T14:14:04.123Z",
+      "type": "page_view",
+      "path": "/articles/licenciement-montants-obligatoires",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "282ba99a-867e-4fcc-9f32-ed36b6a9e5a0",
+      "createdAt": "2026-02-14T14:13:57.485Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "cea8b756-e17b-494b-b7dd-23adb18335d0",
+      "createdAt": "2026-02-14T13:45:46.538Z",
+      "type": "page_view",
+      "path": "/documents/notice-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ac2239be-acc4-4769-8dcb-10e1a67d6c8c",
+      "createdAt": "2026-02-14T13:45:17.062Z",
+      "type": "page_view",
+      "path": "/documents/notice-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "509867e2-c722-45f3-95d4-5d80cd4666ed",
+      "createdAt": "2026-02-14T13:40:11.019Z",
+      "type": "page_view",
+      "path": "/documents/notice-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b0b754f4-a2b2-41eb-9988-f714deb6c5c2",
+      "createdAt": "2026-02-14T13:31:21.425Z",
+      "type": "page_view",
+      "path": "/documents/notice-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "56c9a2d2-a9eb-4421-9aa6-b467e5a3a7b8",
+      "createdAt": "2026-02-14T13:30:29.901Z",
+      "type": "page_view",
+      "path": "/documents/notice-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9ece5b0c-1850-462e-b63e-5759119cd7f7",
+      "createdAt": "2026-02-14T13:19:25.589Z",
+      "type": "page_view",
+      "path": "/documents/notice-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "3e31392d-1937-4f9c-b00d-264730dcf974",
+      "createdAt": "2026-02-14T13:19:22.829Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "fec406d5-5882-4e25-8d3d-47b199cf39a0",
+      "createdAt": "2026-02-14T13:18:30.864Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "94e214ee-d165-4e5c-be66-b6adbc4cfe74",
+      "createdAt": "2026-02-14T13:18:25.117Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "4435d211-4688-4db0-95ff-df496b7f0132",
+      "createdAt": "2026-02-14T13:17:49.141Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "22823ee5-5c47-4443-ab54-7526fcc87036",
+      "createdAt": "2026-02-14T13:17:49.126Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9274fc5d-6a9d-4ef0-8901-f2662fb122a7",
+      "createdAt": "2026-02-14T12:58:38.308Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "39818e3f-d73d-470b-b128-35007ea6913f",
+      "createdAt": "2026-02-14T12:58:38.280Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c27c325f-2328-46c3-9092-afa909045007",
+      "createdAt": "2026-02-14T12:49:36.295Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "09767a4d-eeb7-4645-b513-c44804fd5fde",
+      "createdAt": "2026-02-14T12:49:35.718Z",
+      "type": "simulation_run",
+      "path": "/simulate/net-gross",
+      "locale": "fr-MA",
+      "meta": {
+        "calculatorType": "net_gross"
+      }
+    },
+    {
+      "id": "a40af579-c019-4ef3-8850-ed5a8dd81eac",
+      "createdAt": "2026-02-14T12:49:30.206Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "8ac6ce33-8f53-4563-93c3-229f586b932f",
+      "createdAt": "2026-02-14T12:49:27.449Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ae5138f2-073f-47a0-b57e-052a753e4b0d",
+      "createdAt": "2026-02-14T12:49:10.288Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "139b4b19-dc16-48a3-a23a-7ab7bf684112",
+      "createdAt": "2026-02-14T01:12:36.264Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "79d0f923-ea5d-4912-91a6-30898b509af5",
+      "createdAt": "2026-02-14T01:12:24.541Z",
+      "type": "page_view",
+      "path": "/articles/cnss-affiliation-verification",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "1df2068a-7640-486a-90ac-af329ebba885",
+      "createdAt": "2026-02-14T01:12:00.753Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "be81b84b-3d94-4f10-afd8-1911d43ba9fa",
+      "createdAt": "2026-02-14T01:11:55.653Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ca3cac4a-996a-4542-bb0b-7732af633c4b",
+      "createdAt": "2026-02-14T01:11:43.266Z",
+      "type": "page_view",
+      "path": "/tools/salary-delay-alert",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "90f1cdef-8b77-47cd-b856-c7803d9a54a7",
+      "createdAt": "2026-02-14T01:11:29.346Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d4667e80-d0b0-4294-a773-e16bc8281493",
+      "createdAt": "2026-02-14T01:11:22.872Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "60c7e505-0f6b-490b-a2ba-29e107ae125b",
+      "createdAt": "2026-02-14T01:11:16.947Z",
+      "type": "page_view",
+      "path": "/vault",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "845ea707-1286-4d29-acfa-69d854073c86",
+      "createdAt": "2026-02-14T01:11:10.925Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "34db3201-abbf-4784-8e91-848a6d035658",
+      "createdAt": "2026-02-14T01:11:04.678Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2332c5fc-5ea6-4465-8a14-7846010fd408",
+      "createdAt": "2026-02-14T01:10:37.861Z",
+      "type": "page_view",
+      "path": "/simulate/work-accident/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "34c55d9d-04ac-411c-be37-67dfbd59ee96",
+      "createdAt": "2026-02-14T01:10:37.388Z",
+      "type": "simulation_run",
+      "path": "/simulate/work-accident",
+      "locale": "fr-MA",
+      "meta": {
+        "calculatorType": "work_accident"
+      }
+    },
+    {
+      "id": "3c8e593b-d0ee-4899-bee5-4172daa3db15",
+      "createdAt": "2026-02-14T01:10:24.293Z",
+      "type": "page_view",
+      "path": "/simulate/work-accident",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "93a0c30a-ff94-4f2d-85ac-938a200a3fa9",
+      "createdAt": "2026-02-14T01:10:11.066Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "38a56b0d-c389-4fd7-83b9-c540a224fc1b",
+      "createdAt": "2026-02-14T01:10:07.362Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "5177ddc0-4e3a-444a-9ce7-f6cd5e8acc13",
+      "createdAt": "2026-02-14T01:09:49.635Z",
+      "type": "page_view",
+      "path": "/simulate/leave-accrual/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "65a11ed4-c2aa-4649-8d9e-6fc6785e31fb",
+      "createdAt": "2026-02-14T01:09:49.343Z",
+      "type": "simulation_run",
+      "path": "/simulate/leave-accrual",
+      "locale": "fr-MA",
+      "meta": {
+        "calculatorType": "leave_accrual"
+      }
+    },
+    {
+      "id": "a6292ddf-04c7-4099-9247-d642f78321bb",
+      "createdAt": "2026-02-14T01:09:35.711Z",
+      "type": "page_view",
+      "path": "/simulate/leave-accrual",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "fe26eadd-aa56-479c-98e7-38fe4180010a",
+      "createdAt": "2026-02-14T01:09:19.670Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "1071a7eb-b95d-4098-b59a-1a26ba199031",
+      "createdAt": "2026-02-14T01:09:11.449Z",
+      "type": "page_view",
+      "path": "/documents/resignation-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d6e82c8d-3014-42a0-a07b-bbbfc14adf7b",
+      "createdAt": "2026-02-14T01:09:07.848Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2b026866-0cc1-4d61-8cc6-2037aa1d1c7f",
+      "createdAt": "2026-02-14T01:08:09.405Z",
+      "type": "page_view",
+      "path": "/documents/employment-certificate-request",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "56ab73ab-3f07-4ee1-945d-c79413b6884f",
+      "createdAt": "2026-02-14T01:08:01.450Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "145c52d2-1ace-411c-b7b8-bfffb6d337e8",
+      "createdAt": "2026-02-14T01:07:29.919Z",
+      "type": "page_view",
+      "path": "/simulate/licenciement/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "515334d8-e926-4e48-aa8c-db00d7847cd6",
+      "createdAt": "2026-02-14T01:07:29.666Z",
+      "type": "simulation_run",
+      "path": "/simulate/licenciement",
+      "locale": "fr-MA",
+      "meta": {
+        "calculatorType": "licenciement"
+      }
+    },
+    {
+      "id": "95bbfb68-b8a1-462d-b484-f97cc0e335d9",
+      "createdAt": "2026-02-14T01:07:20.224Z",
+      "type": "page_view",
+      "path": "/simulate/licenciement",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b32e72f1-78c8-4db6-87be-9ae81d96eb65",
+      "createdAt": "2026-02-14T01:07:07.862Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "3c10f923-3298-4cb8-b826-68776b8235e4",
+      "createdAt": "2026-02-14T01:07:03.222Z",
+      "type": "page_view",
+      "path": "/tools/payslip-detector",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9c182af9-2387-479f-9d55-a391b6495bcd",
+      "createdAt": "2026-02-14T01:06:57.601Z",
+      "type": "page_view",
+      "path": "/tools/payslip-detector",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "7cf4501b-3245-4757-a494-1238cf0511b7",
+      "createdAt": "2026-02-14T01:06:30.980Z",
+      "type": "page_view",
+      "path": "/tools/payslip-detector",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "505cdbff-618a-48d4-b538-7f7b839bd51f",
+      "createdAt": "2026-02-14T01:06:24.717Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "606438a4-7ace-430d-8f1f-b99db21277c9",
+      "createdAt": "2026-02-14T01:06:16.305Z",
+      "type": "page_view",
+      "path": "/vault",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "478d89ec-8266-4ca5-9e25-3ba4f9e4e2df",
+      "createdAt": "2026-02-14T01:06:11.140Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "dab79664-c445-4ea7-8cc6-5c5ea457c50b",
+      "createdAt": "2026-02-14T01:06:05.743Z",
+      "type": "page_view",
+      "path": "/journal/violations",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "503406ac-9b3b-41f3-986f-a8f82c7c208e",
+      "createdAt": "2026-02-14T01:05:47.128Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6a52630f-9250-46b3-93b6-ad1b25009f8c",
+      "createdAt": "2026-02-14T01:05:39.340Z",
+      "type": "document_generated",
+      "path": "/documents/resignation-letter",
+      "locale": "fr-MA",
+      "meta": {
+        "templateId": "resignation-letter"
+      }
+    },
+    {
+      "id": "118e5988-afb7-49e1-a47d-5adb39add59e",
+      "createdAt": "2026-02-14T01:04:42.572Z",
+      "type": "page_view",
+      "path": "/documents/resignation-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "cb1095bc-9855-4212-bdd5-2c4a9c45ec24",
+      "createdAt": "2026-02-14T01:04:35.191Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "3399c09f-de67-442d-94f3-5a44c42751b0",
+      "createdAt": "2026-02-14T01:04:32.710Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "d31ded22-3d61-4d80-b8ab-3a7ddd89521f",
+      "createdAt": "2026-02-14T01:04:13.415Z",
+      "type": "page_view",
+      "path": "/articles/lire-fiche-paie-maroc",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "0448a3f0-ba58-4f1a-bbac-6d16ed52d29d",
+      "createdAt": "2026-02-14T01:04:00.730Z",
+      "type": "page_view",
+      "path": "/articles/lire-fiche-paie-maroc",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "616fb450-5ef0-4183-be06-38b9a46ff7f8",
+      "createdAt": "2026-02-14T01:03:49.684Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "7f30cb0d-19ec-4a48-8305-1e7cee09f6c8",
+      "createdAt": "2026-02-14T01:03:34.390Z",
+      "type": "page_view",
+      "path": "/simulate/seniority-growth",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "8b225ee8-ac9f-4ce6-b8fa-06233bb68a49",
+      "createdAt": "2026-02-14T01:03:18.879Z",
+      "type": "page_view",
+      "path": "/simulate/seniority-growth",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "acefb7ee-6d02-445d-bee8-5e9b9de3526a",
+      "createdAt": "2026-02-14T01:03:06.876Z",
+      "type": "page_view",
+      "path": "/simulate/seniority-growth/result",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "fe9ba811-3cc5-4714-a95b-3a8ba4b1c4cb",
+      "createdAt": "2026-02-14T01:03:06.496Z",
+      "type": "simulation_run",
+      "path": "/simulate/seniority-growth",
+      "locale": "ar-MA",
+      "meta": {
+        "calculatorType": "seniority_growth"
+      }
+    },
+    {
+      "id": "d3b57dd7-0c80-4b8c-9c4e-9aa5d0c7ff83",
+      "createdAt": "2026-02-14T01:02:55.884Z",
+      "type": "page_view",
+      "path": "/simulate/seniority-growth",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "8553c24c-5fc9-4319-9d74-90e9ad2ca698",
+      "createdAt": "2026-02-14T01:02:49.154Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "3bdebe36-94ff-41d3-8298-101fe11b61e8",
+      "createdAt": "2026-02-14T01:02:32.984Z",
+      "type": "page_view",
+      "path": "/simulate/demission",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "a222f5ea-ef2c-4778-9533-426702a8840a",
+      "createdAt": "2026-02-14T01:02:27.231Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "9cca6fdb-5bda-4495-a14a-611b3490bc47",
+      "createdAt": "2026-02-14T01:02:10.918Z",
+      "type": "page_view",
+      "path": "/documents/overtime-claim-letter",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "0a6bfb4e-115a-4a3b-b644-074a8c48a452",
+      "createdAt": "2026-02-14T01:01:52.004Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "6848434a-ab70-44f4-92d1-f73a6aed663c",
+      "createdAt": "2026-02-14T01:01:29.523Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross/result",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "3064747b-0539-4743-87db-edd7ea13c290",
+      "createdAt": "2026-02-14T01:01:25.946Z",
+      "type": "simulation_run",
+      "path": "/simulate/net-gross",
+      "locale": "ar-MA",
+      "meta": {
+        "calculatorType": "net_gross"
+      }
+    },
+    {
+      "id": "530e287f-acd1-4052-9fc3-bf3e51c22cca",
+      "createdAt": "2026-02-14T01:01:19.690Z",
+      "type": "page_view",
+      "path": "/simulate/net-gross",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "d2a3fe7d-4da5-44b2-ad68-870431d004d2",
+      "createdAt": "2026-02-14T01:01:14.296Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "cbf4cf90-0e8f-4b12-8e99-f4e7a142e66f",
+      "createdAt": "2026-02-14T01:01:00.936Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "ar-MA"
+    },
+    {
+      "id": "878f952f-8102-48a3-bb69-56d56f55af28",
+      "createdAt": "2026-02-14T01:00:51.091Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9fdc7837-95c5-4a77-b4cd-24e83469aa96",
+      "createdAt": "2026-02-12T21:50:22.481Z",
+      "type": "page_view",
+      "path": "/documents/formal-complaint-employer",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d233aa18-b8b5-49a1-8d72-9b129d4d6f6e",
+      "createdAt": "2026-02-12T20:42:28.443Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "4d12f9b5-d2f3-4127-bf87-a06ebdb0f80d",
+      "createdAt": "2026-02-12T20:42:11.861Z",
+      "type": "page_view",
+      "path": "/articles/lire-fiche-paie-maroc",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e7dafad6-bc56-4072-a9cd-5258d80231f1",
+      "createdAt": "2026-02-12T20:42:01.723Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c864d09b-089d-4139-9595-b756933b644c",
+      "createdAt": "2026-02-12T20:41:58.071Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "c9f5c7e8-7b37-498d-b4a4-7f38e75b1c20",
+      "createdAt": "2026-02-12T20:41:35.536Z",
+      "type": "page_view",
+      "path": "/simulate/fin-cdd/result",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "77398127-4dfd-4db6-b994-fcbb8c11d1c9",
+      "createdAt": "2026-02-12T20:41:32.888Z",
+      "type": "simulation_run",
+      "path": "/simulate/fin-cdd",
+      "locale": "fr-MA",
+      "meta": {
+        "calculatorType": "fin_cdd"
+      }
+    },
+    {
+      "id": "0a7cf472-8f0f-419b-a19d-f55df5b292db",
+      "createdAt": "2026-02-12T20:41:09.381Z",
+      "type": "page_view",
+      "path": "/simulate/fin-cdd",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ebac3d91-732d-4df4-9901-f1de3c2dfaf3",
+      "createdAt": "2026-02-12T20:41:02.271Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d0f5ee17-de5d-4185-8ccb-4c87c36a017d",
+      "createdAt": "2026-02-12T20:40:45.305Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "f3dafa0a-33c1-4a23-a9f7-52f034a6d7e1",
+      "createdAt": "2026-02-12T20:04:18.720Z",
+      "type": "page_view",
+      "path": "/admin/linking",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e65d7697-d52e-4a4a-8bc6-c1ea26dba64f",
+      "createdAt": "2026-02-12T20:04:15.309Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d61d516c-aac1-45f9-8021-2ddb411ecd25",
+      "createdAt": "2026-02-12T20:03:51.759Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "5e86fac4-caec-4cf4-a96b-f01c741c97b8",
+      "createdAt": "2026-02-12T20:03:43.401Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e758879a-c34c-40cf-8283-ed33448c95db",
+      "createdAt": "2026-02-12T19:43:39.950Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "0d9bcef4-df39-44c0-b9a6-268c96da2d2e",
+      "createdAt": "2026-02-12T19:41:57.558Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "847aa9e6-9a76-43a4-a6f9-40139555238e",
+      "createdAt": "2026-02-12T19:41:51.289Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "3aca3be8-1002-4a19-9a59-0be2120e09fe",
+      "createdAt": "2026-02-12T18:50:22.447Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "52ab1e31-3fdb-4e84-b284-b6bb98f8f324",
+      "createdAt": "2026-02-12T18:48:44.276Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "d4b4f7a5-1d6d-42d1-a0ab-71ab867cc745",
+      "createdAt": "2026-02-12T18:38:48.727Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "1195fbef-3c2f-442c-bbbb-7a1d2527f775",
+      "createdAt": "2026-02-12T18:38:19.081Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "8ee23716-42b0-41c0-a2b1-9155fa4b04aa",
+      "createdAt": "2026-02-12T18:34:52.758Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "bae5f3a5-9b10-46b9-9b9f-45da074fd29c",
+      "createdAt": "2026-02-12T18:30:25.796Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "396233f6-b63a-4b6f-acd9-bb8d7c6e10ec",
+      "createdAt": "2026-02-12T18:30:19.571Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2a51d74e-de33-41b2-a147-7c7de116e2d5",
+      "createdAt": "2026-02-12T18:30:09.653Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "35444f68-2bb1-40ae-aa7c-711fdf0ea2a7",
+      "createdAt": "2026-02-12T18:29:38.954Z",
+      "type": "page_view",
+      "path": "/tools/compliance-risk-score",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6e3ca5cd-7063-40ff-9f68-6ea53cd92272",
+      "createdAt": "2026-02-12T18:29:35.054Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "6c904b60-bc49-4d37-a4d8-dd41184044aa",
+      "createdAt": "2026-02-12T18:28:57.291Z",
+      "type": "page_view",
+      "path": "/tools/salary-delay-alert",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "84fa9777-6dad-43ff-8edb-e46dc00d8a00",
+      "createdAt": "2026-02-12T18:28:46.615Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "400a5cf9-d13d-497b-9c7a-1b480b667834",
+      "createdAt": "2026-02-12T18:25:21.098Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "09f686ee-912b-4ffe-a41b-04561619bfab",
+      "createdAt": "2026-02-12T18:23:57.358Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "8c054954-6313-4b2d-ad2f-8bdb34c9d3f4",
+      "createdAt": "2026-02-12T18:22:49.499Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b53ba72d-474c-429e-abbe-a902c5c92919",
+      "createdAt": "2026-02-12T18:16:24.995Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "8318ff67-2a5a-4a0d-a7b8-6490162a9061",
+      "createdAt": "2026-02-12T18:16:15.311Z",
+      "type": "page_view",
+      "path": "/tools/compliance-risk-score",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "bcc38cf0-87f8-4038-88cd-bdb8812f6df5",
+      "createdAt": "2026-02-12T18:16:11.761Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "55ba7381-5b06-4562-8ae8-3878aaa0483c",
+      "createdAt": "2026-02-12T18:15:56.548Z",
+      "type": "page_view",
+      "path": "/tools/salary-delay-alert",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "671789bb-ff94-4f06-8645-c464c052264b",
+      "createdAt": "2026-02-12T18:15:47.846Z",
+      "type": "page_view",
+      "path": "/compte/protection",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "2f25d378-8821-4e29-9398-df44c2ab8184",
+      "createdAt": "2026-02-12T18:15:33.895Z",
+      "type": "page_view",
+      "path": "/compte",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9fe4281b-a00f-427f-9600-d3cbdb5982ce",
+      "createdAt": "2026-02-12T18:15:29.952Z",
+      "type": "page_view",
+      "path": "/simulate",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "22475f35-bc9b-47c9-83f8-4bd41490884a",
+      "createdAt": "2026-02-12T18:15:18.203Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "9809c89a-e487-4e25-b5bb-37a3b50c00ed",
+      "createdAt": "2026-02-12T18:15:06.623Z",
+      "type": "page_view",
+      "path": "/bibliotheque",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "b9fff2d7-1694-4d03-836f-efad821051de",
+      "createdAt": "2026-02-12T18:10:48.707Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "3f0eb292-9495-4ebf-b0c8-8c1b3389722f",
+      "createdAt": "2026-02-12T18:10:43.833Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "844af077-612e-4f66-bc23-1fcafd9fc66d",
+      "createdAt": "2026-02-12T18:09:56.263Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "1fc3c9f7-553b-469c-a712-add6e8688b4b",
+      "createdAt": "2026-02-12T18:06:34.964Z",
+      "type": "page_view",
+      "path": "/",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "7ae4517e-e536-4e46-9fcf-19c7a48f8aba",
+      "createdAt": "2026-02-12T18:06:07.480Z",
+      "type": "page_view",
+      "path": "/admin/articles",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "18c923c7-081a-46e8-9f75-95e20344a1c5",
+      "createdAt": "2026-02-12T18:06:02.143Z",
+      "type": "page_view",
+      "path": "/admin/tools",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "4dc6437b-e675-4078-b522-f714893faad9",
+      "createdAt": "2026-02-12T18:04:08.175Z",
+      "type": "page_view",
+      "path": "/admin/tools",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "12cd233c-66b8-4708-9c03-2f96a0996c70",
+      "createdAt": "2026-02-12T18:03:47.939Z",
+      "type": "page_view",
+      "path": "/admin/activity",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "93102e24-d19a-4967-90e9-8e78ac090b42",
+      "createdAt": "2026-02-12T18:03:43.907Z",
+      "type": "page_view",
+      "path": "/admin/articles",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e9e0d8be-2b9b-429e-a911-447613222e30",
+      "createdAt": "2026-02-12T18:03:36.865Z",
+      "type": "page_view",
+      "path": "/admin/activity",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "ccae5c80-1a48-4ca2-92cc-45593088d7dd",
+      "createdAt": "2026-02-12T18:03:28.301Z",
+      "type": "page_view",
+      "path": "/admin/analytics",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "e82c12ff-9400-4d6b-8323-2a34ecea0692",
+      "createdAt": "2026-02-12T18:03:16.163Z",
+      "type": "page_view",
+      "path": "/admin",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "a60a20fc-4fe1-4e98-b965-26a6bd3c6344",
+      "createdAt": "2026-02-12T18:02:36.548Z",
+      "type": "page_view",
+      "path": "/documents/overtime-claim-letter",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "4c7a2bc8-7531-44d7-9a93-edf32369e8c2",
+      "createdAt": "2026-02-12T18:02:19.787Z",
+      "type": "page_view",
+      "path": "/documents",
+      "locale": "fr-MA"
+    },
+    {
+      "id": "98762d0e-c2fa-460f-9b8d-60ed107f5a81",
+      "createdAt": "2026-02-12T18:02:18.116Z",
+      "type": "page_view",
+      "path": "/simulate/work-accident/result",
+      "locale": "fr-MA"
+    }
+  ]
+}
