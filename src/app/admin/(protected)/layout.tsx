@@ -9,7 +9,7 @@ export default async function AdminProtectedLayout({
 }) {
   const authenticated = await isAdminAuthenticated();
   if (!authenticated) {
-    redirect("/login?next=/admin");
+    redirect("/connexion?next=/admin");
   }
   return <AdminShell>{children}</AdminShell>;
 }

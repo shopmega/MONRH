@@ -5,7 +5,7 @@ export const metadata: Metadata = buildPageMetadata({
   title: "Score Risque Conformite",
   description:
     "Score de risque social et checklist de priorites pour renforcer la conformite RH.",
-  canonicalPath: "/tools/compliance-risk-score",
+  canonicalPath: "/outils/score-risque-conformite",
 });
 
 export default function ComplianceRiskScoreLayout({

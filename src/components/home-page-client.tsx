@@ -18,7 +18,7 @@ const categoryArabicLabels: Record<string, { name: string; description: string }
 };
 
 const featureArabicLabels: Record<string, { title: string; description: string }> = {
-  "/simulate": {
+  "/simulateurs": {
     title: "حسابات قابلة للتحقق",
     description: "كل نتيجة تعرض النسخة القانونية والاقتطاعات والصيغة المعتمدة.",
   },
@@ -71,7 +71,7 @@ export function HomePageClient({
           </p>
 
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/simulate" className="btn-primary px-5 py-2.5 text-sm">
+            <Link href="/simulateurs" className="btn-primary px-5 py-2.5 text-sm">
               {t("home.ctaSimulate")}
             </Link>
             <Link href="/documents" className="btn-muted px-5 py-2.5 text-sm">

@@ -56,9 +56,9 @@ export default function ProtectionPage() {
             {t("protectionPage.description")}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/tools/payslip-detector" className="btn-primary px-4 py-2 text-sm">{t("protectionPage.payslipTool")}</Link>
-            <Link href="/tools/salary-delay-alert" className="btn-muted px-4 py-2 text-sm">{t("protectionPage.salaryDelayTool")}</Link>
-            <Link href="/tools/compliance-risk-score" className="btn-muted px-4 py-2 text-sm">{t("protectionPage.complianceTool")}</Link>
+            <Link href="/outils/detecteur-fiche-paie" className="btn-primary px-4 py-2 text-sm">{t("protectionPage.payslipTool")}</Link>
+            <Link href="/outils/alerte-retard-salaire" className="btn-muted px-4 py-2 text-sm">{t("protectionPage.salaryDelayTool")}</Link>
+            <Link href="/outils/score-risque-conformite" className="btn-muted px-4 py-2 text-sm">{t("protectionPage.complianceTool")}</Link>
           </div>
         </section>
 

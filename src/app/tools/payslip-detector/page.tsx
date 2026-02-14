@@ -153,7 +153,12 @@ export default function PayslipDetectorPage() {
               ) : (
                 result.issues.map((issue) => (
                   <article key={issue.code} className="panel-strong min-w-0 rounded-xl p-3 text-sm">
-                    <p className="break-words font-semibold">{issue.code} ({t(`payslipTool.${issue.severity}`)})</p>
+                    <p className="break-words font-semibold">
+                      {t(`payslipTool.issueLabel_${issue.code}`) === `payslipTool.issueLabel_${issue.code}`
+                        ? issue.code
+                        : t(`payslipTool.issueLabel_${issue.code}`)}{" "}
+                      ({t(`payslipTool.${issue.severity}`)})
+                    </p>
                     <p className="mt-1 break-words text-[var(--ink-soft)]">
                       {t(`payslipTool.issue_${issue.code}`) === `payslipTool.issue_${issue.code}`
                         ? issue.message
@@ -161,9 +166,11 @@ export default function PayslipDetectorPage() {
                     </p>
                     <p className="mt-1 break-words text-xs text-[var(--ink-soft)]">
                       {t("payslipTool.issueLine", {
-                        expected: issue.expected ?? "-",
-                        reported: issue.reported ?? "-",
-                        gap: issue.gap ?? "-",
+                        expected:
+                          typeof issue.expected === "number" ? issue.expected.toLocaleString(locale) : "-",
+                        reported:
+                          typeof issue.reported === "number" ? issue.reported.toLocaleString(locale) : "-",
+                        gap: typeof issue.gap === "number" ? issue.gap.toLocaleString(locale) : "-",
                       })}
                     </p>
                   </article>

@@ -143,7 +143,7 @@ export default async function DocumentGeneratorPage({
                   {
                     title: labels.simulators,
                     description: labels.simulatorsDesc,
-                    href: "/simulate",
+                    href: "/simulateurs",
                   },
                   {
                     title: labels.practicalArticles,

@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description:
     "Outils pratiques pour verifier bulletin, retard de salaire et risque de conformite sociale au Maroc.",
   alternates: {
-    canonical: "/tools",
+    canonical: "/outils",
   },
   openGraph: {
     title: "Outils RH",
     description:
       "Detection d'anomalies de paie, retards salaire et indicateurs de conformite.",
-    url: "/tools",
+    url: "/outils",
     images: [
       {
         url: absoluteUrl(DEFAULT_OG_IMAGE_PATH),

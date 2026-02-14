@@ -20,7 +20,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   async function logout() {
     await fetch("/api/user/session", { method: "DELETE" });
     window.dispatchEvent(new Event("salarie-auth-changed"));
-    router.push("/login?next=/admin");
+    router.push("/connexion?next=/admin");
     router.refresh();
   }
 

@@ -120,7 +120,7 @@ function pickKeyMetrics(snapshot: SimulationResultSnapshot): Array<[string, numb
 export function SimulationResultPage({ slug }: { slug: string }) {
   const { language, t, locale } = useLanguage();
   const searchParams = useSearchParams();
-  const expectedPath = `/simulate/${slug}`;
+  const expectedPath = `/simulateurs/${slug}`;
   const simulationId = searchParams.get("simulationId");
   const [mappedRelatedItems, setMappedRelatedItems] = useState<
     Array<{ title: string; description: string; href: string }>
@@ -375,7 +375,7 @@ export function SimulationResultPage({ slug }: { slug: string }) {
                 <button type="button" onClick={() => window.print()} className="btn-muted px-4 py-2 text-center">
                   {t("resultPage.print")}
                 </button>
-                <Link href="/simulate" className="btn-primary px-4 py-2 text-center">
+                <Link href="/simulateurs" className="btn-primary px-4 py-2 text-center">
                   {t("resultPage.runAnother")}
                 </Link>
                 {prefilledDocumentLink ? (
@@ -407,7 +407,7 @@ export function SimulationResultPage({ slug }: { slug: string }) {
                   {
                     title: t("simulator.relatedSimulatorsTitle"),
                     description: t("simulator.relatedSimulatorsDesc"),
-                    href: "/simulate",
+                    href: "/simulateurs",
                   },
                   {
                     title: t("simulator.relatedDocumentsTitle"),

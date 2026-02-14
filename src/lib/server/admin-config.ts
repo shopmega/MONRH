@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createDefaultToolPolicies, type ToolPolicy } from "@/lib/tools/tool-catalog";
+import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
 
 export type AdminConfig = {
   simulatorAdStepEnabled: boolean;
@@ -26,6 +27,7 @@ export type AdminConfig = {
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const CONFIG_PATH = path.join(DATA_DIR, "admin-config.json");
+const SETTINGS_KEY = "admin_config";
 
 const DEFAULT_ADMIN_CONFIG: AdminConfig = {
   simulatorAdStepEnabled: true,
@@ -59,53 +61,117 @@ async function ensureConfigFile() {
   }
 }
 
-export async function readAdminConfig(): Promise<AdminConfig> {
+function normalizeConfig(
+  parsed: Partial<AdminConfig>,
+  fallbackUpdatedAt = DEFAULT_ADMIN_CONFIG.updatedAt,
+): AdminConfig {
+  const defaultPolicies = createDefaultToolPolicies();
+  const storedPolicies = parsed.toolPolicies ?? {};
+  const mergedPolicies = Object.fromEntries(
+    Object.entries(defaultPolicies).map(([toolId, defaultPolicy]) => [
+      toolId,
+      {
+        visible: storedPolicies[toolId]?.visible ?? defaultPolicy.visible,
+        enabled: storedPolicies[toolId]?.enabled ?? defaultPolicy.enabled,
+        audience: storedPolicies[toolId]?.audience ?? defaultPolicy.audience,
+      },
+    ]),
+  );
+
+  return {
+    simulatorAdStepEnabled: parsed.simulatorAdStepEnabled ?? DEFAULT_ADMIN_CONFIG.simulatorAdStepEnabled,
+    documentAdStepEnabled: parsed.documentAdStepEnabled ?? DEFAULT_ADMIN_CONFIG.documentAdStepEnabled,
+    maintenanceMessage: parsed.maintenanceMessage ?? DEFAULT_ADMIN_CONFIG.maintenanceMessage,
+    websiteSettings: {
+      siteName: parsed.websiteSettings?.siteName ?? DEFAULT_ADMIN_CONFIG.websiteSettings.siteName,
+      siteDescription:
+        parsed.websiteSettings?.siteDescription ??
+        DEFAULT_ADMIN_CONFIG.websiteSettings.siteDescription,
+      siteSubtitle: parsed.websiteSettings?.siteSubtitle ?? DEFAULT_ADMIN_CONFIG.websiteSettings.siteSubtitle,
+      logoUrl: parsed.websiteSettings?.logoUrl ?? DEFAULT_ADMIN_CONFIG.websiteSettings.logoUrl,
+      supportEmail: parsed.websiteSettings?.supportEmail ?? DEFAULT_ADMIN_CONFIG.websiteSettings.supportEmail,
+      defaultArticleCoverUrl:
+        parsed.websiteSettings?.defaultArticleCoverUrl ?? DEFAULT_ADMIN_CONFIG.websiteSettings.defaultArticleCoverUrl,
+      socialLinks: {
+        facebook:
+          parsed.websiteSettings?.socialLinks?.facebook ?? DEFAULT_ADMIN_CONFIG.websiteSettings.socialLinks.facebook,
+        instagram:
+          parsed.websiteSettings?.socialLinks?.instagram ?? DEFAULT_ADMIN_CONFIG.websiteSettings.socialLinks.instagram,
+        linkedin:
+          parsed.websiteSettings?.socialLinks?.linkedin ?? DEFAULT_ADMIN_CONFIG.websiteSettings.socialLinks.linkedin,
+        x: parsed.websiteSettings?.socialLinks?.x ?? DEFAULT_ADMIN_CONFIG.websiteSettings.socialLinks.x,
+      },
+    },
+    toolPolicies: mergedPolicies,
+    updatedAt: parsed.updatedAt ?? fallbackUpdatedAt,
+  };
+}
+
+async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from("app_settings")
+      .select("value,updated_at")
+      .eq("name", SETTINGS_KEY)
+      .maybeSingle();
+    if (error) return null;
+    if (!data) return DEFAULT_ADMIN_CONFIG;
+
+    const rawValue =
+      data.value && typeof data.value === "object" ? (data.value as Partial<AdminConfig>) : {};
+    return normalizeConfig(rawValue, data.updated_at ?? DEFAULT_ADMIN_CONFIG.updatedAt);
+  } catch {
+    return null;
+  }
+}
+
+async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminConfig | null> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const payload: Omit<AdminConfig, "updatedAt"> = {
+      simulatorAdStepEnabled: config.simulatorAdStepEnabled,
+      documentAdStepEnabled: config.documentAdStepEnabled,
+      maintenanceMessage: config.maintenanceMessage,
+      websiteSettings: config.websiteSettings,
+      toolPolicies: config.toolPolicies,
+    };
+    const { data, error } = await supabase
+      .from("app_settings")
+      .upsert(
+        {
+          name: SETTINGS_KEY,
+          value: payload,
+          updated_at: config.updatedAt,
+        },
+        { onConflict: "name" },
+      )
+      .select("value,updated_at")
+      .single();
+    if (error) return null;
+    const rawValue =
+      data.value && typeof data.value === "object" ? (data.value as Partial<AdminConfig>) : {};
+    return normalizeConfig(rawValue, data.updated_at ?? config.updatedAt);
+  } catch {
+    return null;
+  }
+}
+
+async function readLegacyFileConfig(): Promise<AdminConfig> {
   await ensureConfigFile();
   const raw = await fs.readFile(CONFIG_PATH, "utf8");
   try {
     const parsed = JSON.parse(raw) as Partial<AdminConfig>;
-    const defaultPolicies = createDefaultToolPolicies();
-    const storedPolicies = parsed.toolPolicies ?? {};
-    const mergedPolicies = Object.fromEntries(
-      Object.entries(defaultPolicies).map(([toolId, defaultPolicy]) => [
-        toolId,
-        {
-          visible: storedPolicies[toolId]?.visible ?? defaultPolicy.visible,
-          enabled: storedPolicies[toolId]?.enabled ?? defaultPolicy.enabled,
-          audience: storedPolicies[toolId]?.audience ?? defaultPolicy.audience,
-        },
-      ]),
-    );
-    return {
-      simulatorAdStepEnabled: parsed.simulatorAdStepEnabled ?? DEFAULT_ADMIN_CONFIG.simulatorAdStepEnabled,
-      documentAdStepEnabled: parsed.documentAdStepEnabled ?? DEFAULT_ADMIN_CONFIG.documentAdStepEnabled,
-      maintenanceMessage: parsed.maintenanceMessage ?? DEFAULT_ADMIN_CONFIG.maintenanceMessage,
-      websiteSettings: {
-        siteName: parsed.websiteSettings?.siteName ?? DEFAULT_ADMIN_CONFIG.websiteSettings.siteName,
-        siteDescription:
-          parsed.websiteSettings?.siteDescription ??
-          DEFAULT_ADMIN_CONFIG.websiteSettings.siteDescription,
-        siteSubtitle: parsed.websiteSettings?.siteSubtitle ?? DEFAULT_ADMIN_CONFIG.websiteSettings.siteSubtitle,
-        logoUrl: parsed.websiteSettings?.logoUrl ?? DEFAULT_ADMIN_CONFIG.websiteSettings.logoUrl,
-        supportEmail: parsed.websiteSettings?.supportEmail ?? DEFAULT_ADMIN_CONFIG.websiteSettings.supportEmail,
-        defaultArticleCoverUrl:
-          parsed.websiteSettings?.defaultArticleCoverUrl ?? DEFAULT_ADMIN_CONFIG.websiteSettings.defaultArticleCoverUrl,
-        socialLinks: {
-          facebook:
-            parsed.websiteSettings?.socialLinks?.facebook ?? DEFAULT_ADMIN_CONFIG.websiteSettings.socialLinks.facebook,
-          instagram:
-            parsed.websiteSettings?.socialLinks?.instagram ?? DEFAULT_ADMIN_CONFIG.websiteSettings.socialLinks.instagram,
-          linkedin:
-            parsed.websiteSettings?.socialLinks?.linkedin ?? DEFAULT_ADMIN_CONFIG.websiteSettings.socialLinks.linkedin,
-          x: parsed.websiteSettings?.socialLinks?.x ?? DEFAULT_ADMIN_CONFIG.websiteSettings.socialLinks.x,
-        },
-      },
-      toolPolicies: mergedPolicies,
-      updatedAt: parsed.updatedAt ?? DEFAULT_ADMIN_CONFIG.updatedAt,
-    };
+    return normalizeConfig(parsed);
   } catch {
     return DEFAULT_ADMIN_CONFIG;
   }
+}
+
+export async function readAdminConfig(): Promise<AdminConfig> {
+  const supabaseConfig = await readAdminConfigFromSupabase();
+  if (supabaseConfig) return supabaseConfig;
+  return readLegacyFileConfig();
 }
 
 export async function updateAdminConfig(
@@ -122,6 +188,9 @@ export async function updateAdminConfig(
     toolPolicies: patch.toolPolicies ?? current.toolPolicies,
     updatedAt: new Date().toISOString(),
   };
+  const persisted = await writeAdminConfigToSupabase(next);
+  if (persisted) return persisted;
+  await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
   return next;
 }
@@ -137,6 +206,8 @@ export async function replaceAdminConfig(
     toolPolicies: payload.toolPolicies,
     updatedAt: new Date().toISOString(),
   };
+  const persisted = await writeAdminConfigToSupabase(next);
+  if (persisted) return persisted;
   await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
   return next;

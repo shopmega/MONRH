@@ -15,19 +15,19 @@ export default function ToolsIndexPage() {
   const tools = [
     {
       id: "payslip_detector",
-      href: "/tools/payslip-detector",
+      href: "/outils/detecteur-fiche-paie",
       title: t("toolsPage.payslipTitle"),
       description: t("toolsPage.payslipDesc"),
     },
     {
       id: "salary_delay_alert",
-      href: "/tools/salary-delay-alert",
+      href: "/outils/alerte-retard-salaire",
       title: t("toolsPage.delayTitle"),
       description: t("toolsPage.delayDesc"),
     },
     {
       id: "compliance_risk_score",
-      href: "/tools/compliance-risk-score",
+      href: "/outils/score-risque-conformite",
       title: t("toolsPage.complianceTitle"),
       description: t("toolsPage.complianceDesc"),
     },

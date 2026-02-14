@@ -17,7 +17,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { key: "home", href: "/" },
-  { key: "simulate", href: "/simulate" },
+  { key: "simulate", href: "/simulateurs" },
   { key: "documents", href: "/documents" },
   { key: "library", href: "/bibliotheque" },
   { key: "account", href: "/compte" },

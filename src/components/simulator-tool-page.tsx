@@ -139,7 +139,7 @@ export function SimulatorToolPage({
     {
       title: t("simulator.relatedSimulatorsTitle"),
       description: t("simulator.relatedSimulatorsDesc"),
-      href: "/simulate",
+      href: "/simulateurs",
     },
     {
       title: t("simulator.relatedDocumentsTitle"),
@@ -235,7 +235,7 @@ export function SimulatorToolPage({
             <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-[var(--ink-soft)]">2. {t("simulator.stepCompute")}</span>
             <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-[var(--ink-soft)]">3. {t("simulator.stepResult")}</span>
           </div>
-          <Link href="/simulate" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
+          <Link href="/simulateurs" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
             {t("common.backSimulators")}
           </Link>
         </section>

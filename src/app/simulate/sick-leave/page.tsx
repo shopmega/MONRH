@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Arret Maladie",
   description: "Estimation de compensation CNSS et perte de revenu.",
-  canonicalPath: "/simulate/sick-leave",
+  canonicalPath: "/simulateurs/conge-maladie",
 });
 
 export default function SickLeavePage() {

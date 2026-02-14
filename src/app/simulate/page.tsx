@@ -31,7 +31,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Calculez salaire net, charges et cout employeur selon la date legale.",
           ar: "احسب الأجر الصافي والاقتطاعات وكلفة المشغل حسب التاريخ القانوني.",
         },
-        href: "/simulate/net-gross",
+        href: "/simulateurs/brut-net",
       },
       {
         title: { fr: "Cout Total Employeur", ar: "الكلفة الإجمالية للمشغل" },
@@ -39,7 +39,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Projection du cout mensuel complet pour l'entreprise.",
           ar: "تقدير الكلفة الشهرية الإجمالية على الشركة.",
         },
-        href: "/simulate/employer-total-cost",
+        href: "/simulateurs/cout-employeur-total",
       },
       {
         title: { fr: "IR Annuel", ar: "الضريبة السنوية" },
@@ -47,7 +47,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Vue annualisee avec bonus, 13e mois et taux effectif.",
           ar: "عرض سنوي يشمل المنح والشهر 13 والمعدل الفعلي.",
         },
-        href: "/simulate/annual-income-tax",
+        href: "/simulateurs/ir-annuel",
       },
     ],
   },
@@ -61,7 +61,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Estimation indemnite legale, preavis, conges restants et scenario abusif.",
           ar: "تقدير التعويض القانوني والإشعار والعطل المتبقية وسيناريو التعسف.",
         },
-        href: "/simulate/licenciement",
+        href: "/simulateurs/licenciement",
       },
       {
         title: { fr: "Scenario Demission", ar: "سيناريو الاستقالة" },
@@ -69,7 +69,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Impact financier de la demission avec/sans execution du preavis.",
           ar: "الأثر المالي للاستقالة مع أو بدون تنفيذ الإشعار.",
         },
-        href: "/simulate/demission",
+        href: "/simulateurs/demission",
       },
       {
         title: { fr: "Fin de CDD", ar: "نهاية عقد CDD" },
@@ -77,7 +77,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Prime de precarite, conges restants et compensation preavis.",
           ar: "منحة الهشاشة والعطل المتبقية وتعويض الإشعار.",
         },
-        href: "/simulate/fin-cdd",
+        href: "/simulateurs/fin-cdd",
       },
       {
         title: { fr: "Rupture en Periode d'Essai", ar: "إنهاء فترة التجربة" },
@@ -85,7 +85,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Controle des delais de preavis et compensation associee.",
           ar: "التحقق من آجال الإشعار والتعويض المرتبط بها.",
         },
-        href: "/simulate/probation-termination",
+        href: "/simulateurs/rupture-periode-essai",
       },
       {
         title: { fr: "Croissance Anciennete", ar: "تطور الأقدمية" },
@@ -93,7 +93,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Comparez l'indemnite potentielle aujourd'hui vs plus tard.",
           ar: "قارن التعويض المحتمل اليوم مقابل سنوات إضافية.",
         },
-        href: "/simulate/seniority-growth",
+        href: "/simulateurs/progression-anciennete",
       },
     ],
   },
@@ -107,7 +107,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Simulation mensuelle des conges payes, bonus anciennete et reliquat.",
           ar: "محاكاة شهرية للعطل المؤدى عنها مع مكافأة الأقدمية والرصد المتبقي.",
         },
-        href: "/simulate/leave-accrual",
+        href: "/simulateurs/acquisition-conges",
       },
       {
         title: { fr: "Conformite SMIG / SMAG", ar: "مطابقة SMIG / SMAG" },
@@ -115,7 +115,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Controle rapide du minimum legal et ecart de conformite.",
           ar: "فحص سريع للحد الأدنى القانوني وفارق المطابقة.",
         },
-        href: "/simulate/smig-compliance",
+        href: "/simulateurs/conformite-smig",
       },
       {
         title: { fr: "Heures Supplementaires", ar: "الساعات الإضافية" },
@@ -123,7 +123,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Calculez les majorations jour, nuit, weekend et jours feries.",
           ar: "احسب الزيادات لساعات النهار والليل وعطلة الأسبوع والأعياد.",
         },
-        href: "/simulate/overtime",
+        href: "/simulateurs/heures-supplementaires",
       },
       {
         title: { fr: "Travail Jour Ferie", ar: "العمل في يوم عطلة" },
@@ -131,7 +131,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Compensation dediee pour heures realisees en jour ferie.",
           ar: "تعويض خاص عن الساعات المنجزة خلال يوم عطلة.",
         },
-        href: "/simulate/public-holiday-compensation",
+        href: "/simulateurs/compensation-jours-feries",
       },
       {
         title: { fr: "Conge Maternite", ar: "عطلة الأمومة" },
@@ -139,7 +139,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Estimation de revenu CNSS et complement employeur.",
           ar: "تقدير تعويض CNSS وتكملة المشغل.",
         },
-        href: "/simulate/maternity-leave",
+        href: "/simulateurs/conge-maternite",
       },
       {
         title: { fr: "Arret Maladie", ar: "التوقف المرضي" },
@@ -147,7 +147,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Impact financier d'un arret avec delai de carence.",
           ar: "الأثر المالي للتوقف المرضي مع فترة انتظار.",
         },
-        href: "/simulate/sick-leave",
+        href: "/simulateurs/conge-maladie",
       },
       {
         title: { fr: "Projection Pension CNSS", ar: "توقع معاش CNSS" },
@@ -155,7 +155,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Projection simplifiee selon salaire moyen et annees cotisees.",
           ar: "توقع مبسط حسب متوسط الأجر وسنوات الاشتراك.",
         },
-        href: "/simulate/cnss-pension",
+        href: "/simulateurs/pension-cnss",
       },
       {
         title: { fr: "Accident du Travail", ar: "حادثة شغل" },
@@ -163,7 +163,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Estimation indemnisation temporaire et permanente.",
           ar: "تقدير التعويض المؤقت والدائم.",
         },
-        href: "/simulate/work-accident",
+        href: "/simulateurs/accident-travail",
       },
     ],
   },
@@ -177,7 +177,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Evaluation de preparation du dossier et niveau d'escalade.",
           ar: "تقييم جاهزية الملف ومستوى التصعيد.",
         },
-        href: "/simulate/harassment-scenario",
+        href: "/simulateurs/scenario-harcelement",
       },
       {
         title: { fr: "Recouvrement Salaire Impaye", ar: "تحصيل الأجر غير المؤدى" },
@@ -185,7 +185,7 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Principal + penalites de retard pour reclamation.",
           ar: "المبلغ الأصلي مع غرامات التأخير للمطالبة.",
         },
-        href: "/simulate/unpaid-salary-recovery",
+        href: "/simulateurs/recouvrement-salaire-impaye",
       },
       {
         title: { fr: "Recouvrement Heures Sup", ar: "تحصيل الساعات الإضافية" },
@@ -193,14 +193,14 @@ const simulatorGroups: SimulatorGroup[] = [
           fr: "Estimation des heures sup impayees et penalites associees.",
           ar: "تقدير الساعات الإضافية غير المؤداة والغرامات المرتبطة.",
         },
-        href: "/simulate/unpaid-overtime-recovery",
+        href: "/simulateurs/recouvrement-heures-supplementaires",
       },
     ],
   },
 ];
 
 function toolIdFromHref(href: string): string {
-  const slug = href.replace("/simulate/", "");
+  const slug = href.replace("/simulateurs/", "");
   return slug.replaceAll("-", "_");
 }
 

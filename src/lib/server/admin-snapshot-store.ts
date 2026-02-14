@@ -20,18 +20,22 @@ const STORE_PATH = path.join(DATA_DIR, "admin-snapshots.json");
 const DEFAULT_STORE: SnapshotStore = { snapshots: [] };
 
 async function ensureStoreFile() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
   try {
-    await fs.access(STORE_PATH);
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    try {
+      await fs.access(STORE_PATH);
+    } catch {
+      await fs.writeFile(STORE_PATH, JSON.stringify(DEFAULT_STORE, null, 2), "utf8");
+    }
   } catch {
-    await fs.writeFile(STORE_PATH, JSON.stringify(DEFAULT_STORE, null, 2), "utf8");
+    // Read-only filesystem in serverless runtimes: keep snapshots as best-effort.
   }
 }
 
 async function readStore(): Promise<SnapshotStore> {
-  await ensureStoreFile();
-  const raw = await fs.readFile(STORE_PATH, "utf8");
   try {
+    await ensureStoreFile();
+    const raw = await fs.readFile(STORE_PATH, "utf8");
     const parsed = JSON.parse(raw) as SnapshotStore;
     return { snapshots: parsed.snapshots ?? [] };
   } catch {
@@ -40,7 +44,11 @@ async function readStore(): Promise<SnapshotStore> {
 }
 
 async function writeStore(store: SnapshotStore) {
-  await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
+  try {
+    await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
+  } catch {
+    // Best-effort snapshotting.
+  }
 }
 
 export async function addAdminSnapshot(input: {

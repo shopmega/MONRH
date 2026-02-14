@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
 
       setStatus("Mot de passe mis a jour. Redirection vers la connexion...");
       setTimeout(() => {
-        router.replace("/login");
+        router.replace("/connexion");
         router.refresh();
       }, 1200);
     } catch {
@@ -110,7 +110,7 @@ export default function ResetPasswordPage() {
           {status ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{status}</p> : null}
           {error ? <p className="status-error mt-3 rounded-xl px-3 py-2 text-sm">{error}</p> : null}
 
-          <Link href="/forgot-password" className="mt-4 inline-block text-sm font-semibold text-[var(--accent)]">
+          <Link href="/mot-de-passe-oublie" className="mt-4 inline-block text-sm font-semibold text-[var(--accent)]">
             Demander un nouveau lien
           </Link>
         </section>

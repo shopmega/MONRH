@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   const next = sanitizeNextPath(requestUrl.searchParams.get("next"));
 
   if (!code) {
-    return NextResponse.redirect(new URL(`/login?error=missing_code`, requestUrl.origin));
+    return NextResponse.redirect(new URL(`/connexion?error=missing_code`, requestUrl.origin));
   }
 
   const response = NextResponse.redirect(new URL(next, requestUrl.origin));
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(new URL(`/login?error=oauth_exchange_failed`, requestUrl.origin));
+    return NextResponse.redirect(new URL(`/connexion?error=oauth_exchange_failed`, requestUrl.origin));
   }
 
   return response;

@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Recouvrement Salaire Impaye",
   description: "Estimation du principal, penalites de retard et montant total de reclamation.",
-  canonicalPath: "/simulate/unpaid-salary-recovery",
+  canonicalPath: "/simulateurs/recouvrement-salaire-impaye",
 });
 
 export default function UnpaidSalaryRecoveryPage() {

@@ -125,7 +125,7 @@ export default function ComptePage() {
         return;
       }
       window.dispatchEvent(new Event("salarie-auth-changed"));
-      router.replace("/login?next=/compte");
+      router.replace("/connexion?next=/compte");
       router.refresh();
     } catch {
       setSessionStatus(t("accountPage.sessionDenied"));
@@ -238,7 +238,7 @@ export default function ComptePage() {
                 </p>
               </div>
               <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap">
-                <Link href="/simulate" className="btn-primary w-full px-4 py-2 text-xs uppercase tracking-[0.12em] sm:w-auto">
+                <Link href="/simulateurs" className="btn-primary w-full px-4 py-2 text-xs uppercase tracking-[0.12em] sm:w-auto">
                   {t("accountPage.newSimulation")}
                 </Link>
                 <button
@@ -337,7 +337,7 @@ export default function ComptePage() {
                   <p className="font-semibold">{t("accountPage.shortcutProtection")}</p>
                   <p className="mt-1 text-xs text-[var(--ink-soft)]">{t("accountPage.shortcutProtectionDesc")}</p>
                 </Link>
-                <Link href="/tools/payslip-detector" className="panel-strong block rounded-2xl p-3">
+                <Link href="/outils/detecteur-fiche-paie" className="panel-strong block rounded-2xl p-3">
                   <p className="font-semibold">{t("accountPage.shortcutPayslip")}</p>
                   <p className="mt-1 text-xs text-[var(--ink-soft)]">{t("accountPage.shortcutPayslipDesc")}</p>
                 </Link>

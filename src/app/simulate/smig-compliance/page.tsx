@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Conformite SMIG / SMAG",
   description: "Verifiez si le salaire saisi respecte le minimum legal applicable.",
-  canonicalPath: "/simulate/smig-compliance",
+  canonicalPath: "/simulateurs/conformite-smig",
 });
 
 export default function SmigCompliancePage() {

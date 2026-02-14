@@ -45,7 +45,7 @@ export const features: Feature[] = [
     title: "Calculs Verifiables",
     description:
       "Chaque resultat affiche la version legale, les charges appliquees et le detail de la formule.",
-    href: "/simulate",
+    href: "/simulateurs",
   },
   {
     title: "Documents Conformes",
@@ -60,4 +60,3 @@ export const features: Feature[] = [
     href: "/compte",
   },
 ];
-

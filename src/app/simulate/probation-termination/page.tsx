@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Rupture en Periode d'Essai",
   description: "Controle du preavis et de la compensation potentielle.",
-  canonicalPath: "/simulate/probation-termination",
+  canonicalPath: "/simulateurs/rupture-periode-essai",
 });
 
 export default function ProbationTerminationPage() {

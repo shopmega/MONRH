@@ -5,7 +5,7 @@ export const metadata: Metadata = buildPageMetadata({
   title: "Detecteur Bulletin de Paie",
   description:
     "Analyse automatique des ecarts de paie: net, CNSS, IR et coherence du bulletin.",
-  canonicalPath: "/tools/payslip-detector",
+  canonicalPath: "/outils/detecteur-fiche-paie",
 });
 
 export default function PayslipDetectorLayout({

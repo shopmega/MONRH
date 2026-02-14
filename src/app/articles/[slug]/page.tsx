@@ -173,7 +173,7 @@ export default async function ArticlePage({
                   {
                     title: labels.relatedSimulators,
                     description: labels.relatedSimulatorsDesc,
-                    href: "/simulate",
+                    href: "/simulateurs",
                   },
                   {
                     title: labels.relatedDocs,

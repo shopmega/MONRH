@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Cout Total Employeur",
   description: "Projection du cout mensuel complet pour l'entreprise.",
-  canonicalPath: "/simulate/employer-total-cost",
+  canonicalPath: "/simulateurs/cout-employeur-total",
 });
 
 export default function EmployerTotalCostPage() {

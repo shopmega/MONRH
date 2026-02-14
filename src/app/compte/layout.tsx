@@ -22,7 +22,7 @@ export default async function CompteLayout({
 }>) {
   const authenticated = await isUserAuthenticated();
   if (!authenticated) {
-    redirect("/login?next=/compte");
+    redirect("/connexion?next=/compte");
   }
 
   return children;

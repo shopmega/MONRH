@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
 
     try {
       const supabase = createSupabaseClient();
-      const redirectTo = `${window.location.origin}/auth/callback?next=/reset-password`;
+      const redirectTo = `${window.location.origin}/auth/callback?next=/reinitialiser-mot-de-passe`;
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo,
       });
@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
           {status ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{status}</p> : null}
           {error ? <p className="status-error mt-3 rounded-xl px-3 py-2 text-sm">{error}</p> : null}
 
-          <Link href="/login" className="mt-4 inline-block text-sm font-semibold text-[var(--accent)]">
+          <Link href="/connexion" className="mt-4 inline-block text-sm font-semibold text-[var(--accent)]">
             Retour a la connexion
           </Link>
         </section>

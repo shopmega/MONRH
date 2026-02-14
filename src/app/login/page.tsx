@@ -229,7 +229,7 @@ export default function LoginPage() {
               </form>
             )}
 
-            <Link href="/forgot-password" className="mt-3 inline-block text-xs font-semibold text-[var(--accent)]">
+            <Link href="/mot-de-passe-oublie" className="mt-3 inline-block text-xs font-semibold text-[var(--accent)]">
               Mot de passe oublie ?
             </Link>
             {error ? <p className="status-error mt-3 rounded-xl px-3 py-2 text-sm">{error}</p> : null}

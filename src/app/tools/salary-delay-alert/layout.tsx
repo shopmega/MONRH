@@ -5,7 +5,7 @@ export const metadata: Metadata = buildPageMetadata({
   title: "Alerte Retard de Salaire",
   description:
     "Evaluation du risque en cas de retards de salaire et recommandations d'actions legales.",
-  canonicalPath: "/tools/salary-delay-alert",
+  canonicalPath: "/outils/alerte-retard-salaire",
 });
 
 export default function SalaryDelayAlertLayout({

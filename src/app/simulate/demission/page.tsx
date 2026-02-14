@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Scenario Demission",
   description: "Estimation de l'impact financier d'une demission.",
-  canonicalPath: "/simulate/demission",
+  canonicalPath: "/simulateurs/demission",
 });
 
 export default function DemissionPage() {

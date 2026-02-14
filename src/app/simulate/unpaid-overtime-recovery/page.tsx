@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Recouvrement Heures Sup Impayees",
   description: "Estimation du rappel d'heures supplementaires et penalites de retard.",
-  canonicalPath: "/simulate/unpaid-overtime-recovery",
+  canonicalPath: "/simulateurs/recouvrement-heures-supplementaires",
 });
 
 export default function UnpaidOvertimeRecoveryPage() {

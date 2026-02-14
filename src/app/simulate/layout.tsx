@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description:
     "Simulateurs salariaux et juridiques pour salaries au Maroc: net/brut, licenciement, conges, heures supplementaires, CNSS.",
   alternates: {
-    canonical: "/simulate",
+    canonical: "/simulateurs",
   },
   openGraph: {
     title: "Simulateurs",
     description:
       "Estimez vos droits salariaux, indemnites et compensations selon les regles legales.",
-    url: "/simulate",
+    url: "/simulateurs",
     images: [
       {
         url: absoluteUrl(DEFAULT_OG_IMAGE_PATH),

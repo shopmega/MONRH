@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Croissance Anciennete",
   description: "Compare l'indemnite potentielle actuelle vs apres quelques annees.",
-  canonicalPath: "/simulate/seniority-growth",
+  canonicalPath: "/simulateurs/progression-anciennete",
 });
 
 export default function SeniorityGrowthPage() {
