@@ -137,47 +137,45 @@ async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
   }
 }
 
-async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminConfig | null> {
-  try {
-    const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
-      upsert: (
-        values: { name: string; value: unknown; updated_at: string },
-        options: { onConflict: string },
-      ) => {
-        select: (columns: string) => {
-          single: () => Promise<{
-            data: { value?: unknown; updated_at?: string | null } | null;
-            error: unknown;
-          }>;
-        };
+async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminConfig> {
+  const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
+    upsert: (
+      values: { name: string; value: unknown; updated_at: string },
+      options: { onConflict: string },
+    ) => {
+      select: (columns: string) => {
+        single: () => Promise<{
+          data: { value?: unknown; updated_at?: string | null } | null;
+          error: { message?: string } | null;
+        }>;
       };
     };
-    const payload: Omit<AdminConfig, "updatedAt"> = {
-      simulatorAdStepEnabled: config.simulatorAdStepEnabled,
-      documentAdStepEnabled: config.documentAdStepEnabled,
-      maintenanceMessage: config.maintenanceMessage,
-      websiteSettings: config.websiteSettings,
-      toolPolicies: config.toolPolicies,
-    };
-    const { data, error } = await appSettings
-      .upsert(
-        {
-          name: SETTINGS_KEY,
-          value: payload,
-          updated_at: config.updatedAt,
-        },
-        { onConflict: "name" },
-      )
-      .select("value,updated_at")
-      .single();
-    if (error) return null;
-    const row = data as unknown as { value?: unknown; updated_at?: string | null };
-    const rawValue =
-      row.value && typeof row.value === "object" ? (row.value as Partial<AdminConfig>) : {};
-    return normalizeConfig(rawValue, row.updated_at ?? config.updatedAt);
-  } catch {
-    return null;
+  };
+  const payload: Omit<AdminConfig, "updatedAt"> = {
+    simulatorAdStepEnabled: config.simulatorAdStepEnabled,
+    documentAdStepEnabled: config.documentAdStepEnabled,
+    maintenanceMessage: config.maintenanceMessage,
+    websiteSettings: config.websiteSettings,
+    toolPolicies: config.toolPolicies,
+  };
+  const { data, error } = await appSettings
+    .upsert(
+      {
+        name: SETTINGS_KEY,
+        value: payload,
+        updated_at: config.updatedAt,
+      },
+      { onConflict: "name" },
+    )
+    .select("value,updated_at")
+    .single();
+  if (error) {
+    throw new Error(error.message ?? "app_settings_upsert_failed");
   }
+  const row = data as unknown as { value?: unknown; updated_at?: string | null };
+  const rawValue =
+    row.value && typeof row.value === "object" ? (row.value as Partial<AdminConfig>) : {};
+  return normalizeConfig(rawValue, row.updated_at ?? config.updatedAt);
 }
 
 async function readLegacyFileConfig(): Promise<AdminConfig> {
@@ -211,14 +209,22 @@ export async function updateAdminConfig(
     toolPolicies: patch.toolPolicies ?? current.toolPolicies,
     updatedAt: new Date().toISOString(),
   };
-  const persisted = await writeAdminConfigToSupabase(next);
-  if (persisted) return persisted;
   try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
-    return next;
+    return await writeAdminConfigToSupabase(next);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "unknown_persistence_error";
+    // Local filesystem fallback is only acceptable outside production.
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        await fs.mkdir(DATA_DIR, { recursive: true });
+        await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
+        return next;
+      } catch (fileError) {
+        const message =
+          fileError instanceof Error ? fileError.message : "unknown_persistence_error";
+        throw new Error(`admin_config_persistence_failed: ${message}`);
+      }
+    }
+    const message = error instanceof Error ? error.message : "app_settings_upsert_failed";
     throw new Error(`admin_config_persistence_failed: ${message}`);
   }
 }
@@ -234,14 +240,21 @@ export async function replaceAdminConfig(
     toolPolicies: payload.toolPolicies,
     updatedAt: new Date().toISOString(),
   };
-  const persisted = await writeAdminConfigToSupabase(next);
-  if (persisted) return persisted;
   try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
-    return next;
+    return await writeAdminConfigToSupabase(next);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "unknown_persistence_error";
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        await fs.mkdir(DATA_DIR, { recursive: true });
+        await fs.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), "utf8");
+        return next;
+      } catch (fileError) {
+        const message =
+          fileError instanceof Error ? fileError.message : "unknown_persistence_error";
+        throw new Error(`admin_config_persistence_failed: ${message}`);
+      }
+    }
+    const message = error instanceof Error ? error.message : "app_settings_upsert_failed";
     throw new Error(`admin_config_persistence_failed: ${message}`);
   }
 }

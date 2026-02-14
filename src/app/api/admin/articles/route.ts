@@ -23,13 +23,33 @@ const deleteSchema = z.object({
   slug: z.string().min(1),
 });
 
+function mapArticleAdminError(error: unknown): string {
+  const message = error instanceof Error ? error.message : "unknown_error";
+  if (
+    message.includes('relation "articles" does not exist') ||
+    message.includes("articles_list_failed") ||
+    message.includes("article_upsert_failed") ||
+    message.includes("article_delete_failed")
+  ) {
+    return "articles_table_unavailable: run migration 20260214_000006_content_tables.sql";
+  }
+  return message;
+}
+
 export async function GET() {
   const authenticated = await isAdminAuthenticated();
   if (!authenticated) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
-  const items = await listArticles();
-  return NextResponse.json({ ok: true, items });
+  try {
+    const items = await listArticles();
+    return NextResponse.json({ ok: true, items });
+  } catch (error) {
+    return NextResponse.json(
+      { ok: false, error: mapArticleAdminError(error) },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -51,13 +71,14 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json({ ok: true, item });
   } catch (error) {
+    const mappedError = mapArticleAdminError(error);
     await addAdminAuditEvent({
       action: "admin_article_upsert",
       status: "failed",
-      meta: { error: error instanceof Error ? error.message : "invalid_payload" },
+      meta: { error: mappedError },
     });
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "invalid_payload" },
+      { ok: false, error: mappedError },
       { status: 400 },
     );
   }
@@ -82,13 +103,14 @@ export async function DELETE(request: NextRequest) {
     });
     return NextResponse.json({ ok: deleted });
   } catch (error) {
+    const mappedError = mapArticleAdminError(error);
     await addAdminAuditEvent({
       action: "admin_article_delete",
       status: "failed",
-      meta: { error: error instanceof Error ? error.message : "invalid_payload" },
+      meta: { error: mappedError },
     });
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "invalid_payload" },
+      { ok: false, error: mappedError },
       { status: 400 },
     );
   }
