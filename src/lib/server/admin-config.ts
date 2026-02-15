@@ -34,7 +34,7 @@ const DEFAULT_ADMIN_CONFIG: AdminConfig = {
   documentAdStepEnabled: true,
   maintenanceMessage: "",
   websiteSettings: {
-    siteName: "Salarie.ma",
+    siteName: "MON RH",
     siteDescription:
       "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.",
     siteSubtitle: "Labour Clarity Platform",

@@ -39,7 +39,7 @@ export default function OpenGraphImage() {
               textTransform: "uppercase",
             }}
           >
-            Salarie.ma
+            MON RH
           </div>
           <div style={{ fontSize: 66, fontWeight: 800, lineHeight: 1.05 }}>
             Droit du Travail

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { useTheme } from "@/components/theme-provider";
+import { SITE_NAME } from "@/lib/seo";
 
 type NavKey = "home" | "simulate" | "documents" | "library" | "account" | "admin";
 
@@ -139,7 +140,7 @@ export function SiteNav() {
               )}
               <div className="min-w-0">
                 <p className="display-font truncate text-lg font-semibold tracking-tight text-[var(--foreground)]">
-                  {websiteSettings.siteName.trim() || "Salarie.ma"}
+                  {websiteSettings.siteName.trim() || SITE_NAME}
                 </p>
                 <p className="hidden text-[11px] uppercase tracking-[0.15em] text-[var(--ink-soft)] sm:block">
                   {websiteSettings.siteSubtitle.trim() || t("nav.subtitle")}

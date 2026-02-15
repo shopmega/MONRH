@@ -11,6 +11,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import {
   DEFAULT_OG_IMAGE_ALT,
   DEFAULT_OG_IMAGE_PATH,
+  SITE_NAME,
+  SITE_DESCRIPTION,
   SITE_URL,
   absoluteUrl,
 } from "@/lib/seo";
@@ -19,10 +21,10 @@ import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await readAdminConfig();
-  const siteName = config.websiteSettings.siteName.trim() || "Salarie.ma";
+  const siteName = config.websiteSettings.siteName.trim() || SITE_NAME;
   const siteDescription =
     config.websiteSettings.siteDescription.trim() ||
-    "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.";
+    SITE_DESCRIPTION;
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() ?? "";
 
   return {
@@ -103,10 +105,10 @@ export default async function RootLayout({
   const themeCookie = cookieStore.get("salarie_theme")?.value;
   const initialLanguage = languageCookie === "ar" ? "ar" : "fr";
   const initialTheme = themeCookie === "dark" ? "dark" : "light";
-  const siteName = config.websiteSettings.siteName.trim() || "Salarie.ma";
+  const siteName = config.websiteSettings.siteName.trim() || SITE_NAME;
   const siteDescription =
     config.websiteSettings.siteDescription.trim() ||
-    "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.";
+    SITE_DESCRIPTION;
   const sameAs = [
     config.websiteSettings.socialLinks.facebook.trim(),
     config.websiteSettings.socialLinks.instagram.trim(),

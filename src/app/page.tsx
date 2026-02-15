@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { HomePageClient } from "@/components/home-page-client";
-import { DEFAULT_OG_IMAGE_PATH, absoluteUrl } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE_PATH, SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/lib/seo";
 import { readAdminConfig } from "@/lib/server/admin-config";
 import { deriveCategoriesFromArticles } from "@/lib/server/categories";
 import { canAccessArticle, listArticles } from "@/lib/server/articles-store";
@@ -8,10 +8,10 @@ import { isUserAuthenticated } from "@/lib/server/user-session";
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await readAdminConfig();
-  const siteName = config.websiteSettings.siteName.trim() || "Salarie.ma";
+  const siteName = config.websiteSettings.siteName.trim() || SITE_NAME;
   const siteDescription =
     config.websiteSettings.siteDescription.trim() ||
-    "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.";
+    SITE_DESCRIPTION;
 
   return {
     title: "Simulateurs et Documents Droit du Travail Maroc",
