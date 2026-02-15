@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
+import { buildToolResultDocumentLinks } from "@/lib/tools/result-document-links";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
 
 type Result = {
@@ -49,6 +51,12 @@ export default function FinalSettlementAuditPage() {
   const toolPolicy = resolveToolPolicy(config.toolPolicies, "final_settlement_audit");
   const userAuthenticated = config.userAuthenticated;
   const usable = canUseTool(toolPolicy, userAuthenticated);
+  const relatedDocs = result
+    ? buildToolResultDocumentLinks({
+        toolId: "final_settlement_audit",
+        result,
+      })
+    : [];
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -329,6 +337,22 @@ export default function FinalSettlementAuditPage() {
                 ))
               )}
             </div>
+            {relatedDocs.length > 0 ? (
+              <div className="mt-5 rounded-2xl border border-[var(--line)] bg-[var(--surface-elevated)] p-4">
+                <p className="section-kicker">{t("simulator.relatedDocumentsTitle")}</p>
+                <div className="mt-2 space-y-2">
+                  {relatedDocs.map((doc) => (
+                    <div key={doc.href} className="panel-strong rounded-xl p-3">
+                      <p className="text-sm font-semibold">{doc.title}</p>
+                      <p className="mt-1 text-xs text-[var(--ink-soft)]">{doc.description}</p>
+                      <Link href={doc.href} className="mt-2 inline-block text-xs font-semibold text-[var(--accent)]">
+                        {t("documentsPage.openTemplate")}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </section>
         ) : null}
       </div>
