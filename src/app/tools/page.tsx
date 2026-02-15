@@ -31,6 +31,24 @@ export default function ToolsIndexPage() {
       title: t("toolsPage.complianceTitle"),
       description: t("toolsPage.complianceDesc"),
     },
+    {
+      id: "final_settlement_audit",
+      href: "/outils/audit-solde-tout-compte",
+      title: t("toolsPage.finalSettlementTitle"),
+      description: t("toolsPage.finalSettlementDesc"),
+    },
+    {
+      id: "disciplinary_procedure_check",
+      href: "/outils/controle-procedure-disciplinaire",
+      title: t("toolsPage.disciplineTitle"),
+      description: t("toolsPage.disciplineDesc"),
+    },
+    {
+      id: "fixed_term_contract_risk",
+      href: "/outils/risque-requalification-cdd",
+      title: t("toolsPage.cddRiskTitle"),
+      description: t("toolsPage.cddRiskDesc"),
+    },
   ];
 
   return (

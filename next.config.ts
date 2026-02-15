@@ -70,6 +70,21 @@ const nextConfig: NextConfig = {
         destination: "/outils/score-risque-conformite",
         permanent: true,
       },
+      {
+        source: "/tools/final-settlement-audit",
+        destination: "/outils/audit-solde-tout-compte",
+        permanent: true,
+      },
+      {
+        source: "/tools/disciplinary-procedure-check",
+        destination: "/outils/controle-procedure-disciplinaire",
+        permanent: true,
+      },
+      {
+        source: "/tools/fixed-term-contract-risk",
+        destination: "/outils/risque-requalification-cdd",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {
@@ -111,6 +126,12 @@ const nextConfig: NextConfig = {
       { source: "/outils/detecteur-fiche-paie", destination: "/tools/payslip-detector" },
       { source: "/outils/alerte-retard-salaire", destination: "/tools/salary-delay-alert" },
       { source: "/outils/score-risque-conformite", destination: "/tools/compliance-risk-score" },
+      { source: "/outils/audit-solde-tout-compte", destination: "/tools/final-settlement-audit" },
+      {
+        source: "/outils/controle-procedure-disciplinaire",
+        destination: "/tools/disciplinary-procedure-check",
+      },
+      { source: "/outils/risque-requalification-cdd", destination: "/tools/fixed-term-contract-risk" },
     ];
   },
 };

@@ -36,6 +36,9 @@ export const TOOL_CATALOG: ToolDefinition[] = [
   { id: "payslip_detector", label: "Detecteur fiche de paie", kind: "protection", href: "/outils/detecteur-fiche-paie" },
   { id: "salary_delay_alert", label: "Alerte retard salaire", kind: "protection", href: "/outils/alerte-retard-salaire" },
   { id: "compliance_risk_score", label: "Score de conformite", kind: "protection", href: "/outils/score-risque-conformite" },
+  { id: "final_settlement_audit", label: "Audit solde de tout compte", kind: "protection", href: "/outils/audit-solde-tout-compte" },
+  { id: "disciplinary_procedure_check", label: "Controle procedure disciplinaire", kind: "protection", href: "/outils/controle-procedure-disciplinaire" },
+  { id: "fixed_term_contract_risk", label: "Risque requalification CDD", kind: "protection", href: "/outils/risque-requalification-cdd" },
 ];
 
 export function createDefaultToolPolicies(): Record<string, ToolPolicy> {
