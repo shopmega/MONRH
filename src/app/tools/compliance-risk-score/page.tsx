@@ -44,14 +44,20 @@ export default function ComplianceRiskScorePage() {
     setError(null);
     setLoading(true);
     setResult(null);
-    const response = await fetch("/api/tools/compliance-risk-score", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = (await response.json()) as { ok: boolean; result?: Result };
-    if (data.ok && data.result) setResult(data.result);
-    setLoading(false);
+    try {
+      const response = await fetch("/api/tools/compliance-risk-score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = (await response.json()) as { ok: boolean; result?: Result; error?: string };
+      if (!data.ok || !data.result) throw new Error(data.error ?? "request_failed");
+      setResult(data.result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

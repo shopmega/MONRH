@@ -3,10 +3,24 @@ import { z } from "zod";
 import { addSimulation, listSimulations } from "@/lib/server/app-store";
 import { getCurrentUserId } from "@/lib/server/user-session";
 
+const simulationResultSchema = z.object({
+  versionCode: z.string().min(1),
+  breakdown: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  explanation: z
+    .object({
+      summary: z.string(),
+      assumptions: z.array(z.string()),
+      formulas: z.array(z.string()),
+      warnings: z.array(z.string()),
+      nextSteps: z.array(z.string()),
+    })
+    .optional(),
+});
+
 const saveSimulationSchema = z.object({
   calculatorType: z.string().min(1),
   input: z.record(z.string(), z.unknown()),
-  result: z.record(z.string(), z.unknown()),
+  result: simulationResultSchema,
 });
 
 export async function GET() {

@@ -42,18 +42,24 @@ export default function SalaryDelayAlertPage() {
     setError(null);
     setLoading(true);
     setResult(null);
-    const response = await fetch("/api/tools/salary-delay-alert", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        delayDays: Number(form.delayDays),
-        unpaidMonths: Number(form.unpaidMonths),
-        repeatedDelaysLast6Months: Number(form.repeatedDelaysLast6Months),
-      }),
-    });
-    const data = (await response.json()) as { ok: boolean; result?: Result };
-    if (data.ok && data.result) setResult(data.result);
-    setLoading(false);
+    try {
+      const response = await fetch("/api/tools/salary-delay-alert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          delayDays: Number(form.delayDays),
+          unpaidMonths: Number(form.unpaidMonths),
+          repeatedDelaysLast6Months: Number(form.repeatedDelaysLast6Months),
+        }),
+      });
+      const data = (await response.json()) as { ok: boolean; result?: Result; error?: string };
+      if (!data.ok || !data.result) throw new Error(data.error ?? "request_failed");
+      setResult(data.result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -98,16 +104,30 @@ export default function SalaryDelayAlertPage() {
             <p className="display-font break-words text-3xl font-semibold">{t("salaryDelayTool.risk", { score: result.riskScore, level: t(`salaryDelayTool.${result.level}`) })}</p>
             <h2 className="mt-4 font-semibold">{t("salaryDelayTool.legalSteps")}</h2>
             <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-sm">
-              <li>{t("salaryDelayTool.step1")}</li>
-              <li>{t("salaryDelayTool.step2")}</li>
-              <li>{t("salaryDelayTool.step3")}</li>
-              <li>{t("salaryDelayTool.step4")}</li>
+              {result.legalSteps.length > 0 ? (
+                result.legalSteps.map((step, index) => <li key={`legal-step-${index}`}>{step}</li>)
+              ) : (
+                <>
+                  <li>{t("salaryDelayTool.step1")}</li>
+                  <li>{t("salaryDelayTool.step2")}</li>
+                  <li>{t("salaryDelayTool.step3")}</li>
+                  <li>{t("salaryDelayTool.step4")}</li>
+                </>
+              )}
             </ul>
             <h2 className="mt-4 font-semibold">{t("salaryDelayTool.penalties")}</h2>
             <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-sm">
-              <li>{t("salaryDelayTool.penalty1")}</li>
-              <li>{t("salaryDelayTool.penalty2")}</li>
-              <li>{t("salaryDelayTool.penalty3")}</li>
+              {result.possiblePenalties.length > 0 ? (
+                result.possiblePenalties.map((penalty, index) => (
+                  <li key={`penalty-${index}`}>{penalty}</li>
+                ))
+              ) : (
+                <>
+                  <li>{t("salaryDelayTool.penalty1")}</li>
+                  <li>{t("salaryDelayTool.penalty2")}</li>
+                  <li>{t("salaryDelayTool.penalty3")}</li>
+                </>
+              )}
             </ul>
           </section>
         ) : null}
