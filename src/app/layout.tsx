@@ -23,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteDescription =
     config.websiteSettings.siteDescription.trim() ||
     "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.";
+  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() ?? "";
 
   return {
     metadataBase: new URL(SITE_URL),
@@ -80,6 +81,13 @@ export async function generateMetadata(): Promise<Metadata> {
       description: siteDescription,
       images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
     },
+    ...(adsenseClient
+      ? {
+          other: {
+            "google-adsense-account": adsenseClient,
+          },
+        }
+      : {}),
     category: "legal",
   };
 }
