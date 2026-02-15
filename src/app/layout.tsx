@@ -115,9 +115,13 @@ export default async function RootLayout({
   ].filter((item) => item.length > 0);
   const supportEmail = config.websiteSettings.supportEmail.trim();
   const logoUrl = config.websiteSettings.logoUrl.trim();
+  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() ?? "";
 
   return (
     <html lang={initialLanguage} dir={initialLanguage === "ar" ? "rtl" : "ltr"} data-theme={initialTheme}>
+      <head>
+        {adsenseClient ? <meta name="google-adsense-account" content={adsenseClient} /> : null}
+      </head>
       <body className="antialiased">
         <script
           type="application/ld+json"

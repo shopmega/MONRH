@@ -3,7 +3,10 @@ import type { Metadata } from "next";
 export const SITE_NAME = "Salarie.ma";
 export const SITE_DESCRIPTION =
   "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.";
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://salarie.ma";
+const VERCEL_URL = process.env.VERCEL_URL?.trim();
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+  (VERCEL_URL ? `https://${VERCEL_URL}` : "http://localhost:3000");
 export const DEFAULT_OG_IMAGE_PATH = "/opengraph-image";
 export const DEFAULT_OG_IMAGE_ALT = "Salarie.ma - Simulateurs et documents droit du travail au Maroc";
 
