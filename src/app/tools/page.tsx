@@ -49,6 +49,12 @@ export default function ToolsIndexPage() {
       title: t("toolsPage.cddRiskTitle"),
       description: t("toolsPage.cddRiskDesc"),
     },
+    {
+      id: "pre_litigation_timeline",
+      href: "/outils/feuille-route-pre-contentieux",
+      title: t("toolsPage.timelineTitle"),
+      description: t("toolsPage.timelineDesc"),
+    },
   ];
 
   return (

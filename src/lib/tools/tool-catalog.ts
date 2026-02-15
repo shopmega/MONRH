@@ -39,6 +39,7 @@ export const TOOL_CATALOG: ToolDefinition[] = [
   { id: "final_settlement_audit", label: "Audit solde de tout compte", kind: "protection", href: "/outils/audit-solde-tout-compte" },
   { id: "disciplinary_procedure_check", label: "Controle procedure disciplinaire", kind: "protection", href: "/outils/controle-procedure-disciplinaire" },
   { id: "fixed_term_contract_risk", label: "Risque requalification CDD", kind: "protection", href: "/outils/risque-requalification-cdd" },
+  { id: "pre_litigation_timeline", label: "Feuille route pre-contentieux", kind: "protection", href: "/outils/feuille-route-pre-contentieux" },
 ];
 
 export function createDefaultToolPolicies(): Record<string, ToolPolicy> {

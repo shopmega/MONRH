@@ -85,6 +85,11 @@ const nextConfig: NextConfig = {
         destination: "/outils/risque-requalification-cdd",
         permanent: true,
       },
+      {
+        source: "/tools/pre-litigation-timeline",
+        destination: "/outils/feuille-route-pre-contentieux",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {
@@ -132,6 +137,7 @@ const nextConfig: NextConfig = {
         destination: "/tools/disciplinary-procedure-check",
       },
       { source: "/outils/risque-requalification-cdd", destination: "/tools/fixed-term-contract-risk" },
+      { source: "/outils/feuille-route-pre-contentieux", destination: "/tools/pre-litigation-timeline" },
     ];
   },
 };
