@@ -37,6 +37,11 @@ export function buildPageMetadata(input: {
     description: input.description,
     alternates: {
       canonical: input.canonicalPath,
+      languages: {
+        "fr-MA": input.canonicalPath,
+        "ar-MA": input.canonicalPath,
+        "x-default": input.canonicalPath,
+      },
     },
     openGraph: {
       type: "website",

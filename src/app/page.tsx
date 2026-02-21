@@ -18,6 +18,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: siteDescription,
     alternates: {
       canonical: "/",
+      languages: {
+        "fr-MA": "/",
+        "ar-MA": "/",
+        "x-default": "/",
+      },
     },
     openGraph: {
       title: `${siteName} - Droit du Travail Maroc`,

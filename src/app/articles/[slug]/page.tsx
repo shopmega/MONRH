@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/ad-slot";
 import { RelatedContent } from "@/components/related-content";
 import { resolveRelatedItems } from "@/lib/linking/resolve-related";
-import { SITE_NAME, buildOgImageUrl } from "@/lib/seo";
+import { SITE_NAME, absoluteUrl, buildOgImageUrl } from "@/lib/seo";
 import { readAdminConfig } from "@/lib/server/admin-config";
 import { canAccessArticle, getArticleBySlugFromStore } from "@/lib/server/articles-store";
 import { isUserAuthenticated } from "@/lib/server/user-session";
@@ -43,6 +43,11 @@ export async function generateMetadata({
     description,
     alternates: {
       canonical: article.href,
+      languages: {
+        "fr-MA": article.href,
+        "ar-MA": article.href,
+        "x-default": article.href,
+      },
     },
     openGraph: {
       type: "article",
@@ -89,6 +94,27 @@ export default async function ArticlePage({
   });
   const coverImage =
     article?.coverImageUrl || article?.thumbnailUrl || config.websiteSettings.defaultArticleCoverUrl.trim();
+  const siteName = config.websiteSettings.siteName.trim() || SITE_NAME;
+  const articleUrl = absoluteUrl(article.href);
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.excerpt,
+    datePublished: article.lastUpdated,
+    dateModified: article.lastUpdated,
+    inLanguage: ["fr-MA", "ar-MA"],
+    mainEntityOfPage: articleUrl,
+    image: coverImage ? [coverImage] : undefined,
+    author: {
+      "@type": "Organization",
+      name: siteName,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: siteName,
+    },
+  };
   const language = (await cookies()).get("salarie_language")?.value === "ar" ? "ar" : "fr";
   const labels =
     language === "ar"
@@ -115,6 +141,10 @@ export default async function ArticlePage({
 
   return (
     <main className="paper-bg min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <article className="mx-auto w-full max-w-3xl px-4 pb-10 pt-6 sm:px-6">
         <header className="soft-card rounded-[2rem] p-5 sm:p-7">
           {coverImage ? (

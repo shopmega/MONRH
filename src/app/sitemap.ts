@@ -19,6 +19,7 @@ const staticPages = [
   "/simulateurs/ir-annuel",
   "/simulateurs/licenciement",
   "/simulateurs/demission",
+  "/simulateurs/duree-preavis",
   "/simulateurs/fin-cdd",
   "/simulateurs/rupture-periode-essai",
   "/simulateurs/progression-anciennete",

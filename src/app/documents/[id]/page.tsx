@@ -34,6 +34,11 @@ export async function generateMetadata({
     description: template.description,
     alternates: {
       canonical: template.href,
+      languages: {
+        "fr-MA": template.href,
+        "ar-MA": template.href,
+        "x-default": template.href,
+      },
     },
     openGraph: {
       type: "article",

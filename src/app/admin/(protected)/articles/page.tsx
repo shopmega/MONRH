@@ -62,6 +62,9 @@ export default function AdminArticlesPage() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<string>();
   const [form, setForm] = useState<ArticleInput>(toInput());
+  const [importJson, setImportJson] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importStatus, setImportStatus] = useState<string>();
   const categoryOptions = Array.from(new Set(items.map((item) => item.categorySlug))).sort();
   const contentBlocksPreview = parseContentBlocks(form.contentText);
 
@@ -129,6 +132,57 @@ export default function AdminArticlesPage() {
     } else {
       setStatus("Suppression impossible.");
     }
+  }
+
+  async function importArticles() {
+    setImporting(true);
+    setImportStatus(undefined);
+    try {
+      const parsed = JSON.parse(importJson) as unknown;
+      const items = Array.isArray(parsed)
+        ? parsed
+        : typeof parsed === "object" && parsed !== null && "items" in parsed
+          ? (parsed as { items: unknown }).items
+          : null;
+
+      if (!Array.isArray(items)) {
+        setImportStatus("JSON invalide: fournissez un tableau d'articles ou { items: [...] }.");
+        setImporting(false);
+        return;
+      }
+
+      const response = await fetch("/api/admin/articles/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      });
+      const data = (await response.json()) as {
+        ok: boolean;
+        total?: number;
+        imported?: number;
+        failed?: number;
+        errors?: Array<{ index: number; title?: string; error: string }>;
+        error?: string;
+      };
+
+      if (!data.ok) {
+        setImportStatus(`Echec import: ${data.error ?? "unknown_error"}`);
+        setImporting(false);
+        return;
+      }
+
+      const firstError = data.errors?.[0];
+      setImportStatus(
+        `Import termine: ${data.imported ?? 0}/${data.total ?? 0} article(s) importes.` +
+          ((data.failed ?? 0) > 0
+            ? ` ${data.failed} echec(s). Premier: index ${firstError?.index ?? "?"}${firstError?.title ? ` (${firstError.title})` : ""} - ${firstError?.error ?? "unknown_error"}.`
+            : ""),
+      );
+      await loadArticles();
+    } catch {
+      setImportStatus("JSON invalide: impossible de parser le contenu.");
+    }
+    setImporting(false);
   }
 
   return (
@@ -255,6 +309,37 @@ export default function AdminArticlesPage() {
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="soft-card rounded-3xl p-5">
+        <h3 className="display-font text-2xl font-semibold">Import JSON</h3>
+        <p className="mt-2 text-sm text-[var(--ink-soft)]">
+          Collez un tableau JSON d'articles (ou <code>{"{ items: [...] }"}</code>) puis lancez l'import.
+        </p>
+        <textarea
+          className="input-shell mt-3 min-h-48"
+          value={importJson}
+          onChange={(event) => setImportJson(event.target.value)}
+          placeholder='[{"title":"...","excerpt":"...","categorySlug":"...","readingTime":"5 min","content":["..."]}]'
+        />
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="btn-primary px-4 py-2 text-sm"
+            onClick={importArticles}
+            disabled={importing}
+          >
+            {importing ? "Import..." : "Importer JSON"}
+          </button>
+          <button
+            type="button"
+            className="btn-muted px-4 py-2 text-sm"
+            onClick={() => setImportJson("")}
+          >
+            Vider
+          </button>
+        </div>
+        {importStatus ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{importStatus}</p> : null}
       </section>
     </div>
   );
