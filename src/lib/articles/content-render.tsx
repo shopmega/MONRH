@@ -1,5 +1,83 @@
 import type { ReactNode } from "react";
 
+const AUTO_LINK_REGEX =
+  /((?:https?:\/\/[^\s]+)|(?:\/(?:simulateurs|simulate|documents|bibliotheque|articles|tools|outils)\/[a-z0-9\-_/]+))/gi;
+
+function titleCaseWords(value: string): string {
+  return value
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function friendlyLabelForHref(href: string): string {
+  if (!href.startsWith("/")) {
+    return href;
+  }
+  const cleaned = href.replace(/\/+$/, "");
+  const parts = cleaned.split("/").filter(Boolean);
+  if (parts.length === 0) return href;
+
+  const section = parts[0];
+  const slug = parts.slice(1).join("/");
+  const slugLabel = titleCaseWords(slug.replace(/[/-]+/g, " "));
+
+  if (section === "simulateurs" || section === "simulate") {
+    return slugLabel ? `Simulateur ${slugLabel}` : "Simulateur";
+  }
+  if (section === "documents") {
+    return slugLabel ? `Document ${slugLabel}` : "Document";
+  }
+  if (section === "bibliotheque") {
+    return slugLabel ? `Bibliotheque ${slugLabel}` : "Bibliotheque";
+  }
+  if (section === "articles") {
+    return slugLabel ? `Article ${slugLabel}` : "Article";
+  }
+  if (section === "tools" || section === "outils") {
+    return slugLabel ? `Outil ${slugLabel}` : "Outil";
+  }
+
+  return href;
+}
+
+function renderTextWithLinks(text: string, keyPrefix: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null = AUTO_LINK_REGEX.exec(text);
+  let i = 0;
+
+  while (match) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    const href = match[0];
+    const isExternal = href.startsWith("http://") || href.startsWith("https://");
+    const label = friendlyLabelForHref(href);
+    nodes.push(
+      <a
+        key={`${keyPrefix}-link-${i}`}
+        href={href}
+        className="font-semibold text-[var(--accent)] underline underline-offset-2"
+        target={isExternal ? "_blank" : undefined}
+        rel={isExternal ? "noopener noreferrer" : undefined}
+      >
+        {label}
+      </a>,
+    );
+    lastIndex = match.index + match[0].length;
+    i += 1;
+    match = AUTO_LINK_REGEX.exec(text);
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes;
+}
+
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
   const nodes: ReactNode[] = [];
   const regex = /\*\*(.+?)\*\*/g;
@@ -9,7 +87,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
 
   while (match) {
     if (match.index > lastIndex) {
-      nodes.push(text.slice(lastIndex, match.index));
+      nodes.push(...renderTextWithLinks(text.slice(lastIndex, match.index), `${keyPrefix}-text-${i}`));
     }
     nodes.push(<strong key={`${keyPrefix}-strong-${i}`}>{match[1]}</strong>);
     lastIndex = match.index + match[0].length;
@@ -18,7 +96,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
   }
 
   if (lastIndex < text.length) {
-    nodes.push(text.slice(lastIndex));
+    nodes.push(...renderTextWithLinks(text.slice(lastIndex), `${keyPrefix}-tail`));
   }
 
   return nodes;
