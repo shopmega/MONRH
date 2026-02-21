@@ -128,7 +128,7 @@ export function simulateCnssPension(rawInput: CnssPensionInput): CnssPensionResu
         "Recuperer votre releve de carriere CNSS (en ligne ou agence).",
         "Mettre a jour le salaire moyen avec les 5 dernieres annees.",
         "Comparer la projection avec et sans CIMR pour evaluer le gap.",
-        input.replacementRateCombinedPercent < 50 ? "Envisager une epargne complementaire: le taux de remplacement projete est faible." : "",
+        replacementRateCombinedPercent < 50 ? "Envisager une epargne complementaire: le taux de remplacement projete est faible." : "",
       ].filter(Boolean),
     },
   };

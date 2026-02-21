@@ -33,6 +33,8 @@ const salaryRuleSchema = baseVersionSchema.extend({
   amoEmployerRate: z.number().min(0),
   professionalExpenseRate: z.number().min(0),
   professionalExpenseCap: z.number().min(0),
+  formationProRateSmall: z.number().min(0),
+  formationProRateLarge: z.number().min(0),
   taxBracketsMonthly: z.array(taxBracketSchema).min(1),
 });
 
@@ -81,8 +83,10 @@ const socialProtectionRuleSchema = baseVersionSchema.extend({
   sickLeaveWaitingDays: z.number().min(0),
   sickLeaveCnssCoverageRate: z.number().min(0),
   sickLeaveMaxCompensatedDays: z.number().min(0),
+  sickLeaveMinCnssEligibilityDays: z.number().min(0),
   maternityCnssCoverageRate: z.number().min(0),
   maternityLegalLeaveWeeks: z.number().min(0),
+  maternityMinCnssMonths: z.number().min(0),
   pensionMinContributionDays: z.number().min(0),
   pensionAccrualStepDays: z.number().min(1),
   pensionBaseReplacementRate: z.number().min(0),
@@ -93,6 +97,7 @@ const socialProtectionRuleSchema = baseVersionSchema.extend({
   pensionEarlyRetirementFactor: z.number().min(0),
   workAccidentTemporaryCoverageRate: z.number().min(0),
   workAccidentPermanentCoverageCoefficient: z.number().min(0),
+  workAccidentFauteInexcusableMultiplier: z.number().min(0),
 });
 
 export const lawRulesBundleSchema = z.object({
