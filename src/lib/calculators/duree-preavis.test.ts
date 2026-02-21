@@ -3,7 +3,15 @@ import { simulateDureePreavis } from "@/lib/calculators/duree-preavis";
 
 describe("simulateDureePreavis", () => {
   it("computes CDI notice by seniority and category", () => {
-    const result = simulateDureePreavis({
+    const cadreResult = simulateDureePreavis({
+      calculationDate: "2026-02-12",
+      contractType: "CDI",
+      workerCategory: "cadre",
+      yearsOfService: 3,
+      monthsOfService: 0,
+    });
+
+    const employeResult = simulateDureePreavis({
       calculationDate: "2026-02-12",
       contractType: "CDI",
       workerCategory: "employe",
@@ -11,9 +19,10 @@ describe("simulateDureePreavis", () => {
       monthsOfService: 0,
     });
 
-    expect(result.versionCode).toBe("ma_2026");
-    expect(result.breakdown.requiredNoticeMonths).toBe(2);
-    expect(result.breakdown.requiredNoticeDays).toBe(60);
+    expect(cadreResult.versionCode).toBe("ma_2026");
+    expect(cadreResult.breakdown.requiredNoticeMonths).toBe(2);
+    expect(cadreResult.breakdown.requiredNoticeDays).toBe(60);
+    expect(employeResult.breakdown.requiredNoticeMonths).toBe(1);
   });
 
   it("computes CDD notice in days", () => {
@@ -26,7 +35,6 @@ describe("simulateDureePreavis", () => {
     });
 
     expect(result.breakdown.requiredNoticeMonths).toBe(0);
-    expect(result.breakdown.requiredNoticeDays).toBe(8);
+    expect(result.breakdown.requiredNoticeDays).toBe(15);
   });
 });
-

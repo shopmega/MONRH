@@ -183,14 +183,14 @@ export const DEFAULT_TERMINATION_RULES: TerminationRules[] = [
     abusiveCapMonths: 36,
     legalIndemnityContractTypes: ["CDI"],
     cddNoticeDaysByCategory: {
-      cadre: 8,
+      cadre: 15,
       employe: 8,
       ouvrier: 8,
     },
     cdiNoticeMonthsByCategory: {
       cadre: { lt1: 1, gte1lt5: 2, gte5: 3 },
-      employe: { lt1: 1, gte1lt5: 2, gte5: 3 },
-      ouvrier: { lt1: 1, gte1lt5: 2, gte5: 3 },
+      employe: { lt1: 0.27, gte1lt5: 1, gte5: 2 },
+      ouvrier: { lt1: 0.27, gte1lt5: 1, gte5: 2 },
     },
   },
   {
@@ -206,14 +206,14 @@ export const DEFAULT_TERMINATION_RULES: TerminationRules[] = [
     abusiveCapMonths: 36,
     legalIndemnityContractTypes: ["CDI"],
     cddNoticeDaysByCategory: {
-      cadre: 8,
+      cadre: 15,
       employe: 8,
       ouvrier: 8,
     },
     cdiNoticeMonthsByCategory: {
       cadre: { lt1: 1, gte1lt5: 2, gte5: 3 },
-      employe: { lt1: 1, gte1lt5: 2, gte5: 3 },
-      ouvrier: { lt1: 1, gte1lt5: 2, gte5: 3 },
+      employe: { lt1: 0.27, gte1lt5: 1, gte5: 2 },
+      ouvrier: { lt1: 0.27, gte1lt5: 1, gte5: 2 },
     },
   },
 ];

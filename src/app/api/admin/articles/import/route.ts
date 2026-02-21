@@ -5,7 +5,7 @@ import { addAdminAuditEvent } from "@/lib/server/admin-audit-store";
 import { isSameOriginRequest } from "@/lib/server/csrf";
 import { upsertArticle } from "@/lib/server/articles-store";
 
-const articleImportItemSchema = z.object({
+const articleImportItemBaseSchema = z.object({
   slug: z.string().optional(),
   title: z.string().min(1),
   excerpt: z.string().min(1),
@@ -16,11 +16,12 @@ const articleImportItemSchema = z.object({
   access: z.enum(["public", "logged"]).optional(),
   thumbnailUrl: z.string().url().optional().or(z.literal("")),
   coverImageUrl: z.string().url().optional().or(z.literal("")),
-  content: z.array(z.string().min(1)).min(1),
+  content: z.array(z.string().min(1)).optional(),
+  contentText: z.string().optional(),
 });
 
 const articleImportSchema = z.object({
-  items: z.array(articleImportItemSchema).min(1).max(500),
+  items: z.array(articleImportItemBaseSchema).min(1).max(500),
 });
 
 function mapArticleImportError(error: unknown): string {
@@ -48,7 +49,22 @@ export async function POST(request: NextRequest) {
     for (let index = 0; index < payload.items.length; index += 1) {
       const item = payload.items[index];
       try {
-        await upsertArticle(item);
+        const normalizedContent =
+          Array.isArray(item.content) && item.content.length > 0
+            ? item.content
+            : (item.contentText ?? "")
+              .split(/\r?\n\s*\r?\n/g)
+              .map((block) => block.replace(/\s+/g, " ").trim())
+              .filter(Boolean);
+
+        if (normalizedContent.length === 0) {
+          throw new Error("missing_content");
+        }
+
+        await upsertArticle({
+          ...item,
+          content: normalizedContent,
+        });
         imported += 1;
       } catch (error) {
         errors.push({
@@ -86,4 +102,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: mappedError }, { status: 400 });
   }
 }
-

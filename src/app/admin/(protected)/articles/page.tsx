@@ -57,6 +57,7 @@ function toInput(article?: Article): ArticleInput {
 }
 
 export default function AdminArticlesPage() {
+  const [categories, setCategories] = useState<Array<{ slug: string; count: number }>>([]);
   const [items, setItems] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -65,6 +66,10 @@ export default function AdminArticlesPage() {
   const [importJson, setImportJson] = useState("");
   const [importing, setImporting] = useState(false);
   const [importStatus, setImportStatus] = useState<string>();
+  const [categoryActionStatus, setCategoryActionStatus] = useState<string>();
+  const [mergingCategory, setMergingCategory] = useState(false);
+  const [fromCategorySlug, setFromCategorySlug] = useState("");
+  const [toCategorySlug, setToCategorySlug] = useState("");
   const categoryOptions = Array.from(new Set(items.map((item) => item.categorySlug))).sort();
   const contentBlocksPreview = parseContentBlocks(form.contentText);
 
@@ -74,10 +79,19 @@ export default function AdminArticlesPage() {
     if (data.ok && data.items) setItems(data.items);
   }
 
+  async function loadCategories() {
+    const response = await fetch("/api/admin/categories");
+    const data = (await response.json()) as {
+      ok: boolean;
+      items?: Array<{ slug: string; count: number }>;
+    };
+    if (data.ok && data.items) setCategories(data.items);
+  }
+
   useEffect(() => {
     let active = true;
     async function initialLoad() {
-      await loadArticles();
+      await Promise.all([loadArticles(), loadCategories()]);
       if (active) setLoading(false);
     }
     initialLoad();
@@ -112,7 +126,7 @@ export default function AdminArticlesPage() {
     if (data.ok) {
       setStatus("Article enregistre.");
       setForm(toInput());
-      await loadArticles();
+      await Promise.all([loadArticles(), loadCategories()]);
     } else {
       setStatus("Echec enregistrement.");
     }
@@ -128,7 +142,7 @@ export default function AdminArticlesPage() {
     const data = (await response.json()) as { ok: boolean };
     if (data.ok) {
       setStatus("Article supprime.");
-      await loadArticles();
+      await Promise.all([loadArticles(), loadCategories()]);
     } else {
       setStatus("Suppression impossible.");
     }
@@ -178,11 +192,38 @@ export default function AdminArticlesPage() {
             ? ` ${data.failed} echec(s). Premier: index ${firstError?.index ?? "?"}${firstError?.title ? ` (${firstError.title})` : ""} - ${firstError?.error ?? "unknown_error"}.`
             : ""),
       );
-      await loadArticles();
+      await Promise.all([loadArticles(), loadCategories()]);
     } catch {
       setImportStatus("JSON invalide: impossible de parser le contenu.");
     }
     setImporting(false);
+  }
+
+  async function mergeCategories() {
+    setMergingCategory(true);
+    setCategoryActionStatus(undefined);
+    const response = await fetch("/api/admin/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fromSlug: fromCategorySlug,
+        toSlug: toCategorySlug,
+      }),
+    });
+    const data = (await response.json()) as {
+      ok: boolean;
+      updated?: number;
+      error?: string;
+    };
+    if (data.ok) {
+      setCategoryActionStatus(`Categories fusionnees: ${data.updated ?? 0} article(s) deplaces.`);
+      setFromCategorySlug("");
+      setToCategorySlug("");
+      await Promise.all([loadArticles(), loadCategories()]);
+    } else {
+      setCategoryActionStatus(`Echec fusion categories: ${data.error ?? "unknown_error"}`);
+    }
+    setMergingCategory(false);
   }
 
   return (
@@ -316,12 +357,47 @@ export default function AdminArticlesPage() {
         <p className="mt-2 text-sm text-[var(--ink-soft)]">
           Collez un tableau JSON d'articles (ou <code>{"{ items: [...] }"}</code>) puis lancez l'import.
         </p>
+        <div className="mt-3">
+          <label className="text-sm font-semibold">
+            Charger un fichier .json
+            <input
+              type="file"
+              accept="application/json,.json"
+              className="input-shell mt-1"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                const text = await file.text();
+                setImportJson(text);
+                setImportStatus(undefined);
+              }}
+            />
+          </label>
+        </div>
         <textarea
           className="input-shell mt-3 min-h-48"
           value={importJson}
           onChange={(event) => setImportJson(event.target.value)}
           placeholder='[{"title":"...","excerpt":"...","categorySlug":"...","readingTime":"5 min","content":["..."]}]'
         />
+        <pre className="mt-3 overflow-x-auto rounded-xl bg-[var(--surface-muted)] p-3 text-xs text-[var(--ink-soft)]">
+{`{
+  "items": [
+    {
+      "slug": "optionnel-slug",
+      "title": "Titre",
+      "excerpt": "Resume",
+      "categorySlug": "salaire",
+      "readingTime": "5 min",
+      "isActive": true,
+      "access": "public",
+      "thumbnailUrl": "https://...",
+      "coverImageUrl": "https://...",
+      "content": ["Paragraphe 1", "Paragraphe 2"]
+    }
+  ]
+}`}
+        </pre>
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             type="button"
@@ -340,6 +416,61 @@ export default function AdminArticlesPage() {
           </button>
         </div>
         {importStatus ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{importStatus}</p> : null}
+      </section>
+
+      <section className="soft-card rounded-3xl p-5">
+        <h3 className="display-font text-2xl font-semibold">Gestion des categories</h3>
+        <p className="mt-2 text-sm text-[var(--ink-soft)]">
+          Les categories sont basees sur <code>categorySlug</code>. Vous pouvez renommer/fusionner une categorie vers une autre.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <span
+              key={category.slug}
+              className="rounded-full bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--ink-soft)]"
+            >
+              {category.slug} ({category.count})
+            </span>
+          ))}
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <label className="text-sm font-semibold">
+            Categorie source
+            <input
+              className="input-shell mt-1"
+              list="category-slug-options"
+              value={fromCategorySlug}
+              onChange={(event) => setFromCategorySlug(event.target.value)}
+            />
+          </label>
+          <label className="text-sm font-semibold">
+            Categorie cible
+            <input
+              className="input-shell mt-1"
+              list="category-slug-options"
+              value={toCategorySlug}
+              onChange={(event) => setToCategorySlug(event.target.value)}
+            />
+          </label>
+          <datalist id="category-slug-options">
+            {categories.map((category) => (
+              <option key={category.slug} value={category.slug} />
+            ))}
+          </datalist>
+        </div>
+        <div className="mt-3">
+          <button
+            type="button"
+            className="btn-primary px-4 py-2 text-sm"
+            onClick={mergeCategories}
+            disabled={mergingCategory || !fromCategorySlug.trim() || !toCategorySlug.trim()}
+          >
+            {mergingCategory ? "Fusion..." : "Fusionner / Renommer"}
+          </button>
+        </div>
+        {categoryActionStatus ? (
+          <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{categoryActionStatus}</p>
+        ) : null}
       </section>
     </div>
   );
