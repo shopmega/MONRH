@@ -36,4 +36,32 @@ describe("simulateLicenciement", () => {
     expect(result.breakdown.dommagesAbusif).toBeGreaterThan(0);
     expect(result.breakdown.totalEstimated).toBeGreaterThan(result.breakdown.indemnityLegale);
   });
+
+  it("applies category-specific notice indemnity for CDI", () => {
+    const cadreResult = simulateLicenciement({
+      calculationDate: "2026-02-12",
+      monthlySalary: 9000,
+      contractType: "CDI",
+      workerCategory: "cadre",
+      yearsOfService: 3,
+      monthsOfService: 0,
+      unusedLeaveDays: 0,
+      abusive: false,
+    });
+
+    const employeResult = simulateLicenciement({
+      calculationDate: "2026-02-12",
+      monthlySalary: 9000,
+      contractType: "CDI",
+      workerCategory: "employe",
+      yearsOfService: 3,
+      monthsOfService: 0,
+      unusedLeaveDays: 0,
+      abusive: false,
+    });
+
+    expect(cadreResult.breakdown.indemnitePreavis).toBeGreaterThan(
+      employeResult.breakdown.indemnitePreavis,
+    );
+  });
 });
