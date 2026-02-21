@@ -17,6 +17,27 @@ export default function DemissionPage() {
       calculatorType="demission"
       fields={[
         { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "9000", min: 1, step: 0.01 },
+        {
+          key: "workerCategory",
+          label: "Categorie professionnelle",
+          type: "select",
+          defaultValue: "employe",
+          options: [
+            { label: "Ouvrier", value: "ouvrier" },
+            { label: "Employe", value: "employe" },
+            { label: "Cadre / Technicien", value: "cadre" },
+          ],
+        },
+        {
+          key: "contractType",
+          label: "Type de contrat",
+          type: "select",
+          defaultValue: "CDI",
+          options: [
+            { label: "CDI", value: "CDI" },
+            { label: "CDD", value: "CDD" },
+          ],
+        },
         { key: "yearsOfService", label: "Anciennete (annees)", type: "number", defaultValue: "3", min: 0, step: 1 },
         { key: "monthsOfService", label: "Mois supplementaires", type: "number", defaultValue: "0", min: 0, max: 11, step: 1 },
         { key: "unusedLeaveDays", label: "Conges restants (jours)", type: "number", defaultValue: "8", min: 0, step: 0.5 },
@@ -24,6 +45,8 @@ export default function DemissionPage() {
         { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
       ]}
       breakdownLabels={{
+        contractType: "Type de contrat",
+        workerCategory: "Categorie",
         totalServiceYears: "Anciennete",
         requiredNoticeMonths: "Preavis requis",
         leavePayout: "Indemnite conges",

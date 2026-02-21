@@ -8,7 +8,9 @@ describe("simulateFinCdd", () => {
       monthlySalary: 7000,
       contractMonths: 12,
       unusedLeaveDays: 8,
-      precariteApplicable: true,
+      contractSubtype: "standard",
+      renewalCount: 0,
+      totalMonthsWithRenewals: 12,
       noticeDays: 0,
     });
 

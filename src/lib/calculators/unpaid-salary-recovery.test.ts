@@ -7,7 +7,7 @@ describe("simulateUnpaidSalaryRecovery", () => {
       calculationDate: "2026-02-12",
       monthlySalary: 7000,
       unpaidMonths: 2,
-      delayMonths: 4,
+      monthsSinceFirstDefault: 4,
       penaltyRatePerMonth: 0.01,
     });
 

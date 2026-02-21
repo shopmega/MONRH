@@ -19,18 +19,24 @@ export default function WorkAccidentPage() {
         { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "8500", min: 1, step: 0.01 },
         { key: "temporaryIncapacityDays", label: "Jours incapacite temporaire", type: "number", defaultValue: "20", min: 0, step: 1 },
         { key: "permanentIncapacityPercent", label: "Taux incapacite permanente (%)", type: "number", defaultValue: "10", min: 0, max: 100, step: 1 },
+        { key: "accidentDeclared", label: "Accident declare dans les 48h", type: "checkbox", defaultValue: true },
+        { key: "fauteInexcusable", label: "Faute inexcusable de l'employeur", type: "checkbox", defaultValue: false },
+        { key: "contractTerminatedDuringAT", label: "Contrat rompu pendant l'AT", type: "checkbox", defaultValue: false },
         { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
       ]}
       breakdownLabels={{
         temporaryCompensation: "Indemnite temporaire",
-        monthlyPermanentCompensation: "Rente mensuelle",
-        annualPermanentCompensation: "Rente annuelle",
+        monthlyPermanentRente: "Rente mensuelle",
+        annualPermanentRente: "Rente annuelle",
+        fauteInexcusableBonus: "Majoration faute inexcusable",
         totalFirstYearEstimate: "Total 1ere annee",
+        terminationIllegal: "Rupture illicite",
       }}
       units={{
         temporaryCompensation: "MAD",
-        monthlyPermanentCompensation: "MAD",
-        annualPermanentCompensation: "MAD",
+        monthlyPermanentRente: "MAD",
+        annualPermanentRente: "MAD",
+        fauteInexcusableBonus: "MAD",
         totalFirstYearEstimate: "MAD",
       }}
     />

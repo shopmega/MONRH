@@ -72,6 +72,14 @@ const simulatorGroups: SimulatorGroup[] = [
         href: "/simulateurs/demission",
       },
       {
+        title: { fr: "Duree de Preavis", ar: "مدة الإشعار" },
+        description: {
+          fr: "Calculez la duree legale de preavis selon contrat, categorie et anciennete.",
+          ar: "احسب المدة القانونية للإشعار حسب العقد والفئة والأقدمية.",
+        },
+        href: "/simulateurs/duree-preavis",
+      },
+      {
         title: { fr: "Fin de CDD", ar: "نهاية عقد CDD" },
         description: {
           fr: "Prime de precarite, conges restants et compensation preavis.",

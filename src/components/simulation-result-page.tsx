@@ -13,18 +13,14 @@ import {
   localizeCalculatorTitle,
 } from "@/lib/i18n/simulator-localization";
 import { calculatorTypeToPath } from "@/lib/simulations/calculator-path";
+import { ReviewlyPromoCard } from "@/components/reviewly-promo-card";
 import { type SimulationResultSnapshot } from "@/lib/simulations/result-snapshot";
 
 function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): string | null {
   const params = new URLSearchParams();
   const breakdown = snapshot.result.breakdown;
   const input = snapshot.inputPayload ?? {};
-
   const calculationDate = typeof input.calculationDate === "string" ? input.calculationDate : "";
-  if (calculationDate) {
-    params.set("effective_date", calculationDate);
-    params.set("period", calculationDate);
-  }
 
   if (snapshot.calculatorType === "licenciement") {
     const total = typeof breakdown.totalEstimated === "number" ? breakdown.totalEstimated : undefined;
@@ -46,6 +42,7 @@ function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): string 
   if (snapshot.calculatorType === "unpaid_salary_recovery") {
     const total =
       typeof breakdown.totalClaimAmount === "number" ? breakdown.totalClaimAmount : undefined;
+    if (calculationDate) params.set("period", calculationDate);
     if (total !== undefined) params.set("amount_due", String(total));
     params.set("issue_summary", "Salaires impayes constates.");
     return `/documents/salary-recovery-letter?${params.toString()}`;
@@ -64,9 +61,39 @@ function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): string 
           : typeof breakdown.compensationAmount === "number"
             ? breakdown.compensationAmount
             : undefined;
+    if (calculationDate) params.set("period", calculationDate);
     if (total !== undefined) params.set("amount_due", String(total));
     params.set("issue_summary", "Heures supplementaires non regularisees.");
     return `/documents/overtime-claim-letter?${params.toString()}`;
+  }
+
+  if (snapshot.calculatorType === "duree_preavis") {
+    const contractType =
+      typeof breakdown.contractType === "string" ? breakdown.contractType : "CDI";
+    const workerCategory =
+      typeof breakdown.workerCategory === "string" ? breakdown.workerCategory : "employe";
+    const requiredNoticeMonths =
+      typeof breakdown.requiredNoticeMonths === "number"
+        ? breakdown.requiredNoticeMonths
+        : undefined;
+    const requiredNoticeDays =
+      typeof breakdown.requiredNoticeDays === "number"
+        ? breakdown.requiredNoticeDays
+        : undefined;
+
+    params.set("issue_summary", `Duree de preavis (${contractType}) a confirmer.`);
+    if (contractType === "CDI") {
+      params.set(
+        "request",
+        `Confirmation ecrite du preavis legal (${requiredNoticeMonths ?? "?"} mois, ${requiredNoticeDays ?? "?"} jours approx.) pour categorie ${workerCategory}.`,
+      );
+    } else {
+      params.set(
+        "request",
+        `Confirmation ecrite du preavis CDD (${requiredNoticeDays ?? "?"} jours) pour categorie ${workerCategory}.`,
+      );
+    }
+    return `/documents/formal-complaint-employer?${params.toString()}`;
   }
 
   return null;
@@ -130,7 +157,7 @@ export function SimulationResultPage({ slug }: { slug: string }) {
     simulationId ? undefined : null,
   );
   const snapshotRaw = useSyncExternalStore(
-    () => () => {},
+    () => () => { },
     () => {
       if (typeof window === "undefined") return null;
       return (
@@ -160,13 +187,17 @@ export function SimulationResultPage({ slug }: { slug: string }) {
     let active = true;
     fetch(`/api/simulations/${encodeURIComponent(simulationId)}`, { cache: "no-store" })
       .then((response) => response.json().then((data) => ({ response, data })))
-      .then(({ response, data }: { response: Response; data: { ok?: boolean; item?: {
-        id: string;
-        createdAt: string;
-        calculatorType: string;
-        input: Record<string, unknown>;
-        result: Record<string, unknown>;
-      } } }) => {
+      .then(({ response, data }: {
+        response: Response; data: {
+          ok?: boolean; item?: {
+            id: string;
+            createdAt: string;
+            calculatorType: string;
+            input: Record<string, unknown>;
+            result: Record<string, unknown>;
+          }
+        }
+      }) => {
         if (!active || !response.ok || !data.ok || !data.item) {
           if (active) setHistorySnapshot(null);
           return;
@@ -235,7 +266,7 @@ export function SimulationResultPage({ slug }: { slug: string }) {
       if (!active || !data.ok || !data.items) return;
       setMappedRelatedItems(data.items);
     }
-    loadMappedRelated().catch(() => {});
+    loadMappedRelated().catch(() => { });
     return () => {
       active = false;
     };
@@ -392,6 +423,20 @@ export function SimulationResultPage({ slug }: { slug: string }) {
             <section className="soft-card rounded-3xl p-5">
               <p className="section-kicker">{t("common.partner")}</p>
               <div className="mt-3">
+                <ReviewlyPromoCard
+                  type={
+                    resolvedSnapshot.calculatorType === "licenciement" ||
+                      resolvedSnapshot.calculatorType === "unpaid_salary_recovery"
+                      ? "conflict"
+                      : "general"
+                  }
+                />
+              </div>
+            </section>
+
+            <section className="soft-card rounded-3xl p-5">
+              <p className="section-kicker">{t("common.partner")}</p>
+              <div className="mt-3">
                 <AdSlot slot="4545454545" format="auto" />
               </div>
             </section>
@@ -404,22 +449,22 @@ export function SimulationResultPage({ slug }: { slug: string }) {
             mappedRelatedItems.length > 0
               ? mappedRelatedItems
               : [
-                  {
-                    title: t("simulator.relatedSimulatorsTitle"),
-                    description: t("simulator.relatedSimulatorsDesc"),
-                    href: "/simulateurs",
-                  },
-                  {
-                    title: t("simulator.relatedDocumentsTitle"),
-                    description: t("simulator.relatedDocumentsDesc"),
-                    href: "/documents",
-                  },
-                  {
-                    title: t("simulator.relatedLibraryTitle"),
-                    description: t("simulator.relatedLibraryDesc"),
-                    href: "/bibliotheque",
-                  },
-                ]
+                {
+                  title: t("simulator.relatedSimulatorsTitle"),
+                  description: t("simulator.relatedSimulatorsDesc"),
+                  href: "/simulateurs",
+                },
+                {
+                  title: t("simulator.relatedDocumentsTitle"),
+                  description: t("simulator.relatedDocumentsDesc"),
+                  href: "/documents",
+                },
+                {
+                  title: t("simulator.relatedLibraryTitle"),
+                  description: t("simulator.relatedLibraryDesc"),
+                  href: "/bibliotheque",
+                },
+              ]
           }
         />
       </div>

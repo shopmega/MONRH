@@ -17,22 +17,56 @@ export default function EmployerTotalCostPage() {
       calculatorType="employer_total_cost"
       fields={[
         { key: "grossSalary", label: "Salaire brut (MAD)", type: "number", defaultValue: "9000", min: 1, step: 0.01 },
-        { key: "insuranceRate", label: "Taux assurance employeur", type: "number", defaultValue: "0.015", min: 0, step: 0.001 },
+        {
+          key: "companySize",
+          label: "Taille entreprise",
+          type: "select",
+          defaultValue: "large",
+          options: [
+            { label: "<= 20 salaries", value: "small" },
+            { label: "> 20 salaries", value: "large" },
+          ],
+        },
+        {
+          key: "sectorRisk",
+          label: "Risque secteur (AT/MP)",
+          type: "select",
+          defaultValue: "medium",
+          options: [
+            { label: "Faible", value: "low" },
+            { label: "Moyen", value: "medium" },
+            { label: "Eleve", value: "high" },
+            { label: "Tres eleve", value: "very_high" },
+          ],
+        },
+        { key: "additionalBenefitsMad", label: "Avantages complementaires (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
+        { key: "months", label: "Nombre de mois", type: "number", defaultValue: "12", min: 1, max: 14, step: 1 },
+        { key: "include13thMonth", label: "Inclure 13e mois", type: "checkbox", defaultValue: false },
         { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
       ]}
       breakdownLabels={{
         grossSalary: "Brut",
         cnssEmployer: "CNSS employeur",
         amoEmployer: "AMO employeur",
-        insuranceEmployer: "Assurance",
-        totalCostToCompany: "Cout total",
+        atMpInsurance: "AT/MP",
+        formationPro: "Formation pro",
+        additionalBenefits: "Avantages",
+        monthlyTotalCost: "Cout mensuel",
+        annualTotalCost: "Cout annuel",
+        annualCostWithBonus: "Cout annuel avec bonus",
+        effectiveBurdenRatePercent: "Taux de charges",
       }}
       units={{
         grossSalary: "MAD",
         cnssEmployer: "MAD",
         amoEmployer: "MAD",
-        insuranceEmployer: "MAD",
-        totalCostToCompany: "MAD",
+        atMpInsurance: "MAD",
+        formationPro: "MAD",
+        additionalBenefits: "MAD",
+        monthlyTotalCost: "MAD",
+        annualTotalCost: "MAD",
+        annualCostWithBonus: "MAD",
+        effectiveBurdenRatePercent: "%",
       }}
     />
   );

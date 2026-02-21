@@ -5,7 +5,10 @@ import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 export const probationTerminationInputSchema = z.object({
   calculationDate: z.string().date().default("2026-02-12"),
   monthlySalary: z.number().positive(),
+  workerCategory: z.enum(["cadre", "employe", "ouvrier"]).default("employe"),
   workedDays: z.number().min(1).max(365),
+  probationDurationMonths: z.number().min(1).max(12).default(3),
+  probationRenewed: z.boolean().default(false),
   initiator: z.enum(["employer", "employee"]).default("employer"),
   noticeDaysGiven: z.number().min(0).max(60).default(0),
 });
@@ -16,18 +19,46 @@ export type ProbationTerminationResult = {
   versionId: string;
   versionCode: string;
   breakdown: {
+    category: string;
+    probationDurationMonths: number;
+    probationWasRenewed: boolean;
     requiredNoticeDays: number;
     noticeDaysGiven: number;
     missingNoticeDays: number;
     compensationDue: number;
+    probationLegallyValid: boolean;
   };
   explanation: CalculatorExplanation;
 };
 
-function requiredNoticeDays(workedDays: number): number {
-  if (workedDays < 8) return 1;
-  if (workedDays < 30) return 2;
-  return 8;
+/**
+ * Notice rules per Code du Travail Art. 14 — indexed by category and weeks worked.
+ * Ouvriers: 1 day (<8j), 2 days (8–30j), 8 days (>30j)
+ * Employés: 8 days (regardless of time in probation)
+ * Cadres/Techniciens: 8 days (≤3 months), 15 days (>3 months)
+ */
+function requiredNoticeDays(
+  workedDays: number,
+  category: ProbationTerminationInput["workerCategory"],
+  probationMonths: number,
+): number {
+  if (category === "ouvrier") {
+    if (workedDays < 8) return 1;
+    if (workedDays < 30) return 2;
+    return 8;
+  }
+  if (category === "employe") {
+    return 8;
+  }
+  // cadre
+  return probationMonths <= 3 ? 8 : 15;
+}
+
+/** Max legal probation duration by category (Art. 13 CT) */
+function maxProbationMonths(category: ProbationTerminationInput["workerCategory"]): number {
+  if (category === "ouvrier") return 3; // max 1.5 months × 2 with renewal
+  if (category === "employe") return 3;
+  return 6; // cadres: up to 3 months × 2
 }
 
 export function simulateProbationTermination(
@@ -35,38 +66,57 @@ export function simulateProbationTermination(
 ): ProbationTerminationResult {
   const input = probationTerminationInputSchema.parse(rawInput);
   const rules = getTerminationRulesByDate(input.calculationDate);
-  const required = requiredNoticeDays(input.workedDays);
+
+  const maxProbation = maxProbationMonths(input.workerCategory);
+  const effectiveDuration = input.probationRenewed ? input.probationDurationMonths * 2 : input.probationDurationMonths;
+  const probationLegallyValid = effectiveDuration <= maxProbation;
+
+  const required = requiredNoticeDays(input.workedDays, input.workerCategory, input.probationDurationMonths);
   const missing = Math.max(0, required - input.noticeDaysGiven);
   const dailySalary = input.monthlySalary / 26;
-  const compensationDue =
-    input.initiator === "employer" ? missing * dailySalary : 0;
+
+  // Only the employer owes compensation for missing notice; employee owes nothing if they quit during probation
+  const compensationDue = input.initiator === "employer" ? roundMAD(missing * dailySalary) : 0;
 
   return {
     versionId: rules.versionId,
     versionCode: rules.versionCode,
     breakdown: {
+      category: input.workerCategory,
+      probationDurationMonths: input.probationDurationMonths,
+      probationWasRenewed: input.probationRenewed,
       requiredNoticeDays: required,
       noticeDaysGiven: input.noticeDaysGiven,
       missingNoticeDays: missing,
-      compensationDue: roundMAD(compensationDue),
+      compensationDue,
+      probationLegallyValid,
     },
     explanation: {
-      summary: `Preavis requis: ${required} jours. Compensation estimee: ${roundMAD(compensationDue)} MAD.`,
+      summary: `Preavis requis (${input.workerCategory}): ${required} jours. Compensation estimee: ${compensationDue} MAD.`,
       assumptions: [
-        "Duree de preavis estimee selon jours travailles pendant l'essai.",
-        "Compensation appliquee uniquement si rupture par employeur sans preavis suffisant.",
+        `Categorie: ${input.workerCategory} — grille de preavis Art. 14 Code du Travail.`,
+        `Duree d'essai: ${input.probationDurationMonths} mois${input.probationRenewed ? " (renouvelee)" : ""}.`,
+        `Duree totale: ${effectiveDuration} mois / maximum legal: ${maxProbation} mois.`,
+        input.initiator === "employer"
+          ? "Rupture a l'initiative de l'employeur: compensation due si preavis insuffisant."
+          : "Rupture a l'initiative du salarie: aucune compensation due.",
       ],
       formulas: [
         "Jours manquants = preavis requis - preavis donne.",
-        "Compensation = jours manquants x salaire journalier.",
+        "Compensation = jours manquants x (salaire mensuel / 26).",
       ],
       warnings: [
-        "Le contrat peut fixer des dispositions specifiques de periode d'essai.",
+        !probationLegallyValid
+          ? `Attention: duree totale de ${effectiveDuration} mois depasse le maximum legal (${maxProbation} mois). La periode d'essai peut etre requalifiee en CDI.`
+          : "Periode d'essai dans les limites legales.",
+        "Le contrat peut prevoir des conditions specifiques de periode d'essai.",
+        "En cas de requalification de la periode d'essai, les regles du licenciement s'appliquent.",
       ],
       nextSteps: [
-        "Conserver notification de rupture et preuves des dates.",
-        "Verifier le contrat avant d'accepter le solde final.",
-      ],
+        "Conserver la notification de rupture et les preuves des dates de debut/fin d'essai.",
+        "Verifier le contrat de travail avant d'accepter le solde de tout compte.",
+        !probationLegallyValid ? "Consulter un avocat si la periode d'essai a ete prolongee au-dela du maximum legal." : "",
+      ].filter(Boolean),
     },
   };
 }

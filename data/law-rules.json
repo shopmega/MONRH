@@ -12,6 +12,8 @@
       "amoEmployerRate": 0.0411,
       "professionalExpenseRate": 0.2,
       "professionalExpenseCap": 2500,
+      "formationProRateSmall": 0.01,
+      "formationProRateLarge": 0.016,
       "taxBracketsMonthly": [
         { "min": 0, "max": 2500, "rate": 0 },
         { "min": 2500, "max": 4166.67, "rate": 0.1 },
@@ -33,6 +35,8 @@
       "amoEmployerRate": 0.0411,
       "professionalExpenseRate": 0.2,
       "professionalExpenseCap": 3333.33,
+      "formationProRateSmall": 0.01,
+      "formationProRateLarge": 0.016,
       "taxBracketsMonthly": [
         { "min": 0, "max": 3333.33, "rate": 0 },
         { "min": 3333.33, "max": 5000, "rate": 0.1 },
@@ -176,8 +180,10 @@
       "sickLeaveWaitingDays": 3,
       "sickLeaveCnssCoverageRate": 0.6666666667,
       "sickLeaveMaxCompensatedDays": 365,
+      "sickLeaveMinCnssEligibilityDays": 54,
       "maternityCnssCoverageRate": 1,
       "maternityLegalLeaveWeeks": 14,
+      "maternityMinCnssMonths": 3,
       "pensionMinContributionDays": 1320,
       "pensionAccrualStepDays": 216,
       "pensionBaseReplacementRate": 0.5,
@@ -187,7 +193,8 @@
       "pensionNormalRetirementAge": 60,
       "pensionEarlyRetirementFactor": 0.9,
       "workAccidentTemporaryCoverageRate": 0.6666666667,
-      "workAccidentPermanentCoverageCoefficient": 0.5
+      "workAccidentPermanentCoverageCoefficient": 0.5,
+      "workAccidentFauteInexcusableMultiplier": 2
     },
     {
       "versionId": "ma_2026",
@@ -197,18 +204,21 @@
       "sickLeaveWaitingDays": 3,
       "sickLeaveCnssCoverageRate": 0.6666666667,
       "sickLeaveMaxCompensatedDays": 365,
+      "sickLeaveMinCnssEligibilityDays": 54,
       "maternityCnssCoverageRate": 1,
       "maternityLegalLeaveWeeks": 14,
+      "maternityMinCnssMonths": 3,
       "pensionMinContributionDays": 1320,
       "pensionAccrualStepDays": 216,
       "pensionBaseReplacementRate": 0.5,
       "pensionIncrementPerStep": 0.01,
       "pensionMaxReplacementRate": 0.7,
-      "pensionReferenceSalaryCeiling": 6000,
+      "pensionReferenceSalaryCeiling": 8000,
       "pensionNormalRetirementAge": 60,
       "pensionEarlyRetirementFactor": 0.9,
       "workAccidentTemporaryCoverageRate": 0.6666666667,
-      "workAccidentPermanentCoverageCoefficient": 0.5
+      "workAccidentPermanentCoverageCoefficient": 0.5,
+      "workAccidentFauteInexcusableMultiplier": 2
     }
   ]
 }

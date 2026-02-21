@@ -19,6 +19,7 @@ export const TOOL_CATALOG: ToolDefinition[] = [
   { id: "annual_income_tax", label: "IR annuel", kind: "simulator", href: "/simulateurs/ir-annuel" },
   { id: "licenciement", label: "Indemnite licenciement", kind: "simulator", href: "/simulateurs/licenciement" },
   { id: "demission", label: "Scenario demission", kind: "simulator", href: "/simulateurs/demission" },
+  { id: "duree_preavis", label: "Duree de preavis", kind: "simulator", href: "/simulateurs/duree-preavis" },
   { id: "fin_cdd", label: "Fin de CDD", kind: "simulator", href: "/simulateurs/fin-cdd" },
   { id: "probation_termination", label: "Rupture periode d'essai", kind: "simulator", href: "/simulateurs/rupture-periode-essai" },
   { id: "seniority_growth", label: "Croissance anciennete", kind: "simulator", href: "/simulateurs/progression-anciennete" },

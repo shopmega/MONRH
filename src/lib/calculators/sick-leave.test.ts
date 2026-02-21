@@ -7,6 +7,7 @@ describe("simulateSickLeave", () => {
       calculationDate: "2026-02-12",
       monthlySalary: 8000,
       sickDays: 10,
+      cnssEligibilityDays: 54,
     });
 
     expect(result.breakdown.paidDaysByCnss).toBe(7);

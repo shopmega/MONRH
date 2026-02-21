@@ -6,10 +6,11 @@ describe("simulateEmployerTotalCost", () => {
     const result = simulateEmployerTotalCost({
       calculationDate: "2026-02-12",
       grossSalary: 10000,
-      insuranceRate: 0.015,
+      sectorRisk: "medium",
+      companySize: "large",
     });
 
     expect(result.versionCode).toBe("ma_2026");
-    expect(result.breakdown.totalCostToCompany).toBeGreaterThan(result.breakdown.grossSalary);
+    expect(result.breakdown.monthlyTotalCost).toBeGreaterThan(result.breakdown.grossSalary);
   });
 });

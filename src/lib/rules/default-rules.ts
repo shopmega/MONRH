@@ -20,6 +20,10 @@ export type SalaryRules = {
   professionalExpenseRate: number;
   professionalExpenseCap: number;
   taxBracketsMonthly: TaxBracket[];
+  /** Formation professionnelle rate for employers with ≤ 20 employees (1%) */
+  formationProRateSmall: number;
+  /** Formation professionnelle rate for employers with > 20 employees (1.6%) */
+  formationProRateLarge: number;
 };
 
 export type TerminationRules = {
@@ -87,8 +91,12 @@ export type SocialProtectionRules = {
   sickLeaveWaitingDays: number;
   sickLeaveCnssCoverageRate: number;
   sickLeaveMaxCompensatedDays: number;
+  /** Minimum CNSS paid days in last 6 months to be eligible for sick-leave compensation */
+  sickLeaveMinCnssEligibilityDays: number;
   maternityCnssCoverageRate: number;
   maternityLegalLeaveWeeks: number;
+  /** Minimum CNSS paid months in last 10 months to be eligible for maternity compensation */
+  maternityMinCnssMonths: number;
   pensionMinContributionDays: number;
   pensionAccrualStepDays: number;
   pensionBaseReplacementRate: number;
@@ -99,6 +107,8 @@ export type SocialProtectionRules = {
   pensionEarlyRetirementFactor: number;
   workAccidentTemporaryCoverageRate: number;
   workAccidentPermanentCoverageCoefficient: number;
+  /** Faute inexcusable (gross negligence) multiplier applied to permanent incapacity rente */
+  workAccidentFauteInexcusableMultiplier: number;
 };
 
 export type LawRulesBundle = {
@@ -123,6 +133,8 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     amoEmployerRate: 0.0411,
     professionalExpenseRate: 0.2,
     professionalExpenseCap: 2500,
+    formationProRateSmall: 0.01,
+    formationProRateLarge: 0.016,
     taxBracketsMonthly: [
       { min: 0, max: 2500, rate: 0 },
       { min: 2500, max: 4166.67, rate: 0.1 },
@@ -144,6 +156,8 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     amoEmployerRate: 0.0411,
     professionalExpenseRate: 0.2,
     professionalExpenseCap: 3333.33,
+    formationProRateSmall: 0.01,
+    formationProRateLarge: 0.016,
     taxBracketsMonthly: [
       { min: 0, max: 3333.33, rate: 0 },
       { min: 3333.33, max: 5000, rate: 0.1 },
@@ -292,8 +306,10 @@ export const DEFAULT_SOCIAL_PROTECTION_RULES: SocialProtectionRules[] = [
     sickLeaveWaitingDays: 3,
     sickLeaveCnssCoverageRate: 2 / 3,
     sickLeaveMaxCompensatedDays: 365,
+    sickLeaveMinCnssEligibilityDays: 54,
     maternityCnssCoverageRate: 1,
     maternityLegalLeaveWeeks: 14,
+    maternityMinCnssMonths: 3,
     pensionMinContributionDays: 1320,
     pensionAccrualStepDays: 216,
     pensionBaseReplacementRate: 0.5,
@@ -304,6 +320,7 @@ export const DEFAULT_SOCIAL_PROTECTION_RULES: SocialProtectionRules[] = [
     pensionEarlyRetirementFactor: 0.9,
     workAccidentTemporaryCoverageRate: 2 / 3,
     workAccidentPermanentCoverageCoefficient: 0.5,
+    workAccidentFauteInexcusableMultiplier: 2,
   },
   {
     versionId: "ma_2026",
@@ -313,18 +330,22 @@ export const DEFAULT_SOCIAL_PROTECTION_RULES: SocialProtectionRules[] = [
     sickLeaveWaitingDays: 3,
     sickLeaveCnssCoverageRate: 2 / 3,
     sickLeaveMaxCompensatedDays: 365,
+    sickLeaveMinCnssEligibilityDays: 54,
     maternityCnssCoverageRate: 1,
     maternityLegalLeaveWeeks: 14,
+    maternityMinCnssMonths: 3,
     pensionMinContributionDays: 1320,
     pensionAccrualStepDays: 216,
     pensionBaseReplacementRate: 0.5,
     pensionIncrementPerStep: 0.01,
     pensionMaxReplacementRate: 0.7,
-    pensionReferenceSalaryCeiling: 6000,
+    // Updated ceiling to 8000 MAD following CNSS revalorisation (applicable from 2024)
+    pensionReferenceSalaryCeiling: 8000,
     pensionNormalRetirementAge: 60,
     pensionEarlyRetirementFactor: 0.9,
     workAccidentTemporaryCoverageRate: 2 / 3,
     workAccidentPermanentCoverageCoefficient: 0.5,
+    workAccidentFauteInexcusableMultiplier: 2,
   },
 ];
 

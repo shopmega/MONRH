@@ -145,12 +145,12 @@ export default async function ArticlePage({
           </div>
         </section>
 
-        <section className="mt-5 space-y-3">
-          {article.content.map((paragraph) => (
-            <p key={paragraph} className="soft-card rounded-2xl p-4 text-sm leading-relaxed text-[var(--foreground)]">
-              {paragraph}
-            </p>
-          ))}
+        <section className="soft-card mt-5 rounded-3xl p-5 sm:p-6">
+          <div className="space-y-4 text-[15px] leading-8 text-[var(--foreground)] sm:text-base">
+            {article.content.map((paragraph, index) => (
+              <p key={`${article.slug}-p-${index}`}>{paragraph}</p>
+            ))}
+          </div>
         </section>
 
         <section className="mt-5">

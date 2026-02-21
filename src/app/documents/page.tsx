@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AdSlot } from "@/components/ad-slot";
 import { useLanguage } from "@/components/language-provider";
+import { ReviewlyPromoCard } from "@/components/reviewly-promo-card";
 import type { DocumentTemplate } from "@/lib/content/home-content";
 
 type GeneratorGroup = {
@@ -128,7 +129,7 @@ export default function DocumentsPage() {
         if (!active || !data.ok || !data.items) return;
         setAllTemplates(data.items);
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => {
       active = false;
     };
@@ -149,8 +150,8 @@ export default function DocumentsPage() {
 
         <section className="mt-5">
           <p className="section-kicker pl-1">{t("common.partner")}</p>
-          <div className="soft-card mt-2 rounded-3xl p-3">
-            <AdSlot slot="7777777777" format="auto" />
+          <div className="mt-2">
+            <ReviewlyPromoCard type="transition" />
           </div>
         </section>
 

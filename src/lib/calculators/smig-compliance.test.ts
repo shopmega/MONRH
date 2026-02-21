@@ -6,7 +6,7 @@ describe("simulateSmigCompliance", () => {
     const result = simulateSmigCompliance({
       calculationDate: "2026-02-12",
       salaryType: "smig",
-      currentSalaryMad: 2000,
+      baseSalaryMad: 2000,
     });
 
     expect(result.versionCode).toBe("ma_2026");
@@ -18,7 +18,7 @@ describe("simulateSmigCompliance", () => {
     const result = simulateSmigCompliance({
       calculationDate: "2026-02-12",
       salaryType: "smig",
-      currentSalaryMad: 5000,
+      baseSalaryMad: 5000,
     });
 
     expect(result.breakdown.compliant).toBe(true);

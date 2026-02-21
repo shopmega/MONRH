@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
       { source: "/simulate/annual-income-tax", destination: "/simulateurs/ir-annuel", permanent: true },
       { source: "/simulate/licenciement", destination: "/simulateurs/licenciement", permanent: true },
       { source: "/simulate/demission", destination: "/simulateurs/demission", permanent: true },
+      { source: "/simulate/duree-preavis", destination: "/simulateurs/duree-preavis", permanent: true },
       { source: "/simulate/fin-cdd", destination: "/simulateurs/fin-cdd", permanent: true },
       {
         source: "/simulate/probation-termination",
@@ -103,6 +104,7 @@ const nextConfig: NextConfig = {
       { source: "/simulateurs/ir-annuel", destination: "/simulate/annual-income-tax" },
       { source: "/simulateurs/licenciement", destination: "/simulate/licenciement" },
       { source: "/simulateurs/demission", destination: "/simulate/demission" },
+      { source: "/simulateurs/duree-preavis", destination: "/simulate/duree-preavis" },
       { source: "/simulateurs/fin-cdd", destination: "/simulate/fin-cdd" },
       { source: "/simulateurs/rupture-periode-essai", destination: "/simulate/probation-termination" },
       { source: "/simulateurs/progression-anciennete", destination: "/simulate/seniority-growth" },

@@ -7,6 +7,7 @@ describe("simulateMaternityLeave", () => {
       calculationDate: "2026-02-12",
       monthlySalary: 9000,
       leaveWeeks: 14,
+      cnssContributedMonths: 5,
       employerTopUp: false,
     });
 
@@ -19,6 +20,7 @@ describe("simulateMaternityLeave", () => {
       calculationDate: "2026-02-12",
       monthlySalary: 9000,
       leaveWeeks: 20,
+      cnssContributedMonths: 5,
       employerTopUp: false,
     });
 

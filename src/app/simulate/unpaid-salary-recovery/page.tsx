@@ -18,14 +18,18 @@ export default function UnpaidSalaryRecoveryPage() {
       fields={[
         { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "7000", min: 1, step: 0.01 },
         { key: "unpaidMonths", label: "Mois impayes", type: "number", defaultValue: "2", min: 1, step: 1 },
-        { key: "delayMonths", label: "Mois de retard", type: "number", defaultValue: "4", min: 0, step: 1 },
-        { key: "penaltyRatePerMonth", label: "Taux penalite mensuel", type: "number", defaultValue: "0.01", min: 0, max: 0.05, step: 0.001 },
+        { key: "partialPaymentPerMonth", label: "Paiement partiel mensuel (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
+        { key: "monthsSinceFirstDefault", label: "Mois depuis le premier impaye", type: "number", defaultValue: "4", min: 1, max: 120, step: 1 },
+        { key: "penaltyRatePerMonth", label: "Taux penalite mensuel", type: "number", defaultValue: "0.0058", min: 0, max: 0.05, step: 0.0001 },
         { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
       ]}
       breakdownLabels={{
+        claimableMonths: "Mois reclamables",
+        prescribedMonths: "Mois prescrits",
         principalAmount: "Principal",
         delayPenalties: "Penalites",
         totalClaimAmount: "Total reclamation",
+        prescriptionRisk: "Risque prescription",
       }}
       units={{
         principalAmount: "MAD",

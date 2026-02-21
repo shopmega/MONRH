@@ -5,8 +5,15 @@ import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 export const workAccidentInputSchema = z.object({
   calculationDate: z.string().date().default("2026-02-12"),
   monthlySalary: z.number().positive(),
-  temporaryIncapacityDays: z.number().min(0).max(365).default(0),
+  temporaryIncapacityDays: z.number().min(0).max(730).default(0),
+  /** IPP% as certified by medical board — 0 means no permanent incapacity */
   permanentIncapacityPercent: z.number().min(0).max(100).default(0),
+  /** Was the accident declared by the employer within 48h (legal obligation)? */
+  accidentDeclared: z.boolean().default(true),
+  /** Does the employee allege employer gross negligence (faute inexcusable)? */
+  fauteInexcusable: z.boolean().default(false),
+  /** Was the employee's employment contract terminated during the accident leave? */
+  contractTerminatedDuringAT: z.boolean().default(false),
 });
 
 export type WorkAccidentInput = z.infer<typeof workAccidentInputSchema>;
@@ -16,9 +23,14 @@ export type WorkAccidentResult = {
   versionCode: string;
   breakdown: {
     temporaryCompensation: number;
-    monthlyPermanentCompensation: number;
-    annualPermanentCompensation: number;
+    monthlyPermanentRente: number;
+    annualPermanentRente: number;
+    fauteInexcusableBonus: number;
     totalFirstYearEstimate: number;
+    accidentDeclared: boolean;
+    terminationIllegal: boolean;
+    terminationNote?: string;
+    declarationWarning?: string;
   };
   explanation: CalculatorExplanation;
 };
@@ -26,43 +38,95 @@ export type WorkAccidentResult = {
 export function simulateWorkAccident(rawInput: WorkAccidentInput): WorkAccidentResult {
   const input = workAccidentInputSchema.parse(rawInput);
   const rules = getSocialProtectionRulesByDate(input.calculationDate);
+
   const dailySalary = input.monthlySalary / 26;
-  const temporaryCompensation =
-    dailySalary * input.temporaryIncapacityDays * rules.workAccidentTemporaryCoverageRate;
-  const monthlyPermanentCompensation =
+
+  // Temporary incapacity — covered from day 1 (no waiting period for AT contrary to maladie)
+  const temporaryCompensation = roundMAD(
+    dailySalary * input.temporaryIncapacityDays * rules.workAccidentTemporaryCoverageRate,
+  );
+
+  // Permanent incapacity (rente)
+  const monthlyPermanentRente = roundMAD(
     input.monthlySalary *
     (input.permanentIncapacityPercent / 100) *
-    rules.workAccidentPermanentCoverageCoefficient;
-  const annualPermanentCompensation = monthlyPermanentCompensation * 12;
-  const totalFirstYearEstimate = temporaryCompensation + annualPermanentCompensation;
+    rules.workAccidentPermanentCoverageCoefficient,
+  );
+  const annualPermanentRente = roundMAD(monthlyPermanentRente * 12);
+
+  // Faute inexcusable: multiplier on rente (up to 2x typically, per CNSS/jurisprudence)
+  const fauteInexcusableBonus = input.fauteInexcusable
+    ? roundMAD(
+      monthlyPermanentRente * (rules.workAccidentFauteInexcusableMultiplier - 1) * 12,
+    )
+    : 0;
+
+  const totalFirstYearEstimate = roundMAD(
+    temporaryCompensation + annualPermanentRente + fauteInexcusableBonus,
+  );
+
+  // Contract termination during AT leave is prohibited (Art. 274 CT) — signals illegality
+  const terminationIllegal = input.contractTerminatedDuringAT;
+  const terminationNote = terminationIllegal
+    ? "La rupture du contrat de travail pendant un arret pour accident du travail est nulle de droit (Art. 274 CT). L'employe peut exiger reintegration ou indemnites specifiques."
+    : undefined;
+
+  const declarationWarning = !input.accidentDeclared
+    ? "Accident non declare par l'employeur dans les 48h: l'employeur peut etre tenu responsable des frais medicaux. Le salarie peut declarer lui-meme a la CNSS."
+    : undefined;
 
   return {
     versionId: rules.versionId,
     versionCode: rules.versionCode,
     breakdown: {
-      temporaryCompensation: roundMAD(temporaryCompensation),
-      monthlyPermanentCompensation: roundMAD(monthlyPermanentCompensation),
-      annualPermanentCompensation: roundMAD(annualPermanentCompensation),
-      totalFirstYearEstimate: roundMAD(totalFirstYearEstimate),
+      temporaryCompensation,
+      monthlyPermanentRente,
+      annualPermanentRente,
+      fauteInexcusableBonus,
+      totalFirstYearEstimate,
+      accidentDeclared: input.accidentDeclared,
+      terminationIllegal,
+      ...(terminationNote ? { terminationNote } : {}),
+      ...(declarationWarning ? { declarationWarning } : {}),
     },
     explanation: {
-      summary: `Indemnisation premiere annee estimee: ${roundMAD(totalFirstYearEstimate)} MAD.`,
+      summary: `Indemnisation 1ere annee estimee: ${totalFirstYearEstimate} MAD${terminationIllegal ? " — ATTENTION: licenciement en AT interdit!" : ""}`,
       assumptions: [
-        "Incapacite temporaire indemnisee sur base partielle du salaire journalier.",
-        "Incapacite permanente estimee en rente proportionnelle au taux d'incapacite.",
-      ],
+        "Incapacite temporaire (IT): indemnisee sans delai de carence (AT ≠ maladie ordinaire).",
+        `Taux couverture IT: ${roundMAD(rules.workAccidentTemporaryCoverageRate * 100)}% du salaire journalier.`,
+        `Rente IP: salaire mensuel x taux d'incapacite (${input.permanentIncapacityPercent}%) x coefficient ${rules.workAccidentPermanentCoverageCoefficient}.`,
+        input.fauteInexcusable
+          ? `Faute inexcusable: majoration de la rente par facteur x${rules.workAccidentFauteInexcusableMultiplier}.`
+          : "",
+        input.contractTerminatedDuringAT ? "Licenciement pendant AT: statut juridique a clarifier d'urgence." : "",
+      ].filter(Boolean),
       formulas: [
-        "Temporaire = salaire journalier x jours d'arret x taux couverture.",
-        "Rente mensuelle = salaire mensuel x taux incapacite x coefficient simplifie.",
+        "IT = salaire journalier x jours ITA x taux couverture.",
+        "Rente mensuelle IP = salaire mensuel x (IPP% / 100) x coefficient.",
+        "Majoration FI = rente annuelle x (facteur - 1) si faute inexcusable.",
+        "Total 1ere annee = IT + rente annuelle + majoration FI.",
       ],
       warnings: [
-        "Le bareme medico-legal reel peut differer selon expertise.",
-        "Le calcul reste une estimation simplifiee et ne remplace pas l'expertise assureur/CNSS.",
-      ],
+        !input.accidentDeclared
+          ? "Accident non declare: risque de perte de droits CNSS AT — agir dans les 48h."
+          : "",
+        terminationIllegal
+          ? "URGENT: licenciement pendant AT est illicite (Art. 274 CT) — saisir l'inspection du travail immediatement."
+          : "",
+        "Le taux d'IPP est fixe par expertise medicale CNSS — la valeur saisie est estimative.",
+        "Le bareme medico-legal reel peut differer selon expertise et contestation.",
+      ].filter(Boolean),
       nextSteps: [
-        "Constituer dossier complet: certificat medical, declaration accident, preuves.",
-        "Verifier la notification officielle du taux d'incapacite.",
-      ],
+        !input.accidentDeclared ? "Declarer l'accident vous-meme a la CNSS (formulaire DAT) si l'employeur ne le fait pas." : "",
+        "Constituer un dossier: certificat medical, rapport accident, temoin si possible.",
+        input.fauteInexcusable
+          ? "Pour la faute inexcusable: saisir le tribunal du travail — assistance juridique recommandee."
+          : "",
+        terminationIllegal
+          ? "Contester le licenciement devant le tribunal du travail (action en nullite + reintegration)."
+          : "",
+        "Demander le releve de prise en charge CNSS AT pour suivi des frais medicaux.",
+      ].filter(Boolean),
     },
   };
 }

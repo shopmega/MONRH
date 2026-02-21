@@ -16,6 +16,17 @@ type ArticleInput = {
   contentText: string;
 };
 
+function formatContentText(content: string[]): string {
+  return content.join("\n\n");
+}
+
+function parseContentBlocks(contentText: string): string[] {
+  return contentText
+    .split(/\r?\n\s*\r?\n/g)
+    .map((block) => block.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
 function toInput(article?: Article): ArticleInput {
   if (!article) {
     return {
@@ -41,7 +52,7 @@ function toInput(article?: Article): ArticleInput {
     access: article.access ?? "public",
     thumbnailUrl: article.thumbnailUrl ?? "",
     coverImageUrl: article.coverImageUrl ?? "",
-    contentText: article.content.join("\n"),
+    contentText: formatContentText(article.content),
   };
 }
 
@@ -52,6 +63,7 @@ export default function AdminArticlesPage() {
   const [status, setStatus] = useState<string>();
   const [form, setForm] = useState<ArticleInput>(toInput());
   const categoryOptions = Array.from(new Set(items.map((item) => item.categorySlug))).sort();
+  const contentBlocksPreview = parseContentBlocks(form.contentText);
 
   async function loadArticles() {
     const articlesResponse = await fetch("/api/admin/articles");
@@ -89,9 +101,8 @@ export default function AdminArticlesPage() {
         thumbnailUrl: form.thumbnailUrl,
         coverImageUrl: form.coverImageUrl,
         content: form.contentText
-          .split("\n")
-          .map((line) => line.trim())
-          .filter(Boolean),
+          ? parseContentBlocks(form.contentText)
+          : [],
       }),
     });
     const data = (await response.json()) as { ok: boolean };
@@ -190,9 +201,22 @@ export default function AdminArticlesPage() {
             </datalist>
           </label>
           <label className="text-sm font-semibold sm:col-span-2">
-            Content (one paragraph per line)
+            Content (one paragraph per block, separate blocks with an empty line)
             <textarea className="input-shell mt-1 min-h-48" value={form.contentText} onChange={(e) => setForm((c) => ({ ...c, contentText: e.target.value }))} required />
           </label>
+        </div>
+        <div className="mt-4 rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+            Apercu du rendu article
+          </p>
+          <p className="mt-1 text-xs text-[var(--ink-soft)]">
+            {contentBlocksPreview.length} paragraphe(s). Le rendu public utilise ce meme flux continu.
+          </p>
+          <div className="mt-3 space-y-3 text-sm leading-relaxed text-[var(--foreground)]">
+            {contentBlocksPreview.map((block, index) => (
+              <p key={`preview-${index}`}>{block}</p>
+            ))}
+          </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <button type="submit" className="btn-primary px-4 py-2 text-sm" disabled={saving}>

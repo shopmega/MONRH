@@ -11,7 +11,7 @@ describe("simulateCnssPension", () => {
     });
 
     expect(result.breakdown.replacementRatePercent).toBeGreaterThan(0);
-    expect(result.breakdown.estimatedMonthlyPension).toBeGreaterThan(0);
+    expect(result.breakdown.estimatedMonthlyPensionCnss).toBeGreaterThan(0);
   });
 
   it("returns zero pension when contribution days are below legal threshold", () => {
@@ -23,6 +23,6 @@ describe("simulateCnssPension", () => {
     });
 
     expect(result.breakdown.replacementRatePercent).toBe(0);
-    expect(result.breakdown.estimatedMonthlyPension).toBe(0);
+    expect(result.breakdown.estimatedMonthlyPensionCnss).toBe(0);
   });
 });
