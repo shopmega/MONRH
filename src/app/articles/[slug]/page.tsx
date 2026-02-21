@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/ad-slot";
 import { RelatedContent } from "@/components/related-content";
+import { renderArticleContentBlocks } from "@/lib/articles/content-render";
 import { resolveRelatedItems } from "@/lib/linking/resolve-related";
 import { SITE_NAME, absoluteUrl, buildOgImageUrl } from "@/lib/seo";
 import { readAdminConfig } from "@/lib/server/admin-config";
@@ -177,9 +178,7 @@ export default async function ArticlePage({
 
         <section className="soft-card mt-5 rounded-3xl p-5 sm:p-6">
           <div className="space-y-4 text-[15px] leading-8 text-[var(--foreground)] sm:text-base">
-            {article.content.map((paragraph, index) => (
-              <p key={`${article.slug}-p-${index}`}>{paragraph}</p>
-            ))}
+            {renderArticleContentBlocks(article.content, `${article.slug}-content`)}
           </div>
         </section>
 

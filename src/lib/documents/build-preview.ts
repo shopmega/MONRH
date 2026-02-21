@@ -14,9 +14,31 @@ type PreviewData = {
   completion: number;
 };
 
-function pick(values: Values, key: string, fallback: string) {
-  const value = values[key]?.trim();
-  return value && value.length > 0 ? value : fallback;
+const FIELD_ALIASES = {
+  employee_name: ["employee_name", "employeeName", "full_name", "fullName"],
+  company_name: ["company_name", "companyName", "employer_name", "employerName"],
+  period: ["period", "time_period", "timePeriod"],
+  issue_summary: ["issue_summary", "issueSummary", "summary"],
+  request: ["request", "demande", "request_details", "requestDetails"],
+  amount_due: ["amount_due", "amountDue", "amount"],
+  effective_date: ["effective_date", "effectiveDate", "date"],
+  position: ["position", "job_title", "jobTitle"],
+  response_deadline_days: ["response_deadline_days", "responseDeadlineDays", "deadline_days", "deadlineDays"],
+  city: ["city", "ville"],
+  employee_id: ["employee_id", "employeeId", "matricule"],
+  contract_ref: ["contract_ref", "contractRef", "reference_contrat", "referenceContrat"],
+} as const;
+
+function pickFromAliases(
+  values: Values,
+  aliases: readonly string[],
+  fallback: string,
+): string {
+  for (const alias of aliases) {
+    const value = values[alias]?.trim();
+    if (value && value.length > 0) return value;
+  }
+  return fallback;
 }
 
 function completionScore(values: Values): number {
@@ -31,21 +53,25 @@ export function buildDocumentPreview(
   templateTitle: string,
   values: Values,
 ): PreviewData {
-  const employeeName = pick(values, "employee_name", "[Nom employe]");
-  const companyName = pick(values, "company_name", "[Nom entreprise]");
-  const period = pick(values, "period", "[Periode]");
-  const issueSummary = pick(values, "issue_summary", "[Resume des faits]");
-  const request = pick(values, "request", "[Demande detaillee]");
-  const amountDue = pick(values, "amount_due", "[Montant]");
-  const effectiveDate = pick(values, "effective_date", "[Date]");
-  const position = pick(values, "position", "[Poste]");
-  const responseDeadline = pick(values, "response_deadline_days", "7");
+  const employeeName = pickFromAliases(values, FIELD_ALIASES.employee_name, "");
+  const companyName = pickFromAliases(values, FIELD_ALIASES.company_name, "");
+  const period = pickFromAliases(values, FIELD_ALIASES.period, "");
+  const issueSummary = pickFromAliases(values, FIELD_ALIASES.issue_summary, "");
+  const request = pickFromAliases(values, FIELD_ALIASES.request, "");
+  const amountDue = pickFromAliases(values, FIELD_ALIASES.amount_due, "");
+  const effectiveDate = pickFromAliases(values, FIELD_ALIASES.effective_date, "");
+  const position = pickFromAliases(values, FIELD_ALIASES.position, "");
+  const responseDeadline = pickFromAliases(values, FIELD_ALIASES.response_deadline_days, "7");
+  const employeeLabel = employeeName || "le salarie";
+  const companyLabel = companyName || "l'entreprise";
+  const contextFallback = issueSummary || period || "situation professionnelle en attente de regularisation";
+  const requestFallback = request || "regularisation de ma situation";
 
   const defaultData: PreviewData = {
     subject: templateTitle,
-    intro: `Je soussigne(e) ${employeeName}, salarie(e) de ${companyName}, vous adresse la presente correspondance afin de formaliser ma demande.`,
-    context: `Contexte factuel: ${issueSummary !== "[Resume des faits]" ? issueSummary : period}.`,
-    request: `Demande principale: ${request !== "[Demande detaillee]" ? request : "regularisation de ma situation."}`,
+    intro: `Je soussigne(e) ${employeeLabel}, salarie(e) de ${companyLabel}, vous adresse la presente correspondance afin de formaliser ma demande.`,
+    context: `Contexte factuel: ${contextFallback}.`,
+    request: `Demande principale: ${requestFallback}.`,
     legalBasis:
       "Cette demande s'inscrit dans le respect des obligations legales et contractuelles applicables a la relation de travail.",
     deadline: `Je vous prie de bien vouloir me repondre dans un delai de ${responseDeadline} jours a compter de la reception du present courrier.`,
@@ -66,8 +92,8 @@ export function buildDocumentPreview(
       return {
         ...defaultData,
         subject: "Lettre de Demission",
-        context: `Je vous informe de ma decision de demissionner de mon poste de ${position}.`,
-        request: `Je sollicite la prise d'acte de ma demission avec un depart effectif au ${effectiveDate}, sous reserve du preavis applicable.`,
+        context: `Je vous informe de ma decision de demissionner de mon poste${position ? ` de ${position}` : ""}.`,
+        request: `Je sollicite la prise d'acte de ma demission${effectiveDate ? ` avec un depart effectif au ${effectiveDate}` : ""}, sous reserve du preavis applicable.`,
         legalBasis:
           "Cette demission est formulee conformement aux dispositions contractuelles et au Code du travail.",
         deadline: "Merci de confirmer par ecrit la date de fin et les modalites du solde de tout compte.",
@@ -78,8 +104,8 @@ export function buildDocumentPreview(
       return {
         ...defaultData,
         subject: "Notification de Preavis",
-        context: `Je notifie l'execution du preavis lie a mon poste de ${position}.`,
-        request: `Date de fin souhaitee: ${effectiveDate}. Merci de confirmer le solde de tout compte.`,
+        context: `Je notifie l'execution du preavis lie a mon poste${position ? ` de ${position}` : ""}.`,
+        request: `Date de fin souhaitee${effectiveDate ? `: ${effectiveDate}` : ""}. Merci de confirmer le solde de tout compte.`,
         legalBasis:
           "Cette notification est communiquee conformement au preavis applicable a ma situation contractuelle.",
         deadline: "Merci de confirmer les dates retenues et les obligations reciproques par ecrit.",
@@ -90,8 +116,12 @@ export function buildDocumentPreview(
       return {
         ...defaultData,
         subject: "Reclamation de Salaire Impaye",
-        context: `Les salaires de la periode ${period} demeurent impayes.`,
-        request: `Je demande le reglement du montant de ${amountDue} MAD dans les meilleurs delais.`,
+        context: period
+          ? `Les salaires de la periode ${period} demeurent impayes.`
+          : "Des salaires demeurent impayes sur une periode recente.",
+        request: amountDue
+          ? `Je demande le reglement du montant de ${amountDue} MAD dans les meilleurs delais.`
+          : "Je demande la regularisation integrale des salaires dus dans les meilleurs delais.",
         legalBasis:
           "Le paiement du salaire dans les delais convenus constitue une obligation essentielle de l'employeur.",
         deadline: `Je vous mets en demeure de regulariser la somme due sous ${responseDeadline} jours.`,
@@ -102,8 +132,12 @@ export function buildDocumentPreview(
       return {
         ...defaultData,
         subject: "Reclamation Heures Supplementaires",
-        context: `Des heures supplementaires sur la periode ${period} n'ont pas ete regularisees.`,
-        request: `Je sollicite le paiement du rappel estime a ${amountDue} MAD.`,
+        context: period
+          ? `Des heures supplementaires sur la periode ${period} n'ont pas ete regularisees.`
+          : "Des heures supplementaires n'ont pas ete regularisees.",
+        request: amountDue
+          ? `Je sollicite le paiement du rappel estime a ${amountDue} MAD.`
+          : "Je sollicite le paiement du rappel des heures supplementaires dues.",
         legalBasis:
           "Les heures supplementaires doivent etre remunerees selon les majorations legales en vigueur.",
         deadline: `Merci de proceder a la regularisation sous ${responseDeadline} jours.`,
@@ -114,8 +148,8 @@ export function buildDocumentPreview(
       return {
         ...defaultData,
         subject: "Plainte a l'Inspection du Travail",
-        context: `Faits signales: ${issueSummary}.`,
-        request: `Je sollicite l'intervention de l'inspection pour ${request}.`,
+        context: `Faits signales: ${issueSummary || "manquements repetes constates au sein de l'entreprise"}.`,
+        request: `Je sollicite l'intervention de l'inspection pour ${request || "ouvrir une mediation et ordonner une regularisation"}.`,
         legalBasis:
           "La presente plainte est deposee pour solliciter une intervention de mediation et de controle des obligations legales.",
         deadline:
@@ -127,7 +161,7 @@ export function buildDocumentPreview(
       return {
         ...defaultData,
         subject: "Declaration Accident du Travail",
-        context: `Accident survenu le ${period}. Details: ${issueSummary}.`,
+        context: `Accident survenu${period ? ` le ${period}` : ""}. Details: ${issueSummary || "incident constate sur le lieu de travail"}.`,
         request: "Je demande la prise en charge et les formalites legales correspondantes.",
         legalBasis:
           "Cette declaration est effectuee au titre des obligations de declaration et de prise en charge des accidents du travail.",
@@ -140,7 +174,7 @@ export function buildDocumentPreview(
       return {
         ...defaultData,
         subject: "Demande de Conge Maternite",
-        context: `Je sollicite mon conge maternite a compter du ${effectiveDate}.`,
+        context: `Je sollicite mon conge maternite${effectiveDate ? ` a compter du ${effectiveDate}` : ""}.`,
         request: `Merci de traiter ma demande et de confirmer les demarches CNSS.`,
         legalBasis:
           "Cette demande est formulee au titre du droit au conge maternite et des garanties de protection applicables.",
@@ -152,7 +186,7 @@ export function buildDocumentPreview(
       return {
         ...defaultData,
         subject: "Signalement d'Agissements de Harcelement",
-        context: `Faits sur la periode ${period}: ${issueSummary}.`,
+        context: `Faits${period ? ` sur la periode ${period}` : ""}: ${issueSummary || "agissements repetes nuisant aux conditions de travail"}.`,
         request: `Je demande l'ouverture d'une enquete interne et des mesures de protection immediates.`,
         legalBasis:
           "L'employeur est tenu d'assurer la protection de la sante, de la securite et de la dignite au travail.",
@@ -167,12 +201,12 @@ export function buildDocumentPreview(
 }
 
 export function toPreviewText(data: PreviewData, values: Values): string {
-  const dateValue = pick(values, "effective_date", new Date().toISOString().slice(0, 10));
-  const location = pick(values, "city", "[Ville]");
-  const employeeName = pick(values, "employee_name", "[Nom employe]");
-  const companyName = pick(values, "company_name", "[Nom entreprise]");
-  const employeeId = pick(values, "employee_id", "");
-  const contractRef = pick(values, "contract_ref", "");
+  const dateValue = pickFromAliases(values, FIELD_ALIASES.effective_date, new Date().toISOString().slice(0, 10));
+  const location = pickFromAliases(values, FIELD_ALIASES.city, "Casablanca");
+  const employeeName = pickFromAliases(values, FIELD_ALIASES.employee_name, "Le salarie");
+  const companyName = pickFromAliases(values, FIELD_ALIASES.company_name, "L'entreprise");
+  const employeeId = pickFromAliases(values, FIELD_ALIASES.employee_id, "");
+  const contractRef = pickFromAliases(values, FIELD_ALIASES.contract_ref, "");
   const references = [employeeId ? `Matricule: ${employeeId}` : "", contractRef ? `Ref contrat: ${contractRef}` : ""]
     .filter((item) => item.length > 0)
     .join(" | ");

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Article } from "@/lib/content/home-content";
+import { renderArticleContentBlocks } from "@/lib/articles/content-render";
 
 type ArticleInput = {
   slug: string;
@@ -23,7 +24,14 @@ function formatContentText(content: string[]): string {
 function parseContentBlocks(contentText: string): string[] {
   return contentText
     .split(/\r?\n\s*\r?\n/g)
-    .map((block) => block.replace(/\s+/g, " ").trim())
+    .map((block) =>
+      block
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .join("\n")
+        .trim(),
+    )
     .filter(Boolean);
 }
 
@@ -66,6 +74,9 @@ export default function AdminArticlesPage() {
   const [importJson, setImportJson] = useState("");
   const [importing, setImporting] = useState(false);
   const [importStatus, setImportStatus] = useState<string>();
+  const [mediaStatus, setMediaStatus] = useState<string>();
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [categoryActionStatus, setCategoryActionStatus] = useState<string>();
   const [mergingCategory, setMergingCategory] = useState(false);
   const [fromCategorySlug, setFromCategorySlug] = useState("");
@@ -226,6 +237,50 @@ export default function AdminArticlesPage() {
     setMergingCategory(false);
   }
 
+  async function uploadArticleMedia(kind: "thumbnail" | "cover", file: File | null | undefined) {
+    if (!file) return;
+    setMediaStatus(undefined);
+    if (kind === "thumbnail") setUploadingThumbnail(true);
+    if (kind === "cover") setUploadingCover(true);
+
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      body.append("kind", kind);
+      body.append("slug", form.slug || form.title || "article");
+
+      const response = await fetch("/api/admin/articles/media-upload", {
+        method: "POST",
+        body,
+      });
+      const data = (await response.json()) as {
+        ok: boolean;
+        publicUrl?: string;
+        error?: string;
+      };
+
+      if (!data.ok || !data.publicUrl) {
+        setMediaStatus(`Upload echoue: ${data.error ?? "unknown_error"}`);
+      } else {
+        setForm((current) =>
+          kind === "thumbnail"
+            ? { ...current, thumbnailUrl: data.publicUrl ?? current.thumbnailUrl }
+            : { ...current, coverImageUrl: data.publicUrl ?? current.coverImageUrl },
+        );
+        setMediaStatus(
+          kind === "thumbnail"
+            ? "Thumbnail telecharge vers le bucket article-media."
+            : "Cover image telechargee vers le bucket article-media.",
+        );
+      }
+    } catch {
+      setMediaStatus("Upload echoue: erreur reseau.");
+    } finally {
+      if (kind === "thumbnail") setUploadingThumbnail(false);
+      if (kind === "cover") setUploadingCover(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <section className="soft-card rounded-3xl p-5">
@@ -276,10 +331,34 @@ export default function AdminArticlesPage() {
           <label className="text-sm font-semibold sm:col-span-2">
             Thumbnail URL (cartes/lists)
             <input className="input-shell mt-1" value={form.thumbnailUrl} onChange={(e) => setForm((c) => ({ ...c, thumbnailUrl: e.target.value }))} placeholder="https://..." />
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/avif"
+              className="input-shell mt-2"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                uploadArticleMedia("thumbnail", file).catch(() => {});
+              }}
+            />
+            <p className="mt-1 text-xs text-[var(--ink-soft)]">
+              Upload direct vers le bucket Supabase <code>article-media</code>.
+            </p>
           </label>
           <label className="text-sm font-semibold sm:col-span-2">
             Cover Image URL (optionnel)
             <input className="input-shell mt-1" value={form.coverImageUrl} onChange={(e) => setForm((c) => ({ ...c, coverImageUrl: e.target.value }))} placeholder="https://..." />
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/avif"
+              className="input-shell mt-2"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                uploadArticleMedia("cover", file).catch(() => {});
+              }}
+            />
+            <p className="mt-1 text-xs text-[var(--ink-soft)]">
+              Fichiers limites a 5 MB. URL publique injectee automatiquement.
+            </p>
           </label>
           <label className="text-sm font-semibold">
             Category Slug
@@ -308,9 +387,7 @@ export default function AdminArticlesPage() {
             {contentBlocksPreview.length} paragraphe(s). Le rendu public utilise ce meme flux continu.
           </p>
           <div className="mt-3 space-y-3 text-sm leading-relaxed text-[var(--foreground)]">
-            {contentBlocksPreview.map((block, index) => (
-              <p key={`preview-${index}`}>{block}</p>
-            ))}
+            {renderArticleContentBlocks(contentBlocksPreview, "admin-article-preview")}
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -322,6 +399,10 @@ export default function AdminArticlesPage() {
           </button>
         </div>
         {status ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{status}</p> : null}
+        {mediaStatus ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{mediaStatus}</p> : null}
+        {uploadingThumbnail || uploadingCover ? (
+          <p className="mt-2 text-xs text-[var(--ink-soft)]">Upload media en cours...</p>
+        ) : null}
       </form>
 
       <section className="soft-card rounded-3xl p-5">

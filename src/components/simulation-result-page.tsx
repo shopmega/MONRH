@@ -81,19 +81,18 @@ function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): string 
         ? breakdown.requiredNoticeDays
         : undefined;
 
-    params.set("issue_summary", `Duree de preavis (${contractType}) a confirmer.`);
+    if (calculationDate) {
+      params.set("effective_date", calculationDate);
+    }
     if (contractType === "CDI") {
       params.set(
-        "request",
-        `Confirmation ecrite du preavis legal (${requiredNoticeMonths ?? "?"} mois, ${requiredNoticeDays ?? "?"} jours approx.) pour categorie ${workerCategory}.`,
+        "position",
+        `Categorie ${workerCategory} - preavis ${requiredNoticeMonths ?? "?"} mois (${requiredNoticeDays ?? "?"} jours approx.)`,
       );
     } else {
-      params.set(
-        "request",
-        `Confirmation ecrite du preavis CDD (${requiredNoticeDays ?? "?"} jours) pour categorie ${workerCategory}.`,
-      );
+      params.set("position", `Categorie ${workerCategory} - preavis CDD ${requiredNoticeDays ?? "?"} jours`);
     }
-    return `/documents/formal-complaint-employer?${params.toString()}`;
+    return `/documents/resignation-letter?${params.toString()}`;
   }
 
   return null;
