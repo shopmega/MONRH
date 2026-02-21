@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { AdsenseScript } from "@/components/adsense-script";
-import { AnalyticsTracker } from "@/components/analytics-tracker";
-import { GoogleAnalyticsScript } from "@/components/google-analytics-script";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import { LanguageProvider } from "@/components/language-provider";
 import { MaintenanceBanner } from "@/components/maintenance-banner";
 import { PublicConfigProvider } from "@/components/public-config-provider";
@@ -160,8 +159,7 @@ export default async function RootLayout({
         <LanguageProvider initialLanguage={initialLanguage}>
           <ThemeProvider initialTheme={initialTheme}>
             <PublicConfigProvider>
-              <AnalyticsTracker />
-              <GoogleAnalyticsScript />
+              <GoogleAnalytics />
               <AdsenseScript />
               <MaintenanceBanner />
               <SiteNav />

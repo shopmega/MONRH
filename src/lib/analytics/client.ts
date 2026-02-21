@@ -8,6 +8,7 @@ type AnalyticsPayload = {
 };
 
 type GtagParams = Record<string, string | number | boolean>;
+type QueuedEvent = { eventName: string; params: GtagParams };
 
 function sanitizeMeta(meta?: Record<string, unknown>): GtagParams {
   if (!meta) return {};
@@ -26,7 +27,19 @@ function sanitizeMeta(meta?: Record<string, unknown>): GtagParams {
 
 function sendGaEvent(eventName: string, params: GtagParams) {
   if (typeof window === "undefined") return;
-  if (typeof window.gtag !== "function") return;
+  if (typeof window.gtag !== "function") {
+    window.__gaEventQueue = window.__gaEventQueue ?? [];
+    window.__gaEventQueue.push({ eventName, params });
+    return;
+  }
+
+  if (window.__gaEventQueue && window.__gaEventQueue.length > 0) {
+    for (const item of window.__gaEventQueue as QueuedEvent[]) {
+      window.gtag("event", item.eventName, item.params);
+    }
+    window.__gaEventQueue = [];
+  }
+
   window.gtag("event", eventName, params);
 }
 
