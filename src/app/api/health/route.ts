@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const apiChecks = await Promise.all([
+  const apiChecksBase = await Promise.all([
     timedCheck("api.admin.config", async () => {
       await readAdminConfig();
     }),
@@ -163,8 +163,24 @@ export async function GET(request: NextRequest) {
     }),
   ]);
 
+  const avisUrl = process.env.AVIS_API_URL?.replace(/\/$/, "");
+  const reviewlyCheck =
+    avisUrl ?
+      await timedCheck("api.reviewly.health", async () => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(`${avisUrl}/api/health`, { signal: controller.signal });
+        clearTimeout(timeout);
+        if (!res.ok) throw new Error(`${res.status}`);
+        const data = (await res.json()) as { status?: string };
+        if (data.status !== "healthy") throw new Error("unhealthy");
+      })
+    : { name: "api.reviewly.health", ok: true, durationMs: 0, error: null as string | null };
+
+  const apiChecks = [...apiChecksBase, reviewlyCheck];
   const allChecks = [...baseChecks, ...deepChecks, ...apiChecks];
-  const healthy = env.ok && allChecks.every((item) => item.ok);
+  const requiredChecks = allChecks.filter((c) => c.name !== "api.reviewly.health");
+  const healthy = env.ok && requiredChecks.every((item) => item.ok);
 
   return NextResponse.json(
     {

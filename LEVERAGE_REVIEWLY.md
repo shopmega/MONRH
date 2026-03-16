@@ -22,4 +22,4 @@ Reviewly (Business Reviews) and Salarie.ma (Employee Rights) have a natural syne
 1.  [x] Create `ReviewlyPromoCard` component.
 2.  [x] Integrate promo into Simulation Results.
 3.  [x] Integrate promo into Documents Library.
-4.  [ ] Setup a shared API endpoint for Company Autocomplete.
+4.  [ ] Setup a shared API endpoint for Company Autocomplete. → **Plan:** [docs/AVIS_API_INTEGRATION_PLAN.md](docs/AVIS_API_INTEGRATION_PLAN.md)

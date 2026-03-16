@@ -3,10 +3,20 @@
 import { useLanguage } from "@/components/language-provider";
 import Link from "next/link";
 
+const AVIS_SITE_URL = process.env.NEXT_PUBLIC_AVIS_SITE_URL?.replace(/\/$/, "") || "https://reviewly-ma.vercel.app";
+
+export type ReviewlyCompany = {
+  id: string;
+  name: string;
+  overall_rating?: number | null;
+};
+
 export function ReviewlyPromoCard({
-    type = "general"
+  type = "general",
+  company,
 }: {
-    type?: "general" | "conflict" | "transition"
+  type?: "general" | "conflict" | "transition";
+  company?: ReviewlyCompany | null;
 }) {
     const { language } = useLanguage();
     const isAr = language === "ar";
@@ -35,9 +45,11 @@ export function ReviewlyPromoCard({
         }
     };
 
-    const activeContent = content[type];
+  const activeContent = content[type];
+  const href = company?.id ? `${AVIS_SITE_URL}/businesses/${company.id}` : `${AVIS_SITE_URL}/`;
+  const ctaLabel = company?.name ? (isAr ? `تحقق من المراجعات لـ ${company.name}` : `Voir les avis pour ${company.name}`) : activeContent.cta;
 
-    return (
+  return (
         <article className="soft-card overflow-hidden rounded-3xl border border-[var(--line)] bg-gradient-to-br from-[var(--surface)] to-[var(--surface-muted)] p-1">
             <div className="rounded-[1.4rem] bg-[var(--surface)] p-5">
                 <div className="flex items-center gap-3">
@@ -60,11 +72,12 @@ export function ReviewlyPromoCard({
                 </div>
 
                 <Link
-                    href="https://reviewly-ma.vercel.app/"
+                    href={href}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="btn-primary mt-5 flex w-full items-center justify-center py-2.5 text-sm font-semibold transition-all hover:scale-[1.02]"
                 >
-                    {activeContent.cta}
+                    {ctaLabel}
                     <svg
                         className={`ms-2 h-4 w-4 ${isAr ? 'rotate-180' : ''}`}
                         fill="none"

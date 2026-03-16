@@ -2,6 +2,8 @@
 
 import { useMemo, useRef, useState } from "react";
 import { AdSlot } from "@/components/ad-slot";
+import { CompanySearchInput, type CompanyOption } from "@/components/company-search-input";
+import { ReviewlyRatingBadge } from "@/components/reviewly-rating-badge";
 import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics/client";
 import type { DocumentTemplate } from "@/lib/content/home-content";
@@ -51,6 +53,17 @@ export function DocumentGeneratorClient({
     [template.fields, values],
   );
   const isReady = missingFields.length === 0;
+
+  const reviewlyCompany = useMemo(() => {
+    const companyField = template.fields.find((f) => f.type === "company");
+    if (!companyField) return null;
+    const name = values[companyField.id]?.trim();
+    const id = values[`${companyField.id}_reviewly_id`]?.trim();
+    const ratingStr = values[`${companyField.id}_rating`]?.trim();
+    const rating = ratingStr ? parseFloat(ratingStr) : NaN;
+    if (!name || !id || Number.isNaN(rating)) return null;
+    return { companyName: name, businessId: id, rating };
+  }, [template.fields, values]);
 
   function ensureReady(): boolean {
     if (isReady) {
@@ -136,6 +149,32 @@ export function DocumentGeneratorClient({
         <div className="mt-4 space-y-3">
           {template.fields.map((field) => {
             const hasError = missingFields.some((missingField) => missingField.id === field.id);
+            if (field.type === "company") {
+              return (
+                <CompanySearchInput
+                  key={field.id}
+                  id={field.id}
+                  label={field.label}
+                  value={values[field.id] ?? ""}
+                  placeholder={field.placeholder || "Rechercher une entreprise..."}
+                  aria-invalid={hasError}
+                  onChange={(value) => {
+                    setFormStatus(undefined);
+                    setSaveStatus(undefined);
+                    setCopyStatus(undefined);
+                    setValues((current) => ({ ...current, [field.id]: value }));
+                  }}
+                  onSelect={(company: CompanyOption) => {
+                    setValues((current) => ({
+                      ...current,
+                      [field.id]: company.name,
+                      [`${field.id}_reviewly_id`]: company.id,
+                      [`${field.id}_rating`]: company.overall_rating != null ? String(company.overall_rating) : "",
+                    }));
+                  }}
+                />
+              );
+            }
             return (
               <label key={field.id} className="block text-sm font-semibold">
                 {field.label}
@@ -258,6 +297,15 @@ export function DocumentGeneratorClient({
             </div>
           </div>
 
+          {reviewlyCompany ? (
+            <div className="mt-4">
+              <ReviewlyRatingBadge
+                companyName={reviewlyCompany.companyName}
+                businessId={reviewlyCompany.businessId}
+                rating={reviewlyCompany.rating}
+              />
+            </div>
+          ) : null}
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ink-soft)]">

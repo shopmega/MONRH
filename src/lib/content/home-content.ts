@@ -35,7 +35,7 @@ export type DocumentTemplate = {
     id: string;
     label: string;
     placeholder: string;
-    type?: "text" | "date" | "datetime-local";
+    type?: "text" | "date" | "datetime-local" | "company";
   }>;
   href: string;
 };

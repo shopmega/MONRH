@@ -48,7 +48,7 @@ export async function listDocumentTemplatesWithOptions(
               label: String(item.label ?? ""),
               placeholder: String(item.placeholder ?? ""),
               type:
-                item.type === "date" || item.type === "datetime-local" || item.type === "text"
+                item.type === "date" || item.type === "datetime-local" || item.type === "text" || item.type === "company"
                   ? item.type
                   : undefined,
             };
