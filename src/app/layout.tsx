@@ -5,6 +5,7 @@ import { GoogleAnalytics } from "@/components/google-analytics";
 import { LanguageProvider } from "@/components/language-provider";
 import { MaintenanceBanner } from "@/components/maintenance-banner";
 import { PublicConfigProvider } from "@/components/public-config-provider";
+import { PwaRegistration } from "@/components/pwa-registration";
 import { SiteNav } from "@/components/site-nav";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
@@ -82,13 +83,11 @@ export async function generateMetadata(): Promise<Metadata> {
       description: siteDescription,
       images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
     },
-    ...(adsenseClient
-      ? {
-          other: {
-            "google-adsense-account": adsenseClient,
-          },
-        }
-      : {}),
+    manifest: "/manifest.webmanifest",
+    other: {
+      "theme-color": "#0f172a",
+      ...(adsenseClient ? { "google-adsense-account": adsenseClient } : {}),
+    },
     category: "legal",
   };
 }
@@ -160,6 +159,7 @@ export default async function RootLayout({
           <ThemeProvider initialTheme={initialTheme}>
             <PublicConfigProvider>
               <GoogleAnalytics />
+              <PwaRegistration />
               <AdsenseScript />
               <MaintenanceBanner />
               <SiteNav />
