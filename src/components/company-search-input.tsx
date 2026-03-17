@@ -153,7 +153,12 @@ export function CompanySearchInput({
           className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-[var(--line)] bg-[var(--surface)] py-1 shadow-lg"
         >
           {options.length === 0 && !loading ? (
-            <li className="px-3 py-2 text-sm text-[var(--ink-soft)]">Aucun résultat</li>
+            <>
+              <li className="px-3 py-2 text-sm text-[var(--ink-soft)]">Aucun résultat</li>
+              <li className="border-t border-[var(--line)] px-3 py-2 text-xs text-[var(--ink-soft)]">
+                Vous pouvez garder votre saisie pour utiliser ce nom.
+              </li>
+            </>
           ) : (
             options.map((company, index) => (
               <li

@@ -8,6 +8,7 @@ import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics/client";
 import type { DocumentTemplate } from "@/lib/content/home-content";
 import { buildDocumentPreview, toPreviewText } from "@/lib/documents/build-preview";
+import { isCompanyField } from "@/lib/documents/company-fields";
 
 function resolveInputType(field: DocumentTemplate["fields"][number]) {
   if (field.type) {
@@ -55,7 +56,7 @@ export function DocumentGeneratorClient({
   const isReady = missingFields.length === 0;
 
   const reviewlyCompany = useMemo(() => {
-    const companyField = template.fields.find((f) => f.type === "company");
+    const companyField = template.fields.find(isCompanyField);
     if (!companyField) return null;
     const name = values[companyField.id]?.trim();
     const id = values[`${companyField.id}_reviewly_id`]?.trim();
@@ -149,7 +150,7 @@ export function DocumentGeneratorClient({
         <div className="mt-4 space-y-3">
           {template.fields.map((field) => {
             const hasError = missingFields.some((missingField) => missingField.id === field.id);
-            if (field.type === "company") {
+            if (isCompanyField(field)) {
               return (
                 <CompanySearchInput
                   key={field.id}

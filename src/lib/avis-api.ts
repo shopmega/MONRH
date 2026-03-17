@@ -1,6 +1,10 @@
 /**
  * Server-only client for the AVis (Reviewly) API.
  * Use from API routes or server components; do not import in client components.
+ *
+ * Suggested companies (names entered in document generator when no match was selected)
+ * are stored in suggested_companies. Use listSuggestedCompanies() to export them and
+ * add new businesses to Reviewly (e.g. via a create/suggest endpoint when available).
  */
 
 const AVIS_API_URL = process.env.AVIS_API_URL?.replace(/\/$/, "") ?? "";
