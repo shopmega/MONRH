@@ -17,7 +17,14 @@ import {
   absoluteUrl,
 } from "@/lib/seo";
 import { readAdminConfig } from "@/lib/server/admin-config";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await readAdminConfig();
@@ -122,7 +129,7 @@ export default async function RootLayout({
       <head>
         {adsenseClient ? <meta name="google-adsense-account" content={adsenseClient} /> : null}
       </head>
-      <body className="antialiased">
+      <body className={`${inter.variable} antialiased bg-[var(--background)] text-[var(--foreground)]`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

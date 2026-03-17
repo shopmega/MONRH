@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLanguage } from "@/components/language-provider";
 import { AdSlot } from "@/components/ad-slot";
 import { features, type Article, type Category } from "@/lib/content/home-content";
+import { Container } from "@/components/container";
 
 const categoryArabicLabels: Record<string, { name: string; description: string }> = {
   salaire: { name: "الأجر", description: "الصافي والإجمالي وIR وCNSS وAMO والتحقق من كشف الأجر." },
@@ -56,159 +57,209 @@ export function HomePageClient({
   }, {});
 
   return (
-    <main className="paper-bg min-h-screen text-[var(--foreground)]">
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
-        <section className="enter-up soft-card relative overflow-hidden rounded-[2rem] p-6 sm:p-8 lg:p-10">
-          <div className="absolute -left-14 top-20 h-40 w-40 rounded-full bg-[var(--paper-glow-a)]/70 blur-2xl" />
-          <div className="absolute -right-20 -top-12 h-52 w-52 rounded-full bg-[var(--paper-glow-b)]/80 blur-2xl" />
-
-          <p className="section-kicker">{t("home.kicker")}</p>
-          <h1 className="display-font mt-3 max-w-3xl text-4xl font-semibold leading-[1.06] sm:text-5xl lg:text-6xl">
+    <main className="min-h-screen text-[var(--foreground)] w-full overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative py-24 sm:py-32 lg:py-40 bg-[var(--surface-muted)] border-b border-[var(--line)]">
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay pointer-events-none" />
+        <Container className="relative z-10 text-center flex flex-col items-center">
+          <div className="inline-flex items-center rounded-full border border-[var(--accent-soft)] bg-[var(--surface)] px-3 py-1 text-sm font-medium text-[var(--accent-strong)] mb-8 shadow-sm">
+            {t("home.kicker")}
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-[var(--heading)] sm:text-5xl lg:text-7xl max-w-4xl text-balance">
             {t("home.title")}
           </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--ink-soft)] sm:text-base">
+          <p className="mt-6 text-lg leading-8 text-[var(--ink-soft)] max-w-2xl text-balance">
             {t("home.description")}
           </p>
-
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/simulateurs" className="btn-primary px-5 py-2.5 text-sm">
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-x-6 gap-y-4">
+            <Link href="/simulateurs" className="btn-primary text-base px-8 py-3.5 shadow-md">
               {t("home.ctaSimulate")}
             </Link>
-            <Link href="/documents" className="btn-muted px-5 py-2.5 text-sm">
+            <Link href="/documents" className="btn-muted text-base px-8 py-3.5">
               {t("home.ctaDocument")}
             </Link>
-            <Link href="/bibliotheque" className="btn-muted px-5 py-2.5 text-sm">
+            <Link href="/bibliotheque" className="btn-muted text-base px-8 py-3.5">
               {t("home.ctaLibrary")}
             </Link>
           </div>
+        </Container>
+      </section>
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+      {/* Stats Section */}
+      <section className="py-12 border-b border-[var(--line)] bg-[var(--surface)]">
+        <Container>
+          <dl className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-3 text-center">
             {[
               { k: t("common.simulationsLabel"), v: t("home.statsSimulations", { count: 14 }) },
               { k: t("nav.library"), v: t("home.statsLibrary", { count: initialArticles.length }) },
               { k: t("nav.documents"), v: t("home.statsGenerators", { count: features.length > 0 ? 14 : 0 }) },
             ].map((item) => (
-              <div key={item.k} className="panel-strong rounded-2xl p-3">
-                <p className="text-xs uppercase tracking-wide text-[var(--ink-soft)]">{item.k}</p>
-                <p className="mt-1 font-semibold">{item.v}</p>
+              <div key={item.k} className="mx-auto flex max-w-xs flex-col gap-y-2">
+                <dt className="text-sm uppercase tracking-wider text-[var(--ink-soft)] font-medium">{item.k}</dt>
+                <dd className="order-first text-3xl font-semibold tracking-tight text-[var(--heading)] sm:text-4xl">{item.v}</dd>
               </div>
             ))}
-          </div>
-        </section>
+          </dl>
+        </Container>
+      </section>
 
-        <section className="enter-up enter-delay-1 mt-5 grid gap-4 lg:grid-cols-3">
-          {features.map((feature) => (
-            <Link
-              key={feature.title}
-              href={feature.href}
-              className="soft-card group rounded-3xl p-5 transition duration-200 hover:-translate-y-0.5"
-            >
-              <p className="section-kicker">{t("home.featureLabel")}</p>
-              <p className="display-font mt-2 text-2xl font-semibold leading-tight">
-                {language === "ar" ? featureArabicLabels[feature.href]?.title ?? feature.title : feature.title}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--ink-soft)]">
-                {language === "ar" ? featureArabicLabels[feature.href]?.description ?? feature.description : feature.description}
-              </p>
-              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
-                {t("common.explore")}
-              </p>
-            </Link>
-          ))}
-        </section>
+      {/* Features Outline */}
+      <section className="py-24 sm:py-32 bg-[var(--background)]">
+        <Container>
+          <div className="mx-auto max-w-2xl lg:text-center mb-16">
+            <h2 className="text-base font-semibold leading-7 text-[var(--accent)] uppercase tracking-wide">
+              {t("home.featureLabel")}
+            </h2>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-[var(--heading)] sm:text-4xl">
+              Tout ce dont vous avez besoin
+            </p>
+          </div>
+          <div className="mx-auto max-w-5xl">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature) => (
+                <Link
+                  key={feature.title}
+                  href={feature.href}
+                  className="soft-card flex flex-col p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-1 bg-[var(--surface)]"
+                >
+                  <h3 className="text-xl font-semibold leading-tight text-[var(--heading)]">
+                    {language === "ar" ? featureArabicLabels[feature.href]?.title ?? feature.title : feature.title}
+                  </h3>
+                  <p className="mt-4 text-base leading-relaxed text-[var(--ink-soft)] flex-grow">
+                    {language === "ar" ? featureArabicLabels[feature.href]?.description ?? feature.description : feature.description}
+                  </p>
+                  <div className="mt-8 flex items-center text-sm font-semibold text-[var(--accent)] group">
+                    {t("common.explore")}
+                    <span aria-hidden="true" className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </section>
 
-        <section className="enter-up enter-delay-2 mt-5 soft-card rounded-3xl p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="display-font text-2xl font-semibold">{t("home.categoriesTitle")}</h2>
-            <Link href="/bibliotheque" className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
-              {t("common.all")}
+      {/* Categories Grid */}
+      <section className="py-24 sm:py-32 bg-[var(--surface-muted)] border-y border-[var(--line)]">
+        <Container>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
+            <h2 className="text-3xl font-bold tracking-tight text-[var(--heading)]">{t("home.categoriesTitle")}</h2>
+            <Link href="/bibliotheque" className="text-sm font-semibold text-[var(--accent)] hover:text-[var(--accent-strong)] transition-colors">
+              {t("common.all")} <span aria-hidden="true">&rarr;</span>
             </Link>
           </div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {categories.map((category) => (
               <Link
                 key={category.name}
                 href={`/bibliotheque?category=${category.slug}`}
-                className="panel-strong rounded-2xl p-3 transition hover:translate-y-[-1px]"
+                className="panel-strong rounded-2xl p-6 transition hover:shadow-sm"
               >
-                <p className="font-semibold">
+                <h3 className="font-semibold text-[var(--heading)] text-lg">
                   {language === "ar" ? categoryArabicLabels[category.slug]?.name ?? category.name : category.name}
-                </p>
-                <p className="mt-1 text-xs text-[var(--ink-soft)]">
+                </h3>
+                <p className="mt-2 text-sm text-[var(--ink-soft)] line-clamp-2">
                   {language === "ar" ? categoryArabicLabels[category.slug]?.description ?? category.description : category.description}
                 </p>
-                <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">
+                <div className="mt-4 inline-flex items-center rounded-md bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--accent-strong)]">
                   {t("libraryPage.contentCount", { count: categoryCounts[category.slug] ?? 0 })}
-                </p>
+                </div>
               </Link>
             ))}
           </div>
-        </section>
+        </Container>
+      </section>
 
-        <section className="enter-up enter-delay-2 mt-5">
-          <p className="section-kicker pl-1">{t("common.partner")}</p>
-          <div className="soft-card mt-2 rounded-3xl p-3">
-            <AdSlot slot="1111111111" format="auto" />
-          </div>
-        </section>
-
-        {spotlight ? <section className="enter-up enter-delay-3 mt-5 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-          <article className="soft-card rounded-3xl p-6">
-            {spotlight.coverImageUrl || spotlight.thumbnailUrl ? (
-              <Image
-                src={spotlight.coverImageUrl || spotlight.thumbnailUrl || ""}
-                alt={spotlight.title}
-                width={1200}
-                height={480}
-                className="mb-4 h-48 w-full rounded-2xl object-cover"
-                unoptimized
-              />
-            ) : null}
-            <p className="section-kicker">
-              {t("home.spotlightLabel")} | {categoryName(spotlight.categorySlug, language, categories)} | {spotlight.readingTime}
-            </p>
-            <h2 className="display-font mt-3 text-3xl font-semibold leading-[1.14]">
-              {spotlight.title}
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--ink-soft)]">{spotlight.excerpt}</p>
-            <Link href={spotlight.href} className="btn-primary mt-5 px-4 py-2 text-sm">
-              {t("common.readFull")}
-            </Link>
-          </article>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-            {sideArticles.map((article, index) => (
-              <article key={article.title} className={`rounded-3xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}>
-                {article.thumbnailUrl || article.coverImageUrl ? (
+      {/* Spotlight and Latest Articles */}
+      {spotlight && (
+        <section className="py-24 sm:py-32 bg-[var(--background)]">
+          <Container>
+            <div className="mx-auto max-w-2xl lg:text-center mb-16">
+              <h2 className="text-3xl font-bold tracking-tight text-[var(--heading)] sm:text-4xl">
+                Actualités et guides récents
+              </h2>
+            </div>
+            <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr]">
+              <article className="soft-card flex flex-col p-8 bg-[var(--surface)]">
+                {spotlight.coverImageUrl || spotlight.thumbnailUrl ? (
                   <Image
-                    src={article.thumbnailUrl || article.coverImageUrl || ""}
-                    alt={article.title}
-                    width={900}
-                    height={224}
-                    className="mb-3 h-28 w-full rounded-xl object-cover"
+                    src={spotlight.coverImageUrl || spotlight.thumbnailUrl || ""}
+                    alt={spotlight.title}
+                    width={1200}
+                    height={600}
+                    className="mb-8 aspect-[2/1] w-full rounded-2xl object-cover object-center border border-[var(--line)]"
                     unoptimized
                   />
                 ) : null}
-                <p className="section-kicker">
-                  {categoryName(article.categorySlug, language, categories)} | {article.readingTime}
-                </p>
-                <h3 className="display-font mt-2 text-xl font-semibold leading-snug">{article.title}</h3>
-                <p className="mt-2 text-sm text-[var(--ink-soft)]">{article.excerpt}</p>
-                <Link href={article.href} className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
-                  {t("common.readArticle")}
-                </Link>
+                <div className="flex items-center gap-x-4 text-xs">
+                  <span className="text-[var(--ink-soft)]">{spotlight.readingTime}</span>
+                  <span className="relative z-10 rounded-full bg-[var(--surface-strong)] px-3 py-1.5 font-medium text-[var(--heading)]">
+                    {categoryName(spotlight.categorySlug, language, categories)}
+                  </span>
+                </div>
+                <div className="group relative mt-6 max-w-2xl">
+                  <h3 className="text-3xl font-bold leading-tight text-[var(--heading)] group-hover:text-[var(--accent)] transition-colors">
+                    <Link href={spotlight.href}>
+                      <span className="absolute inset-0" />
+                      {spotlight.title}
+                    </Link>
+                  </h3>
+                  <p className="mt-4 text-base leading-relaxed text-[var(--ink-soft)]">{spotlight.excerpt}</p>
+                </div>
+                <div className="mt-8 flex items-center">
+                  <span className="text-sm font-semibold text-[var(--accent)]">
+                    {t("common.readFull")} <span aria-hidden="true">&rarr;</span>
+                  </span>
+                </div>
               </article>
-            ))}
-          </div>
-        </section> : null}
 
-        <section className="enter-up enter-delay-3 mt-5">
-          <p className="section-kicker pl-1">{t("common.partner")}</p>
-          <div className="soft-card mt-2 rounded-3xl p-3">
-            <AdSlot slot="2222222222" format="auto" />
-          </div>
+              <div className="flex flex-col gap-8">
+                {sideArticles.map((article) => (
+                  <article key={article.title} className="soft-card p-6 flex flex-col sm:flex-row gap-6 items-start">
+                    {(article.thumbnailUrl || article.coverImageUrl) && (
+                      <div className="w-full sm:w-1/3 flex-shrink-0">
+                         <Image
+                          src={article.thumbnailUrl || article.coverImageUrl || ""}
+                          alt={article.title}
+                          width={300}
+                          height={200}
+                          className="aspect-[3/2] w-full rounded-xl object-cover border border-[var(--line)]"
+                          unoptimized
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-x-4 text-xs mb-3">
+                        <span className="text-[var(--ink-soft)]">{article.readingTime}</span>
+                        <span className="text-[var(--accent)] font-medium">
+                          {categoryName(article.categorySlug, language, categories)}
+                        </span>
+                      </div>
+                      <h4 className="text-lg font-bold leading-snug text-[var(--heading)] group-hover:text-[var(--accent)] transition-colors">
+                        <Link href={article.href}>
+                          {article.title}
+                        </Link>
+                      </h4>
+                      <p className="mt-2 text-sm text-[var(--ink-soft)] line-clamp-2">{article.excerpt}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </Container>
         </section>
-      </div>
+      )}
+
+      {/* Footer Ad Space */}
+      <section className="py-12 bg-[var(--surface-muted)] border-t border-[var(--line)]">
+        <Container>
+           <p className="text-center text-xs uppercase tracking-wider text-[var(--ink-soft)] font-semibold mb-4">{t("common.partner")}</p>
+           <div className="soft-card p-4 mx-auto max-w-4xl bg-white flex items-center justify-center min-h-[100px]">
+             <AdSlot slot="2222222222" format="auto" />
+           </div>
+        </Container>
+      </section>
     </main>
   );
 }
+
