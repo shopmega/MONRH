@@ -40,6 +40,7 @@ export function CompanySearchInput({
   const [open, setOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchOptions = useCallback(async (q: string) => {
@@ -47,10 +48,20 @@ export function CompanySearchInput({
       setOptions([]);
       return;
     }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     setLoading(true);
     try {
       const params = new URLSearchParams({ q: q.trim(), limit: "5" });
-      const res = await fetch(`/api/reviewly/companies?${params.toString()}`);
+      const res = await fetch(`/api/reviewly/companies?${params.toString()}`, {
+        signal: abortControllerRef.current.signal,
+      });
+      if (!res.ok) {
+        throw new Error("Failed to fetch");
+      }
       const data = (await res.json()) as { results?: Array<{ id: string; name: string; city?: string | null; overall_rating?: number | null; category?: string | null }> };
       const list = Array.isArray(data.results) ? data.results : [];
       setOptions(
@@ -63,10 +74,13 @@ export function CompanySearchInput({
         })),
       );
       setSelectedIndex(-1);
-    } catch {
+    } catch (error: any) {
+      if (error.name === "AbortError") return;
       setOptions([]);
     } finally {
-      setLoading(false);
+      if (!abortControllerRef.current?.signal.aborted) {
+        setLoading(false);
+      }
     }
   }, []);
 

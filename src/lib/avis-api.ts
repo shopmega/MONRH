@@ -7,8 +7,6 @@
  * add new businesses to Reviewly (e.g. via a create/suggest endpoint when available).
  */
 
-const AVIS_API_URL = process.env.AVIS_API_URL?.replace(/\/$/, "") ?? "";
-
 export type AVisBusiness = {
   id: string;
   name: string;
@@ -47,7 +45,8 @@ export async function searchCompanies(
   q: string,
   options: AVisSearchOptions = {},
 ): Promise<AVisSearchResult> {
-  if (!AVIS_API_URL) {
+  const apiUrl = process.env.AVIS_API_URL?.replace(/\/$/, "") ?? "";
+  if (!apiUrl) {
     throw new Error("AVIS_API_URL is not configured");
   }
 
@@ -68,11 +67,19 @@ export async function searchCompanies(
   if (options.city) params.set("city", options.city);
   if (options.category) params.set("category", options.category);
 
-  const url = `${AVIS_API_URL}/api/businesses/search?${params.toString()}`;
-  const res = await fetch(url, {
-    headers: { Accept: "application/json" },
-    next: { revalidate: 0 },
-  });
+  const url = `${apiUrl}/api/businesses/search?${params.toString()}`;
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 0 },
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
 
   if (!res.ok) {
     throw new Error(`AVis API error: ${res.status} ${res.statusText}`);
@@ -80,8 +87,13 @@ export async function searchCompanies(
 
   const data = (await res.json()) as AVisSearchResult;
   return data;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    throw err;
+  }
 }
 
 export function getAvisSiteUrl(): string {
-  return process.env.NEXT_PUBLIC_AVIS_SITE_URL?.replace(/\/$/, "") || AVIS_API_URL || "https://reviewly-ma.vercel.app";
+  const apiUrl = process.env.AVIS_API_URL?.replace(/\/$/, "") ?? "";
+  return process.env.NEXT_PUBLIC_AVIS_SITE_URL?.replace(/\/$/, "") || apiUrl || "https://reviewly-ma.vercel.app";
 }
