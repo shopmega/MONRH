@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
 import { listArticles } from "@/lib/server/articles-store";
 import { listDocumentTemplates } from "@/lib/server/document-templates-store";
+import { seoGuides } from "@/data/seo-guides";
 
 const staticPages = [
   "",
@@ -67,5 +68,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.65,
   }));
 
-  return [...staticEntries, ...articleEntries, ...documentEntries];
+  const guideEntries: MetadataRoute.Sitemap = seoGuides.map((guide) => ({
+    url: `${SITE_URL}/sujets/${guide.slug}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  return [...staticEntries, ...articleEntries, ...documentEntries, ...guideEntries];
 }

@@ -7,6 +7,7 @@ import { AdSlot } from "@/components/ad-slot";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { RelatedContent } from "@/components/related-content";
+import { JsonLd } from "@/components/json-ld";
 import { trackEvent } from "@/lib/analytics/client";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
 import {
