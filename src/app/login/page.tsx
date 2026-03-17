@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { createSupabaseClient } from "@/lib/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 function sanitizeNextPath(value: string | null): string {
   if (!value || !value.startsWith("/")) return "/compte";
@@ -167,14 +170,15 @@ export default function LoginPage() {
           <article className="soft-card rounded-3xl p-6">
             <h2 className="display-font text-2xl font-semibold">{t("accountPage.sessionLogin")}</h2>
             <p className="mt-1 text-sm text-[var(--ink-soft)]">Utilisez vos identifiants d&apos;acces.</p>
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={signInWithLinkedIn}
               disabled={loading}
-              className="btn-muted mt-4 w-full px-4 py-2.5 text-sm"
+              className="mt-4 w-full"
             >
               {loading ? t("common.loading") : "Continuer avec LinkedIn"}
-            </button>
+            </Button>
             <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-[var(--surface-muted)] p-1 text-sm">
               <button
                 type="button"
@@ -195,37 +199,37 @@ export default function LoginPage() {
             {checking ? (
               <p className="mt-5 text-sm text-[var(--ink-soft)]">{t("common.loading")}</p>
             ) : (
-              <form onSubmit={onSubmit} className="mt-5 space-y-3">
-                <label className="block text-sm font-semibold">
-                  Email
-                  <input
+              <form onSubmit={onSubmit} className="mt-5 space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="input-shell mt-1"
                     autoComplete="username"
                     placeholder="user@domain.com"
                     required
                   />
-                </label>
-                <label className="block text-sm font-semibold">
-                  {t("accountPage.sessionPrompt")}
-                  <input
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">{t("accountPage.sessionPrompt")}</Label>
+                  <Input
+                    id="password"
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="input-shell mt-1"
                     autoComplete="current-password"
                     required
                   />
-                </label>
-                <button type="submit" disabled={loading} className="btn-primary w-full px-4 py-2.5 text-sm">
+                </div>
+                <Button type="submit" disabled={loading} className="w-full">
                   {loading
                     ? t("common.loading")
                     : mode === "signup"
                       ? "Creer mon compte"
                       : t("accountPage.sessionLogin")}
-                </button>
+                </Button>
               </form>
             )}
 

@@ -3,6 +3,9 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { createSupabaseClient } from "@/lib/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -46,20 +49,20 @@ export default function ForgotPasswordPage() {
             Entrez votre email pour recevoir un lien de reinitialisation.
           </p>
 
-          <form onSubmit={onSubmit} className="mt-5 space-y-3">
-            <label className="block text-sm font-semibold">
-              Email
-              <input
+          <form onSubmit={onSubmit} className="mt-5 space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="input-shell mt-1"
                 required
               />
-            </label>
-            <button type="submit" disabled={loading} className="btn-primary w-full px-4 py-2.5 text-sm">
+            </div>
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? "Envoi..." : "Envoyer le lien"}
-            </button>
+            </Button>
           </form>
 
           {status ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{status}</p> : null}
