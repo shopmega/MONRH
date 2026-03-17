@@ -200,7 +200,7 @@ export default function LoginPage() {
               <p className="mt-5 text-sm text-[var(--ink-soft)]">{t("common.loading")}</p>
             ) : (
               <form onSubmit={onSubmit} className="mt-5 space-y-6">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -212,7 +212,7 @@ export default function LoginPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="password">{t("accountPage.sessionPrompt")}</Label>
                   <Input
                     id="password"
