@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export type CompanyOption = {
   id: string;
@@ -134,13 +136,11 @@ export function CompanySearchInput({
   const showDropdown = open && (options.length > 0 || loading);
 
   return (
-    <div ref={containerRef} className={`relative block text-sm font-semibold ${className}`}>
+    <div ref={containerRef} className={`relative block space-y-3 ${className}`}>
       {label ? (
-        <label htmlFor={id} className="block">
-          {label}
-        </label>
+        <Label htmlFor={id}>{label}</Label>
       ) : null}
-      <input
+      <Input
         id={id}
         type="text"
         autoComplete="off"
@@ -153,7 +153,7 @@ export function CompanySearchInput({
         onChange={handleInputChange}
         onFocus={() => query.trim().length >= MIN_QUERY_LENGTH && setOpen(true)}
         placeholder={placeholder}
-        className={`input-shell mt-1 font-normal ${ariaInvalid ? "border-red-500" : ""}`}
+        error={ariaInvalid ? "Ce champ est requis" : undefined}
       />
       {loading && (
         <p className="mt-1 text-xs text-[var(--ink-soft)]" aria-live="polite">

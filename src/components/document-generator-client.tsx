@@ -5,6 +5,9 @@ import { AdSlot } from "@/components/ad-slot";
 import { CompanySearchInput, type CompanyOption } from "@/components/company-search-input";
 import { ReviewlyRatingBadge } from "@/components/reviewly-rating-badge";
 import { useLanguage } from "@/components/language-provider";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics/client";
 import type { DocumentTemplate } from "@/lib/content/home-content";
 import { buildDocumentPreview, toPreviewText } from "@/lib/documents/build-preview";
@@ -147,7 +150,7 @@ export function DocumentGeneratorClient({
         <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
           {t("documentGenerator.completion")}: {previewData.completion.toLocaleString(locale)}%
         </p>
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-6">
           {template.fields.map((field) => {
             const hasError = missingFields.some((missingField) => missingField.id === field.id);
             if (isCompanyField(field)) {
@@ -177,9 +180,10 @@ export function DocumentGeneratorClient({
               );
             }
             return (
-              <label key={field.id} className="block text-sm font-semibold">
-                {field.label}
-                <input
+              <div key={field.id} className="space-y-3">
+                <Label htmlFor={field.id}>{field.label}</Label>
+                <Input
+                  id={field.id}
                   type={resolveInputType(field)}
                   value={values[field.id] ?? ""}
                   onChange={(event) => {
@@ -191,20 +195,20 @@ export function DocumentGeneratorClient({
                   placeholder={field.placeholder}
                   required
                   aria-invalid={hasError}
-                  className={`input-shell mt-1 font-normal ${hasError ? "border-red-500" : ""}`}
+                  error={hasError ? "Ce champ est requis" : undefined}
                 />
-              </label>
+              </div>
             );
           })}
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={openPreview}
-          className="btn-primary mt-4 w-full px-4 py-2.5 text-sm"
+          className="mt-6 w-full"
         >
           {t("documentGenerator.previewTitle")}
-        </button>
+        </Button>
       </form>
 
       <article ref={previewRef} className="soft-card min-w-0 rounded-3xl p-5">
