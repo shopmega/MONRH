@@ -153,6 +153,8 @@ export function DocumentGeneratorClient({
         <div className="mt-4 space-y-6">
           {template.fields.map((field) => {
             const hasError = missingFields.some((missingField) => missingField.id === field.id);
+            const showError = Boolean(formStatus && hasError);
+            
             if (isCompanyField(field)) {
               return (
                 <CompanySearchInput
@@ -161,7 +163,7 @@ export function DocumentGeneratorClient({
                   label={field.label}
                   value={values[field.id] ?? ""}
                   placeholder={field.placeholder || "Rechercher une entreprise..."}
-                  aria-invalid={hasError}
+                  aria-invalid={showError}
                   onChange={(value) => {
                     setFormStatus(undefined);
                     setSaveStatus(undefined);
@@ -194,8 +196,8 @@ export function DocumentGeneratorClient({
                   }}
                   placeholder={field.placeholder}
                   required
-                  aria-invalid={hasError}
-                  error={hasError ? "Ce champ est requis" : undefined}
+                  aria-invalid={showError}
+                  error={showError ? "Ce champ est requis" : undefined}
                 />
               </div>
             );
