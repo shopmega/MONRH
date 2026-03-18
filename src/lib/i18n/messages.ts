@@ -1,8 +1,9 @@
-﻿export const MESSAGES = {
+export const MESSAGES = {
   fr: {
     nav: {
       home: "Accueil",
       simulate: "Simuler",
+      plan: "Planifier",
       documents: "Documents",
       library: "Articles",
       account: "Compte",
@@ -60,6 +61,24 @@
       groupDisputeTitle: "Litiges et Recouvrement",
       groupDisputeSubtitle: "Scenarios de preuve et montants de reclamation.",
       toolsCount: "{count} outils",
+    },
+    planifierPage: {
+      kicker: "Decision Engine",
+      title: "Planifiez votre avenir financier",
+      description: "Simulateurs de decision: augmentation, bonus, credit, retraite, freelance. Comparez, decidez, agissez.",
+      groupSalaryTitle: "Salaire & Fiscalite",
+      groupSalarySubtitle: "Augmentation, bonus, IGR detail, avantages en nature.",
+      groupCareerTitle: "Decisions de Carriere",
+      groupCareerSubtitle: "Freelance vs salarie, credit immobilier, chomage, retraite.",
+      groupHRTitle: "Entreprise & RH",
+      groupHRSubtitle: "Masse salariale, recrutement, optimisation remuneration.",
+      groupFreelanceTitle: "Freelance & Independant",
+      groupFreelanceSubtitle: "Auto-entrepreneur, tarification, rentabilite.",
+      groupCompareTitle: "Comparaison & Decision",
+      groupCompareSubtitle: "Comparez deux scenarios et generez un rapport de decision.",
+      toolsCount: "{count} outils",
+      badgeNew: "NOUVEAU",
+      badgePaid: "PRO",
     },
     documentsPage: {
       kicker: "Document Factory",
@@ -448,6 +467,7 @@
     nav: {
       home: "الرئيسية",
       simulate: "المحاكاة",
+      plan: "التخطيط",
       documents: "الوثائق",
       library: "المقالات",
       account: "الحساب",
@@ -882,6 +902,24 @@
       formulas: "الصيغ المعتمدة",
       warnings: "نقاط الانتباه",
       nextSteps: "الخطوات الموصى بها",
+    },
+    planifierPage: {
+      kicker: "محرك التخطيط المالي",
+      title: "أدوات التخطيط والقرار",
+      description: "صمم مسارك المهني والمالي مع 17 أداة متقدمة للنمو، القرارات الكبرى، والعمل الحر.",
+      toolsCount: "{count} أدوات",
+      badgeNew: "جديد",
+      badgePaid: "إصدار برو",
+      groupCompareTitle: "مقارنة السيناريوهات",
+      groupCompareSubtitle: "اتخذ قرارات مبنية على الأرقام.",
+      groupSalaryTitle: "تحسين ونمو الأجر",
+      groupSalarySubtitle: "فهم الزيادات، المنح، والمزايا العينية.",
+      groupCareerTitle: "قرارات الحياة المهنية",
+      groupCareerSubtitle: "المستقل مقابل الأجير، القروض، والتقاعد.",
+      groupHRTitle: "أدوات المقاولات والموارد البشرية",
+      groupHRSubtitle: "كلفة التوظيف، الأجور، وتدقيق ورقة الأجر.",
+      groupFreelanceTitle: "باقة العمل الحر",
+      groupFreelanceSubtitle: "تسعير التراخيص والربحية الصافية.",
     },
     ad: {
       placeholder: "مساحة إعلانية. فعّل NEXT_PUBLIC_ADSENSE_CLIENT لتشغيل AdSense.",

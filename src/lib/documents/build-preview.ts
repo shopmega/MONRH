@@ -195,6 +195,79 @@ export function buildDocumentPreview(
         attachments: ["Echanges ecrits", "Temoignages", "Journal date des faits"],
         cc: ["Service RH", "Referent interne"],
       };
+    case "salary-negotiation-letter":
+      return {
+        ...defaultData,
+        subject: "Demande de Revalorisation Salariale",
+        context: `Dans le cadre de l'evolution de mes missions et de mon engagement au sein de ${companyName || "l'entreprise"}.`,
+        request: "Je sollicite une revision de ma remuneration fixe actuelle pour mieux l'aligner sur mes responsabilites et le marche.",
+        legalBasis: "Cette demande est formulee dans un esprit de dialogue constructif et de reconnaissance mutuelle.",
+        deadline: "Je reste disponible pour un entretien afin d'exposer mes arguments en detail.",
+        attachments: ["Recapitulatif des realisations", "Etude de marche (facultatif)"],
+        cc: ["Manager direct"],
+      };
+    case "promotion-request-email":
+      return {
+        ...defaultData,
+        subject: "Demande de Promotion / Evolution de Poste",
+        context: `Apres une periode de performance constante sur mon poste actuel de ${position || "collaborateur"}.`,
+        request: "Je souhaite soumettre ma candidature pour une evolution vers des responsabilites superieures.",
+        legalBasis: "L'evolution interne constitue un levier majeur de motivation et de croissance partagee.",
+        deadline: "Je sollicite un point d'etape pour discuter des opportunites et de ma trajectoire.",
+        attachments: ["Bilan de competences", "Proposition de nouvelles missions"],
+        cc: ["Manager direct", "Service RH"],
+      };
+    case "compensation-comparison-report":
+      return {
+        ...defaultData,
+        subject: "Rapport de Comparaison de Remuneration",
+        context: "Analyse comparative entre deux scenarios de compensation (Salaire vs Bonus vs Avantages).",
+        request: "Synthese des gains nets, de l'efficacite fiscale et du cout global employeur pour aide a la decision.",
+        legalBasis: "Rapport purement informatif base sur les donnees de simulation Salarie.ma.",
+        attachments: ["Detail des calculs", "Scenario de reference", "Projection annuelle"],
+        cc: [],
+      };
+    case "bonus-request-letter":
+      return {
+        ...defaultData,
+        subject: "Demande d'Attribution de Prime Exceptionnelle",
+        context: "A l'issue de la reussite d'un projet majeur ou d'une periode de surcroit d'activite.",
+        request: "Je sollicite l'octroi d'une prime exceptionnelle en reconnaissance des resultats obtenus.",
+        legalBasis: "Les primes constituent un mode de recompense de la performance individuelle ou collective.",
+        deadline: "Je reste a votre disposition pour toute precision sur les indicateurs de reussite.",
+        attachments: ["Rapport de performance", "Emails de felicitation"],
+        cc: ["Manager direct"],
+      };
+    case "variable-compensation-breakdown":
+      return {
+        ...defaultData,
+        subject: "Detail de la Remuneration Variable / Bonus",
+        context: "Justificatif detaille du calcul de la part variable pour la periode ecoulee.",
+        request: "Recapitulatif des objectifs atteints, des taux de calcul et du net fiscal associe.",
+        legalBasis: "Transparence des elements de remuneration conformement aux regles de l'entreprise.",
+        attachments: ["Grille d'objectifs", "Tableau de calcul net"],
+        cc: ["Service Paie"],
+      };
+    case "freelance-pricing-sheet":
+      return {
+        ...defaultData,
+        subject: "Grille de Tarification (TJM) & Offre de Services",
+        context: "Positionnement tarifaire base sur l'objectif de revenu net et les charges AE.",
+        request: "Presentation du TJM (Tarif Journalier Moyen) et des modalites de collaboration.",
+        legalBasis: "Offre commerciale de prestation de services en tant qu'auto-entrepreneur.",
+        attachments: ["Portfolio de services", "Detail des options de facturation"],
+        cc: [],
+      };
+    case "invoice-template":
+      return {
+        ...defaultData,
+        subject: "Facture / Modele de Facturation",
+        context: "Document de facturation pour prestations de services ou vente de biens.",
+        request: "Demande de reglement pour les prestations accomplies conformement au devis.",
+        legalBasis: "Obligations de facturation liees au statut d'auto-entrepreneur au Maroc.",
+        attachments: ["Devis signe", "Bon de livraison"],
+        cc: [],
+      };
     default:
       return defaultData;
   }

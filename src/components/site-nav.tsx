@@ -9,7 +9,7 @@ import { usePublicConfig } from "@/components/public-config-provider";
 import { useTheme } from "@/components/theme-provider";
 import { SITE_NAME } from "@/lib/seo";
 
-type NavKey = "home" | "simulate" | "documents" | "library" | "account" | "admin";
+type NavKey = "home" | "simulate" | "plan" | "documents" | "library" | "account" | "admin";
 
 type NavItem = {
   key: NavKey;
@@ -19,6 +19,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { key: "home", href: "/" },
   { key: "simulate", href: "/simulateurs" },
+  { key: "plan", href: "/planifier" },
   { key: "documents", href: "/documents" },
   { key: "library", href: "/bibliotheque" },
   { key: "account", href: "/compte" },
@@ -54,6 +55,14 @@ function MobileIcon({ itemKey }: { itemKey: NavKey }) {
       <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M7 3h7l4 4v14H7z" />
         <path d="M14 3v5h5M9 12h6M9 16h6" />
+      </svg>
+    );
+  }
+  if (itemKey === "plan") {
+    return (
+      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+        <polyline points="16 7 22 7 22 13" />
       </svg>
     );
   }
