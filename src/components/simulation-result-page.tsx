@@ -8,6 +8,7 @@ import { AdSlot } from "@/components/ad-slot";
 import { useLanguage } from "@/components/language-provider";
 import { RelatedContent } from "@/components/related-content";
 import { SimulationExplanation } from "@/components/simulation-explanation";
+import { SITE_URL } from "@/lib/seo";
 import {
   localizeBreakdownLabel,
   localizeCalculatorDescription,
@@ -511,7 +512,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
               </span>
             ) : null}
           </div>
-          <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+          <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold print:hidden">
             <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-[var(--ink-soft)]">
               1. {t("simulator.stepInput")}
             </span>
@@ -522,12 +523,12 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
               3. {t("simulator.stepResult")}
             </span>
           </div>
-          <Link href={expectedPath} className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
+          <Link href={expectedPath} className="mt-3 inline-block text-sm font-semibold text-[var(--accent)] print:hidden">
             {t("resultPage.backToForm")}
           </Link>
         </section>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(290px,1fr)] lg:items-start">
+        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(290px,1fr)] lg:items-start print:grid-cols-1">
           <section className="space-y-4">
             {keyMetrics.length > 0 ? (
               <div className="grid gap-2 sm:grid-cols-3">
@@ -581,7 +582,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
             </section>
           </section>
 
-          <aside className="space-y-4 lg:sticky lg:top-20">
+          <aside className="space-y-4 lg:sticky lg:top-20 print:hidden">
             <section className="soft-card min-w-0 rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.actionsTitle")}</p>
               <div className="mt-3 flex flex-col gap-2 text-sm">
@@ -634,30 +635,35 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
           </aside>
         </div>
 
-        <SimulationExplanation explanation={resolvedSnapshot.result.explanation} />
-        <RelatedContent
-          items={
-            (mappedRelatedItems ?? []).length > 0
-              ? mappedRelatedItems
-              : [
-                {
-                  title: t("simulator.relatedSimulatorsTitle"),
-                  description: t("simulator.relatedSimulatorsDesc"),
-                  href: "/simulateurs",
-                },
-                {
-                  title: t("simulator.relatedDocumentsTitle"),
-                  description: t("simulator.relatedDocumentsDesc"),
-                  href: "/documents",
-                },
-                {
-                  title: t("simulator.relatedLibraryTitle"),
-                  description: t("simulator.relatedLibraryDesc"),
-                  href: "/bibliotheque",
-                },
-              ]
-          }
-        />
+        <div className="print:hidden">
+          <SimulationExplanation explanation={resolvedSnapshot.result.explanation} />
+          <RelatedContent
+            items={
+              (mappedRelatedItems ?? []).length > 0
+                ? mappedRelatedItems
+                : [
+                  {
+                    title: t("simulator.relatedSimulatorsTitle"),
+                    description: t("simulator.relatedSimulatorsDesc"),
+                    href: "/simulateurs",
+                  },
+                  {
+                    title: t("simulator.relatedDocumentsTitle"),
+                    description: t("simulator.relatedDocumentsDesc"),
+                    href: "/documents",
+                  },
+                  {
+                    title: t("simulator.relatedLibraryTitle"),
+                    description: t("simulator.relatedLibraryDesc"),
+                    href: "/bibliotheque",
+                  },
+                ]
+            }
+          />
+        </div>
+        <p className="mt-8 hidden text-center text-[10px] text-[var(--ink-soft)] print:block">
+          {t("common.generatedOn")} {SITE_URL}
+        </p>
       </div>
     </main>
   );

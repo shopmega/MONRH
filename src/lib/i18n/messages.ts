@@ -32,6 +32,7 @@ export const MESSAGES = {
       relatedContent: "Contenus lies",
       yes: "Oui",
       no: "Non",
+      generatedOn: "Document généré sur",
     },
     home: {
       kicker: "Moroccan Employee Rights Platform",
@@ -496,6 +497,7 @@ export const MESSAGES = {
       relatedContent: "محتوى مرتبط",
       yes: "نعم",
       no: "لا",
+      generatedOn: "تم إنشاء الوثيقة على",
     },
     home: {
       kicker: "منصة حقوق الأجراء بالمغرب",

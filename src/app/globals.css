@@ -187,3 +187,41 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateY(0);
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  .paper-bg {
+    background: white !important;
+  }
+
+  .soft-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure text is black and readable */
+  h1, h2, h3, h4, h5, h6, p, span, div {
+    color: black !important;
+  }
+
+  /* Hide scrollbars and other UI artifacts */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}

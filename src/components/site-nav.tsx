@@ -158,7 +158,7 @@ export function SiteNav() {
             </div>
           </Link>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 print:hidden">
             <button
               type="button"
               onClick={toggleTheme}
@@ -227,7 +227,7 @@ export function SiteNav() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-2 bottom-3 z-50 rounded-2xl border border-[var(--line-strong)] bg-[var(--surface)] p-1.5 shadow-xl backdrop-blur sm:inset-x-3 md:hidden">
+      <nav className="fixed inset-x-2 bottom-3 z-50 rounded-2xl border border-[var(--line-strong)] bg-[var(--surface)] p-1.5 shadow-xl backdrop-blur sm:inset-x-3 md:hidden print:hidden">
         <ul
           className="grid gap-1"
           style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}

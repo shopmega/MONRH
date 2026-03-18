@@ -12,6 +12,7 @@ import { trackEvent } from "@/lib/analytics/client";
 import type { DocumentTemplate } from "@/lib/content/home-content";
 import { buildDocumentPreview, toPreviewText } from "@/lib/documents/build-preview";
 import { isCompanyField } from "@/lib/documents/company-fields";
+import { SITE_URL } from "@/lib/seo";
 
 function resolveInputType(field: DocumentTemplate["fields"][number]) {
   if (field.type) {
@@ -144,8 +145,8 @@ export function DocumentGeneratorClient({
   }
 
   return (
-    <section className="mt-5 grid gap-4 lg:grid-cols-2">
-      <form className="soft-card min-w-0 rounded-3xl p-5">
+    <section className="mt-5 grid gap-4 lg:grid-cols-2 print:grid-cols-1">
+      <form className="soft-card min-w-0 rounded-3xl p-5 print:hidden">
         <h2 className="display-font break-words text-xl font-semibold">{t("documentGenerator.fieldsTitle")}</h2>
         <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
           {t("documentGenerator.completion")}: {previewData.completion.toLocaleString(locale)}%
@@ -225,7 +226,7 @@ export function DocumentGeneratorClient({
             </span>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2 print:hidden">
             <button
               type="button"
               onClick={printDocument}
@@ -270,13 +271,13 @@ export function DocumentGeneratorClient({
           </div>
 
           {formStatus ? (
-            <p className="mt-3 rounded-xl bg-[var(--warning-soft)] px-3 py-2 text-sm text-[var(--foreground)] break-words">{formStatus}</p>
+            <p className="mt-3 rounded-xl bg-[var(--warning-soft)] px-3 py-2 text-sm text-[var(--foreground)] break-words print:hidden">{formStatus}</p>
           ) : null}
           {saveStatus ? (
-            <p className="status-success mt-3 rounded-xl px-3 py-2 text-sm">{saveStatus}</p>
+            <p className="status-success mt-3 rounded-xl px-3 py-2 text-sm print:hidden">{saveStatus}</p>
           ) : null}
           {copyStatus ? (
-            <p className="status-info mt-2 rounded-xl px-3 py-2 text-sm">{copyStatus}</p>
+            <p className="status-info mt-2 rounded-xl px-3 py-2 text-sm print:hidden">{copyStatus}</p>
           ) : null}
 
           {previewMode === "raw" ? (
@@ -297,7 +298,7 @@ export function DocumentGeneratorClient({
             </article>
           )}
 
-          <div className="mt-4">
+          <div className="mt-4 print:hidden">
             <p className="section-kicker">{t("common.partner")}</p>
             <div className="mt-2">
               <AdSlot slot="1717171717" format="auto" />
@@ -305,7 +306,7 @@ export function DocumentGeneratorClient({
           </div>
 
           {reviewlyCompany ? (
-            <div className="mt-4">
+            <div className="mt-4 print:hidden">
               <ReviewlyRatingBadge
                 companyName={reviewlyCompany.companyName}
                 businessId={reviewlyCompany.businessId}
@@ -335,6 +336,9 @@ export function DocumentGeneratorClient({
               </ul>
             </div>
           </div>
+          <p className="mt-8 hidden text-center text-[10px] text-[var(--ink-soft)] print:block">
+            {t("common.generatedOn")} {SITE_URL}
+          </p>
       </article>
     </section>
   );
