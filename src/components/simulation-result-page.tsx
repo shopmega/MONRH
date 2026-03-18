@@ -188,8 +188,21 @@ function formatValue(
   return String(value);
 }
 
+function flattenObject(obj: any, prefix = ""): Record<string, string | number | boolean> {
+  if (!obj || typeof obj !== "object") return {};
+  return Object.keys(obj).reduce((acc, k) => {
+    const pre = prefix.length ? prefix + "." : "";
+    if (typeof obj[k] === "object" && obj[k] !== null && !Array.isArray(obj[k])) {
+      Object.assign(acc, flattenObject(obj[k], pre + k));
+    } else {
+      acc[pre + k] = obj[k];
+    }
+    return acc;
+  }, {} as Record<string, string | number | boolean>);
+}
+
 function pickKeyMetrics(snapshot: SimulationResultSnapshot): Array<[string, number]> {
-  const breakdown = snapshot?.result?.breakdown ?? {};
+  const breakdown = flattenObject(snapshot?.result?.breakdown);
   const entries = Object.entries(breakdown).filter(
     (entry): entry is [string, number] => typeof entry[1] === "number",
   );
@@ -252,10 +265,11 @@ const BAR_FIELD_PRIORITY = [
 ];
 
 function buildBarData(
-  breakdown: Record<string, string | number | boolean> | undefined,
+  breakdownRaw: Record<string, string | number | boolean | any> | undefined,
   labels: Record<string, string> | undefined,
 ): BarEntry[] {
-  const entries = Object.entries(breakdown ?? {})
+  const breakdown = flattenObject(breakdownRaw);
+  const entries = Object.entries(breakdown)
     .filter((e): e is [string, number] => typeof e[1] === "number" && (e[1] as number) >= 0)
     .sort((a, b) => {
       const ia = BAR_FIELD_PRIORITY.indexOf(a[0]);
@@ -310,7 +324,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
   const showBarChart = resolvedSnapshot ? BAR_CHART_TYPES.has(resolvedSnapshot.calculatorType) : false;
 
   const pieData = useMemo<PieSlice[]>(
-    () => (resolvedSnapshot && showPieChart ? buildPieData(resolvedSnapshot.result?.breakdown ?? {}) : []),
+    () => (resolvedSnapshot && showPieChart ? buildPieData(flattenObject(resolvedSnapshot.result?.breakdown)) : []),
     [resolvedSnapshot, showPieChart],
   );
   const barData = useMemo<BarEntry[]>(
@@ -443,9 +457,10 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
   const safeSnapshot = resolvedSnapshot;
 
   async function copySummary() {
-    const lines = Object.entries(safeSnapshot.result.breakdown).map(([key, value]) => {
-      const label = localizeBreakdownLabel(key, safeSnapshot.breakdownLabels[key] ?? key, language);
-      return `${label}: ${formatValue(value, safeSnapshot.locale, t, safeSnapshot.units[key])}`;
+    const breakdown = flattenObject(safeSnapshot.result.breakdown);
+    const lines = Object.entries(breakdown).map(([key, value]) => {
+      const label = localizeBreakdownLabel(key, (safeSnapshot.breakdownLabels ?? {})[key] ?? key, language);
+      return `${label}: ${formatValue(value, safeSnapshot.locale, t, (safeSnapshot.units ?? {})[key])}`;
     });
     const payload = [
       localizeCalculatorTitle(safeSnapshot.calculatorType, safeSnapshot.title, language),
@@ -537,7 +552,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
             <section className="soft-card min-w-0 rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.breakdownTitle")}</p>
               <div className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-                {Object.entries(resolvedSnapshot.result?.breakdown ?? {}).map(([key, value]) => (
+                {Object.entries(flattenObject(resolvedSnapshot.result?.breakdown)).map(([key, value]) => (
                   <div key={key} className="panel-strong min-w-0 rounded-xl p-3">
                     <p className="break-words text-[11px] uppercase tracking-wide text-[var(--ink-soft)]">
                       {localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language)}
