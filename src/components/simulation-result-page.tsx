@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
@@ -15,8 +16,35 @@ import {
 import { calculatorTypeToPath } from "@/lib/simulations/calculator-path";
 import { ReviewlyPromoCard } from "@/components/reviewly-promo-card";
 import { type SimulationResultSnapshot } from "@/lib/simulations/result-snapshot";
+import type { PieSlice } from "@/components/charts/breakdown-pie-chart";
+import type { BarEntry } from "@/components/charts/timeline-bar-chart";
 
-function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): string | null {
+const BreakdownPieChart = dynamic(
+  () => import("@/components/charts/breakdown-pie-chart").then((m) => ({ default: m.BreakdownPieChart })),
+  { ssr: false },
+);
+
+const TimelineBarChart = dynamic(
+  () => import("@/components/charts/timeline-bar-chart").then((m) => ({ default: m.TimelineBarChart })),
+  { ssr: false },
+);
+
+type DocumentCTA = { href: string; label: string };
+
+const DOCUMENT_CTA_LABELS: Record<string, string> = {
+  "labor-inspector-complaint": "Générer la plainte à l'inspection du travail",
+  "salary-recovery-letter": "Générer la mise en demeure (salaires impayés)",
+  "overtime-claim-letter": "Générer la mise en demeure (heures sup.)",
+  "resignation-letter": "Générer la lettre de démission",
+  "harassment-report-letter": "Signaler le harcèlement (lettre)",
+  "maternity-leave-request": "Demander le congé maternité",
+  "work-accident-declaration": "Déclarer l'accident du travail",
+  "unpaid-leave-request": "Demander un congé sans solde",
+  "contract-renewal-request": "Demander le renouvellement CDD",
+  "notice-letter": "Générer la lettre de préavis",
+};
+
+function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): DocumentCTA | null {
   const params = new URLSearchParams();
   const breakdown = snapshot.result.breakdown;
   const input = snapshot.inputPayload ?? {};
@@ -26,26 +54,31 @@ function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): string 
     const total = typeof breakdown.totalEstimated === "number" ? breakdown.totalEstimated : undefined;
     const serviceYears =
       typeof breakdown.totalServiceYears === "number" ? breakdown.totalServiceYears : undefined;
-    params.set(
-      "issue_summary",
-      serviceYears ? `Licenciement apres ${serviceYears} an(s) d'anciennete.` : "Litige de licenciement.",
-    );
     if (total !== undefined) {
       params.set("amount_due", String(total));
       params.set("request", `Regularisation des indemnites estimees a ${total} MAD.`);
     } else {
       params.set("request", "Regularisation des indemnites legales et des conges non regles.");
     }
-    return `/documents/labor-inspector-complaint?${params.toString()}`;
+    const isAbusive = Boolean(snapshot.result.breakdown.dommagesAbusif);
+    if (isAbusive) {
+      params.set("issue_summary", "Licenciement abusif et litige indemnites.");
+    } else {
+      params.set("issue_summary", serviceYears ? `Licenciement apres ${serviceYears} an(s) d'anciennete.` : "Litige de licenciement.");
+    }
+    const docId = "labor-inspector-complaint";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
   }
 
   if (snapshot.calculatorType === "unpaid_salary_recovery") {
     const total =
       typeof breakdown.totalClaimAmount === "number" ? breakdown.totalClaimAmount : undefined;
-    if (calculationDate) params.set("period", calculationDate);
+    const unpaidMonths = typeof input.unpaidMonths === "number" ? input.unpaidMonths : undefined;
+    if (calculationDate) params.set("period", unpaidMonths ? `Derniers ${unpaidMonths} mois` : calculationDate);
     if (total !== undefined) params.set("amount_due", String(total));
     params.set("issue_summary", "Salaires impayes constates.");
-    return `/documents/salary-recovery-letter?${params.toString()}`;
+    const docId = "salary-recovery-letter";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
   }
 
   if (
@@ -64,10 +97,14 @@ function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): string 
     if (calculationDate) params.set("period", calculationDate);
     if (total !== undefined) params.set("amount_due", String(total));
     params.set("issue_summary", "Heures supplementaires non regularisees.");
-    return `/documents/overtime-claim-letter?${params.toString()}`;
+    const docId = "overtime-claim-letter";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
   }
 
-  if (snapshot.calculatorType === "duree_preavis") {
+  if (
+    snapshot.calculatorType === "duree_preavis" ||
+    snapshot.calculatorType === "demission"
+  ) {
     const contractType =
       typeof breakdown.contractType === "string" ? breakdown.contractType : "CDI";
     const workerCategory =
@@ -80,19 +117,56 @@ function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): string 
       typeof breakdown.requiredNoticeDays === "number"
         ? breakdown.requiredNoticeDays
         : undefined;
+    const leavePayout =
+      typeof breakdown.leavePayout === "number" ? breakdown.leavePayout : undefined;
+    const noticeComp =
+      typeof breakdown.noticeCompensationDue === "number" ? breakdown.noticeCompensationDue : undefined;
 
-    if (calculationDate) {
-      params.set("effective_date", calculationDate);
-    }
-    if (contractType === "CDI") {
-      params.set(
-        "position",
-        `Categorie ${workerCategory} - preavis ${requiredNoticeMonths ?? "?"} mois (${requiredNoticeDays ?? "?"} jours approx.)`,
-      );
-    } else {
-      params.set("position", `Categorie ${workerCategory} - preavis CDD ${requiredNoticeDays ?? "?"} jours`);
-    }
-    return `/documents/resignation-letter?${params.toString()}`;
+    if (calculationDate) params.set("effective_date", calculationDate);
+    if (leavePayout !== undefined) params.set("amount_due", String(leavePayout + (noticeComp ?? 0)));
+    params.set("position", workerCategory);
+    const docId = "resignation-letter";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
+  }
+
+  if (snapshot.calculatorType === "harassment_scenario") {
+    if (calculationDate) params.set("period", calculationDate);
+    params.set("issue_summary", "Signalement de faits de harcelement.");
+    const docId = "harassment-report-letter";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
+  }
+
+  if (snapshot.calculatorType === "maternity_leave") {
+    if (calculationDate) params.set("effective_date", calculationDate);
+    params.set("request", "Conge maternite legal.");
+    const docId = "maternity-leave-request";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
+  }
+
+  if (snapshot.calculatorType === "work_accident") {
+    if (calculationDate) params.set("period", calculationDate);
+    params.set("issue_summary", "Accident du travail survenu.");
+    const docId = "work-accident-declaration";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
+  }
+
+  if (snapshot.calculatorType === "leave_accrual") {
+    if (calculationDate) params.set("period", calculationDate);
+    params.set("request", "Demande de conge exceptionnel.");
+    const docId = "unpaid-leave-request";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
+  }
+
+  if (snapshot.calculatorType === "fin_cdd") {
+    params.set("request", "Proposition de renouvellement de contrat.");
+    const docId = "contract-renewal-request";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
+  }
+
+  if (snapshot.calculatorType === "probation_termination") {
+    if (calculationDate) params.set("effective_date", calculationDate);
+    const docId = "notice-letter";
+    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
   }
 
   return null;
@@ -143,6 +217,56 @@ function pickKeyMetrics(snapshot: SimulationResultSnapshot): Array<[string, numb
     .slice(0, 3);
 }
 
+/* ── Chart data helpers ──────────────────────────────────────────────── */
+
+const PIE_CHART_TYPES = new Set(["net_gross", "employer_total_cost"]);
+const BAR_CHART_TYPES = new Set(["leave_accrual", "seniority_growth"]);
+
+const PIE_FIELD_CONFIG: Record<string, { label: string; color?: string }> = {
+  net: { label: "Net", color: "var(--accent)" },
+  cnssEmployee: { label: "CNSS salarié", color: "#60a5fa" },
+  amoEmployee: { label: "AMO salarié", color: "#fb923c" },
+  incomeTax: { label: "IR", color: "#a78bfa" },
+  cimrEmployee: { label: "CIMR", color: "#34d399" },
+  cnssEmployer: { label: "CNSS employeur", color: "#f472b6" },
+  amoEmployer: { label: "AMO employeur", color: "#facc15" },
+};
+
+function buildPieData(breakdown: Record<string, string | number | boolean>): PieSlice[] {
+  return Object.entries(PIE_FIELD_CONFIG)
+    .map(([key, cfg]) => ({
+      name: cfg.label,
+      value: typeof breakdown[key] === "number" && (breakdown[key] as number) > 0
+        ? (breakdown[key] as number)
+        : 0,
+      color: cfg.color,
+    }))
+    .filter((d) => d.value > 0);
+}
+
+const BAR_FIELD_PRIORITY = [
+  "accruedDaysPerYear", "accruedDaysTotal", "totalLeaveDays",
+  "seniorityBonus", "annualBonus", "totalAnnualLeave",
+];
+
+function buildBarData(
+  breakdown: Record<string, string | number | boolean>,
+  labels: Record<string, string>,
+): BarEntry[] {
+  const entries = Object.entries(breakdown)
+    .filter((e): e is [string, number] => typeof e[1] === "number" && (e[1] as number) >= 0)
+    .sort((a, b) => {
+      const ia = BAR_FIELD_PRIORITY.indexOf(a[0]);
+      const ib = BAR_FIELD_PRIORITY.indexOf(b[0]);
+      return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+    })
+    .slice(0, 8);
+  return entries.map(([key, value]) => ({
+    label: labels[key] ?? key,
+    value,
+  }));
+}
+
 export function SimulationResultPage({ slug }: { slug: string }) {
   const { language, t, locale } = useLanguage();
   const searchParams = useSearchParams();
@@ -177,8 +301,23 @@ export function SimulationResultPage({ slug }: { slug: string }) {
     }
   }, [expectedPath, snapshotRaw]);
   const resolvedSnapshot = historySnapshot ?? snapshot;
-  const prefilledDocumentLink = resolvedSnapshot ? buildPrefilledDocumentLink(resolvedSnapshot) : null;
+  const prefilledDocumentCTA = resolvedSnapshot ? buildPrefilledDocumentLink(resolvedSnapshot) : null;
   const keyMetrics = useMemo(() => (resolvedSnapshot ? pickKeyMetrics(resolvedSnapshot) : []), [resolvedSnapshot]);
+
+  const showPieChart = resolvedSnapshot ? PIE_CHART_TYPES.has(resolvedSnapshot.calculatorType) : false;
+  const showBarChart = resolvedSnapshot ? BAR_CHART_TYPES.has(resolvedSnapshot.calculatorType) : false;
+
+  const pieData = useMemo<PieSlice[]>(
+    () => (resolvedSnapshot && showPieChart ? buildPieData(resolvedSnapshot.result.breakdown) : []),
+    [resolvedSnapshot, showPieChart],
+  );
+  const barData = useMemo<BarEntry[]>(
+    () =>
+      resolvedSnapshot && showBarChart
+        ? buildBarData(resolvedSnapshot.result.breakdown, resolvedSnapshot.breakdownLabels)
+        : [],
+    [resolvedSnapshot, showBarChart],
+  );
 
   useEffect(() => {
     if (!simulationId || snapshot) return;
@@ -375,6 +514,24 @@ export function SimulationResultPage({ slug }: { slug: string }) {
               </div>
             ) : null}
 
+            {showPieChart && pieData.length > 0 ? (
+              <section className="soft-card min-w-0 rounded-3xl p-5">
+                <p className="section-kicker">Répartition salariale</p>
+                <div className="mt-3">
+                  <BreakdownPieChart data={pieData} />
+                </div>
+              </section>
+            ) : null}
+
+            {showBarChart && barData.length > 0 ? (
+              <section className="soft-card min-w-0 rounded-3xl p-5">
+                <p className="section-kicker">Projection</p>
+                <div className="mt-3">
+                  <TimelineBarChart data={barData} />
+                </div>
+              </section>
+            ) : null}
+
             <section className="soft-card min-w-0 rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.breakdownTitle")}</p>
               <div className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
@@ -408,9 +565,12 @@ export function SimulationResultPage({ slug }: { slug: string }) {
                 <Link href="/simulateurs" className="btn-primary px-4 py-2 text-center">
                   {t("resultPage.runAnother")}
                 </Link>
-                {prefilledDocumentLink ? (
-                  <Link href={prefilledDocumentLink} className="btn-primary px-4 py-2 text-center">
-                    {t("resultPage.generateLetter")}
+                {prefilledDocumentCTA ? (
+                  <Link
+                    href={prefilledDocumentCTA.href}
+                    className="btn-primary px-4 py-2 text-center font-semibold"
+                  >
+                    {prefilledDocumentCTA.label}
                   </Link>
                 ) : null}
               </div>

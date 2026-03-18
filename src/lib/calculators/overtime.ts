@@ -62,7 +62,7 @@ export function simulateOvertime(rawInput: OvertimeInput): OvertimeResult {
     explanation: {
       summary: `Montant estime des heures supplementaires: ${roundMAD(totalOvertimeAmount)} MAD.`,
       assumptions: [
-        "Le taux horaire de base est derive du salaire mensuel / 191 heures.",
+        `Le taux horaire de base est derive du salaire mensuel / ${rules.monthlyReferenceHours} heures.`,
         "Chaque tranche horaire applique son coefficient legal (jour, nuit, weekend, ferie).",
       ],
       formulas: [

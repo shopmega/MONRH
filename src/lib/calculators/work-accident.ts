@@ -46,11 +46,14 @@ export function simulateWorkAccident(rawInput: WorkAccidentInput): WorkAccidentR
     dailySalary * input.temporaryIncapacityDays * rules.workAccidentTemporaryCoverageRate,
   );
 
-  // Permanent incapacity (rente)
+  // Permanent incapacity (rente) — apply reduction/increase logic (Dahir 1963)
+  const ipp = input.permanentIncapacityPercent;
+  const baseIpp = Math.min(ipp, 50);
+  const excessIpp = Math.max(0, ipp - 50);
+  const adjustedIppPercent = baseIpp * 0.5 + excessIpp * 1.5;
+
   const monthlyPermanentRente = roundMAD(
-    input.monthlySalary *
-    (input.permanentIncapacityPercent / 100) *
-    rules.workAccidentPermanentCoverageCoefficient,
+    input.monthlySalary * (adjustedIppPercent / 100),
   );
   const annualPermanentRente = roundMAD(monthlyPermanentRente * 12);
 
@@ -94,7 +97,8 @@ export function simulateWorkAccident(rawInput: WorkAccidentInput): WorkAccidentR
       assumptions: [
         "Incapacite temporaire (IT): indemnisee sans delai de carence (AT ≠ maladie ordinaire).",
         `Taux couverture IT: ${roundMAD(rules.workAccidentTemporaryCoverageRate * 100)}% du salaire journalier.`,
-        `Rente IP: salaire mensuel x taux d'incapacite (${input.permanentIncapacityPercent}%) x coefficient ${rules.workAccidentPermanentCoverageCoefficient}.`,
+        `Rente IP: salaire mensuel x taux d'incapacite ajuste (${adjustedIppPercent}%).`,
+        "L'ipp est reduit de moitie sous 50% et augmente de moitie au-dela.",
         input.fauteInexcusable
           ? `Faute inexcusable: majoration de la rente par facteur x${rules.workAccidentFauteInexcusableMultiplier}.`
           : "",
@@ -102,7 +106,8 @@ export function simulateWorkAccident(rawInput: WorkAccidentInput): WorkAccidentR
       ].filter(Boolean),
       formulas: [
         "IT = salaire journalier x jours ITA x taux couverture.",
-        "Rente mensuelle IP = salaire mensuel x (IPP% / 100) x coefficient.",
+        "IPP Ajuste = (T aux <= 50% / 2) + (T aux > 50% * 1.5).",
+        "Rente mensuelle IP = salaire mensuel x IPP Ajuste.",
         "Majoration FI = rente annuelle x (facteur - 1) si faute inexcusable.",
         "Total 1ere annee = IT + rente annuelle + majoration FI.",
       ],

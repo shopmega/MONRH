@@ -69,7 +69,7 @@ export function simulateFinCdd(rawInput: FinCddInput): FinCddResult {
     requalificationNote = `${input.renewalCount} renouvellements — Art. 16 CT n'autorise qu'un seul renouvellement pour les CDD standards.`;
   } else if (input.totalMonthsWithRenewals > 12 && input.contractSubtype === "standard") {
     requalificationRisk = "medium";
-    requalificationNote = `Duree de ${input.totalMonthsWithRenewals} mois avec resenouvellement: verifier la conformite avec la limite legale.`;
+    requalificationNote = `Duree de ${input.totalMonthsWithRenewals} mois avec renouvellement: verifier la conformite avec la limite legale.`;
   }
 
   return {

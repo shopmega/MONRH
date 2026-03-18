@@ -56,9 +56,9 @@ function requiredNoticeDays(
 
 /** Max legal probation duration by category (Art. 13 CT) */
 function maxProbationMonths(category: ProbationTerminationInput["workerCategory"]): number {
-  if (category === "ouvrier") return 3; // max 1.5 months × 2 with renewal
-  if (category === "employe") return 3;
-  return 6; // cadres: up to 3 months × 2
+  if (category === "ouvrier") return 2;   // Art. 13: 1 mois répétable une fois = max 2 mois
+  if (category === "employe") return 3;   // Art. 13: 1.5 mois répétable une fois = max 3 mois
+  return 6; // cadres/techniciens: 3 mois répétables une fois = max 6 mois
 }
 
 export function simulateProbationTermination(

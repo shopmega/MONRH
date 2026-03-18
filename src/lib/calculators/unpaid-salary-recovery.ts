@@ -13,8 +13,8 @@ export const unpaidSalaryRecoveryInputSchema = z.object({
   partialPaymentPerMonth: z.number().min(0).default(0),
   /** Months elapsed since the first missed payment — for prescription check */
   monthsSinceFirstDefault: z.number().min(1).max(120),
-  /** Legal late payment rate (DGI reference rate; default 7%/year = 0.58%/month) */
-  penaltyRatePerMonth: z.number().min(0).max(0.05).default(0.0058),
+  /** Legal late payment rate (annual percentage) */
+  penaltyRateAnnual: z.number().min(0).max(50).default(7),
 });
 
 export type UnpaidSalaryRecoveryInput = z.infer<typeof unpaidSalaryRecoveryInputSchema>;
@@ -39,6 +39,7 @@ export function simulateUnpaidSalaryRecovery(
 ): UnpaidSalaryRecoveryResult {
   const input = unpaidSalaryRecoveryInputSchema.parse(rawInput);
   const rules = getSmigRulesByDate(input.calculationDate);
+  const penaltyRatePerMonth = input.penaltyRateAnnual / 100 / 12;
 
   const prescriptionLimitMonths = PRESCRIPTION_YEARS * 12;
   // Months that have passed the prescription limit
@@ -53,7 +54,7 @@ export function simulateUnpaidSalaryRecovery(
 
   const principalAmount = roundMAD(actualMonthlyShortfall * claimableMonths);
   const delayPenalties = roundMAD(
-    principalAmount * input.penaltyRatePerMonth * input.monthsSinceFirstDefault,
+    principalAmount * penaltyRatePerMonth * input.monthsSinceFirstDefault,
   );
   const totalClaimAmount = roundMAD(principalAmount + delayPenalties);
 
@@ -86,7 +87,7 @@ export function simulateUnpaidSalaryRecovery(
         `Salaire mensuel du: ${input.monthlySalary} MAD${input.partialPaymentPerMonth > 0 ? ` — paiement partiel de ${input.partialPaymentPerMonth} MAD, manque mensuel: ${roundMAD(actualMonthlyShortfall)} MAD` : ""}.`,
         `Prescription Art. 399 CT: 2 ans a compter de chaque mois impaye.`,
         `Delai ecoule depuis le premier defaut: ${input.monthsSinceFirstDefault} mois.`,
-        `Taux de penalites: ${roundMAD(input.penaltyRatePerMonth * 100)}%/mois (reference DGI: ~7%/an).`,
+        `Taux de penalites: ${input.penaltyRateAnnual}%/an (~${roundMAD(penaltyRatePerMonth * 100)}%/mois).`,
       ],
       formulas: [
         "Mois prescrit = max(0, mois ecoules - 24).",
