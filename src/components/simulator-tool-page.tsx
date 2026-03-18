@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 
-type FieldType = "number" | "date" | "checkbox" | "select";
+type FieldType = "number" | "date" | "checkbox" | "select" | "text";
 
 type FieldOption = {
   label: string;
@@ -403,6 +403,24 @@ function FieldRenderer({
             </option>
           ))}
         </Select>
+      </div>
+    );
+  }
+
+  if (field.type === "text") {
+    return (
+      <div className="space-y-3">
+        <Label htmlFor={`field-${field.key}`} className="font-semibold text-[var(--foreground)]">
+          {localizeFieldLabel(field.key, field.label, language)}
+        </Label>
+        <Input
+          id={`field-${field.key}`}
+          type="text"
+          value={String(value ?? "")}
+          onChange={(event) => onChange(event.target.value)}
+          required
+          placeholder={localizeFieldLabel(field.key, field.label, language)}
+        />
       </div>
     );
   }

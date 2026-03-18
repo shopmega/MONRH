@@ -16,6 +16,8 @@ export default function PayrollMassPage() {
       apiPath="/api/simulate/payroll-mass"
       calculatorType="payroll_mass"
       fields={[
+        { key: "employeeCount", label: "Nombre d'employes", type: "number", defaultValue: "10", min: 1, step: 1 },
+        { key: "averageGrossSalary", label: "Salaire brut moyen (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
         { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
         { key: "companySize", label: "Taille entreprise", type: "select", defaultValue: "large", options: [
           { label: "Grande (> 20 employes, 1.6% FP)", value: "large" },

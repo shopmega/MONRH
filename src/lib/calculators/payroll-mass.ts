@@ -43,9 +43,13 @@ export const payrollMassInputSchema = z.object({
       name: z.string().max(80),
       grossSalary: z.number().positive(),
     }),
-  ).min(1),
+  ).optional(),
+  employeeCount: z.number().int().min(1).optional(),
+  averageGrossSalary: z.number().positive().optional(),
   calculationDate: z.string().date().default("2026-01-01"),
   companySize: z.enum(["small", "large"]).default("large"),
+}).refine(data => data.employees || (data.employeeCount && data.averageGrossSalary), {
+  message: "Either 'employees' list or both 'employeeCount' and 'averageGrossSalary' must be provided.",
 });
 
 export type PayrollMassInput = z.infer<typeof payrollMassInputSchema>;
@@ -83,7 +87,12 @@ export function simulatePayrollMass(raw: PayrollMassInput): PayrollMassResult {
   const input = payrollMassInputSchema.parse(raw);
   const rules = getSalaryRulesByDate(input.calculationDate);
 
-  const employeeLines: EmployeePayrollLine[] = input.employees.map((emp) => {
+  const rawEmployees = input.employees || Array.from({ length: input.employeeCount || 1 }, (_, i) => ({
+    name: `Employe ${i + 1}`,
+    grossSalary: input.averageGrossSalary || 0,
+  }));
+
+  const employeeLines: EmployeePayrollLine[] = rawEmployees.map((emp) => {
     const contributableBase = Math.min(emp.grossSalary, rules.cnssCeiling);
     const cnssEmployee = roundMAD(contributableBase * rules.cnssEmployeeRate);
     const amoEmployee = roundMAD(emp.grossSalary * rules.amoEmployeeRate);
@@ -113,15 +122,15 @@ export function simulatePayrollMass(raw: PayrollMassInput): PayrollMassResult {
     { totalGross: 0, totalNet: 0, totalEmployerCost: 0, totalCnssEmployee: 0, totalCnssEmployer: 0, totalIncomeTax: 0, totalFormationPro: 0 },
   );
 
-  const averageSalary = roundMAD(totals.totalGross / input.employees.length);
+  const averageSalary = input.averageGrossSalary || roundMAD(totals.totalGross / rawEmployees.length);
 
   return {
-    employeeCount: input.employees.length,
+    employeeCount: rawEmployees.length,
     employees: employeeLines,
     totals,
     averageSalary,
     explanation: {
-      summary: `${input.employees.length} employes | Masse brute: ${totals.totalGross} MAD | Cout total employeur: ${totals.totalEmployerCost} MAD/mois`,
+      summary: `${rawEmployees.length} employes | Masse brute: ${totals.totalGross} MAD | Cout total employeur: ${totals.totalEmployerCost} MAD/mois`,
     },
   };
 }

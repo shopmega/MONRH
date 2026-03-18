@@ -116,7 +116,7 @@ export function simulateCompensationOptimization(raw: CompensationOptimizationIn
     bestNetScenario: bestNet.label,
     bestEfficiencyScenario: bestEfficiency.label,
     explanation: {
-      summary: `Meilleur net: ${bestNet.label} (${bestNet.netMonthly} MAD/mois). Meilleure efficacite fiscale: ${bestEfficiency.label} (${bestEfficiency.taxEfficiency}% du brut conserve).`,
+      summary: `Sur un budget employeur cible de ${input.totalBudget} MAD, le meilleur net est ${bestNet.label} (${bestNet.netMonthly} MAD/mois). Meilleure efficacite fiscale: ${bestEfficiency.label} (${bestEfficiency.taxEfficiency}% du brut conserve).`,
       warnings: [
         "Les avantages en nature sont taxables: ils augmentent l'assiette IR.",
         "Comparez aussi le cout total employeur: une prime peut couter plus a l'employeur.",

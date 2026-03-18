@@ -16,8 +16,8 @@ export default function PayslipPage() {
       apiPath="/api/simulate/payslip"
       calculatorType="payslip"
       fields={[
-        { key: "employeeName", label: "Nom du salarie", type: "number", defaultValue: "1", min: 1, step: 1 },
-        { key: "period", label: "Periode (ex: Mars 2026)", type: "number", defaultValue: "1", min: 1, step: 1 },
+        { key: "employeeName", label: "Nom du salarie", type: "text", defaultValue: "Salarie Demo" },
+        { key: "period", label: "Periode (ex: Mars 2026)", type: "text", defaultValue: "Mars 2026" },
         { key: "grossSalary", label: "Salaire brut de base (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
         { key: "overtimePay", label: "Heures sup (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
         { key: "bonus", label: "Prime/Bonus (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
