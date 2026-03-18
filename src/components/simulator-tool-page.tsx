@@ -18,6 +18,10 @@ import {
   localizeOptionLabel,
 } from "@/lib/i18n/simulator-localization";
 import { writeSimulationResultSnapshot } from "@/lib/simulations/result-snapshot";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 
 type FieldType = "number" | "date" | "checkbox" | "select";
 
@@ -242,49 +246,50 @@ export function SimulatorToolPage({
         </section>
 
         <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(290px,1fr)] lg:items-start">
-          <form onSubmit={onSubmit} className="soft-card min-w-0 rounded-3xl p-5 sm:p-6">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-[var(--foreground)]">{t("simulator.parametersTitle")}</p>
-              <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--ink-soft)]">
-                {t("simulator.completionRate", { rate: completionRate })}
-              </span>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+          <form onSubmit={onSubmit} className="soft-card min-w-0 rounded-3xl p-5 sm:p-7">
+            <h2 className="display-font break-words text-xl font-semibold">
+              {t("simulator.parametersTitle")}
+            </h2>
+            <p className="mt-2 break-words text-sm text-[var(--ink-soft)] font-medium">
+              {t("simulator.completionRate", { rate: completionRate })}
+            </p>
+
+            <div className="mt-6 flex flex-col gap-6">
               {fields.map((field) => (
                 <FieldRenderer
                   key={field.key}
                   field={field}
                   language={language}
                   value={values[field.key]}
-                  onChange={(newValue) => {
-                    setValues((current) => ({ ...current, [field.key]: newValue }));
+                  onChange={(val) => {
+                    setValues((prev) => ({ ...prev, [field.key]: val }));
                     setMessage(undefined);
                   }}
                 />
               ))}
             </div>
 
-            <div className="mt-5 rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] p-3">
-              <p className="text-xs text-[var(--ink-soft)]">
-                {t("simulator.quickCheck")}
+            <Button
+              type="submit"
+              disabled={loading || !toolUsable}
+              className="mt-8 w-full h-12 text-base font-semibold transition-all hover:scale-[1.01] active:scale-[0.99]"
+            >
+              {loading ? t("simulator.running") : t("simulator.run")}
+            </Button>
+            
+            {!toolUsable ? (
+              <p className="mt-4 text-center break-words text-xs text-[var(--ink-soft)]">
+                {toolPolicy?.enabled === false
+                  ? t("simulator.accessDisabled")
+                  : toolPolicy?.visible === false
+                    ? t("simulator.accessHidden")
+                    : t("simulator.accessLoggedOnly")}
               </p>
-              <button
-                type="submit"
-                disabled={loading || !toolUsable}
-                className="btn-primary mt-3 w-full px-4 py-3 text-sm disabled:opacity-70"
-              >
-                {loading ? t("simulator.running") : t("simulator.run")}
-              </button>
-              {!toolUsable ? (
-                <p className="mt-2 break-words text-xs text-[var(--ink-soft)]">
-                  {toolPolicy?.enabled === false
-                    ? t("simulator.accessDisabled")
-                    : toolPolicy?.visible === false
-                      ? t("simulator.accessHidden")
-                      : t("simulator.accessLoggedOnly")}
-                </p>
-              ) : null}
-            </div>
+            ) : null}
+
+            <p className="mt-4 break-words text-xs text-[var(--ink-soft)] text-center italic">
+              {t("simulator.quickCheck")}
+            </p>
           </form>
 
           <aside className="space-y-4 lg:sticky lg:top-20">
@@ -336,6 +341,15 @@ export function SimulatorToolPage({
 
         <RelatedContent items={relatedItems} />
       </div>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: localizedTitle,
+          description: localizedDescription,
+          applicationCategory: "BusinessApplication",
+        }}
+      />
     </main>
   );
 }
@@ -353,41 +367,53 @@ function FieldRenderer({
 }) {
   if (field.type === "checkbox") {
     return (
-      <label className="sm:col-span-2 flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm">
+      <div className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface-elevated)] p-4 transition-colors hover:border-[var(--accent)]">
         <input
+          id={`field-${field.key}`}
           type="checkbox"
           checked={Boolean(value)}
           onChange={(event) => onChange(event.target.checked)}
+          className="h-5 w-5 rounded-md border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
         />
-        {localizeFieldLabel(field.key, field.label, language)}
-      </label>
+        <Label 
+          htmlFor={`field-${field.key}`} 
+          className="cursor-pointer font-semibold text-[var(--foreground)] mt-0"
+        >
+          {localizeFieldLabel(field.key, field.label, language)}
+        </Label>
+      </div>
     );
   }
 
   if (field.type === "select") {
     return (
-      <label className="block text-sm font-semibold text-[var(--foreground)]">
-        <span>{localizeFieldLabel(field.key, field.label, language)}</span>
-        <select
+      <div className="space-y-3">
+        <Label htmlFor={`field-${field.key}`} className="font-semibold text-[var(--foreground)]">
+          {localizeFieldLabel(field.key, field.label, language)}
+        </Label>
+        <Select
+          id={`field-${field.key}`}
           value={String(value ?? "")}
           onChange={(event) => onChange(event.target.value)}
           required
-          className="input-shell mt-1"
         >
           {field.options?.map((item) => (
             <option key={item.value} value={item.value}>
               {localizeOptionLabel(item.value, item.label, language)}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </div>
     );
   }
 
   return (
-    <label className="block text-sm font-semibold text-[var(--foreground)]">
-      <span>{localizeFieldLabel(field.key, field.label, language)}</span>
-      <input
+    <div className="space-y-3">
+      <Label htmlFor={`field-${field.key}`} className="font-semibold text-[var(--foreground)]">
+        {localizeFieldLabel(field.key, field.label, language)}
+      </Label>
+      <Input
+        id={`field-${field.key}`}
         type={field.type}
         min={field.min}
         max={field.max}
@@ -395,9 +421,8 @@ function FieldRenderer({
         value={String(value ?? "")}
         onChange={(event) => onChange(event.target.value)}
         required
-        className="input-shell mt-1"
+        placeholder={localizeFieldLabel(field.key, field.label, language)}
       />
-    </label>
+    </div>
   );
 }
-
