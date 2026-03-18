@@ -607,7 +607,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
         <SimulationExplanation explanation={resolvedSnapshot.result.explanation} />
         <RelatedContent
           items={
-            mappedRelatedItems.length > 0
+            (mappedRelatedItems ?? []).length > 0
               ? mappedRelatedItems
               : [
                 {

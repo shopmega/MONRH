@@ -24,16 +24,16 @@ export function SimulationExplanation({ explanation }: { explanation?: Explanati
         {explanation.summary}
       </p>
 
-      <ExplanationList title={t("explanation.assumptions")} items={explanation.assumptions} />
-      <ExplanationList title={t("explanation.formulas")} items={explanation.formulas} />
-      <ExplanationList title={t("explanation.warnings")} items={explanation.warnings} />
-      <ExplanationList title={t("explanation.nextSteps")} items={explanation.nextSteps} />
+      <ExplanationList title={t("explanation.assumptions")} items={explanation.assumptions ?? []} />
+      <ExplanationList title={t("explanation.formulas")} items={explanation.formulas ?? []} />
+      <ExplanationList title={t("explanation.warnings")} items={explanation.warnings ?? []} />
+      <ExplanationList title={t("explanation.nextSteps")} items={explanation.nextSteps ?? []} />
     </section>
   );
 }
 
 function ExplanationList({ title, items }: { title: string; items: string[] }) {
-  if (items.length === 0) {
+  if (!items || items.length === 0) {
     return null;
   }
 
