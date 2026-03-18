@@ -267,10 +267,10 @@ function buildBarData(
   }));
 }
 
-export function SimulationResultPage({ slug }: { slug: string }) {
+export function SimulationResultPage({ slug, expectedPath: providedExpectedPath }: { slug: string; expectedPath?: string }) {
   const { language, t, locale } = useLanguage();
   const searchParams = useSearchParams();
-  const expectedPath = `/simulateurs/${slug}`;
+  const expectedPath = providedExpectedPath ?? `/simulateurs/${slug}`;
   const simulationId = searchParams.get("simulationId");
   const [mappedRelatedItems, setMappedRelatedItems] = useState<
     Array<{ title: string; description: string; href: string }>
