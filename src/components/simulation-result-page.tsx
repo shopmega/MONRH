@@ -179,6 +179,7 @@ function formatValue(
   unit?: string,
 ) {
   if (value === undefined || value === null) return "-";
+  if (typeof value === "object") return ""; // Hide complex objects/arrays from table
   if (typeof value === "boolean") {
     return value ? t("common.yes") : t("common.no");
   }
@@ -468,10 +469,12 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
 
   async function copySummary() {
     const breakdown = getEffectiveBreakdown(safeSnapshot.result);
-    const lines = Object.entries(breakdown).map(([key, value]) => {
-      const label = localizeBreakdownLabel(key, (safeSnapshot.breakdownLabels ?? {})[key] ?? key, language);
-      return `${label}: ${formatValue(value, safeSnapshot.locale, t, (safeSnapshot.units ?? {})[key])}`;
-    });
+    const lines = Object.entries(breakdown)
+      .filter(([key]) => (safeSnapshot.breakdownLabels ?? {})[key])
+      .map(([key, value]) => {
+        const label = localizeBreakdownLabel(key, (safeSnapshot.breakdownLabels ?? {})[key] ?? key, language);
+        return `${label}: ${formatValue(value, safeSnapshot.locale, t, (safeSnapshot.units ?? {})[key])}`;
+      });
     const payload = [
       localizeCalculatorTitle(safeSnapshot.calculatorType, safeSnapshot.title, language),
       `${t("common.legalVersion")}: ${safeSnapshot.result.versionCode}`,
@@ -487,7 +490,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
   }
 
   return (
-    <main className="paper-bg min-h-screen">
+    <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
         <section className="soft-card rounded-[2rem] p-5 sm:p-7">
           <p className="section-kicker">{t("resultPage.kicker")}</p>
@@ -542,7 +545,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
             ) : null}
 
             {showPieChart && pieData.length > 0 ? (
-              <section className="soft-card min-w-0 rounded-3xl p-5">
+              <section className="soft-card overflow-hidden min-w-0 rounded-3xl p-5">
                 <p className="section-kicker">Répartition salariale</p>
                 <div className="mt-3">
                   <BreakdownPieChart data={pieData} />
@@ -551,7 +554,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
             ) : null}
 
             {showBarChart && barData.length > 0 ? (
-              <section className="soft-card min-w-0 rounded-3xl p-5">
+              <section className="soft-card overflow-hidden min-w-0 rounded-3xl p-5">
                 <p className="section-kicker">Projection</p>
                 <div className="mt-3">
                   <TimelineBarChart data={barData} />
@@ -561,17 +564,19 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
 
             <section className="soft-card min-w-0 rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.breakdownTitle")}</p>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-                {Object.entries(getEffectiveBreakdown(resolvedSnapshot.result)).map(([key, value]) => (
-                  <div key={key} className="panel-strong min-w-0 rounded-xl p-3">
-                    <p className="break-words text-[11px] uppercase tracking-wide text-[var(--ink-soft)]">
-                      {localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language)}
-                    </p>
-                    <p className="mt-1 break-words font-semibold">
-                      {formatValue(value, resolvedSnapshot.locale, t, (resolvedSnapshot.units ?? {})[key])}
-                    </p>
-                  </div>
-                ))}
+              <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+                {Object.entries(getEffectiveBreakdown(resolvedSnapshot.result))
+                  .filter(([key]) => (resolvedSnapshot.breakdownLabels ?? {})[key])
+                  .map(([key, value]) => (
+                    <div key={key} className="panel-strong min-w-0 rounded-xl p-3">
+                      <p className="break-words text-[11px] uppercase tracking-wide text-[var(--ink-soft)]">
+                        {localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language)}
+                      </p>
+                      <p className="mt-1 break-words font-semibold">
+                        {formatValue(value, resolvedSnapshot.locale, t, (resolvedSnapshot.units ?? {})[key])}
+                      </p>
+                    </div>
+                  ))}
               </div>
             </section>
           </section>

@@ -136,7 +136,7 @@ export function simulateIGRDetail(raw: IGRDetailInput): IGRDetailResult {
       taxableIncome: roundMAD(taxableIncome),
       incomeTax: roundMAD(incomeTax),
       net: roundMAD(net),
-      marginalRate,
+      marginalRate: roundMAD(marginalRate * 100),
       effectiveRate,
       brackets,
     },
