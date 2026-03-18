@@ -134,7 +134,7 @@ export function SimulatorToolPage({
   const localizedTitle = localizeCalculatorTitle(calculatorType, title, language);
   const localizedDescription = localizeCalculatorDescription(calculatorType, description, language);
   const localizedBreakdownLabels = Object.fromEntries(
-    Object.entries(breakdownLabels).map(([key, value]) => [
+    Object.entries(breakdownLabels ?? {}).map(([key, value]) => [
       key,
       localizeBreakdownLabel(key, value, language),
     ]),

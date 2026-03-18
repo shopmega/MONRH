@@ -173,22 +173,24 @@ function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): Documen
 }
 
 function formatValue(
-  value: string | number | boolean,
+  value: string | number | boolean | undefined | null,
   locale: string,
   t: (key: string, params?: Record<string, string | number>) => string,
   unit?: string,
 ) {
+  if (value === undefined || value === null) return "-";
   if (typeof value === "boolean") {
     return value ? t("common.yes") : t("common.no");
   }
   if (typeof value === "number") {
     return `${value.toLocaleString(locale)}${unit ? ` ${unit}` : ""}`;
   }
-  return value;
+  return String(value);
 }
 
 function pickKeyMetrics(snapshot: SimulationResultSnapshot): Array<[string, number]> {
-  const entries = Object.entries(snapshot.result.breakdown).filter(
+  const breakdown = snapshot?.result?.breakdown ?? {};
+  const entries = Object.entries(breakdown).filter(
     (entry): entry is [string, number] => typeof entry[1] === "number",
   );
 
@@ -250,10 +252,10 @@ const BAR_FIELD_PRIORITY = [
 ];
 
 function buildBarData(
-  breakdown: Record<string, string | number | boolean>,
-  labels: Record<string, string>,
+  breakdown: Record<string, string | number | boolean> | undefined,
+  labels: Record<string, string> | undefined,
 ): BarEntry[] {
-  const entries = Object.entries(breakdown)
+  const entries = Object.entries(breakdown ?? {})
     .filter((e): e is [string, number] => typeof e[1] === "number" && (e[1] as number) >= 0)
     .sort((a, b) => {
       const ia = BAR_FIELD_PRIORITY.indexOf(a[0]);
@@ -262,7 +264,7 @@ function buildBarData(
     })
     .slice(0, 8);
   return entries.map(([key, value]) => ({
-    label: labels[key] ?? key,
+    label: (labels ?? {})[key] ?? key,
     value,
   }));
 }
@@ -308,13 +310,13 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
   const showBarChart = resolvedSnapshot ? BAR_CHART_TYPES.has(resolvedSnapshot.calculatorType) : false;
 
   const pieData = useMemo<PieSlice[]>(
-    () => (resolvedSnapshot && showPieChart ? buildPieData(resolvedSnapshot.result.breakdown) : []),
+    () => (resolvedSnapshot && showPieChart ? buildPieData(resolvedSnapshot.result?.breakdown ?? {}) : []),
     [resolvedSnapshot, showPieChart],
   );
   const barData = useMemo<BarEntry[]>(
     () =>
       resolvedSnapshot && showBarChart
-        ? buildBarData(resolvedSnapshot.result.breakdown, resolvedSnapshot.breakdownLabels)
+        ? buildBarData(resolvedSnapshot.result?.breakdown, resolvedSnapshot.breakdownLabels)
         : [],
     [resolvedSnapshot, showBarChart],
   );
@@ -535,13 +537,13 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
             <section className="soft-card min-w-0 rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.breakdownTitle")}</p>
               <div className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-                {Object.entries(resolvedSnapshot.result.breakdown).map(([key, value]) => (
+                {Object.entries(resolvedSnapshot.result?.breakdown ?? {}).map(([key, value]) => (
                   <div key={key} className="panel-strong min-w-0 rounded-xl p-3">
                     <p className="break-words text-[11px] uppercase tracking-wide text-[var(--ink-soft)]">
-                      {localizeBreakdownLabel(key, resolvedSnapshot.breakdownLabels[key] ?? key, language)}
+                      {localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language)}
                     </p>
                     <p className="mt-1 break-words font-semibold">
-                      {formatValue(value, resolvedSnapshot.locale, t, resolvedSnapshot.units[key])}
+                      {formatValue(value, resolvedSnapshot.locale, t, (resolvedSnapshot.units ?? {})[key])}
                     </p>
                   </div>
                 ))}
