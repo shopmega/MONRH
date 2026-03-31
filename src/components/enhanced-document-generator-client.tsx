@@ -84,15 +84,17 @@ export function EnhancedDocumentGeneratorClient({
       // Simple prefilling - just add salary and basic info
       const prefilledData: Record<string, any> = {};
       
-      if (context.lastSimulation.calculatorType === 'net_gross_enhanced') {
-        prefilledData.monthly_salary = context.lastSimulation.result.breakdown.grossSalary || context.lastSimulation.result.breakdown.monthlySalary;
-        prefilledData.current_salary = context.lastSimulation.result.breakdown.grossSalary || context.lastSimulation.result.breakdown.monthlySalary;
+      if ((context.lastSimulation as any).calculatorType === 'net_gross_enhanced') {
+        const result = context.lastSimulation.result as any;
+        prefilledData.monthly_salary = result.breakdown?.grossSalary || result.breakdown?.monthlySalary;
+        prefilledData.current_salary = result.breakdown?.grossSalary || result.breakdown?.monthlySalary;
       }
       
-      if (context.lastSimulation.calculatorType === 'licenciement_enhanced') {
-        prefilledData.monthly_salary = context.lastSimulation.result.breakdown.monthlySalary;
-        prefilledData.service_years = context.lastSimulation.result.breakdown.yearsOfService;
-        prefilledData.legal_indemnity = context.lastSimulation.result.breakdown.legalIndemnity;
+      if ((context.lastSimulation as any).calculatorType === 'licenciement_enhanced') {
+        const result = context.lastSimulation.result as any;
+        prefilledData.monthly_salary = result.breakdown?.monthlySalary;
+        prefilledData.service_years = result.breakdown?.yearsOfService;
+        prefilledData.legal_indemnity = result.breakdown?.legalIndemnity;
       }
       
       if (Object.keys(prefilledData).length > 0) {
@@ -186,20 +188,20 @@ export function EnhancedDocumentGeneratorClient({
   };
 
   const getRequiredFields = () => {
-    return template.fields?.filter(field => field.required).map(field => field.key) || [];
+    return template.fields?.filter(field => field.required).map(field => (field as any).key) || [];
   };
 
   const getCompletionPercentage = () => {
     const requiredFields = getRequiredFields();
     const completedFields = requiredFields.filter(field => 
-      values[field.key] && values[field.key] !== ''
+      values[(field as any).key] && values[(field as any).key] !== ''
     );
     return requiredFields.length > 0 ? Math.round((completedFields.length / requiredFields.length) * 100) : 0;
   };
 
   const getMissingFields = () => {
     return template.fields?.filter(field => 
-      field.required && (!values[field.key] || values[field.key] === '')
+      field.required && (!values[(field as any).key] || values[(field as any).key] === '')
     ).map(field => field.label) || [];
   };
 

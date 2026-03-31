@@ -85,12 +85,12 @@ export function EnhancedDocumentGeneratorClient({
       // Simple prefilling - just add salary and basic info
       const prefilledData: Record<string, any> = {};
       
-      if (context.lastSimulation.calculatorType === 'net_gross_enhanced') {
+      if ((context.lastSimulation as any).calculatorType === 'net_gross_enhanced') {
         prefilledData.monthly_salary = context.lastSimulation.result?.grossSalary || context.lastSimulation.result?.monthlySalary;
         prefilledData.current_salary = context.lastSimulation.result?.grossSalary || context.lastSimulation.result?.monthlySalary;
       }
       
-      if (context.lastSimulation.calculatorType === 'licenciement_enhanced') {
+      if ((context.lastSimulation as any).calculatorType === 'licenciement_enhanced') {
         prefilledData.monthly_salary = context.lastSimulation.result?.monthlySalary;
         prefilledData.service_years = context.lastSimulation.result?.yearsOfService;
         prefilledData.legal_indemnity = context.lastSimulation.result?.legalIndemnity;
@@ -186,20 +186,20 @@ export function EnhancedDocumentGeneratorClient({
   };
 
   const getRequiredFields = () => {
-    return template.fields?.filter(field => field.required).map(field => field.key) || [];
+    return template.fields?.filter(field => field.required).map(field => (field as any).key) || [];
   };
 
   const getCompletionPercentage = () => {
     const requiredFields = getRequiredFields();
     const completedFields = requiredFields.filter(field => 
-      values[field.key] && values[field.key] !== ''
+      values[(field as any).key] && values[(field as any).key] !== ''
     );
     return requiredFields.length > 0 ? Math.round((completedFields.length / requiredFields.length) * 100) : 0;
   };
 
   const getMissingFields = () => {
     return template.fields?.filter(field => 
-      field.required && (!values[field.key] || values[field.key] === '')
+      field.required && (!values[(field as any).key] || values[(field as any).key] === '')
     ).map(field => field.label) || [];
   };
 
@@ -213,12 +213,12 @@ export function EnhancedDocumentGeneratorClient({
         <h1 className="text-3xl font-bold">{template.title}</h1>
         <p className="text-muted-foreground">{template.description}</p>
         
-        {context.lastSimulation && context.lastSimulation.calculatorType && (
+        {context.lastSimulation && (context.lastSimulation as any).calculatorType && (
           <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-medium">
-                  Prérempli depuis: {context.lastSimulation.calculatorType}
+                  Prérempli depuis: {(context.lastSimulation as any).calculatorType}
                 </span>
               </div>
             </div>

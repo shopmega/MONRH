@@ -151,24 +151,21 @@ function verifyTypes() {
       {
         rule_id: 'employee_name_required',
         field: 'employee_name',
-        message: 'Le nom du salarié est obligatoire',
-        rule_type: 'required'
+        message: 'Le nom du salarié est obligatoire'
       }
     ],
     warnings: [
       {
         rule_id: 'salary_smig_warning',
         field: 'salary_brut',
-        message: 'Attention: le salaire est inférieur au SMIG (3000 MAD)',
-        rule_type: 'warning'
+        message: 'Attention: le salaire est inférieur au SMIG (3000 MAD)'
       }
     ],
     defaults: [
       {
-        rule_id: 'payment_frequency_default',
-        field: 'payment_frequency',
-        value: 'mensuel',
-        rule_type: 'default'
+        field: 'trial_period_duration',
+        value: '3 months',
+        rule_id: 'default_trial_period'
       }
     ]
   };
@@ -181,33 +178,30 @@ function verifyTypes() {
 
   // 6. ContractPreview Type Test
   const validPreview: ContractPreview = {
-    template_id: 'CDI',
     sections: [
       {
         id: 'header',
         title: 'Entête',
-        content: 'CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE\nEntre les soussignés:',
-        variables: []
+        content: 'CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE\nEntre les soussignés:'
       },
       {
         id: 'parties',
         title: 'Parties',
-        content: 'L\'employeur: Société Test Maroc\nLe salarié: Mohammed Alami',
-        variables: [
-          { name: 'company_name', value: 'Société Test Maroc', injected: true },
-          { name: 'employee_name', value: 'Mohammed Alami', injected: true }
-        ]
+        content: 'L\'employeur: Société Test Maroc\nLe salarié: Mohammed Alami'
       }
     ],
-    completeness: 0.8,
-    missing_variables: ['start_date', 'trial_period_duration']
+    variables: {
+      company_name: 'Société Test Maroc',
+      employee_name: 'Mohammed Alami'
+    },
+    is_complete: false,
+    completion_percentage: 0.8
   };
 
   console.log('\n✅ ContractPreview type validation passed');
-  console.log(`   - Template ID: ${validPreview.template_id}`);
   console.log(`   - Sections: ${validPreview.sections.length}`);
-  console.log(`   - Completeness: ${(validPreview.completeness * 100).toFixed(1)}%`);
-  console.log(`   - Missing Variables: ${validPreview.missing_variables.length}`);
+  console.log(`   - Completeness: ${(validPreview.completion_percentage * 100).toFixed(1)}%`);
+  console.log(`   - Variables: ${Object.keys(validPreview.variables).length}`);
 
   // 7. Edge Cases and Constraints
   console.log('\n🧪 Testing Edge Cases...');

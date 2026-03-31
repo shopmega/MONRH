@@ -109,7 +109,7 @@ export class ContractTemplateEngine {
         
         // Inject clause-specific variables
         if (formData.clause_variables && formData.clause_variables[clauseId]) {
-          const variables = formData.clause_variables[clauseId];
+          const variables = formData.clause_variables[clauseId] as unknown as Record<string, string>;
           Object.keys(variables).forEach(variable => {
             clauseContent = clauseContent.replace(
               new RegExp(`{{${variable}}}`, 'g'), 

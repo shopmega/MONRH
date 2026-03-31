@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
 import { ContractValidationEngine } from "@/lib/contracts/validation-engine";
 import { ContractTemplateEngine } from "@/lib/contracts/template-engine";
+import { ContractTemplate } from "@/lib/contracts/types";
 
 export async function POST(request: Request) {
   try {
@@ -33,6 +34,9 @@ export async function POST(request: Request) {
       );
     }
 
+    // Cast template to proper type
+    const typedTemplate = template as ContractTemplate;
+
     // Get clauses
     const { data: clauses, error: clausesError } = await supabase
       .from("contract_clauses")
@@ -55,7 +59,7 @@ export async function POST(request: Request) {
 
     // Validate contract data
     const validationEngine = new ContractValidationEngine(rules || []);
-    const validationResult = validationEngine.validate(contractData, template.contract_type);
+    const validationResult = validationEngine.validate(contractData, typedTemplate.contract_type);
 
     if (!validationResult.isValid) {
       console.error("Validation errors:", validationResult.errors);
@@ -71,7 +75,7 @@ export async function POST(request: Request) {
     const finalContractData = validationEngine.applyDefaults(contractData, validationResult.defaults);
 
     // Generate contract
-    const templateEngine = new ContractTemplateEngine(template, clauses || []);
+    const templateEngine = new ContractTemplateEngine(typedTemplate, clauses || []);
     const contractContent = templateEngine.generateContract(finalContractData);
 
     // Save generated contract
@@ -81,7 +85,7 @@ export async function POST(request: Request) {
         template_id: templateId,
         contract_data: finalContractData,
         rendered_content: contractContent
-      })
+      } as any)
       .select()
       .single();
 
@@ -92,12 +96,12 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       contract: {
-        id: generatedContract.id,
+        id: (generatedContract as any).id,
         content: contractContent,
         templateId,
         contractData: finalContractData,
         warnings: validationResult.warnings,
-        createdAt: generatedContract.created_at
+        createdAt: (generatedContract as any).created_at
       }
     });
 

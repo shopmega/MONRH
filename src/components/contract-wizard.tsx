@@ -350,7 +350,7 @@ export function ContractWizard({
       clause_variables: {
         ...prev.clause_variables,
         [clauseId]: {
-          ...(prev.clause_variables?.[clauseId] || {}),
+          ...(prev.clause_variables?.[clauseId] as unknown as Record<string, string> || {}),
           [variable]: value
         }
       }
@@ -523,19 +523,19 @@ export function ContractWizard({
             <ClausesStep
               clauses={clauses}
               selectedClauses={formData.selected_clauses || []}
-              clauseVariables={formData.clause_variables || {}}
+              clauseVariables={formData.clause_variables as unknown as Record<string, Record<string, string>> || {}}
               onClauseToggle={handleClauseToggle}
               onVariableChange={handleClauseVariableChange}
             />
           ) : (
             <div className="grid gap-4">
               {currentStepData.fields
-                .filter(field => !field.depends_on || formData[field.depends_on.field] === field.depends_on.value)
+                .filter(field => !field.depends_on || (formData as any)[field.depends_on.field] === field.depends_on.value)
                 .map(field => (
                   <FormField
                     key={field.id}
                     field={field}
-                    value={formData[field.id]}
+                    value={(formData as any)[field.id]}
                     onChange={(value) => handleFieldChange(field.id, value)}
                     onCompanySelect={handleCompanySelect}
                     validation={validationResult ? validationEngine.getFieldValidation(field.id, formData, formData.contract_type) : undefined}

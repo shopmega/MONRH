@@ -121,22 +121,24 @@ export const enhancedEmployerTotalCostSchema = employerTotalCostInputSchema.exte
   // Enhanced with actual company data
   actualCompanySize: z.enum(["micro", "small", "medium", "large", "enterprise"]).optional(),
   actualSectorRisk: z.enum(["low", "medium", "high", "very_high", "critical"]).optional(),
-  industrySpecificRates: z.record(z.number()).optional(),
+  industrySpecificRates: z.record(z.string(), z.number()).optional(),
 });
 
 export const enhancedLicenciementSchema = licenciementInputSchema.extend({
   companyId: z.string().optional(),
   companyContext: z.custom<AvilineCompanyContext>().optional(),
   employerLitigationHistory: z.object({
-    previousTerminations: number,
-    unfairDismissalCases: number,
-    averageCompensation: number,
-    legalCosts: number,
+    previousTerminations: z.number(),
+    unfairDismissalCases: z.number(),
+    averageCompensation: z.number(),
+    legalCosts: z.number(),
+    lastTerminationDate: z.string().optional(),
+    litigationRiskScore: z.number(),
   }).optional(),
   workplaceCompliance: z.object({
-    contractCompliance: number,
-    hrDocumentation: number,
-    proceduralCompliance: number,
+    contractCompliance: z.number(),
+    hrDocumentation: z.number(),
+    proceduralCompliance: z.number(),
   }).optional(),
 });
 
@@ -144,16 +146,18 @@ export const enhancedHarassmentSchema = harassmentScenarioInputSchema.extend({
   companyId: z.string().optional(),
   companyContext: z.custom<AvilineCompanyContext>().optional(),
   workplaceHistory: z.object({
-    previousHarassmentCases: number,
-    hrResponseTime: number,
+    previousHarassmentCases: z.number(),
+    hrResponseTime: z.number(),
     caseOutcomes: z.array(z.enum(['resolved', 'unresolved', 'settled'])),
-    preventiveMeasures: z.array(z.string()),
+    preventionTraining: z.boolean(),
+    reportingMechanisms: z.boolean(),
+    investigationQuality: z.number(),
   }).optional(),
   managementCulture: z.object({
-    trainingProvided: boolean,
+    trainingProvided: z.boolean(),
     reportingChannels: z.array(z.string()),
-    anonymousReporting: boolean,
-    regularAudits: boolean,
+    anonymousReporting: z.boolean(),
+    regularAudits: z.boolean(),
   }).optional(),
 });
 
@@ -161,15 +165,15 @@ export const enhancedOvertimeSchema = overtimeInputSchema.extend({
   companyId: z.string().optional(),
   companyContext: z.custom<AvilineCompanyContext>().optional(),
   overtimeHistory: z.object({
-    averageMonthlyOvertime: number,
-    complianceRate: number,
-    disputes: number,
-    payments: number,
+    averageMonthlyOvertime: z.number(),
+    complianceRate: z.number(),
+    disputes: z.number(),
+    payments: z.number(),
   }).optional(),
   industryBenchmark: z.object({
-    sectorAverageOvertime: number,
-    complianceRate: number,
-    disputeRate: number,
+    sectorAverageOvertime: z.number(),
+    complianceRate: z.number(),
+    disputeRate: z.number(),
   }).optional(),
 });
 
@@ -177,16 +181,16 @@ export const enhancedUnpaidSalarySchema = unpaidSalaryRecoverySchema.extend({
   companyId: z.string().optional(),
   companyContext: z.custom<AvilineCompanyContext>().optional(),
   paymentHistory: z.object({
-    onTimePayments: number,
-    latePayments: number,
-    averageDelayDays: number,
-    totalAmountDelayed: number,
+    onTimePayments: z.number(),
+    latePayments: z.number(),
+    averageDelayDays: z.number(),
+    totalAmountDelayed: z.number(),
   }).optional(),
   recoveryHistory: z.object({
-    previousClaims: number,
-    successfulRecoveries: number,
-    averageRecoveryTime: number,
-    legalActionsRequired: number,
+    previousClaims: z.number(),
+    successfulRecoveries: z.number(),
+    averageRecoveryTime: z.number(),
+    legalActionsRequired: z.number(),
   }).optional(),
 });
 
