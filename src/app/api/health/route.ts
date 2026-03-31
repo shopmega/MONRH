@@ -186,26 +186,3 @@ export async function GET(request: NextRequest) {
         if (!res.ok) throw new Error(`${res.status}`);
         const data = (await res.json()) as { status?: string };
         if (data.status !== "healthy") throw new Error("unhealthy");
-      })
-    : { name: "api.reviewly.health", ok: true, durationMs: 0, error: null as string | null };
-
-  const apiChecks = [...apiChecksBase, reviewlyCheck];
-  const allChecks = [...baseChecks, ...deepChecks, ...apiChecks];
-  const requiredChecks = allChecks.filter((c) => c.name !== "api.reviewly.health");
-  const healthy = env.ok && requiredChecks.every((item) => item.ok);
-
-  return NextResponse.json(
-    {
-      ok: healthy,
-      scope: "all",
-      timestamp: new Date().toISOString(),
-      checks: {
-        env: env.checks,
-        base: baseChecks,
-        database: deepChecks,
-        apis: apiChecks,
-      },
-    },
-    { status: healthy ? 200 : 503 },
-  );
-}
