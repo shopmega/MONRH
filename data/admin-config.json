@@ -1,0 +1,21 @@
+{
+  "simulatorAdStepEnabled": true,
+  "documentAdStepEnabled": true,
+  "maintenanceMessage": "",
+  "websiteSettings": {
+    "siteName": "Salarie.ma",
+    "siteDescription": "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.",
+    "siteSubtitle": "Labour Clarity Platform",
+    "logoUrl": "",
+    "supportEmail": "",
+    "defaultArticleCoverUrl": "",
+    "socialLinks": {
+      "facebook": "",
+      "instagram": "",
+      "linkedin": "",
+      "x": ""
+    }
+  },
+  "toolPolicies": {},
+  "updatedAt": "1970-01-01T00:00:00.000Z"
+}

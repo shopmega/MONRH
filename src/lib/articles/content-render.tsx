@@ -1,0 +1,179 @@
+import type { ReactNode } from "react";
+
+const AUTO_LINK_REGEX =
+  /((?:https?:\/\/[^\s]+)|(?:\/(?:simulateurs|simulate|documents|bibliotheque|articles|tools|outils)\/[a-z0-9\-_/]+))/gi;
+
+function titleCaseWords(value: string): string {
+  return value
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function friendlyLabelForHref(href: string): string {
+  if (!href.startsWith("/")) {
+    return href;
+  }
+  const cleaned = href.replace(/\/+$/, "");
+  const parts = cleaned.split("/").filter(Boolean);
+  if (parts.length === 0) return href;
+
+  const section = parts[0];
+  const slug = parts.slice(1).join("/");
+  const slugLabel = titleCaseWords(slug.replace(/[/-]+/g, " "));
+
+  if (section === "simulateurs" || section === "simulate") {
+    return slugLabel ? `Simulateur ${slugLabel}` : "Simulateur";
+  }
+  if (section === "documents") {
+    return slugLabel ? `Document ${slugLabel}` : "Document";
+  }
+  if (section === "bibliotheque") {
+    return slugLabel ? `Bibliotheque ${slugLabel}` : "Bibliotheque";
+  }
+  if (section === "articles") {
+    return slugLabel ? `Article ${slugLabel}` : "Article";
+  }
+  if (section === "tools" || section === "outils") {
+    return slugLabel ? `Outil ${slugLabel}` : "Outil";
+  }
+
+  return href;
+}
+
+function renderTextWithLinks(text: string, keyPrefix: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null = AUTO_LINK_REGEX.exec(text);
+  let i = 0;
+
+  while (match) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    const href = match[0];
+    const isExternal = href.startsWith("http://") || href.startsWith("https://");
+    const label = friendlyLabelForHref(href);
+    nodes.push(
+      <a
+        key={`${keyPrefix}-link-${i}`}
+        href={href}
+        className="font-semibold text-[var(--accent)] underline underline-offset-2"
+        target={isExternal ? "_blank" : undefined}
+        rel={isExternal ? "noopener noreferrer" : undefined}
+      >
+        {label}
+      </a>,
+    );
+    lastIndex = match.index + match[0].length;
+    i += 1;
+    match = AUTO_LINK_REGEX.exec(text);
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes;
+}
+
+function renderInline(text: string, keyPrefix: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const regex = /\*\*(.+?)\*\*/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null = regex.exec(text);
+  let i = 0;
+
+  while (match) {
+    if (match.index > lastIndex) {
+      nodes.push(...renderTextWithLinks(text.slice(lastIndex, match.index), `${keyPrefix}-text-${i}`));
+    }
+    nodes.push(<strong key={`${keyPrefix}-strong-${i}`}>{match[1]}</strong>);
+    lastIndex = match.index + match[0].length;
+    i += 1;
+    match = regex.exec(text);
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(...renderTextWithLinks(text.slice(lastIndex), `${keyPrefix}-tail`));
+  }
+
+  return nodes;
+}
+
+function splitBulletTrail(text: string): { lead: string; items: string[] } {
+  const parts = text
+    .split(/\s+-\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length <= 1) {
+    return { lead: text.trim(), items: [] };
+  }
+  return {
+    lead: parts[0],
+    items: parts.slice(1),
+  };
+}
+
+export function renderArticleContentBlocks(blocks: string[], keyPrefix: string): ReactNode[] {
+  const rendered: ReactNode[] = [];
+
+  blocks.forEach((rawBlock, blockIndex) => {
+    const block = rawBlock.trim();
+    if (!block) return;
+
+    const lines = block
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (lines.length === 0) return;
+
+    const singleLine = lines.join(" ");
+    const headingMatch = singleLine.match(/^#{1,2}\s+(.+)$/);
+
+    if (headingMatch) {
+      const headingContent = headingMatch[1].trim();
+      const { lead, items } = splitBulletTrail(headingContent);
+      rendered.push(
+        <h2 key={`${keyPrefix}-h2-${blockIndex}`} className="text-xl font-semibold leading-tight">
+          {renderInline(lead, `${keyPrefix}-h2-inline-${blockIndex}`)}
+        </h2>,
+      );
+      if (items.length > 0) {
+        rendered.push(
+          <ul key={`${keyPrefix}-ul-${blockIndex}`} className="list-disc space-y-1 pl-5">
+            {items.map((item, itemIndex) => (
+              <li key={`${keyPrefix}-li-${blockIndex}-${itemIndex}`}>
+                {renderInline(item, `${keyPrefix}-li-inline-${blockIndex}-${itemIndex}`)}
+              </li>
+            ))}
+          </ul>,
+        );
+      }
+      return;
+    }
+
+    const allBulletLines = lines.every((line) => /^[-*]\s+/.test(line));
+    if (allBulletLines) {
+      rendered.push(
+        <ul key={`${keyPrefix}-ul-lines-${blockIndex}`} className="list-disc space-y-1 pl-5">
+          {lines.map((line, itemIndex) => (
+            <li key={`${keyPrefix}-line-li-${blockIndex}-${itemIndex}`}>
+              {renderInline(line.replace(/^[-*]\s+/, ""), `${keyPrefix}-line-inline-${blockIndex}-${itemIndex}`)}
+            </li>
+          ))}
+        </ul>,
+      );
+      return;
+    }
+
+    rendered.push(
+      <p key={`${keyPrefix}-p-${blockIndex}`}>
+        {renderInline(singleLine, `${keyPrefix}-p-inline-${blockIndex}`)}
+      </p>,
+    );
+  });
+
+  return rendered;
+}

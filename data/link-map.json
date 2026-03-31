@@ -1,0 +1,18 @@
+{
+  "article": {
+    "lire-fiche-paie-maroc": {
+      "articleSlugs": [
+        "heures-sup-preuves-et-reclamation"
+      ],
+      "toolIds": [
+        "net_gross"
+      ],
+      "documentIds": [
+        "formal-complaint-employer"
+      ]
+    }
+  },
+  "simulator": {},
+  "document": {},
+  "updatedAt": "2026-02-14T19:02:52.902Z"
+}

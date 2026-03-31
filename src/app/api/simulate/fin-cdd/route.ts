@@ -1,0 +1,24 @@
+﻿import { NextRequest, NextResponse } from "next/server";
+import { requireToolAccessOrResponse } from "@/lib/server/tool-access-enforcement";
+import { finCddInputSchema, simulateFinCdd } from "@/lib/calculators/fin-cdd";
+
+export async function POST(request: NextRequest) {
+  const accessDenied = await requireToolAccessOrResponse("fin_cdd");
+  if (accessDenied) return accessDenied;
+  try {
+    const payload = await request.json();
+    const input = finCddInputSchema.parse(payload);
+    const result = simulateFinCdd(input);
+    return NextResponse.json({ ok: true, calculatorType: "fin_cdd", result });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "Invalid simulation payload.",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 400 },
+    );
+  }
+}
+
