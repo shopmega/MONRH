@@ -13,7 +13,7 @@ export default function ContractsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Contract generator page - v1.0.1
+  // Contract generator page - v1.0.2 - Production ready
 
   useEffect(() => {
     const fetchData = async () => {
