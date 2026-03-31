@@ -186,3 +186,25 @@ export async function GET(request: NextRequest) {
         if (!res.ok) throw new Error(`${res.status}`);
         const data = (await res.json()) as { status?: string };
         if (data.status !== "healthy") throw new Error("unhealthy");
+      }) : null;
+
+  if (reviewlyCheck) {
+    deepChecks.push(reviewlyCheck);
+  }
+
+  const healthy = env.ok && baseChecks.every((item) => item.ok) && deepChecks.every((item) => item.ok);
+
+  return NextResponse.json(
+    {
+      ok: healthy,
+      scope: "all",
+      timestamp: new Date().toISOString(),
+      checks: {
+        env: env.checks,
+        base: baseChecks,
+        deep: deepChecks,
+      },
+    },
+    { status: healthy ? 200 : 503 },
+  );
+}
