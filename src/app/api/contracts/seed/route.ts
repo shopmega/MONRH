@@ -177,7 +177,7 @@ export async function POST() {
           ],
           is_active: true
         }
-      ]);
+      ] as any);
 
     if (templatesError) {
       console.error('Error inserting templates:', templatesError);
@@ -236,7 +236,7 @@ export async function POST() {
           category: 'remote_work',
           is_active: true
         }
-      ]);
+      ] as any);
 
     if (clausesError) {
       console.error('Error inserting clauses:', clausesError);
@@ -396,7 +396,7 @@ export async function POST() {
           value_expression: 'CURRENT_DATE',
           is_active: true
         }
-      ]);
+      ] as any);
 
     if (rulesError) {
       console.error('Error inserting rules:', rulesError);
