@@ -388,6 +388,7 @@ export function ContractWizard({
 
   const currentStepData = wizardSteps[currentStep];
   const isLastStep = currentStep === wizardSteps.length - 1;
+  const shouldShowValidation = touchedFields.size > 0 || isAttemptingToProceed;
   // Allow navigation between steps, only block final generation
   const canProceed = !isLastStep || (validationResult?.isValid && touchedFields.size > 0);
 
@@ -500,8 +501,8 @@ export function ContractWizard({
           <CardDescription>{currentStepData.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Validation Errors - only show for current step */}
-          {validationResult?.errors
+          {/* Validation Errors - only show for current step and after interaction */}
+          {shouldShowValidation && validationResult?.errors
             .filter(error => currentStepData.fields.some(field => field.id === error.field))
             .map(error => (
               <Alert key={error.rule_id} variant="destructive">
@@ -509,8 +510,8 @@ export function ContractWizard({
               </Alert>
             ))}
 
-          {/* Validation Warnings - only show for current step */}
-          {validationResult?.warnings
+          {/* Validation Warnings - only show for current step and after interaction */}
+          {shouldShowValidation && validationResult?.warnings
             .filter(warning => currentStepData.fields.some(field => field.id === warning.field))
             .map(warning => (
               <Alert key={warning.rule_id}>
@@ -757,17 +758,45 @@ function ClausesStep({
                         {/* Clause variables */}
                         {isSelected && variables.length > 0 && (
                           <div className="mt-3 space-y-2">
-                            {variables.map(variable => (
-                              <div key={variable} className="flex items-center space-x-2">
-                                <Label className="text-sm min-w-24">{variable}:</Label>
-                                <Input
-                                  placeholder={t('contractWizard.enterVariable', { variable: variable })}
-                                  value={clauseVariables[clause.id]?.[variable] || ""}
-                                  onChange={(e) => onVariableChange(clause.id, variable, e.target.value)}
-                                  className="h-8"
-                                />
-                              </div>
-                            ))}
+                            {variables.map(variable => {
+                              const variableLabel = t(`contractWizard.clauseVariables.${variable}`);
+                              const labelText = variableLabel.startsWith('contractWizard.clauseVariables') ? variable : variableLabel;
+
+                              const numberField = [
+                                'mobility_notice',
+                                'non_competition_duration',
+                                'non_competition_radius',
+                                'non_competition_compensation',
+                                'probation_extension_duration',
+                                'remote_work_days'
+                              ].includes(variable);
+
+                              const units: Record<string, string> = {
+                                mobility_notice: 'jours',
+                                non_competition_duration: 'mois',
+                                non_competition_radius: 'km',
+                                non_competition_compensation: 'MAD',
+                                probation_extension_duration: 'jours',
+                                remote_work_days: 'jours/semaine'
+                              };
+
+                              const renderedLabel = labelText.includes('(')
+                                ? labelText
+                                : units[variable] ? `${labelText} (${units[variable]})` : labelText;
+
+                              return (
+                                <div key={variable} className="flex items-center space-x-2">
+                                  <Label className="text-sm min-w-24">{renderedLabel}:</Label>
+                                  <Input
+                                    type={numberField ? 'number' : 'text'}
+                                    placeholder={t('contractWizard.enterVariable', { variable: labelText })}
+                                    value={clauseVariables[clause.id]?.[variable] || ""}
+                                    onChange={(e) => onVariableChange(clause.id, variable, e.target.value)}
+                                    className="h-8"
+                                  />
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
                       </div>

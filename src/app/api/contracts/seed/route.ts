@@ -292,6 +292,60 @@ export async function POST() {
           error_message: 'La date de début est obligatoire',
           is_active: true
         },
+        {
+          id: 'mobility_notice_required',
+          contract_type: 'ALL',
+          rule_type: 'required',
+          field_path: 'clause_variables.mobility_notice',
+          condition_expression: 'selected_clauses CONTAINS "mobility" AND clause_variables.mobility_notice IS NOT NULL AND clause_variables.mobility_notice > 0',
+          error_message: 'Le préavis de mobilité est obligatoire et doit être supérieur à 0',
+          is_active: true
+        },
+        {
+          id: 'non_competition_duration_required',
+          contract_type: 'ALL',
+          rule_type: 'required',
+          field_path: 'clause_variables.non_competition_duration',
+          condition_expression: 'selected_clauses CONTAINS "non_competition" AND clause_variables.non_competition_duration IS NOT NULL AND clause_variables.non_competition_duration > 0',
+          error_message: 'La durée de non-concurrence est obligatoire (mois)',
+          is_active: true
+        },
+        {
+          id: 'non_competition_radius_required',
+          contract_type: 'ALL',
+          rule_type: 'required',
+          field_path: 'clause_variables.non_competition_radius',
+          condition_expression: 'selected_clauses CONTAINS "non_competition" AND clause_variables.non_competition_radius IS NOT NULL AND clause_variables.non_competition_radius > 0',
+          error_message: 'Le rayon de non-concurrence est obligatoire (km)',
+          is_active: true
+        },
+        {
+          id: 'non_competition_compensation_required',
+          contract_type: 'ALL',
+          rule_type: 'required',
+          field_path: 'clause_variables.non_competition_compensation',
+          condition_expression: 'selected_clauses CONTAINS "non_competition" AND clause_variables.non_competition_compensation IS NOT NULL AND clause_variables.non_competition_compensation > 0',
+          error_message: 'L\'indemnité de non-concurrence est obligatoire (MAD)',
+          is_active: true
+        },
+        {
+          id: 'probation_extension_duration_required',
+          contract_type: 'ALL',
+          rule_type: 'required',
+          field_path: 'clause_variables.probation_extension_duration',
+          condition_expression: 'selected_clauses CONTAINS "probation_extension" AND clause_variables.probation_extension_duration IS NOT NULL AND clause_variables.probation_extension_duration > 0',
+          error_message: 'La durée de prolongation de période d’essai est obligatoire (jours)',
+          is_active: true
+        },
+        {
+          id: 'remote_work_days_required',
+          contract_type: 'ALL',
+          rule_type: 'required',
+          field_path: 'clause_variables.remote_work_days',
+          condition_expression: 'selected_clauses CONTAINS "remote_work" AND clause_variables.remote_work_days IS NOT NULL AND clause_variables.remote_work_days > 0',
+          error_message: 'Le nombre de jours de télétravail par semaine est obligatoire',
+          is_active: true
+        },
         // CDD specific
         {
           id: 'cdd_duration_required',

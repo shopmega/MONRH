@@ -7,9 +7,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { useTheme } from "@/components/theme-provider";
+import { AccountDropdown } from "./account-dropdown";
 import { SITE_NAME } from "@/lib/seo";
 
-type NavKey = "home" | "simulate" | "plan" | "contracts" | "documents" | "library" | "account" | "admin";
+type NavKey = "home" | "simulate" | "plan" | "contracts" | "documents" | "library" | "account";
 
 type NavItem = {
   key: NavKey;
@@ -25,8 +26,6 @@ const NAV_ITEMS: NavItem[] = [
   { key: "library", href: "/bibliotheque" },
   { key: "account", href: "/compte" },
 ];
-
-const ADMIN_NAV_ITEM: NavItem = { key: "admin", href: "/admin" };
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
@@ -86,14 +85,6 @@ function MobileIcon({ itemKey }: { itemKey: NavKey }) {
       </svg>
     );
   }
-  if (itemKey === "admin") {
-    return (
-      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M12 3l7 4v5c0 4.3-2.6 7.8-7 9-4.4-1.2-7-4.7-7-9V7l7-4Z" />
-        <path d="M9.5 12.5 11 14l3.5-3.5" />
-      </svg>
-    );
-  }
   return (
     <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="12" cy="8" r="3.5" />
@@ -134,10 +125,7 @@ export function SiteNav() {
     };
   }, [refreshAdminVisibility]);
 
-  const navItems = useMemo(
-    () => (adminVisible ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS),
-    [adminVisible],
-  );
+  const navItems = NAV_ITEMS;
 
   return (
     <>
@@ -218,7 +206,7 @@ export function SiteNav() {
             </div>
 
             <nav className="hidden items-center rounded-full border border-[var(--line)] bg-[var(--surface)] p-1 md:flex">
-              {navItems.map((item) => {
+              {navItems.slice(0, -1).map((item) => {
                 const active = isActive(pathname, item.href);
                 return (
                   <Link
@@ -235,6 +223,8 @@ export function SiteNav() {
                 );
               })}
             </nav>
+
+            <AccountDropdown adminVisible={adminVisible} />
           </div>
         </div>
       </header>
@@ -242,9 +232,9 @@ export function SiteNav() {
       <nav className="fixed inset-x-2 bottom-3 z-50 rounded-2xl border border-[var(--line-strong)] bg-[var(--surface)] p-1.5 shadow-xl backdrop-blur sm:inset-x-3 md:hidden print:hidden">
         <ul
           className="grid gap-1"
-          style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
+          style={{ gridTemplateColumns: `repeat(${navItems.length - 1}, minmax(0, 1fr))` }}
         >
-          {navItems.map((item) => {
+          {navItems.slice(0, -1).map((item) => {
             const active = isActive(pathname, item.href);
             return (
               <li key={item.key}>
@@ -267,6 +257,24 @@ export function SiteNav() {
               </li>
             );
           })}
+          <li>
+            <button
+              type="button"
+              onClick={() => window.location.href = '/compte'}
+              className={`mobile-nav-link block min-w-0 rounded-xl px-1.5 py-2 text-center sm:px-2 ${
+                isActive(pathname, '/compte') || isActive(pathname, '/admin')
+                  ? "bg-[var(--accent)] text-white"
+                  : "text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
+              }`}
+            >
+              <span className="mx-auto mb-0.5 block w-fit">
+                <MobileIcon itemKey="account" />
+              </span>
+              <span className="mobile-nav-label block truncate text-[10px] font-semibold leading-tight sm:text-xs">
+                {t("nav.account")}
+              </span>
+            </button>
+          </li>
         </ul>
       </nav>
     </>

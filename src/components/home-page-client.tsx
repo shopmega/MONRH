@@ -2,10 +2,41 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { useLanguage } from "@/components/language-provider";
-import { AdSlot } from "@/components/ad-slot";
+import { PartnerAdSection } from "@/components/partner-ad-section";
 import { features, type Article, type Category } from "@/lib/content/home-content";
 import { Container } from "@/components/container";
+
+// Image placeholder component
+function ImagePlaceholder({ className }: { className?: string }) {
+  return (
+    <div className={`flex items-center justify-center bg-gradient-to-br from-[var(--surface-muted)] to-[var(--surface)] border border-[var(--line)] ${className}`}>
+      <svg className="w-8 h-8 text-[var(--ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    </div>
+  );
+}
+
+// Safe image component with fallback
+function SafeImage({ src, alt, className, ...props }: any) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src) {
+    return <ImagePlaceholder className={className} />;
+  }
+
+  return (
+    <Image
+      {...props}
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setHasError(true)}
+    />
+  );
+}
 
 const categoryArabicLabels: Record<string, { name: string; description: string }> = {
   salaire: { name: "الأجر", description: "الصافي والإجمالي وIR وCNSS وAMO والتحقق من كشف الأجر." },
@@ -85,21 +116,117 @@ export function HomePageClient({
         </Container>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-12 border-b border-[var(--line)] bg-[var(--surface)]">
+      {/* Tools Showcase Section */}
+      <section className="py-24 sm:py-32 bg-[var(--surface)] border-y border-[var(--line)]">
         <Container>
-          <dl className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-3 text-center">
-            {[
-              { k: t("common.simulationsLabel"), v: t("home.statsSimulations", { count: 14 }) },
-              { k: t("nav.library"), v: t("home.statsLibrary", { count: initialArticles.length }) },
-              { k: t("nav.documents"), v: t("home.statsGenerators", { count: features.length > 0 ? 14 : 0 }) },
-            ].map((item) => (
-              <div key={item.k} className="mx-auto flex max-w-xs flex-col gap-y-2">
-                <dt className="text-sm uppercase tracking-wider text-[var(--ink-soft)] font-medium">{item.k}</dt>
-                <dd className="order-first text-3xl font-semibold tracking-tight text-[var(--heading)] sm:text-4xl">{item.v}</dd>
-              </div>
-            ))}
-          </dl>
+          <div className="mx-auto max-w-2xl lg:text-center mb-16">
+            <h2 className="text-base font-semibold leading-7 text-[var(--accent)] uppercase tracking-wide">
+              {language === "ar" ? "الأدوات والمحاكيات" : "Outils et Simulateurs"}
+            </h2>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-[var(--heading)] sm:text-4xl">
+              {language === "ar" ? "حسابات قانونية موثوقة" : "Calculs juridiques fiables"}
+            </p>
+            <p className="mt-4 text-lg leading-8 text-[var(--ink-soft)]">
+              {language === "ar" ? "مستندات جاهزة ومحاكيات دقيقة للقانون المغربي" : "Documents prêts et simulations précises pour le droit marocain"}
+            </p>
+          </div>
+          <div className="mx-auto max-w-5xl">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                  title: language === "ar" ? "صافي/إجمالي" : "Salaire Net/Brut",
+                  description: language === "ar" ? "احسب الأجر الصافي والاقتطاعات والكلفة الإجمالية" : "Calculez le salaire net, charges et coût employeur",
+                  href: "/simulateurs/brut-net",
+                  category: language === "ar" ? "أجر" : "Salaire"
+                },
+                {
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  ),
+                  title: language === "ar" ? "فصل العمل" : "Licenciement",
+                  description: language === "ar" ? "تقدير التعويضات والإشعار والحقوق القانونية" : "Estimation des indemnités, préavis et droits légaux",
+                  href: "/simulateurs/licenciement",
+                  category: language === "ar" ? "فصل" : "Licenciement"
+                },
+                {
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  ),
+                  title: language === "ar" ? "وثائق قانونية" : "Documents Juridiques",
+                  description: language === "ar" ? "رسائل جاهزة مع المراجع القانونية" : "Lettres pré-remplies avec références juridiques",
+                  href: "/documents",
+                  category: language === "ar" ? "وثائق" : "Documents"
+                },
+                {
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                  title: language === "ar" ? "الساعات الإضافية" : "Heures Supplémentaires",
+                  description: language === "ar" ? "حساب التعويضات والمعدلات القانونية" : "Calcul des majorations et taux légaux",
+                  href: "/simulateurs/heures-supplementaires",
+                  category: language === "ar" ? "وقت" : "Temps"
+                },
+                {
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                  title: language === "ar" ? "العطل والإجازات" : "Congés et Vacances",
+                  description: language === "ar" ? "حساب الاستحقاق والترصيد والإجازات المرضية" : "Calcul des droits, solde et congés maladie",
+                  href: "/simulateurs/conges",
+                  category: language === "ar" ? "إجازة" : "Congé"
+                },
+                {
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  ),
+                  title: language === "ar" ? "التخطيط المالي" : "Planification Financière",
+                  description: language === "ar" ? "محاكاة السيناريوهات وتحسين القرارات" : "Simulation de scénarios et optimisation des décisions",
+                  href: "/planifier",
+                  category: language === "ar" ? "تخطيط" : "Planification"
+                }
+              ].map((tool) => (
+                <Link
+                  key={tool.href}
+                  href={tool.href}
+                  className="soft-card flex flex-col p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-1 bg-[var(--surface)] group"
+                >
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] mb-6 group-hover:bg-[var(--accent)] group-hover:text-white transition-colors">
+                    {tool.icon}
+                  </div>
+                  <div className="flex items-center gap-x-3 mb-4">
+                    <span className="text-xs font-semibold text-[var(--accent-strong)] uppercase tracking-wide">
+                      {tool.category}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-semibold leading-tight text-[var(--heading)] mb-4 group-hover:text-[var(--accent)] transition-colors">
+                    {tool.title}
+                  </h3>
+                  <p className="text-base leading-relaxed text-[var(--ink-soft)] flex-grow">
+                    {tool.description}
+                  </p>
+                  <div className="mt-6 flex items-center text-sm font-semibold text-[var(--accent)]">
+                    {language === "ar" ? "ابدأ" : "Commencer"}
+                    <span aria-hidden="true" className="mr-2 transition-transform group-hover:translate-x-1">→</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
         </Container>
       </section>
 
@@ -179,18 +306,22 @@ export function HomePageClient({
                 Actualités et guides récents
               </h2>
             </div>
-            <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr]">
+            <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-[1.2fr_1fr]">
               <article className="soft-card flex flex-col p-8 bg-[var(--surface)]">
                 {spotlight.coverImageUrl || spotlight.thumbnailUrl ? (
-                  <Image
-                    src={spotlight.coverImageUrl || spotlight.thumbnailUrl || ""}
-                    alt={spotlight.title}
-                    width={1200}
-                    height={600}
-                    className="mb-8 aspect-[2/1] w-full rounded-2xl object-cover object-center border border-[var(--line)]"
-                    unoptimized
-                  />
-                ) : null}
+                  <div className="relative mb-8">
+                    <SafeImage
+                      src={spotlight.coverImageUrl || spotlight.thumbnailUrl || ""}
+                      alt={spotlight.title}
+                      width={1200}
+                      height={600}
+                      className="aspect-[2/1] w-full rounded-2xl object-cover object-center border border-[var(--line)]"
+                      unoptimized
+                    />
+                  </div>
+                ) : (
+                  <ImagePlaceholder className="mb-8 aspect-[2/1] w-full rounded-2xl" />
+                )}
                 <div className="flex items-center gap-x-4 text-xs">
                   <span className="text-[var(--ink-soft)]">{spotlight.readingTime}</span>
                   <span className="relative z-10 rounded-full bg-[var(--surface-strong)] px-3 py-1.5 font-medium text-[var(--heading)]">
@@ -215,19 +346,23 @@ export function HomePageClient({
 
               <div className="flex flex-col gap-8">
                 {sideArticles.map((article) => (
-                  <article key={article.title} className="soft-card p-6 flex flex-col sm:flex-row gap-6 items-start">
-                    {(article.thumbnailUrl || article.coverImageUrl) && (
-                      <div className="w-full sm:w-1/3 flex-shrink-0">
-                         <Image
-                          src={article.thumbnailUrl || article.coverImageUrl || ""}
-                          alt={article.title}
-                          width={300}
-                          height={200}
-                          className="aspect-[3/2] w-full rounded-xl object-cover border border-[var(--line)]"
-                          unoptimized
-                        />
-                      </div>
-                    )}
+                  <article key={article.title} className="soft-card p-6 flex gap-6 items-start">
+                    <div className="w-32 h-24 flex-shrink-0">
+                      {(article.thumbnailUrl || article.coverImageUrl) ? (
+                        <div className="relative w-full h-full">
+                          <SafeImage
+                            src={article.thumbnailUrl || article.coverImageUrl || ""}
+                            alt={article.title}
+                            width={300}
+                            height={200}
+                            className="aspect-[4/3] w-full h-full rounded-xl object-cover border border-[var(--line)]"
+                            unoptimized
+                          />
+                        </div>
+                      ) : (
+                        <ImagePlaceholder className="aspect-[4/3] w-full h-full rounded-xl" />
+                      )}
+                    </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-x-4 text-xs mb-3">
                         <span className="text-[var(--ink-soft)]">{article.readingTime}</span>
@@ -252,12 +387,7 @@ export function HomePageClient({
 
       {/* Footer Ad Space */}
       <section className="py-12 bg-[var(--surface-muted)] border-t border-[var(--line)]">
-        <Container>
-           <p className="text-center text-xs uppercase tracking-wider text-[var(--ink-soft)] font-semibold mb-4">{t("common.partner")}</p>
-           <div className="soft-card p-4 mx-auto max-w-4xl bg-white flex items-center justify-center min-h-[100px]">
-             <AdSlot slot="2222222222" format="auto" />
-           </div>
-        </Container>
+        <PartnerAdSection slot="2222222222" className="py-12 bg-[var(--surface-muted)] border-t border-[var(--line)]" />
       </section>
     </main>
   );

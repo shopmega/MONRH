@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { AdSlot } from "@/components/ad-slot";
+import { PartnerAdSection } from "@/components/partner-ad-section";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { RelatedContent } from "@/components/related-content";
@@ -323,15 +323,11 @@ export function SimulatorToolPage({
               </div>
             </section>
 
-            <section className="soft-card min-w-0 rounded-3xl p-5">
-              <p className="section-kicker">{t("common.partner")}</p>
-              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
-                {t("simulator.partnerDisclaimer")}
-              </p>
-              <div className="mt-4">
-                <AdSlot slot="4444444444" format="auto" />
-              </div>
-            </section>
+            <PartnerAdSection slot="4444444444" className="mt-5">
+          <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+            {t("simulator.partnerDisclaimer")}
+          </p>
+        </PartnerAdSection>
           </aside>
         </div>
 

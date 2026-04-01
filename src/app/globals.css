@@ -147,6 +147,33 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0.5;
 }
 
+.input-shell {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.input-shell:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.input-shell:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-shell::placeholder {
+  color: var(--ink-soft);
+}
+
 .section-kicker {
   font-size: 0.75rem;
   text-transform: uppercase;

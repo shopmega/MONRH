@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AdSlot } from "@/components/ad-slot";
+import { PartnerAdSection } from "@/components/partner-ad-section";
 import { CompanyContextCard } from "@/components/company-context-card";
 import { CompanyTrustSummary } from "@/components/company-trust-summary";
 import { useLanguage } from "@/components/language-provider";
@@ -773,12 +773,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
               company={employerCompany}
             />
 
-            <section className="soft-card rounded-3xl p-5">
-              <p className="section-kicker">{t("common.partner")}</p>
-              <div className="mt-3">
-                <AdSlot slot="4545454545" format="auto" />
-              </div>
-            </section>
+            <PartnerAdSection slot="4545454545" />
           </aside>
         </div>
 

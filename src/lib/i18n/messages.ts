@@ -568,6 +568,17 @@ export const MESSAGES = {
         cheque: "Chèque",
         espece: "Espèces",
       },
+      clauseVariables: {
+        mobility_notice: "Préavis de mobilité",
+        non_competition: "Clause de non-concurrence",
+        non_competition_duration: "Durée de non-concurrence",
+        non_competition_radius: "Rayon de non-concurrence",
+        non_competition_compensation: "Indemnité de non-concurrence",
+        probation_extension: "Extension de période d'essai",
+        probation_extension_duration: "Durée de prolongation de la période d'essai",
+        remote_work: "Télétravail",
+        remote_work_days: "Jours de télétravail par semaine"
+      },
       validation: {
         required: "Ce champ est obligatoire",
         invalidFormat: "Format invalide",
@@ -1150,6 +1161,17 @@ export const MESSAGES = {
         virement: "تحويل بنكي",
         cheque: "شيك",
         espece: "نقدي",
+      },
+      clauseVariables: {
+        mobility_notice: "مدة الإشعار للتنقل",
+        non_competition: "بند عدم المنافسة",
+        non_competition_duration: "مدة عدم المنافسة",
+        non_competition_radius: "نطاق عدم المنافسة",
+        non_competition_compensation: "تعويض عدم المنافسة",
+        probation_extension: "تمديد فترة التجربة",
+        probation_extension_duration: "مدة تمديد فترة التجربة",
+        remote_work: "العمل عن بعد",
+        remote_work_days: "أيام العمل عن بعد في الأسبوع"
       },
       validation: {
         required: "هذا الحقل إلزامي",

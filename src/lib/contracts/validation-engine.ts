@@ -87,8 +87,18 @@ export class ContractValidationEngine {
   }
 
   private getFieldValue(formData: ContractFormData, fieldPath: string): any {
-    // Handle nested field paths like "employee.name" in the future
-    return formData[fieldPath as keyof ContractFormData];
+    // Support nested paths like "clause_variables.non_competition_duration" or "selected_clauses"
+    if (!fieldPath) return undefined;
+
+    const pathParts = fieldPath.split('.');
+
+    let current: any = formData as any;
+    for (const part of pathParts) {
+      if (current === null || current === undefined) return undefined;
+      current = current[part];
+    }
+
+    return current;
   }
 
   private isRequiredSatisfied(fieldValue: any, condition?: string, formData?: ContractFormData): boolean {
@@ -103,24 +113,42 @@ export class ContractValidationEngine {
       return fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
     }
 
+    if (condition.includes(' CONTAINS ')) {
+      const match = condition.match(/(\w+)\s+CONTAINS\s+"([^"]+)"/);
+      if (match) {
+        const fieldName = match[1];
+        const expected = match[2];
+        const fieldValue = this.getFieldValue(formData, fieldName);
+        if (Array.isArray(fieldValue)) {
+          return fieldValue.includes(expected);
+        }
+        if (typeof fieldValue === 'string') {
+          return fieldValue === expected;
+        }
+        return false;
+      }
+    }
+
     if (condition.includes('>')) {
       // Pattern: "field_name > value"
-      const match = condition.match(/(\w+)\s*>\s*(\d+)/);
+      const match = condition.match(/([\w\.]+)\s*>\s*([\d\.]+)/);
       if (match) {
         const fieldName = match[1];
         const threshold = parseFloat(match[2]);
-        const actualValue = parseFloat(fieldValue);
+        const fieldValueFromData = this.getFieldValue(formData, fieldName);
+        const actualValue = parseFloat(fieldValueFromData as any);
         return !isNaN(actualValue) && actualValue > threshold;
       }
     }
 
     if (condition.includes('<')) {
       // Pattern: "field_name < value"
-      const match = condition.match(/(\w+)\s*<\s*(\d+)/);
+      const match = condition.match(/([\w\.]+)\s*<\s*([\d\.]+)/);
       if (match) {
         const fieldName = match[1];
         const threshold = parseFloat(match[2]);
-        const actualValue = parseFloat(fieldValue);
+        const fieldValueFromData = this.getFieldValue(formData, fieldName);
+        const actualValue = parseFloat(fieldValueFromData as any);
         return !isNaN(actualValue) && actualValue < threshold;
       }
     }
@@ -133,25 +161,42 @@ export class ContractValidationEngine {
     if (!expression) return false;
 
     try {
-      // Handle SQL-style conditions
+      // Handle clause inclusion checks
+      if (expression.includes(' CONTAINS ')) {
+        const match = expression.match(/([\w\.]+)\s+CONTAINS\s+"([^"]+)"/);
+        if (match) {
+          const fieldName = match[1];
+          const expected = match[2];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          if (Array.isArray(fieldValue)) {
+            return fieldValue.includes(expected);
+          }
+          if (typeof fieldValue === 'string') {
+            return fieldValue === expected;
+          }
+          return false;
+        }
+      }
+
+      // Numeric comparisons
       if (expression.includes('<')) {
-        const match = expression.match(/(\w+)\s*<\s*(\d+)/);
+        const match = expression.match(/([\w\.]+)\s*<\s*([\d\.]+)/);
         if (match) {
           const fieldName = match[1];
           const threshold = parseFloat(match[2]);
-          const fieldValue = formData[fieldName as keyof ContractFormData];
-          const actualValue = parseFloat(fieldValue as string);
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          const actualValue = parseFloat(fieldValue as any);
           return !isNaN(actualValue) && actualValue < threshold;
         }
       }
 
       if (expression.includes('>')) {
-        const match = expression.match(/(\w+)\s*>\s*(\d+)/);
+        const match = expression.match(/([\w\.]+)\s*>\s*([\d\.]+)/);
         if (match) {
           const fieldName = match[1];
           const threshold = parseFloat(match[2]);
-          const fieldValue = formData[fieldName as keyof ContractFormData];
-          const actualValue = parseFloat(fieldValue as string);
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          const actualValue = parseFloat(fieldValue as any);
           return !isNaN(actualValue) && actualValue > threshold;
         }
       }

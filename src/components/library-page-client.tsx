@@ -5,8 +5,38 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
-import { AdSlot } from "@/components/ad-slot";
+import { PartnerAdSection } from "@/components/partner-ad-section";
 import { type Article } from "@/lib/content/home-content";
+
+// Image placeholder component
+function ImagePlaceholder({ className }: { className?: string }) {
+  return (
+    <div className={`flex items-center justify-center bg-gradient-to-br from-[var(--surface-muted)] to-[var(--surface)] border border-[var(--line)] ${className}`}>
+      <svg className="w-8 h-8 text-[var(--ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    </div>
+  );
+}
+
+// Safe image component with fallback
+function SafeImage({ src, alt, className, ...props }: any) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src) {
+    return <ImagePlaceholder className={className} />;
+  }
+
+  return (
+    <Image
+      {...props}
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setHasError(true)}
+    />
+  );
+}
 
 function categoryName(slug: string): string {
   return slug.replaceAll("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -70,31 +100,32 @@ export function LibraryPageClient({ initialArticles }: { initialArticles: Articl
           </div>
         </section>
 
-        <section className="mt-5">
-          <p className="section-kicker pl-1">{t("common.partner")}</p>
-          <div className="soft-card mt-2 rounded-3xl p-3">
-            <AdSlot slot="3333333333" format="auto" />
-          </div>
-        </section>
+        <PartnerAdSection slot="3333333333" />
 
         <section className="mt-5">
           <h2 className="display-font text-3xl font-semibold">Articles</h2>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {articles.map((article, index) => (
               <article
                 key={article.slug}
                 className={`rounded-3xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
               >
-                {article.thumbnailUrl || article.coverImageUrl ? (
-                  <Image
-                    src={article.thumbnailUrl || article.coverImageUrl || ""}
-                    alt={article.title}
-                    width={900}
-                    height={288}
-                    className="mb-3 h-36 w-full rounded-2xl object-cover"
-                    unoptimized
-                  />
-                ) : null}
+                <div className="mb-3 h-36 w-full">
+                  {(article.thumbnailUrl || article.coverImageUrl) ? (
+                    <div className="relative w-full h-full">
+                      <SafeImage
+                        src={article.thumbnailUrl || article.coverImageUrl || ""}
+                        alt={article.title}
+                        width={900}
+                        height={288}
+                        className="h-36 w-full rounded-2xl object-cover border border-[var(--line)]"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <ImagePlaceholder className="h-36 w-full rounded-2xl" />
+                  )}
+                </div>
                 <p className="section-kicker">
                   {article.lastUpdated} | {article.readingTime}
                 </p>

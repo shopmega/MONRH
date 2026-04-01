@@ -86,13 +86,7 @@ export function AdSlot({
   }, [adsenseClient, format, responsive, slot]);
 
   if (!adsenseClient) {
-    return (
-      <div className={className}>
-        <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface)] px-4 py-8 text-center text-xs text-[var(--ink-soft)]">
-          {t("ad.placeholder")}
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

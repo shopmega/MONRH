@@ -49,7 +49,7 @@ export default function ContractsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          templateId: contractData.contract_type.toUpperCase(), // Convert to uppercase to match template ID
+          templateId: contractData.contract_type.toUpperCase(),
           contractData
         }),
       });
@@ -57,16 +57,166 @@ export default function ContractsPage() {
       const result = await response.json();
 
       if (result.ok) {
-        // Download or display the generated contract
-        const blob = new Blob([result.contract.content], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `contrat-${contractData.contract_type}-${Date.now()}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const content = result.contract.content;
+        const contractType = contractData.contract_type === 'CDI' 
+          ? 'CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE (CDI)'
+          : 'CONTRAT DE TRAVAIL À DURÉE DÉTERMINÉE (CDD)';
+        
+        // Professional HTML formatted for print-to-PDF
+        const pdfWindow = window.open('', '', 'width=950,height=1200');
+        if (pdfWindow) {
+          // Escape content for safe HTML insertion
+          const escapedContent = content
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+          pdfWindow.document.write(`
+            <!DOCTYPE html>
+            <html lang="fr">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Contrat de Travail</title>
+              <style>
+                * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+                }
+                
+                body {
+                  font-family: 'Cambria', 'Times New Roman', serif;
+                  line-height: 1.5;
+                  color: #1a1a1a;
+                  background: white;
+                }
+                
+                .page {
+                  width: 21cm;
+                  height: 29.7cm;
+                  margin: 0 auto;
+                  padding: 1.5cm;
+                  background: white;
+                }
+                
+                .header {
+                  text-align: center;
+                  border-bottom: 3px solid #000;
+                  padding-bottom: 0.8cm;
+                  margin-bottom: 0.8cm;
+                }
+                
+                .brand {
+                  font-size: 12pt;
+                  font-weight: bold;
+                  letter-spacing: 2px;
+                  margin-bottom: 0.2cm;
+                }
+                
+                .tagline {
+                  font-size: 9pt;
+                  color: #555;
+                  margin-bottom: 0.5cm;
+                }
+                
+                .title {
+                  text-align: center;
+                  font-size: 16pt;
+                  font-weight: bold;
+                  text-decoration: underline;
+                  margin: 1cm 0 0.5cm 0;
+                }
+                
+                .intro {
+                  text-align: center;
+                  font-size: 10pt;
+                  margin-bottom: 1cm;
+                  font-style: italic;
+                }
+                
+                .parties {
+                  font-size: 10pt;
+                  margin-bottom: 1cm;
+                  line-height: 1.8;
+                }
+                
+                .party {
+                  margin-bottom: 0.5cm;
+                }
+                
+                .party-label {
+                  font-weight: bold;
+                  text-decoration: underline;
+                }
+                
+                .divider {
+                  border-top: 2px solid #000;
+                  margin: 1cm 0;
+                }
+                
+                .preamble {
+                  text-align: center;
+                  font-weight: bold;
+                  font-size: 11pt;
+                  margin: 1cm 0;
+                }
+                
+                .content {
+                  font-size: 10pt;
+                  line-height: 1.7;
+                  text-align: justify;
+                  white-space: pre-wrap;
+                  word-break: break-word;
+                  font-family: 'Cambria', 'Times New Roman', serif;
+                }
+                
+                .footer {
+                  border-top: 1px solid #ccc;
+                  margin-top: 1.5cm;
+                  padding-top: 0.5cm;
+                  font-size: 8pt;
+                  color: #666;
+                  text-align: center;
+                  line-height: 1.6;
+                }
+                
+                @media print {
+                  body { margin: 0; padding: 0; }
+                  .page { width: 100%; height: auto; margin: 0; padding: 1.5cm; }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="page">
+                <div class="header">
+                  <div class="brand">MONRH</div>
+                  <div class="tagline">Plateforme de Droit du Travail au Maroc</div>
+                </div>
+                
+                <div class="title">${contractType}</div>
+                
+                <div class="content">${escapedContent}</div>
+                
+                <div class="footer">
+                  <div>Conforme au Code du Travail Marocain (Loi 65-99)</div>
+                  <div>Document généré automatiquement par MONRH</div>
+                  <div>Date: ${new Date().toLocaleDateString('fr-FR')}</div>
+                </div>
+              </div>
+              
+              <script>
+                window.addEventListener('load', function() {
+                  setTimeout(function() {
+                    window.print();
+                  }, 500);
+                });
+              </script>
+            </body>
+            </html>
+          `);
+          pdfWindow.document.close();
+        }
       } else {
         alert(result.error || t('contractsPage.errorLoading'));
       }
