@@ -26,10 +26,10 @@ export default function ContractsPage() {
           setClauses(data.clauses);
           setValidationRules(data.validationRules);
         } else {
-          setError(data.error || "Failed to load contract templates");
+          setError(data.error || t('contractsPage.errorLoading'));
         }
       } catch (err) {
-        setError("Network error loading contract templates");
+        setError(t('contractsPage.networkError'));
       } finally {
         setLoading(false);
       }
@@ -68,10 +68,10 @@ export default function ContractsPage() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } else {
-        alert(result.error || "Failed to generate contract");
+        alert(result.error || t('contractsPage.errorLoading'));
       }
     } catch (err) {
-      alert("Network error generating contract");
+      alert(t('contractsPage.networkError'));
     }
   };
 
@@ -80,7 +80,7 @@ export default function ContractsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Chargement des modèles de contrat...</p>
+          <p>{t('contractsPage.loading')}</p>
         </div>
       </div>
     );
@@ -95,7 +95,7 @@ export default function ContractsPage() {
             onClick={() => window.location.reload()} 
             className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
           >
-            Réessayer
+            {t('contractsPage.retry')}
           </button>
         </div>
       </div>
@@ -107,10 +107,10 @@ export default function ContractsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Générateur de Contrats
+            {t('contractsPage.title')}
           </h1>
           <p className="text-muted-foreground">
-            Créez des contrats de travail conformes au Code du travail marocain
+            {t('contractsPage.description')}
           </p>
         </div>
 
@@ -124,8 +124,7 @@ export default function ContractsPage() {
 
         <div className="mt-12 text-center text-sm text-muted-foreground">
           <p>
-            Conforme au Code du travail marocain • Génération déterministe • 
-            Pas d'IA, uniquement des templates et règles
+            {t('contractsPage.footer')}
           </p>
         </div>
       </div>

@@ -81,112 +81,112 @@ export function ContractWizard({
   const wizardSteps: ContractWizardStep[] = [
     {
       id: "contract_type",
-      title: "Type de Contrat",
-      description: "Choisissez le type de contrat à générer",
+      title: t('contractWizard.steps.contractType.title'),
+      description: t('contractWizard.steps.contractType.description'),
       fields: [
         {
           id: "contract_type",
-          label: "Type de contrat",
+          label: t('contractWizard.fields.contractType'),
           type: "select",
           required: true,
           options: [
-            { value: "CDI", label: "CDI - Contrat à Durée Indéterminée" },
-            { value: "CDD", label: "CDD - Contrat à Durée Déterminée" }
+            { value: "CDI", label: t('contractWizard.options.cdi') },
+            { value: "CDD", label: t('contractWizard.options.cdd') }
           ]
         }
       ]
     },
     {
       id: "employer",
-      title: "Employeur",
-      description: "Informations sur l'entreprise",
+      title: t('contractWizard.steps.employer.title'),
+      description: t('contractWizard.steps.employer.description'),
       fields: [
-        { id: "company_name", label: "Nom de l'entreprise", type: "company", required: true },
-        { id: "company_address", label: "Adresse", type: "textarea", required: true },
-        { id: "company_rc", label: "RC", type: "text", required: true },
-        { id: "company_cnss", label: "CNSS", type: "text", required: true }
+        { id: "company_name", label: t('contractWizard.fields.companyName'), type: "company", required: true },
+        { id: "company_address", label: t('contractWizard.fields.companyAddress'), type: "textarea", required: true },
+        { id: "company_rc", label: t('contractWizard.fields.companyRC'), type: "text", required: true },
+        { id: "company_cnss", label: t('contractWizard.fields.companyCNSS'), type: "text", required: true }
       ]
     },
     {
       id: "employee",
-      title: "Salarié",
-      description: "Informations sur le salarié",
+      title: t('contractWizard.steps.employee.title'),
+      description: t('contractWizard.steps.employee.description'),
       fields: [
-        { id: "employee_name", label: "Nom complet", type: "text", required: true },
-        { id: "employee_address", label: "Adresse", type: "textarea", required: true },
-        { id: "employee_cin", label: "CIN", type: "text", required: true },
-        { id: "employee_cnss", label: "CNSS", type: "text" }
+        { id: "employee_name", label: t('contractWizard.fields.employeeName'), type: "text", required: true },
+        { id: "employee_address", label: t('contractWizard.fields.employeeAddress'), type: "textarea", required: true },
+        { id: "employee_cin", label: t('contractWizard.fields.employeeCIN'), type: "text", required: true },
+        { id: "employee_cnss", label: t('contractWizard.fields.employeeCNSS'), type: "text" }
       ]
     },
     {
       id: "job",
-      title: "Poste et Fonctions",
-      description: "Détails du poste",
+      title: t('contractWizard.steps.job.title'),
+      description: t('contractWizard.steps.job.description'),
       fields: [
-        { id: "job_title", label: "Intitulé du poste", type: "text", required: true },
-        { id: "job_description", label: "Description des fonctions", type: "textarea", required: true },
-        { id: "role_level", label: "Niveau hiérarchique", type: "select", required: true,
+        { id: "job_title", label: t('contractWizard.fields.jobTitle'), type: "text", required: true },
+        { id: "job_description", label: t('contractWizard.fields.jobDescription'), type: "textarea", required: true },
+        { id: "role_level", label: t('contractWizard.fields.roleLevel'), type: "select", required: true,
           options: [
-            { value: "employee", label: "Employé" },
-            { value: "cadre", label: "Cadre" }
+            { value: "employee", label: t('contractWizard.options.employee') },
+            { value: "cadre", label: t('contractWizard.options.cadre') }
           ]
         }
       ]
     },
     {
       id: "conditions",
-      title: "Conditions du Contrat",
-      description: "Durée, période d'essai et conditions de travail",
+      title: t('contractWizard.steps.conditions.title'),
+      description: t('contractWizard.steps.conditions.description'),
       fields: [
-        { id: "start_date", label: "Date de début", type: "date", required: true },
-        { id: "contract_duration", label: "Durée (mois)", type: "number", 
+        { id: "start_date", label: t('contractWizard.fields.startDate'), type: "date", required: true },
+        { id: "contract_duration", label: t('contractWizard.fields.contractDuration'), type: "number", 
           depends_on: { field: "contract_type", value: "CDD" } },
-        { id: "end_date", label: "Date de fin", type: "date", 
+        { id: "end_date", label: t('contractWizard.fields.endDate'), type: "date", 
           depends_on: { field: "contract_type", value: "CDD" } },
-        { id: "cdd_justification", label: "Justification du CDD", type: "textarea", 
+        { id: "cdd_justification", label: t('contractWizard.fields.cddJustification'), type: "textarea", 
           depends_on: { field: "contract_type", value: "CDD" } },
-        { id: "trial_period_duration", label: "Période d'essai", type: "text" },
-        { id: "work_hours", label: "Heures de travail/semaine", type: "text" },
-        { id: "work_days", label: "Jours de travail/semaine", type: "text" },
-        { id: "work_schedule", label: "Horaires", type: "text" }
+        { id: "trial_period_duration", label: t('contractWizard.fields.trialPeriodDuration'), type: "text" },
+        { id: "work_hours", label: t('contractWizard.fields.workHours'), type: "text" },
+        { id: "work_days", label: t('contractWizard.fields.workDays'), type: "text" },
+        { id: "work_schedule", label: t('contractWizard.fields.workSchedule'), type: "text" }
       ]
     },
     {
       id: "salary",
-      title: "Rémunération",
-      description: "Détails salariaux",
+      title: t('contractWizard.steps.salary.title'),
+      description: t('contractWizard.steps.salary.description'),
       fields: [
-        { id: "salary_brut", label: "Salaire brut (MAD)", type: "number", required: true },
-        { id: "salary_net", label: "Salaire net (MAD)", type: "number" },
-        { id: "payment_frequency", label: "Fréquence de paiement", type: "select",
+        { id: "salary_brut", label: t('contractWizard.fields.salaryBrut'), type: "number", required: true },
+        { id: "salary_net", label: t('contractWizard.fields.salaryNet'), type: "number" },
+        { id: "payment_frequency", label: t('contractWizard.fields.paymentFrequency'), type: "select",
           options: [
-            { value: "mensuel", label: "Mensuel" },
-            { value: "bimensuel", label: "Bimensuel" },
-            { value: "trimestriel", label: "Trimestriel" }
+            { value: "mensuel", label: t('contractWizard.options.mensuel') },
+            { value: "bimensuel", label: t('contractWizard.options.bimensuel') },
+            { value: "trimestriel", label: t('contractWizard.options.trimestriel') }
           ]
         },
-        { id: "payment_method", label: "Mode de paiement", type: "select",
+        { id: "payment_method", label: t('contractWizard.fields.paymentMethod'), type: "select",
           options: [
-            { value: "virement", label: "Virement bancaire" },
-            { value: "cheque", label: "Chèque" },
-            { value: "espece", label: "Espèces" }
+            { value: "virement", label: t('contractWizard.options.virement') },
+            { value: "cheque", label: t('contractWizard.options.cheque') },
+            { value: "espece", label: t('contractWizard.options.espece') }
           ]
         }
       ]
     },
     {
       id: "clauses",
-      title: "Clauses Particulières",
-      description: "Sélectionnez les clauses à inclure",
+      title: t('contractWizard.steps.clauses.title'),
+      description: t('contractWizard.steps.clauses.description'),
       fields: []
     },
     {
       id: "final",
-      title: "Finalisation",
-      description: "Vérifiez et générez le contrat",
+      title: t('contractWizard.steps.final.title'),
+      description: t('contractWizard.steps.final.description'),
       fields: [
-        { id: "contract_location", label: "Lieu de signature", type: "text" },
-        { id: "contract_date", label: "Date de signature", type: "date" }
+        { id: "contract_location", label: t('contractWizard.fields.contractLocation'), type: "text" },
+        { id: "contract_date", label: t('contractWizard.fields.contractDate'), type: "date" }
       ]
     }
   ];
@@ -265,7 +265,7 @@ export function ContractWizard({
 
   // Add draft status indicator and clear functionality
   const handleClearDraft = () => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer le brouillon ? Cette action ne peut pas être annulée.')) {
+    if (confirm(t('contractWizard.deleteDraftConfirm'))) {
       clearDraft();
       // Reset to initial state
       setFormData(getInitialFormData());
@@ -399,7 +399,7 @@ export function ContractWizard({
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span className="text-sm text-muted-foreground">
-              Brouillon sauvegardé
+              {t('contractWizard.draftSaved')}
             </span>
           </div>
           <div className="flex items-center space-x-2">
@@ -414,7 +414,7 @@ export function ContractWizard({
               onClick={handleClearDraft}
               className="text-xs hover:bg-destructive hover:text-destructive-foreground h-8 px-3"
             >
-              Supprimer
+              {t('contractWizard.deleteDraft')}
             </Button>
           </div>
         </div>
@@ -426,7 +426,7 @@ export function ContractWizard({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
             <h2 className="text-lg font-semibold text-foreground">
-              Étape {currentStep + 1} sur {wizardSteps.length}
+              {t('contractWizard.step')} {currentStep + 1} {t('contractWizard.of')} {wizardSteps.length}
             </h2>
             <span className="text-sm text-muted-foreground">
               {currentStepData.title}
@@ -488,7 +488,7 @@ export function ContractWizard({
             {currentStepData.title}
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            {currentStep === 0 ? 'En cours' : currentStep < wizardSteps.length - 1 ? 'Étape ' + (currentStep + 1) : 'Finalisation'}
+            {currentStep === 0 ? t('contractWizard.inProgress') : currentStep < wizardSteps.length - 1 ? t('contractWizard.step') + ' ' + (currentStep + 1) : t('contractWizard.finalization')}
           </div>
         </div>
       </div>
@@ -548,7 +548,7 @@ export function ContractWizard({
           {/* Preview for last step */}
           {isLastStep && preview && (
             <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-4">Aperçu du Contrat</h3>
+              <h3 className="text-lg font-semibold mb-4">{t('contractWizard.contractPreview')}</h3>
               <div className="border rounded-lg p-4 bg-muted/50 max-h-96 overflow-y-auto">
                 <div className="space-y-4">
                   {preview.sections.map(section => (
@@ -561,11 +561,11 @@ export function ContractWizard({
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <Badge variant={preview.is_complete ? "default" : "secondary"}>
-                  {preview.completion_percentage}% complété
+                  {preview.completion_percentage}% {t('contractWizard.completed')}
                 </Badge>
                 {!preview.is_complete && (
                   <span className="text-sm text-muted-foreground">
-                    Certains champs obligatoires sont manquants
+                    {t('contractWizard.someFieldsMissing')}
                   </span>
                 )}
               </div>
@@ -581,20 +581,20 @@ export function ContractWizard({
           onClick={prevStep}
           disabled={currentStep === 0}
         >
-          Précédent
+          {t('contractWizard.previous')}
         </Button>
         
         <div className="flex gap-2">
           {!isLastStep ? (
             <Button onClick={nextStep} disabled={!canProceed}>
-              Suivant
+              {t('contractWizard.next')}
             </Button>
           ) : (
             <Button 
               onClick={() => onGenerate?.(formData)}
               disabled={!preview?.is_complete}
             >
-              Générer le Contrat
+              {t('contractWizard.generate')}
             </Button>
           )}
         </div>
@@ -619,6 +619,8 @@ function FormField({
   validation?: { error?: string; warning?: string };
   touched?: boolean;
 }) {
+  const { t } = useLanguage();
+
   if (field.type === "company") {
     return (
       <div className="space-y-2">
@@ -647,7 +649,7 @@ function FormField({
           onChange={(e: any) => onChange(e.target.value)}
           error={touched ? validation?.error : undefined}
         >
-          <option value="">{`Sélectionner ${field.label}`}</option>
+          <option value="">{t('contractWizard.selectField', { field: field.label })}</option>
           {field.options?.map((option: any) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -715,6 +717,8 @@ function ClausesStep({
   onClauseToggle: (clauseId: string, checked: boolean) => void;
   onVariableChange: (clauseId: string, variable: string, value: string) => void;
 }) {
+  const { t } = useLanguage();
+
   const groupedClauses = clauses.reduce((acc, clause) => {
     if (!acc[clause.category]) {
       acc[clause.category] = [];
@@ -757,7 +761,7 @@ function ClausesStep({
                               <div key={variable} className="flex items-center space-x-2">
                                 <Label className="text-sm min-w-24">{variable}:</Label>
                                 <Input
-                                  placeholder={`Entrez ${variable}`}
+                                  placeholder={t('contractWizard.enterVariable', { variable: variable })}
                                   value={clauseVariables[clause.id]?.[variable] || ""}
                                   onChange={(e) => onVariableChange(clause.id, variable, e.target.value)}
                                   className="h-8"

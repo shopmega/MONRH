@@ -4,6 +4,14 @@ import { ContractValidationEngine } from "@/lib/contracts/validation-engine";
 import { ContractTemplateEngine } from "@/lib/contracts/template-engine";
 import { ContractTemplate } from "@/lib/contracts/types";
 
+// Error messages that should be translated in the frontend
+const ERROR_MESSAGES = {
+  MISSING_DATA: "Template ID and contract data are required",
+  TEMPLATE_NOT_FOUND: "Template not found",
+  VALIDATION_FAILED: "Contract validation failed",
+  GENERATION_FAILED: "Failed to generate contract",
+} as const;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -11,7 +19,7 @@ export async function POST(request: Request) {
 
     if (!templateId || !contractData) {
       return NextResponse.json(
-        { ok: false, error: "Template ID and contract data are required" },
+        { ok: false, error: ERROR_MESSAGES.MISSING_DATA },
         { status: 400 }
       );
     }
@@ -29,7 +37,7 @@ export async function POST(request: Request) {
     if (templateError || !template) {
       console.error("Template not found:", templateId, templateError);
       return NextResponse.json(
-        { ok: false, error: `Template not found: ${templateId}` },
+        { ok: false, error: `${ERROR_MESSAGES.TEMPLATE_NOT_FOUND}: ${templateId}` },
         { status: 404 }
       );
     }
@@ -65,7 +73,7 @@ export async function POST(request: Request) {
       console.error("Validation errors:", validationResult.errors);
       return NextResponse.json({
         ok: false,
-        error: "Contract validation failed",
+        error: ERROR_MESSAGES.VALIDATION_FAILED,
         validationErrors: validationResult.errors,
         warnings: validationResult.warnings
       }, { status: 400 });
@@ -108,7 +116,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Contract generation error:", error);
     return NextResponse.json(
-      { ok: false, error: "Failed to generate contract" },
+      { ok: false, error: ERROR_MESSAGES.GENERATION_FAILED },
       { status: 500 }
     );
   }
