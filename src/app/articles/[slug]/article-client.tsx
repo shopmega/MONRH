@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { AdSlot } from "@/components/ad-slot";
 import { RelatedContent } from "@/components/related-content";
 import { renderArticleContentBlocks } from "@/lib/articles/content-render";
-import { resolveRelatedItems } from "@/lib/linking/resolve-related";
 import type { Article } from "@/lib/content/home-content";
 
 // Image placeholder component
@@ -56,8 +55,27 @@ export function ArticleClient({ article, coverImage, articleJsonLd }: ArticleCli
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
 
   useEffect(() => {
-    resolveRelatedItems(article.categorySlug, article.slug).then(setRelatedItems);
-  }, [article.categorySlug, article.slug]);
+    const loadRelated = async () => {
+      try {
+        const url = `/api/public-linking?sourceType=article&sourceId=${encodeURIComponent(article.slug)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.ok && Array.isArray(data.items)) {
+          setRelatedItems(data.items);
+        } else {
+          setRelatedItems([]);
+        }
+      } catch (error) {
+        console.error("Failed to load related content:", error);
+        setRelatedItems([]);
+      }
+    };
+
+    loadRelated();
+  }, [article.slug]);
 
   return (
     <main className="paper-bg min-h-screen">
