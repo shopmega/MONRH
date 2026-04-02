@@ -6,14 +6,6 @@ import { canAccessArticle, getArticleBySlugFromStore } from "@/lib/server/articl
 import { isUserAuthenticated } from "@/lib/server/user-session";
 import { ArticleClient } from "./article-client";
 
-function categoryName(slug: string) {
-  return slug
-    .split("-")
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -54,8 +46,8 @@ export async function generateMetadata({
       locale: "fr_MA",
       alternateLocale: ["ar_MA"],
       authors: [siteName],
-      publishedTime: article.publishedAt,
-      modifiedTime: article.lastUpdatedAt,
+      publishedTime: article.lastUpdated,
+      modifiedTime: article.lastUpdated,
       images: [
         {
           url: imageUrl,
@@ -99,8 +91,8 @@ export default async function ArticlePage({
     headline: article.title,
     description: article.excerpt,
     url: absoluteUrl(article.href),
-    datePublished: article.publishedAt,
-    dateModified: article.lastUpdatedAt,
+    datePublished: article.lastUpdated,
+    dateModified: article.lastUpdated,
     author: {
       "@type": "Organization",
       name: siteName,
@@ -125,32 +117,7 @@ export default async function ArticlePage({
       <article>
         <section>
           <ArticleClient article={article} coverImage={coverImage} articleJsonLd={articleJsonLd} />
-          <AdSlot slot="1414141414" format="auto" />
         </section>
-
-        <RelatedContent
-          items={
-            mappedItems.length > 0
-              ? mappedItems
-              : [
-                  {
-                    title: labels.relatedArticles,
-                    description: labels.relatedArticlesDesc,
-                    href: "/bibliotheque",
-                  },
-                  {
-                    title: labels.relatedSimulators,
-                    description: labels.relatedSimulatorsDesc,
-                    href: "/simulateurs",
-                  },
-                  {
-                    title: labels.relatedDocs,
-                    description: labels.relatedDocsDesc,
-                    href: "/documents",
-                  },
-                ]
-          }
-        />
       </article>
     </main>
   );

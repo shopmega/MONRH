@@ -114,6 +114,9 @@ export class ContractValidationEngine {
     }
 
     if (condition.includes(' CONTAINS ')) {
+      if (!formData) {
+        return false;
+      }
       const match = condition.match(/(\w+)\s+CONTAINS\s+"([^"]+)"/);
       if (match) {
         const fieldName = match[1];
@@ -130,6 +133,9 @@ export class ContractValidationEngine {
     }
 
     if (condition.includes('>')) {
+      if (!formData) {
+        return false;
+      }
       // Pattern: "field_name > value"
       const match = condition.match(/([\w\.]+)\s*>\s*([\d\.]+)/);
       if (match) {
@@ -142,6 +148,9 @@ export class ContractValidationEngine {
     }
 
     if (condition.includes('<')) {
+      if (!formData) {
+        return false;
+      }
       // Pattern: "field_name < value"
       const match = condition.match(/([\w\.]+)\s*<\s*([\d\.]+)/);
       if (match) {
