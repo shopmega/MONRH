@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildToolResultDocumentLinks } from "@/lib/tools/result-document-links";
+import { buildSimulationResultDocumentLink, buildToolResultDocumentLinks } from "@/lib/tools/result-document-links";
 
 describe("buildToolResultDocumentLinks", () => {
   it("builds prefilled links for final settlement results", () => {
@@ -31,5 +31,32 @@ describe("buildToolResultDocumentLinks", () => {
     });
 
     expect(links).toHaveLength(1);
+  });
+
+  it("builds a shared simulation-to-document link for unpaid salary recovery", () => {
+    const link = buildSimulationResultDocumentLink({
+      calculatorPath: "/simulateurs/recouvrement-salaire-impaye",
+      calculatorType: "unpaid_salary_recovery",
+      title: "Salaire impaye",
+      description: "Recouvrement",
+      breakdownLabels: {},
+      units: {},
+      locale: "fr-MA",
+      inputPayload: {
+        calculationDate: "2026-03-01",
+        unpaidMonths: 2,
+      },
+      result: {
+        versionCode: "ma_2026",
+        breakdown: {
+          totalClaimAmount: 12000,
+        },
+      },
+    });
+
+    expect(link?.templateId).toBe("salary-recovery-letter");
+    expect(link?.href).toContain("/documents/salary-recovery-letter");
+    expect(link?.href).toContain("amount_due=12000");
+    expect(link?.href).toContain("period=Derniers+2+mois");
   });
 });

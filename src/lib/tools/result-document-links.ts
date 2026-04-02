@@ -1,8 +1,11 @@
+import type { SimulationResultSnapshot } from "@/lib/simulations/result-snapshot";
+
 export type ResultDocumentLink = {
   templateId: string;
   title: string;
   description: string;
   href: string;
+  ctaLabel?: string;
 };
 
 type ToolId =
@@ -12,21 +15,43 @@ type ToolId =
   | "pre_litigation_timeline";
 
 const TEMPLATE_TITLES: Record<string, string> = {
-  "salary-recovery-letter": "Demande de Salaire Impaye",
-  "overtime-claim-letter": "Demande Paiement Heures Sup",
-  "formal-complaint-employer": "Reclamation Formelle Employeur",
-  "labor-inspector-complaint": "Plainte a l'Inspection du Travail",
   "contract-renewal-request": "Demande Renouvellement Contrat",
+  "formal-complaint-employer": "Reclamation Formelle Employeur",
   "harassment-report-letter": "Signalement Harcelement",
+  "labor-inspector-complaint": "Plainte a l'Inspection du Travail",
+  "maternity-leave-request": "Demande Conge Maternite",
+  "notice-letter": "Lettre de Preavis",
+  "overtime-claim-letter": "Demande Paiement Heures Sup",
+  "resignation-letter": "Lettre de Demission",
+  "salary-recovery-letter": "Demande de Salaire Impaye",
+  "unpaid-leave-request": "Demande Conge Sans Solde",
+  "work-accident-declaration": "Declaration Accident du Travail",
+};
+
+const TEMPLATE_CTA_LABELS: Record<string, string> = {
+  "contract-renewal-request": "Demander le renouvellement CDD",
+  "harassment-report-letter": "Signaler le harcelement",
+  "labor-inspector-complaint": "Generer la plainte a l'inspection du travail",
+  "maternity-leave-request": "Demander le conge maternite",
+  "notice-letter": "Generer la lettre de preavis",
+  "overtime-claim-letter": "Generer la mise en demeure (heures sup.)",
+  "resignation-letter": "Generer la lettre de demission",
+  "salary-recovery-letter": "Generer la mise en demeure (salaires impayes)",
+  "unpaid-leave-request": "Demander un conge sans solde",
+  "work-accident-declaration": "Declarer l'accident du travail",
 };
 
 function titleForTemplate(templateId: string): string {
   return TEMPLATE_TITLES[templateId] ?? templateId;
 }
 
-function buildDocumentHref(
+function ctaLabelForTemplate(templateId: string): string {
+  return TEMPLATE_CTA_LABELS[templateId] ?? titleForTemplate(templateId);
+}
+
+export function buildDocumentHref(
   templateId: string,
-  params: Record<string, string | number | undefined>,
+  params: Record<string, string | number | boolean | undefined>,
 ): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -35,6 +60,21 @@ function buildDocumentHref(
   }
   const suffix = query.toString();
   return suffix.length > 0 ? `/documents/${templateId}?${suffix}` : `/documents/${templateId}`;
+}
+
+function buildDocumentLink(
+  templateId: string,
+  description: string,
+  params: Record<string, string | number | boolean | undefined>,
+  ctaLabel?: string,
+): ResultDocumentLink {
+  return {
+    templateId,
+    title: titleForTemplate(templateId),
+    description,
+    href: buildDocumentHref(templateId, params),
+    ctaLabel: ctaLabel ?? ctaLabelForTemplate(templateId),
+  };
 }
 
 function uniqueByHref(items: ResultDocumentLink[]): ResultDocumentLink[] {
@@ -46,6 +86,186 @@ function uniqueByHref(items: ResultDocumentLink[]): ResultDocumentLink[] {
   });
 }
 
+export function buildSimulationResultDocumentLink(
+  snapshot: SimulationResultSnapshot,
+): ResultDocumentLink | null {
+  const params = new URLSearchParams();
+  const breakdown = snapshot.result.breakdown;
+  const input = snapshot.inputPayload ?? {};
+  const calculationDate = typeof input.calculationDate === "string" ? input.calculationDate : "";
+
+  if (snapshot.calculatorType === "licenciement") {
+    const total = typeof breakdown.totalEstimated === "number" ? breakdown.totalEstimated : undefined;
+    const serviceYears =
+      typeof breakdown.totalServiceYears === "number" ? breakdown.totalServiceYears : undefined;
+    if (total !== undefined) {
+      params.set("amount_due", String(total));
+      params.set("request", `Regularisation des indemnites estimees a ${total} MAD.`);
+    } else {
+      params.set("request", "Regularisation des indemnites legales et des conges non regles.");
+    }
+    const isAbusive = Boolean(snapshot.result.breakdown.dommagesAbusif);
+    if (isAbusive) {
+      params.set("issue_summary", "Licenciement abusif et litige indemnites.");
+    } else {
+      params.set(
+        "issue_summary",
+        serviceYears ? `Licenciement apres ${serviceYears} an(s) d'anciennete.` : "Litige de licenciement.",
+      );
+    }
+    const docId = "labor-inspector-complaint";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Escalade utile si le depart se transforme en litige indemnitaire.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  if (snapshot.calculatorType === "unpaid_salary_recovery") {
+    const total =
+      typeof breakdown.totalClaimAmount === "number" ? breakdown.totalClaimAmount : undefined;
+    const unpaidMonths = typeof input.unpaidMonths === "number" ? input.unpaidMonths : undefined;
+    if (calculationDate) params.set("period", unpaidMonths ? `Derniers ${unpaidMonths} mois` : calculationDate);
+    if (total !== undefined) params.set("amount_due", String(total));
+    params.set("issue_summary", "Salaires impayes constates.");
+    const docId = "salary-recovery-letter";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Formalisez la reclamation avec le montant estime deja renseigne.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  if (
+    snapshot.calculatorType === "unpaid_overtime_recovery" ||
+    snapshot.calculatorType === "overtime" ||
+    snapshot.calculatorType === "public_holiday_compensation"
+  ) {
+    const total =
+      typeof breakdown.totalClaimAmount === "number"
+        ? breakdown.totalClaimAmount
+        : typeof breakdown.totalOvertimeAmount === "number"
+          ? breakdown.totalOvertimeAmount
+          : typeof breakdown.compensationAmount === "number"
+            ? breakdown.compensationAmount
+            : undefined;
+    if (calculationDate) params.set("period", calculationDate);
+    if (total !== undefined) params.set("amount_due", String(total));
+    params.set("issue_summary", "Heures supplementaires non regularisees.");
+    const docId = "overtime-claim-letter";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Passez du calcul au courrier avec les heures et montants deja prepares.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  if (snapshot.calculatorType === "duree_preavis" || snapshot.calculatorType === "demission") {
+    const workerCategory =
+      typeof breakdown.workerCategory === "string" ? breakdown.workerCategory : "employe";
+    const leavePayout =
+      typeof breakdown.leavePayout === "number" ? breakdown.leavePayout : undefined;
+    const noticeComp =
+      typeof breakdown.noticeCompensationDue === "number" ? breakdown.noticeCompensationDue : undefined;
+
+    if (calculationDate) params.set("effective_date", calculationDate);
+    if (leavePayout !== undefined) params.set("amount_due", String(leavePayout + (noticeComp ?? 0)));
+    params.set("position", workerCategory);
+    const docId = "resignation-letter";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Preparez une lettre de demission avec les informations deja connues.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  if (snapshot.calculatorType === "harassment_scenario") {
+    if (calculationDate) params.set("period", calculationDate);
+    params.set("issue_summary", "Signalement de faits de harcelement.");
+    const docId = "harassment-report-letter";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Transformez l'evaluation en signalement ecrit structure.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  if (snapshot.calculatorType === "maternity_leave") {
+    if (calculationDate) params.set("effective_date", calculationDate);
+    params.set("request", "Conge maternite legal.");
+    const docId = "maternity-leave-request";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Passez du calcul de droit a la demande de conge.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  if (snapshot.calculatorType === "work_accident") {
+    if (calculationDate) params.set("period", calculationDate);
+    params.set("issue_summary", "Accident du travail survenu.");
+    const docId = "work-accident-declaration";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Declenchez la declaration avec le contexte deja renseigne.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  if (snapshot.calculatorType === "leave_accrual") {
+    if (calculationDate) params.set("period", calculationDate);
+    params.set("request", "Demande de conge exceptionnel.");
+    const docId = "unpaid-leave-request";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Utilisez votre estimation de conges pour lancer la demande.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  if (snapshot.calculatorType === "fin_cdd") {
+    params.set("request", "Proposition de renouvellement de contrat.");
+    const docId = "contract-renewal-request";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Passez au modele de regularisation ou renouvellement du contrat.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  if (snapshot.calculatorType === "probation_termination") {
+    if (calculationDate) params.set("effective_date", calculationDate);
+    const docId = "notice-letter";
+    return {
+      templateId: docId,
+      title: titleForTemplate(docId),
+      description: "Formalisez la notification de preavis avec la date deja choisie.",
+      href: `/documents/${docId}?${params.toString()}`,
+      ctaLabel: ctaLabelForTemplate(docId),
+    };
+  }
+
+  return null;
+}
+
 export function buildToolResultDocumentLinks({
   toolId,
   result,
@@ -55,73 +275,66 @@ export function buildToolResultDocumentLinks({
 }): ResultDocumentLink[] {
   if (toolId === "final_settlement_audit") {
     const total = Number(
-      ((result as { breakdown?: { totalEstimatedDue?: number } })?.breakdown?.totalEstimatedDue ??
-        0),
+      ((result as { breakdown?: { totalEstimatedDue?: number } })?.breakdown?.totalEstimatedDue ?? 0),
     );
     return [
-      {
-        templateId: "salary-recovery-letter",
-        title: titleForTemplate("salary-recovery-letter"),
-        description: "Demande de regularisation du solde final et montants non regles.",
-        href: buildDocumentHref("salary-recovery-letter", {
+      buildDocumentLink(
+        "salary-recovery-letter",
+        "Demande de regularisation du solde final et montants non regles.",
+        {
           period: "Solde de tout compte",
           amount_due: total > 0 ? total : undefined,
-        }),
-      },
-      {
-        templateId: "labor-inspector-complaint",
-        title: titleForTemplate("labor-inspector-complaint"),
-        description: "Escalade a l'inspection du travail si absence de regularisation.",
-        href: buildDocumentHref("labor-inspector-complaint", {
+        },
+      ),
+      buildDocumentLink(
+        "labor-inspector-complaint",
+        "Escalade a l'inspection du travail si absence de regularisation.",
+        {
           issue_summary: "Regularisation du solde de tout compte",
           request: total > 0 ? `Paiement d'un montant estime a ${total} MAD.` : "Regularisation des droits dus.",
-        }),
-      },
+        },
+      ),
     ];
   }
 
   if (toolId === "disciplinary_procedure_check") {
     return [
-      {
-        templateId: "formal-complaint-employer",
-        title: titleForTemplate("formal-complaint-employer"),
-        description: "Demande interne de revision de la procedure disciplinaire.",
-        href: buildDocumentHref("formal-complaint-employer", {
+      buildDocumentLink(
+        "formal-complaint-employer",
+        "Demande interne de revision de la procedure disciplinaire.",
+        {
           issue_summary: "Contestation de la procedure disciplinaire",
           request: "Reexamen contradictoire et regularisation procedurale.",
-        }),
-      },
-      {
-        templateId: "labor-inspector-complaint",
-        title: titleForTemplate("labor-inspector-complaint"),
-        description: "Saisine externe en cas de procedure irréguliere persistante.",
-        href: buildDocumentHref("labor-inspector-complaint", {
+        },
+      ),
+      buildDocumentLink(
+        "labor-inspector-complaint",
+        "Saisine externe en cas de procedure irreguliere persistante.",
+        {
           issue_summary: "Irregularites dans la procedure disciplinaire",
           request: "Intervention et mediation sur le respect des droits de defense.",
-        }),
-      },
+        },
+      ),
     ];
   }
 
   if (toolId === "fixed_term_contract_risk") {
     return [
-      {
-        templateId: "formal-complaint-employer",
-        title: titleForTemplate("formal-complaint-employer"),
-        description: "Demande de clarification et regularisation du CDD.",
-        href: buildDocumentHref("formal-complaint-employer", {
+      buildDocumentLink(
+        "formal-complaint-employer",
+        "Demande de clarification et regularisation du CDD.",
+        {
           issue_summary: "Risque de requalification du CDD",
           request: "Mise en conformite des clauses du contrat.",
-        }),
-      },
-      {
-        templateId: "contract-renewal-request",
-        title: titleForTemplate("contract-renewal-request"),
-        description: "Demande ecrite de regularisation contractuelle (renouvellement ou ajustement).",
-        href: buildDocumentHref("contract-renewal-request", {
+        },
+      ),
+      buildDocumentLink(
+        "contract-renewal-request",
+        "Demande ecrite de regularisation contractuelle (renouvellement ou ajustement).",
+        {
           request: "Regularisation du contrat en conformite juridique.",
-        }),
-      },
+        },
+      ),
     ];
   }
 
@@ -138,6 +351,7 @@ export function buildToolResultDocumentLinks({
           title: titleForTemplate(step.documentTemplateId as string),
           description: "Document recommande dans la feuille de route.",
           href: step.documentHref as string,
+          ctaLabel: ctaLabelForTemplate(step.documentTemplateId as string),
         })),
     );
   }

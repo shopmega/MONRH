@@ -20,6 +20,7 @@ import {
 import { calculatorTypeToPath } from "@/lib/simulations/calculator-path";
 import { ReviewlyPromoCard } from "@/components/reviewly-promo-card";
 import { type SimulationResultSnapshot } from "@/lib/simulations/result-snapshot";
+import { buildSimulationResultDocumentLink } from "@/lib/tools/result-document-links";
 import type { PieSlice } from "@/components/charts/breakdown-pie-chart";
 import type { BarEntry } from "@/components/charts/timeline-bar-chart";
 
@@ -50,131 +51,15 @@ const DOCUMENT_CTA_LABELS: Record<string, string> = {
 };
 
 function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): DocumentCTA | null {
-  const params = new URLSearchParams();
-  const breakdown = snapshot.result.breakdown;
-  const input = snapshot.inputPayload ?? {};
-  const calculationDate = typeof input.calculationDate === "string" ? input.calculationDate : "";
-
-  if (snapshot.calculatorType === "licenciement") {
-    const total = typeof breakdown.totalEstimated === "number" ? breakdown.totalEstimated : undefined;
-    const serviceYears =
-      typeof breakdown.totalServiceYears === "number" ? breakdown.totalServiceYears : undefined;
-    if (total !== undefined) {
-      params.set("amount_due", String(total));
-      params.set("request", `Regularisation des indemnites estimees a ${total} MAD.`);
-    } else {
-      params.set("request", "Regularisation des indemnites legales et des conges non regles.");
-    }
-    const isAbusive = Boolean(snapshot.result.breakdown.dommagesAbusif);
-    if (isAbusive) {
-      params.set("issue_summary", "Licenciement abusif et litige indemnites.");
-    } else {
-      params.set("issue_summary", serviceYears ? `Licenciement apres ${serviceYears} an(s) d'anciennete.` : "Litige de licenciement.");
-    }
-    const docId = "labor-inspector-complaint";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
+  const link = buildSimulationResultDocumentLink(snapshot);
+  if (!link) {
+    return null;
   }
 
-  if (snapshot.calculatorType === "unpaid_salary_recovery") {
-    const total =
-      typeof breakdown.totalClaimAmount === "number" ? breakdown.totalClaimAmount : undefined;
-    const unpaidMonths = typeof input.unpaidMonths === "number" ? input.unpaidMonths : undefined;
-    if (calculationDate) params.set("period", unpaidMonths ? `Derniers ${unpaidMonths} mois` : calculationDate);
-    if (total !== undefined) params.set("amount_due", String(total));
-    params.set("issue_summary", "Salaires impayes constates.");
-    const docId = "salary-recovery-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (
-    snapshot.calculatorType === "unpaid_overtime_recovery" ||
-    snapshot.calculatorType === "overtime" ||
-    snapshot.calculatorType === "public_holiday_compensation"
-  ) {
-    const total =
-      typeof breakdown.totalClaimAmount === "number"
-        ? breakdown.totalClaimAmount
-        : typeof breakdown.totalOvertimeAmount === "number"
-          ? breakdown.totalOvertimeAmount
-          : typeof breakdown.compensationAmount === "number"
-            ? breakdown.compensationAmount
-            : undefined;
-    if (calculationDate) params.set("period", calculationDate);
-    if (total !== undefined) params.set("amount_due", String(total));
-    params.set("issue_summary", "Heures supplementaires non regularisees.");
-    const docId = "overtime-claim-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (
-    snapshot.calculatorType === "duree_preavis" ||
-    snapshot.calculatorType === "demission"
-  ) {
-    const contractType =
-      typeof breakdown.contractType === "string" ? breakdown.contractType : "CDI";
-    const workerCategory =
-      typeof breakdown.workerCategory === "string" ? breakdown.workerCategory : "employe";
-    const requiredNoticeMonths =
-      typeof breakdown.requiredNoticeMonths === "number"
-        ? breakdown.requiredNoticeMonths
-        : undefined;
-    const requiredNoticeDays =
-      typeof breakdown.requiredNoticeDays === "number"
-        ? breakdown.requiredNoticeDays
-        : undefined;
-    const leavePayout =
-      typeof breakdown.leavePayout === "number" ? breakdown.leavePayout : undefined;
-    const noticeComp =
-      typeof breakdown.noticeCompensationDue === "number" ? breakdown.noticeCompensationDue : undefined;
-
-    if (calculationDate) params.set("effective_date", calculationDate);
-    if (leavePayout !== undefined) params.set("amount_due", String(leavePayout + (noticeComp ?? 0)));
-    params.set("position", workerCategory);
-    const docId = "resignation-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "harassment_scenario") {
-    if (calculationDate) params.set("period", calculationDate);
-    params.set("issue_summary", "Signalement de faits de harcelement.");
-    const docId = "harassment-report-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "maternity_leave") {
-    if (calculationDate) params.set("effective_date", calculationDate);
-    params.set("request", "Conge maternite legal.");
-    const docId = "maternity-leave-request";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "work_accident") {
-    if (calculationDate) params.set("period", calculationDate);
-    params.set("issue_summary", "Accident du travail survenu.");
-    const docId = "work-accident-declaration";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "leave_accrual") {
-    if (calculationDate) params.set("period", calculationDate);
-    params.set("request", "Demande de conge exceptionnel.");
-    const docId = "unpaid-leave-request";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "fin_cdd") {
-    params.set("request", "Proposition de renouvellement de contrat.");
-    const docId = "contract-renewal-request";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "probation_termination") {
-    if (calculationDate) params.set("effective_date", calculationDate);
-    const docId = "notice-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  return null;
+  return {
+    href: link.href,
+    label: link.ctaLabel ?? link.title,
+  };
 }
 
 function formatValue(
