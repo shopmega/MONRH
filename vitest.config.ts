@@ -3,7 +3,8 @@ import { fileURLToPath } from "node:url";
 
 export default defineConfig({
   test: {
-    environment: "node",
+    environment: "jsdom",
+    globals: true,
   },
   resolve: {
     alias: {

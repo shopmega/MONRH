@@ -46,12 +46,7 @@ export function AccountDropdown({ adminVisible }: AccountDropdownProps) {
     <div className="relative">
       <button
         type="button"
-        onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) {
-            window.location.href = '/compte';
-          }
-        }}
+        onClick={() => setIsOpen((open) => !open)}
         className={`hidden items-center rounded-full border px-4 py-2 text-sm font-semibold transition md:flex ${
           accountActive || adminActive
             ? "border-[var(--accent)] bg-[var(--accent)] text-white"
@@ -75,6 +70,21 @@ export function AccountDropdown({ adminVisible }: AccountDropdownProps) {
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-1 shadow-lg z-20">
+            <Link
+              href="/compte"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center rounded-md px-3 py-2 text-sm font-medium transition ${
+                accountActive
+                  ? "bg-[var(--accent)] text-white"
+                  : "text-[var(--foreground)] hover:bg-[var(--surface-strong)]"
+              }`}
+            >
+              <svg viewBox="0 0 24 24" className="mr-2 h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M5 20c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5" />
+              </svg>
+              {t("nav.account")}
+            </Link>
             <Link
               href="/admin"
               onClick={() => setIsOpen(false)}
