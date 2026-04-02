@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Bulletin de Paie — Generateur Complet",
   description: "Generez un bulletin de paie marocain complet et conforme. CNSS, AMO, CIMR, IR et charges employeur.",
-  canonicalPath: "/planifier/bulletin-paie",
+  canonicalPath: "/salaire/bulletin-paie",
 });
 
 export default function PayslipPage() {

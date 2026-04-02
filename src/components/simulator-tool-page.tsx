@@ -140,21 +140,41 @@ export function SimulatorToolPage({
     ]),
   );
   const toolUsable = canUseTool(toolPolicy, userAuthenticated);
+  const relatedLabels =
+    language === "ar"
+      ? {
+          toolsTitle: "خطوات مرتبطة",
+          toolsDescription: "اكتشف الادوات الاكثر فائدة لفهم الاجر والحقوق.",
+          modelsTitle: "نماذج مفيدة",
+          modelsDescription: "افتح الرسائل والنماذج الجاهزة المرتبطة بنفس الحالة.",
+          articlesTitle: "شروحات عملية",
+          articlesDescription: "اقرأ الشرح المبسط قبل اتخاذ الخطوة التالية.",
+          back: "الرجوع الى قسم الاجر",
+        }
+      : {
+          toolsTitle: "Outils lies",
+          toolsDescription: "Retrouvez les calculs les plus utiles pour comprendre votre situation.",
+          modelsTitle: "Modeles utiles",
+          modelsDescription: "Accedez aux lettres et modeles associes a la meme demarche.",
+          articlesTitle: "Guides pratiques",
+          articlesDescription: "Lisez les explications utiles avant de passer a l'action.",
+          back: "Retour a Salaire",
+        };
   const relatedItems = [
     {
-      title: t("simulator.relatedSimulatorsTitle"),
-      description: t("simulator.relatedSimulatorsDesc"),
-      href: "/simulateurs",
+      title: relatedLabels.toolsTitle,
+      description: relatedLabels.toolsDescription,
+      href: "/salaire",
     },
     {
-      title: t("simulator.relatedDocumentsTitle"),
-      description: t("simulator.relatedDocumentsDesc"),
-      href: "/documents",
+      title: relatedLabels.modelsTitle,
+      description: relatedLabels.modelsDescription,
+      href: "/modeles",
     },
     {
-      title: t("simulator.relatedLibraryTitle"),
-      description: t("simulator.relatedLibraryDesc"),
-      href: "/bibliotheque",
+      title: relatedLabels.articlesTitle,
+      description: relatedLabels.articlesDescription,
+      href: "/articles",
     },
   ];
 
@@ -240,8 +260,8 @@ export function SimulatorToolPage({
             <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-[var(--ink-soft)]">2. {t("simulator.stepCompute")}</span>
             <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-[var(--ink-soft)]">3. {t("simulator.stepResult")}</span>
           </div>
-          <Link href="/simulateurs" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
-            {t("common.backSimulators")}
+          <Link href="/salaire" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
+            {relatedLabels.back}
           </Link>
         </section>
 

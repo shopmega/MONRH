@@ -146,6 +146,22 @@ export default function DocumentsPage() {
           <p className="mt-3 max-w-2xl break-words text-sm leading-relaxed text-[var(--ink-soft)]">
             {t("documentsPage.description")}
           </p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <Link href="/modeles" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
+              {language === "ar" ? "كل النماذج" : "Tous les modeles"}
+            </Link>
+            <Link href="/contrat-depart" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
+              {language === "ar" ? "رسائل المغادرة" : "Documents de depart"}
+            </Link>
+            <Link href="/litiges" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
+              {language === "ar" ? "وثائق النزاعات" : "Documents de litige"}
+            </Link>
+          </div>
+          <p className="mt-4 text-xs text-[var(--ink-soft)]">
+            {language === "ar"
+              ? "هذه الصفحة ما زالت متاحة، لكن النماذج أصبحت مرتبطة أيضا بالمسارات العملية الجديدة."
+              : "Cette page reste accessible, mais les modeles sont aussi rattaches aux nouveaux parcours par situation."}
+          </p>
         </section>
 
         <section className="mt-5">

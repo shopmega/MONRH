@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Auto-Entrepreneur — Net Apres Impot",
   description: "Calculez votre revenu net apres impot AE (1%/2%), CNSS optionnel et projection annuelle au Maroc.",
-  canonicalPath: "/planifier/auto-entrepreneur",
+  canonicalPath: "/carriere/auto-entrepreneur",
 });
 
 export default function AutoEntrepreneurPage() {

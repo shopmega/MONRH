@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 
 export const SITE_NAME = "MON RH";
 export const SITE_DESCRIPTION =
-  "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.";
+  "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc.";
 const VERCEL_URL = process.env.VERCEL_URL?.trim();
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
   (VERCEL_URL ? `https://${VERCEL_URL}` : "http://localhost:3000");
 export const DEFAULT_OG_IMAGE_PATH = "/opengraph-image";
-export const DEFAULT_OG_IMAGE_ALT = "MON RH - Simulateurs et documents droit du travail au Maroc";
+export const DEFAULT_OG_IMAGE_ALT = "MON RH - Salaire, CNSS, litiges et modeles RH au Maroc";
 
 export function absoluteUrl(path: string) {
   const normalized = path.startsWith("/") ? path : `/${path}`;

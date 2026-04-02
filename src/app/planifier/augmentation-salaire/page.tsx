@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Simulateur Augmentation Salaire",
   description: "Calculez votre gain net reel apres augmentation brute: IR, CNSS, cout employeur compare.",
-  canonicalPath: "/planifier/augmentation-salaire",
+  canonicalPath: "/carriere/augmentation-salaire",
 });
 
 export default function SalaryIncreasePage() {

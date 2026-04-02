@@ -44,8 +44,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     ],
     shortcuts: [
       { name: "Accueil", short_name: "Accueil", url: "/", icons: [{ src: "/icon-192.png", sizes: "192x192", type: "image/png" }] },
-      { name: "Simulateur", short_name: "Simuler", url: "/simulate", icons: [{ src: "/icon-192.png", sizes: "192x192", type: "image/png" }] },
-      { name: "Bibliothèque", short_name: "Bibliothèque", url: "/bibliotheque", icons: [{ src: "/icon-192.png", sizes: "192x192", type: "image/png" }] },
+      { name: "Salaire", short_name: "Salaire", url: "/salaire", icons: [{ src: "/icon-192.png", sizes: "192x192", type: "image/png" }] },
+      { name: "Articles", short_name: "Articles", url: "/articles", icons: [{ src: "/icon-192.png", sizes: "192x192", type: "image/png" }] },
     ],
     screenshots: [],
     prefer_related_applications: false,

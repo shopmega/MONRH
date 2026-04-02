@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 const AUTO_LINK_REGEX =
-  /((?:https?:\/\/[^\s]+)|(?:\/(?:simulateurs|simulate|documents|bibliotheque|articles|tools|outils)\/[a-z0-9\-_/]+))/gi;
+  /((?:https?:\/\/[^\s]+)|(?:\/(?:simulateurs|simulate|documents|bibliotheque|articles|tools|outils|salaire|contrat-depart|conges-cnss|litiges|modeles|carriere|rh-pro)\/[a-z0-9\-_/]+))/gi;
 
 function titleCaseWords(value: string): string {
   return value
@@ -25,6 +25,27 @@ function friendlyLabelForHref(href: string): string {
 
   if (section === "simulateurs" || section === "simulate") {
     return slugLabel ? `Simulateur ${slugLabel}` : "Simulateur";
+  }
+  if (section === "salaire") {
+    return slugLabel ? `Salaire ${slugLabel}` : "Salaire";
+  }
+  if (section === "contrat-depart") {
+    return slugLabel ? `Contrat et depart ${slugLabel}` : "Contrat et depart";
+  }
+  if (section === "conges-cnss") {
+    return slugLabel ? `Conges et CNSS ${slugLabel}` : "Conges et CNSS";
+  }
+  if (section === "litiges") {
+    return slugLabel ? `Litige ${slugLabel}` : "Litiges";
+  }
+  if (section === "modeles") {
+    return slugLabel ? `Modele ${slugLabel}` : "Modeles";
+  }
+  if (section === "carriere") {
+    return slugLabel ? `Carriere ${slugLabel}` : "Carriere";
+  }
+  if (section === "rh-pro") {
+    return slugLabel ? `RH Pro ${slugLabel}` : "RH Pro";
   }
   if (section === "documents") {
     return slugLabel ? `Document ${slugLabel}` : "Document";

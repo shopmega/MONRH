@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "IGR Detail — Taux Marginal et Effectif",
   description: "Detail complet de l'IR mensuel par tranche, taux marginal vs effectif, et reconciliation annuelle.",
-  canonicalPath: "/planifier/igr-detail",
+  canonicalPath: "/salaire/ir-igr",
 });
 
 export default function IGRDetailPage() {

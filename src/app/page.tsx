@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     SITE_DESCRIPTION;
 
   return {
-    title: "Simulateurs et Documents Droit du Travail Maroc",
+    title: "Salaire, Litiges, CNSS et Modeles RH Maroc",
     description: siteDescription,
     alternates: {
       canonical: "/",

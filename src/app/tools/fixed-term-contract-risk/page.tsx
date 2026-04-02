@@ -19,7 +19,7 @@ type Result = {
 };
 
 export default function FixedTermContractRiskPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [form, setForm] = useState({
     contractReasonDocumented: true,
     contractHasEndDate: true,
@@ -37,6 +37,7 @@ export default function FixedTermContractRiskPage() {
   const toolPolicy = resolveToolPolicy(config.toolPolicies, "fixed_term_contract_risk");
   const userAuthenticated = config.userAuthenticated;
   const usable = canUseTool(toolPolicy, userAuthenticated);
+  const relatedModelsLabel = language === "ar" ? "نماذج مفيدة" : "Modeles utiles";
   const relatedDocs = result
     ? buildToolResultDocumentLinks({
         toolId: "fixed_term_contract_risk",
@@ -175,7 +176,7 @@ export default function FixedTermContractRiskPage() {
             </ul>
             {relatedDocs.length > 0 ? (
               <div className="mt-5 rounded-2xl border border-[var(--line)] bg-[var(--surface-elevated)] p-4">
-                <p className="section-kicker">{t("simulator.relatedDocumentsTitle")}</p>
+                <p className="section-kicker">{relatedModelsLabel}</p>
                 <div className="mt-2 space-y-2">
                   {relatedDocs.map((doc) => (
                     <div key={doc.href} className="panel-strong rounded-xl p-3">

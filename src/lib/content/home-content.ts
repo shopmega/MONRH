@@ -45,13 +45,13 @@ export const features: Feature[] = [
     title: "Calculs Verifiables",
     description:
       "Chaque resultat affiche la version legale, les charges appliquees et le detail de la formule.",
-    href: "/simulateurs",
+    href: "/salaire",
   },
   {
     title: "Documents Conformes",
     description:
       "Lettres pre-remplies avec references juridiques et export en format imprimable.",
-    href: "/documents",
+    href: "/modeles",
   },
   {
     title: "Suivi Personnel",

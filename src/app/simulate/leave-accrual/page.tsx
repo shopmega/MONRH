@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Conges Acquis",
   description: "Calculez les jours acquis, le reliquat et l'impact de l'anciennete.",
-  canonicalPath: "/simulateurs/acquisition-conges",
+  canonicalPath: "/conges-cnss/conges-acquis",
 });
 
 export default function LeaveAccrualPage() {

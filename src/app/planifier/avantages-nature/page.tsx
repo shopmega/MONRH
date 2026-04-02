@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Avantages en Nature — Valeur Imposable",
   description: "Calculez la valeur imposable de vos avantages (voiture, logement, repas) et votre remuneration reelle totale.",
-  canonicalPath: "/planifier/avantages-nature",
+  canonicalPath: "/salaire/avantages-nature",
 });
 
 export default function AvantagesNaturePage() {

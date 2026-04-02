@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Indemnite Chomage CNSS — Eligibilite et Montant",
   description: "Verifiez votre eligibilite, estimez l'indemnite mensuelle CNSS et la duree de prise en charge apres perte d'emploi.",
-  canonicalPath: "/planifier/indemnite-chomage",
+  canonicalPath: "/conges-cnss/indemnite-chomage",
 });
 
 export default function UnemploymentPage() {

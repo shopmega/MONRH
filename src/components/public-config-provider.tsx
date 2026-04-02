@@ -38,7 +38,7 @@ const defaultConfig: PublicConfig = {
   websiteSettings: {
     siteName: "MON RH",
     siteDescription:
-      "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.",
+      "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc, avec articles juridiques clairs.",
     siteSubtitle: "Labour Clarity Platform",
     logoUrl: "",
     supportEmail: "",

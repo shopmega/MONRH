@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Duree de Preavis",
   description: "Calcul de la duree de preavis selon type de contrat, categorie et anciennete.",
-  canonicalPath: "/simulateurs/duree-preavis",
+  canonicalPath: "/contrat-depart/duree-preavis",
 });
 
 export default function DureePreavisPage() {
@@ -56,4 +56,3 @@ export default function DureePreavisPage() {
     />
   );
 }
-

@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Simulateur Prime / Bonus — Net Reel",
   description: "Calculez le net de votre prime apres pic de taxation IR. Decouvrez le taux effectif reel de votre bonus.",
-  canonicalPath: "/planifier/simulation-prime",
+  canonicalPath: "/salaire/prime-bonus",
 });
 
 export default function BonusSimulatorPage() {

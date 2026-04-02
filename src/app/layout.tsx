@@ -142,7 +142,7 @@ export default async function RootLayout({
               description: siteDescription,
               potentialAction: {
                 "@type": "SearchAction",
-                target: `${SITE_URL}/bibliotheque?q={search_term_string}`,
+                target: `${SITE_URL}/articles?q={search_term_string}`,
                 "query-input": "required name=search_term_string",
               },
             }),

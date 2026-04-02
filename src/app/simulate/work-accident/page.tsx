@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Accident du Travail",
   description: "Estimation d'indemnisation temporaire et permanente.",
-  canonicalPath: "/simulateurs/accident-travail",
+  canonicalPath: "/conges-cnss/accident-travail",
 });
 
 export default function WorkAccidentPage() {

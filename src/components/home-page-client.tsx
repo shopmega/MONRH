@@ -50,6 +50,14 @@ const categoryArabicLabels: Record<string, { name: string; description: string }
 };
 
 const featureArabicLabels: Record<string, { title: string; description: string }> = {
+  "/salaire": {
+    title: "حسابات قابلة للتحقق",
+    description: "كل نتيجة تعرض النسخة القانونية والاقتطاعات والصيغة المعتمدة.",
+  },
+  "/modeles": {
+    title: "وثائق مطابقة",
+    description: "رسائل جاهزة مع مراجع قانونية وتنسيق مناسب للطباعة.",
+  },
   "/simulateurs": {
     title: "حسابات قابلة للتحقق",
     description: "كل نتيجة تعرض النسخة القانونية والاقتطاعات والصيغة المعتمدة.",
@@ -86,6 +94,18 @@ export function HomePageClient({
     acc[article.categorySlug] = (acc[article.categorySlug] ?? 0) + 1;
     return acc;
   }, {});
+  const heroCtas =
+    language === "ar"
+      ? {
+          simulate: "افهم أجري",
+          document: "أغادر عملي",
+          library: "أحل نزاعا",
+        }
+      : {
+          simulate: t("home.ctaSimulate"),
+          document: t("home.ctaDocument"),
+          library: t("home.ctaLibrary"),
+        };
 
   return (
     <main className="min-h-screen text-[var(--foreground)] w-full overflow-hidden">
@@ -103,14 +123,14 @@ export function HomePageClient({
             {t("home.description")}
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-x-6 gap-y-4">
-            <Link href="/simulateurs" className="btn-primary text-base px-8 py-3.5 shadow-md">
-              {t("home.ctaSimulate")}
+            <Link href="/salaire" className="btn-primary text-base px-8 py-3.5 shadow-md">
+              {heroCtas.simulate}
             </Link>
-            <Link href="/documents" className="btn-muted text-base px-8 py-3.5">
-              {t("home.ctaDocument")}
+            <Link href="/contrat-depart" className="btn-muted text-base px-8 py-3.5">
+              {heroCtas.document}
             </Link>
-            <Link href="/bibliotheque" className="btn-muted text-base px-8 py-3.5">
-              {t("home.ctaLibrary")}
+            <Link href="/litiges" className="btn-muted text-base px-8 py-3.5">
+              {heroCtas.library}
             </Link>
           </div>
         </Container>
@@ -121,13 +141,13 @@ export function HomePageClient({
         <Container>
           <div className="mx-auto max-w-2xl lg:text-center mb-16">
             <h2 className="text-base font-semibold leading-7 text-[var(--accent)] uppercase tracking-wide">
-              {language === "ar" ? "الأدوات والمحاكيات" : "Outils et Simulateurs"}
+              {language === "ar" ? "المسارات والادوات" : "Parcours et outils"}
             </h2>
             <p className="mt-2 text-3xl font-bold tracking-tight text-[var(--heading)] sm:text-4xl">
-              {language === "ar" ? "حسابات قانونية موثوقة" : "Calculs juridiques fiables"}
+              {language === "ar" ? "حلول عملية لحقوقك في الشغل" : "Des actions claires pour vos droits au travail"}
             </p>
             <p className="mt-4 text-lg leading-8 text-[var(--ink-soft)]">
-              {language === "ar" ? "مستندات جاهزة ومحاكيات دقيقة للقانون المغربي" : "Documents prêts et simulations précises pour le droit marocain"}
+              {language === "ar" ? "احسب حقوقك، حضر نموذجك، وانتقل مباشرة الى الخطوة التالية." : "Calculez, verifiez et preparez la bonne demarche sans chercher dans plusieurs rubriques."}
             </p>
           </div>
           <div className="mx-auto max-w-5xl">
@@ -139,9 +159,9 @@ export function HomePageClient({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   ),
-                  title: language === "ar" ? "صافي/إجمالي" : "Salaire Net/Brut",
-                  description: language === "ar" ? "احسب الأجر الصافي والاقتطاعات والكلفة الإجمالية" : "Calculez le salaire net, charges et coût employeur",
-                  href: "/simulateurs/brut-net",
+                  title: language === "ar" ? "صافي واجمالي" : "Salaire net et retenues",
+                  description: language === "ar" ? "احسب الاجر الصافي والاقتطاعات وافهم كشف الاجر." : "Calculez votre net, vos retenues et les principaux montants de paie.",
+                  href: "/salaire",
                   category: language === "ar" ? "أجر" : "Salaire"
                 },
                 {
@@ -150,10 +170,10 @@ export function HomePageClient({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   ),
-                  title: language === "ar" ? "فصل العمل" : "Licenciement",
-                  description: language === "ar" ? "تقدير التعويضات والإشعار والحقوق القانونية" : "Estimation des indemnités, préavis et droits légaux",
-                  href: "/simulateurs/licenciement",
-                  category: language === "ar" ? "فصل" : "Licenciement"
+                  title: language === "ar" ? "مغادرة الشغل" : "Depart, preavis et droits",
+                  description: language === "ar" ? "تحقق من الاستقالة او الفصل واحسب التعويضات والخطوات." : "Verifiez le preavis, les indemnites et les documents utiles en cas de depart.",
+                  href: "/contrat-depart",
+                  category: language === "ar" ? "مغادرة" : "Depart"
                 },
                 {
                   icon: (
@@ -161,10 +181,10 @@ export function HomePageClient({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   ),
-                  title: language === "ar" ? "وثائق قانونية" : "Documents Juridiques",
-                  description: language === "ar" ? "رسائل جاهزة مع المراجع القانونية" : "Lettres pré-remplies avec références juridiques",
-                  href: "/documents",
-                  category: language === "ar" ? "وثائق" : "Documents"
+                  title: language === "ar" ? "نماذج ورسائل" : "Modeles utiles",
+                  description: language === "ar" ? "رسائل جاهزة ومبسطة حسب وضعيتك." : "Accedez aux lettres et modeles les plus utiles pour vos demarches.",
+                  href: "/modeles",
+                  category: language === "ar" ? "نماذج" : "Modeles"
                 },
                 {
                   icon: (
@@ -172,9 +192,9 @@ export function HomePageClient({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   ),
-                  title: language === "ar" ? "الساعات الإضافية" : "Heures Supplémentaires",
-                  description: language === "ar" ? "حساب التعويضات والمعدلات القانونية" : "Calcul des majorations et taux légaux",
-                  href: "/simulateurs/heures-supplementaires",
+                  title: language === "ar" ? "الساعات الاضافية" : "Heures supplementaires",
+                  description: language === "ar" ? "احسب الزيادات القانونية والعطل والغيابات." : "Calculez les majorations, jours feries et autres droits lies au temps de travail.",
+                  href: "/conges-cnss",
                   category: language === "ar" ? "وقت" : "Temps"
                 },
                 {
@@ -183,10 +203,10 @@ export function HomePageClient({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   ),
-                  title: language === "ar" ? "العطل والإجازات" : "Congés et Vacances",
-                  description: language === "ar" ? "حساب الاستحقاق والترصيد والإجازات المرضية" : "Calcul des droits, solde et congés maladie",
-                  href: "/simulateurs/conges",
-                  category: language === "ar" ? "إجازة" : "Congé"
+                  title: language === "ar" ? "العطل و CNSS" : "Conges et CNSS",
+                  description: language === "ar" ? "تحقق من العطل، المرض، الامومة وحقوق CNSS." : "Retrouvez vos droits sur les conges, l'arret maladie, la maternite et la CNSS.",
+                  href: "/conges-cnss",
+                  category: language === "ar" ? "عطل" : "Conges"
                 },
                 {
                   icon: (
@@ -194,10 +214,10 @@ export function HomePageClient({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   ),
-                  title: language === "ar" ? "التخطيط المالي" : "Planification Financière",
-                  description: language === "ar" ? "محاكاة السيناريوهات وتحسين القرارات" : "Simulation de scénarios et optimisation des décisions",
-                  href: "/planifier",
-                  category: language === "ar" ? "تخطيط" : "Planification"
+                  title: language === "ar" ? "قرارات مهنية" : "Carriere et choix pro",
+                  description: language === "ar" ? "قارن بين السيناريوهات المهنية والعمل الحر والاجر." : "Comparez vos scenarios de carriere, freelance ou evolution salariale.",
+                  href: "/carriere",
+                  category: language === "ar" ? "مسار" : "Carriere"
                 }
               ].map((tool) => (
                 <Link
@@ -271,7 +291,7 @@ export function HomePageClient({
         <Container>
           <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
             <h2 className="text-3xl font-bold tracking-tight text-[var(--heading)]">{t("home.categoriesTitle")}</h2>
-            <Link href="/bibliotheque" className="text-sm font-semibold text-[var(--accent)] hover:text-[var(--accent-strong)] transition-colors">
+            <Link href="/articles" className="text-sm font-semibold text-[var(--accent)] hover:text-[var(--accent-strong)] transition-colors">
               {t("common.all")} <span aria-hidden="true">&rarr;</span>
             </Link>
           </div>
@@ -279,7 +299,7 @@ export function HomePageClient({
             {categories.map((category) => (
               <Link
                 key={category.name}
-                href={`/bibliotheque?category=${category.slug}`}
+                href={`/articles?category=${category.slug}`}
                 className="panel-strong rounded-2xl p-6 transition hover:shadow-sm"
               >
                 <h3 className="font-semibold text-[var(--heading)] text-lg">
@@ -392,4 +412,3 @@ export function HomePageClient({
     </main>
   );
 }
-

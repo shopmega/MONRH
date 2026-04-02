@@ -6,6 +6,14 @@ import { seoGuides } from "@/data/seo-guides";
 
 const staticPages = [
   "",
+  "/salaire",
+  "/contrat-depart",
+  "/conges-cnss",
+  "/litiges",
+  "/modeles",
+  "/carriere",
+  "/rh-pro",
+  "/articles",
   "/simulateurs",
   "/documents",
   "/bibliotheque",
@@ -15,26 +23,42 @@ const staticPages = [
   "/outils/score-risque-conformite",
   "/journal/overtime",
   "/journal/violations",
-  "/simulateurs/brut-net",
-  "/simulateurs/cout-employeur-total",
-  "/simulateurs/ir-annuel",
-  "/simulateurs/licenciement",
-  "/simulateurs/demission",
-  "/simulateurs/duree-preavis",
-  "/simulateurs/fin-cdd",
-  "/simulateurs/rupture-periode-essai",
-  "/simulateurs/progression-anciennete",
-  "/simulateurs/acquisition-conges",
-  "/simulateurs/conformite-smig",
-  "/simulateurs/heures-supplementaires",
-  "/simulateurs/compensation-jours-feries",
-  "/simulateurs/conge-maternite",
-  "/simulateurs/conge-maladie",
-  "/simulateurs/pension-cnss",
-  "/simulateurs/accident-travail",
-  "/simulateurs/scenario-harcelement",
-  "/simulateurs/recouvrement-salaire-impaye",
-  "/simulateurs/recouvrement-heures-supplementaires",
+  "/salaire/brut-net",
+  "/salaire/ir-igr",
+  "/salaire/prime-bonus",
+  "/salaire/avantages-nature",
+  "/salaire/smig-smag",
+  "/salaire/bulletin-paie",
+  "/salaire/optimisation-remuneration",
+  "/contrat-depart/licenciement",
+  "/contrat-depart/demission",
+  "/contrat-depart/duree-preavis",
+  "/contrat-depart/fin-cdd",
+  "/contrat-depart/periode-essai",
+  "/contrat-depart/anciennete-indemnites",
+  "/conges-cnss/conges-acquis",
+  "/conges-cnss/heures-supplementaires",
+  "/conges-cnss/jour-ferie",
+  "/conges-cnss/arret-maladie",
+  "/conges-cnss/conge-maternite",
+  "/conges-cnss/indemnite-chomage",
+  "/conges-cnss/pension-cnss",
+  "/conges-cnss/retraite-cnss",
+  "/conges-cnss/accident-travail",
+  "/litiges/salaire-impaye",
+  "/litiges/heures-sup-impayees",
+  "/litiges/harcelement",
+  "/carriere/comparaison-scenarios",
+  "/carriere/augmentation-salaire",
+  "/carriere/promotion",
+  "/carriere/freelance-vs-salarie",
+  "/carriere/capacite-credit",
+  "/carriere/auto-entrepreneur",
+  "/carriere/tarification-freelance",
+  "/carriere/benefice-net",
+  "/rh-pro/cout-employeur-total",
+  "/rh-pro/masse-salariale",
+  "/rh-pro/cout-recrutement",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -50,8 +74,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = staticPages.map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: now,
-    changeFrequency: path === "" ? "daily" : path.startsWith("/journal") ? "daily" : "weekly",
-    priority: path === "" ? 1 : path.startsWith("/simulateurs/") ? 0.85 : 0.8,
+    changeFrequency:
+      path === ""
+        ? "daily"
+        : path.startsWith("/journal")
+          ? "daily"
+          : path === "/simulateurs" || path === "/documents" || path === "/bibliotheque"
+            ? "monthly"
+            : "weekly",
+    priority:
+      path === ""
+        ? 1
+        : path === "/salaire" ||
+            path === "/contrat-depart" ||
+            path === "/conges-cnss" ||
+            path === "/litiges" ||
+            path === "/modeles" ||
+            path === "/articles"
+          ? 0.9
+          : path.startsWith("/salaire/") ||
+              path.startsWith("/contrat-depart/") ||
+              path.startsWith("/conges-cnss/") ||
+              path.startsWith("/litiges/") ||
+              path.startsWith("/carriere/")
+            ? 0.85
+            : path.startsWith("/rh-pro/")
+              ? 0.7
+            : path.startsWith("/simulateurs/") ||
+                path === "/simulateurs" ||
+                path === "/documents" ||
+                path === "/bibliotheque"
+              ? 0.45
+              : 0.75,
   }));
 
   const articleEntries: MetadataRoute.Sitemap = publicArticles.map((article) => ({

@@ -7,25 +7,50 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { useTheme } from "@/components/theme-provider";
+import { CATEGORY_HUBS } from "@/lib/navigation/category-hubs";
 import { AccountDropdown } from "./account-dropdown";
 import { SITE_NAME } from "@/lib/seo";
 
-type NavKey = "home" | "simulate" | "plan" | "contracts" | "documents" | "library" | "account";
+type NavKey = "home" | "salary" | "departure" | "leaveCnss" | "disputes" | "models" | "account";
 
 type NavItem = {
   key: NavKey;
   href: string;
 };
 
+type MegaMenuSection = {
+  labelKey: NavKey;
+  href: string;
+  hubKey: keyof typeof CATEGORY_HUBS;
+};
+
 const NAV_ITEMS: NavItem[] = [
   { key: "home", href: "/" },
-  { key: "simulate", href: "/simulateurs" },
-  { key: "plan", href: "/planifier" },
-  { key: "contracts", href: "/contracts" },
-  { key: "documents", href: "/documents" },
-  { key: "library", href: "/bibliotheque" },
+  { key: "salary", href: "/salaire" },
+  { key: "departure", href: "/contrat-depart" },
+  { key: "leaveCnss", href: "/conges-cnss" },
+  { key: "disputes", href: "/litiges" },
+  { key: "models", href: "/modeles" },
   { key: "account", href: "/compte" },
 ];
+
+const DESKTOP_MENU_SECTIONS: MegaMenuSection[] = [
+  { labelKey: "salary", href: "/salaire", hubKey: "salaire" },
+  { labelKey: "departure", href: "/contrat-depart", hubKey: "contrat-depart" },
+  { labelKey: "leaveCnss", href: "/conges-cnss", hubKey: "conges-cnss" },
+  { labelKey: "disputes", href: "/litiges", hubKey: "litiges" },
+  { labelKey: "models", href: "/modeles", hubKey: "modeles" },
+];
+
+const ARABIC_NAV_LABELS: Record<NavKey, string> = {
+  home: "الرئيسية",
+  salary: "الأجر",
+  departure: "العقد والمغادرة",
+  leaveCnss: "العطل و CNSS",
+  disputes: "النزاعات",
+  models: "النماذج",
+  account: "الحساب",
+};
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
@@ -42,7 +67,7 @@ function MobileIcon({ itemKey }: { itemKey: NavKey }) {
       </svg>
     );
   }
-  if (itemKey === "simulate") {
+  if (itemKey === "salary") {
     return (
       <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="4" y="3" width="16" height="18" rx="2.5" />
@@ -50,7 +75,7 @@ function MobileIcon({ itemKey }: { itemKey: NavKey }) {
       </svg>
     );
   }
-  if (itemKey === "contracts") {
+  if (itemKey === "departure") {
     return (
       <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -61,7 +86,7 @@ function MobileIcon({ itemKey }: { itemKey: NavKey }) {
       </svg>
     );
   }
-  if (itemKey === "documents") {
+  if (itemKey === "models") {
     return (
       <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M7 3h7l4 4v14H7z" />
@@ -69,19 +94,18 @@ function MobileIcon({ itemKey }: { itemKey: NavKey }) {
       </svg>
     );
   }
-  if (itemKey === "plan") {
+  if (itemKey === "leaveCnss") {
     return (
       <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-        <polyline points="16 7 22 7 22 13" />
+        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     );
   }
-  if (itemKey === "library") {
+  if (itemKey === "disputes") {
     return (
       <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M4 5h7v14H4zM13 5h7v14h-7z" />
-        <path d="M11 7h2M11 11h2M11 15h2" />
+        <path d="M12 3 4 7v5c0 4.4 3.1 8.5 8 9 4.9-.5 8-4.6 8-9V7l-8-4Z" />
+        <path d="m9.5 12 1.7 1.7 3.3-3.4" />
       </svg>
     );
   }
@@ -100,6 +124,7 @@ export function SiteNav() {
   const { config } = usePublicConfig();
   const websiteSettings = config.websiteSettings;
   const [adminVisible, setAdminVisible] = useState(false);
+  const [openMenu, setOpenMenu] = useState<NavKey | null>(null);
 
   const refreshAdminVisibility = useCallback(() => {
     fetch("/api/admin/me", { cache: "no-store" })
@@ -126,6 +151,7 @@ export function SiteNav() {
   }, [refreshAdminVisibility]);
 
   const navItems = NAV_ITEMS;
+  const navLabel = (key: NavKey) => (language === "ar" ? ARABIC_NAV_LABELS[key] : t(`nav.${key}`));
 
   return (
     <>
@@ -205,21 +231,79 @@ export function SiteNav() {
               </button>
             </div>
 
-            <nav className="hidden items-center rounded-full border border-[var(--line)] bg-[var(--surface)] p-1 md:flex">
-              {navItems.slice(0, -1).map((item) => {
-                const active = isActive(pathname, item.href);
+            <nav
+              className="hidden items-center rounded-full border border-[var(--line)] bg-[var(--surface)] p-1 md:flex"
+              onMouseLeave={() => setOpenMenu(null)}
+            >
+              <Link
+                href="/"
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isActive(pathname, "/")
+                    ? "bg-[var(--accent)] text-white"
+                    : "text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
+                }`}
+              >
+                {navLabel("home")}
+              </Link>
+              {DESKTOP_MENU_SECTIONS.map((section) => {
+                const active = isActive(pathname, section.href);
+                const hub = CATEGORY_HUBS[section.hubKey];
+                const copy = language === "ar" ? "ar" : "fr";
+                const visibleLinks = hub.links.slice(0, 6);
+
                 return (
-                  <Link
-                    key={item.key}
-                    href={item.href}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      active
-                        ? "bg-[var(--accent)] text-white"
-                        : "text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
-                    }`}
+                  <div
+                    key={section.labelKey}
+                    className="relative"
+                    onMouseEnter={() => setOpenMenu(section.labelKey)}
+                    onFocus={() => setOpenMenu(section.labelKey)}
                   >
-                    {t(`nav.${item.key}`)}
-                  </Link>
+                    <Link
+                      href={section.href}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                        active || openMenu === section.labelKey
+                          ? "bg-[var(--accent)] text-white"
+                          : "text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
+                      }`}
+                    >
+                      {navLabel(section.labelKey)}
+                    </Link>
+                    {openMenu === section.labelKey ? (
+                      <div className="absolute left-1/2 top-[calc(100%+0.6rem)] z-50 w-[40rem] -translate-x-1/2">
+                        <div className="grid gap-4 rounded-[1.75rem] border border-[var(--line)] bg-[var(--surface)] p-4 shadow-2xl lg:grid-cols-[1.1fr_1.7fr]">
+                          <Link
+                            href={hub.featuredHref}
+                            className="soft-card rounded-[1.4rem] p-5 transition hover:-translate-y-0.5"
+                          >
+                            <p className="section-kicker">{hub.kicker[copy]}</p>
+                            <h3 className="display-font mt-2 text-2xl font-semibold leading-tight text-[var(--foreground)]">
+                              {hub.featuredLabel[copy]}
+                            </h3>
+                            <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">
+                              {hub.featuredDescription[copy]}
+                            </p>
+                            <span className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]">
+                              {copy === "ar" ? "افتح الآن" : "Ouvrir"}
+                            </span>
+                          </Link>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            {visibleLinks.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] p-4 transition hover:border-[var(--accent-soft)] hover:bg-[var(--surface-strong)]"
+                              >
+                                <h4 className="text-sm font-semibold text-[var(--foreground)]">{link.title[copy]}</h4>
+                                <p className="mt-1 text-xs leading-relaxed text-[var(--ink-soft)]">
+                                  {link.description[copy]}
+                                </p>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
                 );
               })}
             </nav>
@@ -232,15 +316,15 @@ export function SiteNav() {
       <nav className="fixed inset-x-2 bottom-3 z-50 rounded-2xl border border-[var(--line-strong)] bg-[var(--surface)] p-1.5 shadow-xl backdrop-blur sm:inset-x-3 md:hidden print:hidden">
         <ul
           className="grid gap-1"
-          style={{ gridTemplateColumns: `repeat(${navItems.length - 1}, minmax(0, 1fr))` }}
+          style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}
         >
-          {navItems.slice(0, -1).map((item) => {
+          {navItems.filter((item) => item.key !== "home" && item.key !== "models" && item.key !== "account").map((item) => {
             const active = isActive(pathname, item.href);
             return (
               <li key={item.key}>
                 <Link
                   href={item.href}
-                  aria-label={t(`nav.${item.key}`)}
+                  aria-label={navLabel(item.key)}
                   className={`mobile-nav-link block min-w-0 rounded-xl px-1.5 py-2 text-center sm:px-2 ${
                     active
                       ? "bg-[var(--accent)] text-white"
@@ -251,7 +335,7 @@ export function SiteNav() {
                     <MobileIcon itemKey={item.key} />
                   </span>
                   <span className="mobile-nav-label block truncate text-[10px] font-semibold leading-tight sm:text-xs">
-                    {t(`nav.${item.key}`)}
+                    {navLabel(item.key)}
                   </span>
                 </Link>
               </li>
@@ -271,7 +355,7 @@ export function SiteNav() {
                 <MobileIcon itemKey="account" />
               </span>
               <span className="mobile-nav-label block truncate text-[10px] font-semibold leading-tight sm:text-xs">
-                {t("nav.account")}
+                {navLabel("account")}
               </span>
             </button>
           </li>

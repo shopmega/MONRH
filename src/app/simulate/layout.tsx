@@ -2,29 +2,29 @@ import type { Metadata } from "next";
 import { DEFAULT_OG_IMAGE_PATH, absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Simulateurs Droit du Travail",
+  title: "Salaire, conges et droits au travail",
   description:
     "Simulateurs salariaux et juridiques pour salaries au Maroc: net/brut, licenciement, conges, heures supplementaires, CNSS.",
   alternates: {
-    canonical: "/simulateurs",
+    canonical: "/salaire",
   },
   openGraph: {
-    title: "Simulateurs",
+    title: "Salaire et droits",
     description:
       "Estimez vos droits salariaux, indemnites et compensations selon les regles legales.",
-    url: "/simulateurs",
+    url: "/salaire",
     images: [
       {
         url: absoluteUrl(DEFAULT_OG_IMAGE_PATH),
         width: 1200,
         height: 630,
-        alt: "Simulateurs MON RH",
+        alt: "Salaire et droits MON RH",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Simulateurs",
+    title: "Salaire et droits",
     description:
       "Estimez vos droits salariaux, indemnites et compensations selon les regles legales.",
     images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],

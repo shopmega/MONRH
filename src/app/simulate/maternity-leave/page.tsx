@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Conge Maternite",
   description: "Projection de revenu pendant conge maternite (CNSS + complement).",
-  canonicalPath: "/simulateurs/conge-maternite",
+  canonicalPath: "/conges-cnss/conge-maternite",
 });
 
 export default function MaternityLeavePage() {

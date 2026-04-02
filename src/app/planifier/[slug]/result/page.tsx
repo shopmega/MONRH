@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SimulationResultPage } from "@/components/simulation-result-page";
 
 export const metadata: Metadata = {
-  title: "Resultat Simulation | Planification Financiere",
+  title: "Resultat simulation | Carriere et decisions",
   robots: {
     index: false,
     follow: false,

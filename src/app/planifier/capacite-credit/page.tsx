@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Capacite Credit — Montant Empruntable",
   description: "Calculez votre capacite d'emprunt selon votre salaire net et la regle des 33% des banques marocaines.",
-  canonicalPath: "/planifier/capacite-credit",
+  canonicalPath: "/carriere/capacite-credit",
 });
 
 export default function LoanCapacityPage() {

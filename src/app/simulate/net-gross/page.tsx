@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Salaire Net / Brut",
   description: "Resultat detaille avec charges sociales, IR et cout employeur.",
-  canonicalPath: "/simulateurs/brut-net",
+  canonicalPath: "/salaire/brut-net",
 });
 
 export default function NetGrossSimulationPage() {

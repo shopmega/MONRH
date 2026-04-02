@@ -303,7 +303,7 @@ export default function ComptePage() {
                 </p>
               </div>
               <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap">
-                <Link href="/simulateurs" className="btn-primary w-full px-4 py-2 text-xs uppercase tracking-[0.12em] sm:w-auto">
+                <Link href="/salaire" className="btn-primary w-full px-4 py-2 text-xs uppercase tracking-[0.12em] sm:w-auto">
                   {t("accountPage.newSimulation")}
                 </Link>
                 <button

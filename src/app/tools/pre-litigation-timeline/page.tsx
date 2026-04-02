@@ -21,7 +21,7 @@ type Result = {
 };
 
 export default function PreLitigationTimelinePage() {
-  const { t, locale } = useLanguage();
+  const { t, locale, language } = useLanguage();
   const [form, setForm] = useState({
     incidentDate: "2026-02-01",
     scenario: "salary_delay",
@@ -36,6 +36,7 @@ export default function PreLitigationTimelinePage() {
   const toolPolicy = resolveToolPolicy(config.toolPolicies, "pre_litigation_timeline");
   const userAuthenticated = config.userAuthenticated;
   const usable = canUseTool(toolPolicy, userAuthenticated);
+  const relatedModelsLabel = language === "ar" ? "نماذج مفيدة" : "Modeles utiles";
   const relatedDocs = result
     ? buildToolResultDocumentLinks({
         toolId: "pre_litigation_timeline",
@@ -182,7 +183,7 @@ export default function PreLitigationTimelinePage() {
             </div>
             {relatedDocs.length > 0 ? (
               <div className="mt-5 rounded-2xl border border-[var(--line)] bg-[var(--surface-elevated)] p-4">
-                <p className="section-kicker">{t("simulator.relatedDocumentsTitle")}</p>
+                <p className="section-kicker">{relatedModelsLabel}</p>
                 <div className="mt-2 space-y-2">
                   {relatedDocs.map((doc) => (
                     <div key={doc.href} className="panel-strong rounded-xl p-3">

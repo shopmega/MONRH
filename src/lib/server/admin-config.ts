@@ -42,7 +42,7 @@ const DEFAULT_ADMIN_CONFIG: AdminConfig = {
   websiteSettings: {
     siteName: "MON RH",
     siteDescription:
-      "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.",
+      "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc.",
     siteSubtitle: "Labour Clarity Platform",
     logoUrl: "",
     supportEmail: "",

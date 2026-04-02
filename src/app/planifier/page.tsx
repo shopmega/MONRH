@@ -29,7 +29,7 @@ const planGroups: PlanGroup[] = [
           fr: "Comparez deux situations (offres, scenarios carriere) et generez un rapport de decision.",
           ar: "قارن بين وضعيتين (عروض، مسارات مهنية) وأنشئ تقرير قرار.",
         },
-        href: "/planifier/comparaison-scenarios",
+        href: "/carriere/comparaison-scenarios",
         badge: "new",
         icon: "⚖️",
       },
@@ -45,7 +45,7 @@ const planGroups: PlanGroup[] = [
           fr: "Gain net reel apres augmentation brute: IR, cout employeur, comparaison.",
           ar: "صافي الربح الحقيقي بعد الزيادة الإجمالية: الضريبة وكلفة المشغل.",
         },
-        href: "/planifier/augmentation-salaire",
+        href: "/carriere/augmentation-salaire",
         badge: "new",
         icon: "📈",
       },
@@ -55,7 +55,7 @@ const planGroups: PlanGroup[] = [
           fr: "Net recu apres prime, pic de taxation et taux effectif reel.",
           ar: "الصافي المستلم بعد المنحة وذروة الضريبة والمعدل الفعلي.",
         },
-        href: "/planifier/simulation-prime",
+        href: "/salaire/prime-bonus",
         badge: "new",
         icon: "🎁",
       },
@@ -65,7 +65,7 @@ const planGroups: PlanGroup[] = [
           fr: "Taux marginal vs effectif, detail par tranche, regularisation annuelle.",
           ar: "المعدل الهامشي مقابل الفعلي، التفصيل حسب الشريحة، التسوية السنوية.",
         },
-        href: "/planifier/igr-detail",
+        href: "/salaire/ir-igr",
         badge: "new",
         icon: "🧾",
       },
@@ -75,7 +75,7 @@ const planGroups: PlanGroup[] = [
           fr: "Valeur imposable des avantages (vehicule, logement, repas) et remuneration reelle.",
           ar: "القيمة الخاضعة للضريبة للمزايا (سيارة، سكن، وجبات) والأجر الحقيقي.",
         },
-        href: "/planifier/avantages-nature",
+        href: "/salaire/avantages-nature",
         badge: "new",
         icon: "🏠",
       },
@@ -85,7 +85,7 @@ const planGroups: PlanGroup[] = [
           fr: "Gain net reel d'une promotion vs augmentation brute et cout employeur.",
           ar: "صافي مكسب الترقية مقابل الزيادة الإجمالية وكلفة المشغل.",
         },
-        href: "/planifier/scenario-promotion",
+        href: "/carriere/promotion",
         badge: "new",
         icon: "🚀",
       },
@@ -101,7 +101,7 @@ const planGroups: PlanGroup[] = [
           fr: "Comparaison nette: salarie vs auto-entrepreneur. Seuil de rentabilite et TJM.",
           ar: "مقارنة صافية: أجير مقابل مقاول ذاتي. عتبة الربحية والأجر اليومي.",
         },
-        href: "/planifier/freelance-vs-salarie",
+        href: "/carriere/freelance-vs-salarie",
         badge: "new",
         icon: "⚡",
       },
@@ -111,7 +111,7 @@ const planGroups: PlanGroup[] = [
           fr: "Montant maximum empruntable selon salaire net et taux d'endettement 33%.",
           ar: "الحد الأقصى للاقتراض حسب الأجر الصافي وقاعدة 33% للتداين.",
         },
-        href: "/planifier/capacite-credit",
+        href: "/carriere/capacite-credit",
         badge: "new",
         icon: "🏦",
       },
@@ -121,7 +121,7 @@ const planGroups: PlanGroup[] = [
           fr: "Eligibilite, montant mensuel, duree de prise en charge et plan de survie.",
           ar: "الأهلية والمبلغ الشهري ومدة التغطية والخطة المالية.",
         },
-        href: "/planifier/indemnite-chomage",
+        href: "/conges-cnss/indemnite-chomage",
         badge: "new",
         icon: "🛡️",
       },
@@ -131,7 +131,7 @@ const planGroups: PlanGroup[] = [
           fr: "Projection de pension selon carriere, taux de remplacement et ecart a combler.",
           ar: "توقع المعاش حسب المسار المهني ونسبة الاستبدال والفجوة المالية.",
         },
-        href: "/planifier/retraite-avancee",
+        href: "/conges-cnss/retraite-cnss",
         badge: "new",
         icon: "🌅",
       },
@@ -147,7 +147,7 @@ const planGroups: PlanGroup[] = [
           fr: "Generez un bulletin de paie complet et conforme avec toutes les cotisations.",
           ar: "أنشئ ورقة أجر كاملة ومطابقة مع جميع الاقتطاعات.",
         },
-        href: "/planifier/bulletin-paie",
+        href: "/salaire/bulletin-paie",
         badge: "pro",
         icon: "📄",
       },
@@ -157,7 +157,7 @@ const planGroups: PlanGroup[] = [
           fr: "Simulez le cout total d'une equipe complete avec charges employeur.",
           ar: "احسب التكلفة الإجمالية لفريق كامل مع اشتراكات المشغل.",
         },
-        href: "/planifier/masse-salariale",
+        href: "/rh-pro/masse-salariale",
         badge: "new",
         icon: "👥",
       },
@@ -167,7 +167,7 @@ const planGroups: PlanGroup[] = [
           fr: "Cout total d'un recrutement: charges, cabinet, onboarding, equipement.",
           ar: "التكلفة الإجمالية للتوظيف: اشتراكات، وكالة، تأهيل، معدات.",
         },
-        href: "/planifier/cout-recrutement",
+        href: "/rh-pro/cout-recrutement",
         badge: "new",
         icon: "🎯",
       },
@@ -177,7 +177,7 @@ const planGroups: PlanGroup[] = [
           fr: "Comparez salaire pur vs salaire + prime vs salaire + avantages. Maximisez le net.",
           ar: "قارن الأجر الصرف مقابل الأجر + المنحة مقابل الأجر + المزايا.",
         },
-        href: "/planifier/optimisation-remuneration",
+        href: "/salaire/optimisation-remuneration",
         badge: "new",
         icon: "⚙️",
       },
@@ -193,7 +193,7 @@ const planGroups: PlanGroup[] = [
           fr: "Net apres impot AE (1%/2%), CNSS optionnel et projection annuelle.",
           ar: "الصافي بعد ضريبة المقاول الذاتي (1%/2%) والـ CNSS الاختيارية.",
         },
-        href: "/planifier/auto-entrepreneur",
+        href: "/carriere/auto-entrepreneur",
         badge: "new",
         icon: "💼",
       },
@@ -203,7 +203,7 @@ const planGroups: PlanGroup[] = [
           fr: "Calculez votre TJM pour atteindre votre objectif de revenu net.",
           ar: "احسب أجرك اليومي لبلوغ هدفك من الدخل الصافي.",
         },
-        href: "/planifier/tarification-freelance",
+        href: "/carriere/tarification-freelance",
         badge: "new",
         icon: "💰",
       },
@@ -213,7 +213,7 @@ const planGroups: PlanGroup[] = [
           fr: "Revenus moins charges: marge nette reelle et analyse par categorie.",
           ar: "الإيرادات ناقص الأعباء: هامش الربح الصافي والتحليل التفصيلي.",
         },
-        href: "/planifier/benefice-net",
+        href: "/carriere/benefice-net",
         badge: "new",
         icon: "📊",
       },
@@ -241,6 +241,22 @@ export default function PlanifierPage() {
           </p>
           <p className="mt-4 text-xs text-[var(--ink-soft)]">
             {t("planifierPage.toolsCount", { count: totalTools })} disponibles
+          </p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <Link href="/carriere" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
+              {language === "ar" ? "المسار المهني" : "Carriere & decisions"}
+            </Link>
+            <Link href="/salaire" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
+              {language === "ar" ? "الأجر والدخل" : "Salaire & revenu"}
+            </Link>
+            <Link href="/conges-cnss" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
+              {language === "ar" ? "CNSS والتقاعد" : "CNSS & retraite"}
+            </Link>
+          </div>
+          <p className="mt-4 text-xs text-[var(--ink-soft)]">
+            {language === "ar"
+              ? "هذه الصفحة انتقلت إلى منطق جديد يعتمد على نوع القرار أو المشكلة بدل نوع الأداة."
+              : "Cette page bascule vers une logique par decision ou probleme, et non plus par type d'outil."}
           </p>
         </section>
 

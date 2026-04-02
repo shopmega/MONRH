@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Retraite Avancee CNSS — Projection de Pension",
   description: "Projetez votre pension CNSS selon votre carriere, votre taux de remplacement et l'ecart a combler.",
-  canonicalPath: "/planifier/retraite-avancee",
+  canonicalPath: "/conges-cnss/retraite-cnss",
 });
 
 export default function RetirementAdvancedPage() {

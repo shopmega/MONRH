@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Comparaison de Scenarios — Rapport de Decision",
   description: "Comparez deux scenarios (offres, situations) cote a cote et generez un rapport de decision chiffre.",
-  canonicalPath: "/planifier/comparaison-scenarios",
+  canonicalPath: "/carriere/comparaison-scenarios",
 });
 
 export default function ScenarioComparisonPage() {

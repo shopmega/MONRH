@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Freelance vs Salarie — Comparaison Nette",
   description: "Comparez le net salarie vs auto-entrepreneur a revenus equivalents. Seuil de basculement et avantages caches.",
-  canonicalPath: "/planifier/freelance-vs-salarie",
+  canonicalPath: "/carriere/freelance-vs-salarie",
 });
 
 export default function FreelanceVsSalariePage() {

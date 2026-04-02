@@ -18,18 +18,20 @@ const LanguageContext = createContext<LanguageContextType | null>(null);
 
 function translate(language: AppLanguage, key: string, params?: MessageParams): string {
   const segments = key.split(".");
-  let value: unknown = MESSAGES[language];
+  const resolveValue = (sourceLanguage: AppLanguage) => {
+    let value: unknown = MESSAGES[sourceLanguage];
 
-  for (const segment of segments) {
-    if (!value || typeof value !== "object" || !(segment in value)) {
-      return key;
+    for (const segment of segments) {
+      if (!value || typeof value !== "object" || !(segment in value)) {
+        return null;
+      }
+      value = (value as Record<string, unknown>)[segment];
     }
-    value = (value as Record<string, unknown>)[segment];
-  }
 
-  if (typeof value !== "string") {
-    return key;
-  }
+    return typeof value === "string" ? value : null;
+  };
+
+  const value = resolveValue(language) ?? resolveValue("fr") ?? key;
 
   if (!params) {
     return value;

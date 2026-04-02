@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Masse Salariale — Simulation RH",
   description: "Simulez le cout total de votre equipe avec charges employeur, CNSS et formation professionnelle.",
-  canonicalPath: "/planifier/masse-salariale",
+  canonicalPath: "/rh-pro/masse-salariale",
 });
 
 export default function PayrollMassPage() {

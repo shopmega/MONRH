@@ -361,6 +361,24 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
   >([]);
   const [employerCompany, setEmployerCompany] = useState<EmployerCompanyContext | null>(null);
   const [copyStatus, setCopyStatus] = useState<string>();
+  const relatedLabels =
+    language === "ar"
+      ? {
+          toolsTitle: "خطوات مرتبطة",
+          toolsDescription: "واصل من النتيجة الى الاداة التالية المناسبة.",
+          modelsTitle: "نماذج مفيدة",
+          modelsDescription: "انتقل مباشرة الى الرسائل والنماذج المرتبطة بهذه النتيجة.",
+          articlesTitle: "شروحات عملية",
+          articlesDescription: "راجع الشرح المختصر قبل المتابعة او التصعيد.",
+        }
+      : {
+          toolsTitle: "Outils lies",
+          toolsDescription: "Passez du resultat a l'outil suivant le plus utile.",
+          modelsTitle: "Modeles utiles",
+          modelsDescription: "Accedez directement aux lettres et modeles lies a ce resultat.",
+          articlesTitle: "Guides pratiques",
+          articlesDescription: "Consultez l'explication utile avant la prochaine etape.",
+        };
   const [historySnapshot, setHistorySnapshot] = useState<SimulationResultSnapshot | null | undefined>(
     simulationId ? undefined : null,
   );
@@ -725,7 +743,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
                 <button type="button" onClick={() => window.print()} className="btn-muted px-4 py-2 text-center">
                   {t("resultPage.print")}
                 </button>
-                <Link href="/simulateurs" className="btn-primary px-4 py-2 text-center">
+                <Link href="/salaire" className="btn-primary px-4 py-2 text-center">
                   {t("resultPage.runAnother")}
                 </Link>
                 {prefilledDocumentCTA ? (
@@ -785,19 +803,19 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
                 ? mappedRelatedItems
                 : [
                   {
-                    title: t("simulator.relatedSimulatorsTitle"),
-                    description: t("simulator.relatedSimulatorsDesc"),
-                    href: "/simulateurs",
+                    title: relatedLabels.toolsTitle,
+                    description: relatedLabels.toolsDescription,
+                    href: "/salaire",
                   },
                   {
-                    title: t("simulator.relatedDocumentsTitle"),
-                    description: t("simulator.relatedDocumentsDesc"),
-                    href: "/documents",
+                    title: relatedLabels.modelsTitle,
+                    description: relatedLabels.modelsDescription,
+                    href: "/modeles",
                   },
                   {
-                    title: t("simulator.relatedLibraryTitle"),
-                    description: t("simulator.relatedLibraryDesc"),
-                    href: "/bibliotheque",
+                    title: relatedLabels.articlesTitle,
+                    description: relatedLabels.articlesDescription,
+                    href: "/articles",
                   },
                 ]
             }

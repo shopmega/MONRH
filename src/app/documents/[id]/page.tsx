@@ -42,7 +42,7 @@ export async function generateMetadata({
     },
     openGraph: {
       type: "article",
-      title: `${template.title} | Generateur`,
+      title: `${template.title} | Modele`,
       description: template.description,
       url: template.href,
       siteName,
@@ -94,12 +94,12 @@ export default async function DocumentGeneratorPage({
           practicalArticlesDesc: "راجع المقالات القانونية لتقوية ملفك.",
         }
       : {
-          generator: "Generateur",
+          generator: "Modele",
           partner: "Partenaire",
-          moreGenerators: "Plus de generateurs",
+          moreGenerators: "Plus de modeles",
           moreGeneratorsDesc: "Explorez d'autres modeles de lettres professionnelles.",
-          simulators: "Simulateurs",
-          simulatorsDesc: "Estimez vos montants avant de rediger votre courrier.",
+          simulators: "Outils lies",
+          simulatorsDesc: "Verifiez vos montants ou vos droits avant de rediger votre courrier.",
           practicalArticles: "Articles pratiques",
           practicalArticlesDesc: "Consultez les articles pour mieux cadrer votre demande.",
         };
@@ -149,17 +149,17 @@ export default async function DocumentGeneratorPage({
                   {
                     title: labels.moreGenerators,
                     description: labels.moreGeneratorsDesc,
-                    href: "/documents",
+                    href: "/modeles",
                   },
                   {
                     title: labels.simulators,
                     description: labels.simulatorsDesc,
-                    href: "/simulateurs",
+                    href: "/salaire",
                   },
                   {
                     title: labels.practicalArticles,
                     description: labels.practicalArticlesDesc,
-                    href: "/bibliotheque",
+                    href: "/articles",
                   },
                 ]
           }

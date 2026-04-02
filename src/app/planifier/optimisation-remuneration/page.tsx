@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Optimisation Remuneration — Structure Salariale",
   description: "Comparez salaire pur vs salaire + prime vs salaire + avantages. Trouvez la structure qui maximise votre net.",
-  canonicalPath: "/planifier/optimisation-remuneration",
+  canonicalPath: "/salaire/optimisation-remuneration",
 });
 
 export default function CompensationOptimizationPage() {

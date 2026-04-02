@@ -47,17 +47,17 @@ export default function OpenGraphImage() {
             Maroc
           </div>
           <div style={{ fontSize: 32, color: "#334155", maxWidth: "88%" }}>
-            Simulateurs legaux 2026, generateurs de lettres et articles pratiques.
+            Salaire, CNSS, litiges et modeles RH pour le travail au Maroc.
           </div>
         </div>
         <div style={{ display: "flex", gap: "14px", fontSize: 26, color: "#0f172a" }}>
           <div style={{ padding: "8px 14px", background: "#e2e8f0", borderRadius: 12 }}>
-            Simulateurs
+            Salaire
           </div>
           <div style={{ padding: "8px 14px", background: "#e2e8f0", borderRadius: 12 }}>
-            Documents
+            Litiges
           </div>
-          <div style={{ padding: "8px 14px", background: "#e2e8f0", borderRadius: 12 }}>Articles</div>
+          <div style={{ padding: "8px 14px", background: "#e2e8f0", borderRadius: 12 }}>Modeles</div>
         </div>
       </div>
     ),

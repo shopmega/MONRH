@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Benefice Net — Charges vs Profit Freelance",
   description: "Calculez votre benefice net reel apres deduction de toutes vos charges professionnelles et impots.",
-  canonicalPath: "/planifier/benefice-net",
+  canonicalPath: "/carriere/benefice-net",
 });
 
 export default function ProfitExpensePage() {

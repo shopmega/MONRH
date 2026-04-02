@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Scenario Promotion — Gain Net Reel",
   description: "Calculez le gain net reel d'une promotion vs l'augmentation brute affichee. Impact IR et cout employeur.",
-  canonicalPath: "/planifier/scenario-promotion",
+  canonicalPath: "/carriere/promotion",
 });
 
 export default function PromotionScenarioPage() {

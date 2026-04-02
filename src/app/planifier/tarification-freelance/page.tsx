@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Tarification Freelance — Calculer son TJM",
   description: "Calculez votre tarif journalier moyen (TJM) pour atteindre votre objectif de revenu net en freelance au Maroc.",
-  canonicalPath: "/planifier/tarification-freelance",
+  canonicalPath: "/carriere/tarification-freelance",
 });
 
 export default function FreelancePricingPage() {

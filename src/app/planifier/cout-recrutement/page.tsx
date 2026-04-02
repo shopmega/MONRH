@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Cout de Recrutement — Simulation Embauche",
   description: "Calculez le cout total d'un recrutement: charges employeur, cabinet, onboarding et equipement.",
-  canonicalPath: "/planifier/cout-recrutement",
+  canonicalPath: "/rh-pro/cout-recrutement",
 });
 
 export default function HiringCostPage() {
