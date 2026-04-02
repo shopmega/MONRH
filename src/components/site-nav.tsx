@@ -125,6 +125,22 @@ export function SiteNav() {
   const websiteSettings = config.websiteSettings;
   const [adminVisible, setAdminVisible] = useState(false);
   const [openMenu, setOpenMenu] = useState<NavKey | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setDrawerOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [drawerOpen]);
 
   const refreshAdminVisibility = useCallback(() => {
     fetch("/api/admin/me", { cache: "no-store" })
@@ -185,6 +201,17 @@ export function SiteNav() {
           </Link>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 print:hidden">
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              className="grid h-9 w-9 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--foreground)] transition hover:bg-[var(--surface-strong)] md:hidden"
+              aria-label={t("nav.openMenu") ?? "Open menu"}
+              aria-expanded={drawerOpen}
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M3 7h18M3 12h18M3 17h18" />
+              </svg>
+            </button>
             <button
               type="button"
               onClick={toggleTheme}
@@ -313,18 +340,80 @@ export function SiteNav() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-2 bottom-3 z-50 rounded-2xl border border-[var(--line-strong)] bg-[var(--surface)] p-1.5 shadow-xl backdrop-blur sm:inset-x-3 md:hidden print:hidden">
+      {drawerOpen ? (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            aria-hidden="true"
+            onClick={() => setDrawerOpen(false)}
+          />
+          <aside
+            className="relative flex h-full w-[min(90vw,18rem)] flex-col gap-4 overflow-y-auto border-r border-[var(--line)] bg-[var(--surface)] p-4 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("nav.mobileMenu") ?? "Mobile menu"}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-[var(--foreground)]">{t("nav.menu") ?? "Menu"}</span>
+              <button
+                type="button"
+                className="grid h-8 w-8 place-items-center rounded-md border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--surface-strong)]"
+                onClick={() => setDrawerOpen(false)}
+                aria-label={t("nav.closeMenu") ?? "Close menu"}
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </button>
+            </div>
+
+            <nav aria-label={t("nav.mobileMenu") ?? "Mobile menu"}>
+              <ul className="space-y-1">
+                {navItems.map((item) => {
+                  const active = isActive(pathname, item.href);
+                  return (
+                    <li key={item.key}>
+                      <Link
+                        href={item.href}
+                        onClick={() => setDrawerOpen(false)}
+                        aria-current={active ? "page" : undefined}
+                        className={`block rounded-xl px-3 py-2 text-sm font-semibold ${
+                          active
+                            ? "bg-[var(--accent)] text-white"
+                            : "text-[var(--foreground)] hover:bg-[var(--surface-strong)]"
+                        }`}
+                      >
+                        {navLabel(item.key)}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </aside>
+        </div>
+      ) : null}
+
+      <nav
+        className={`fixed inset-x-2 bottom-3 z-50 rounded-2xl border border-[var(--line-strong)] bg-[var(--surface)] p-1.5 shadow-xl backdrop-blur sm:inset-x-3 md:hidden print:hidden ${drawerOpen ? "invisible pointer-events-none" : ""}`}
+        role="navigation"
+        aria-label="Mobile navigation"
+        style={{ paddingBottom: "calc(0.375rem + env(safe-area-inset-bottom, 0px))" }}
+      >
         <ul
           className="grid gap-1"
+          role="menubar"
           style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}
         >
           {navItems.filter((item) => item.key !== "home" && item.key !== "models" && item.key !== "account").map((item) => {
             const active = isActive(pathname, item.href);
             return (
-              <li key={item.key}>
+              <li key={item.key} role="none">
                 <Link
                   href={item.href}
                   aria-label={navLabel(item.key)}
+                  aria-current={active ? "page" : undefined}
+                  role="menuitem"
                   className={`mobile-nav-link block min-w-0 rounded-xl px-1.5 py-2 text-center sm:px-2 ${
                     active
                       ? "bg-[var(--accent)] text-white"
@@ -341,12 +430,14 @@ export function SiteNav() {
               </li>
             );
           })}
-          <li>
-            <button
-              type="button"
-              onClick={() => window.location.href = '/compte'}
+          <li role="none">
+            <Link
+              href="/compte"
+              aria-label={navLabel("account")}
+              aria-current={isActive(pathname, "/compte") || isActive(pathname, "/admin") ? "page" : undefined}
+              role="menuitem"
               className={`mobile-nav-link block min-w-0 rounded-xl px-1.5 py-2 text-center sm:px-2 ${
-                isActive(pathname, '/compte') || isActive(pathname, '/admin')
+                isActive(pathname, "/compte") || isActive(pathname, "/admin")
                   ? "bg-[var(--accent)] text-white"
                   : "text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
               }`}
@@ -357,7 +448,7 @@ export function SiteNav() {
               <span className="mobile-nav-label block truncate text-[10px] font-semibold leading-tight sm:text-xs">
                 {navLabel("account")}
               </span>
-            </button>
+            </Link>
           </li>
         </ul>
       </nav>
