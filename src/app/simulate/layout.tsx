@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { DEFAULT_OG_IMAGE_PATH, absoluteUrl } from "@/lib/seo";
+import { SectionLayoutWrapper } from "@/components/section-layout-wrapper";
+import { simulatorSidebarGroups } from "@/lib/content/simulators-sidebar";
 
 export const metadata: Metadata = {
   title: "Salaire, conges et droits au travail",
@@ -36,5 +38,20 @@ export default function SimulateLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return (
+    <SectionLayoutWrapper
+      indexPath="/simulateurs"
+      sidebarProps={{
+        title: { fr: "Simulateurs", ar: "المحاكيات" },
+        groups: simulatorSidebarGroups.map(group => ({
+          title: group.title,
+          items: [...group.items]
+        })),
+        backHref: "/simulateurs",
+        backLabel: { fr: "Retour simulateurs", ar: "الرجوع إلى المحاكيات" },
+      }}
+    >
+      {children}
+    </SectionLayoutWrapper>
+  );
 }

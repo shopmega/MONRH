@@ -324,6 +324,37 @@ export default function PlanifierPage() {
             <AdSlot slot="8888888888" format="auto" />
           </div>
         </section>
+
+        {/* Related Simulators & Tools Section */}
+        <section className="mt-8">
+          <p className="section-kicker pl-1">{t("planifierPage.relatedSimulators")}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Link href="/simulateurs/brut-net" className="soft-card min-w-0 rounded-3xl p-5">
+              <h2 className="display-font break-words text-xl font-semibold">
+                {language === "ar" ? "الصافي مقابل الإجمالي" : "Net <-> Brut"}
+              </h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+                {language === "ar" ? "احسب الأجر الصافي والاقتطاعات وكلفة المشغل." : "Calculez salaire net, charges et coût employeur."}
+              </p>
+            </Link>
+            <Link href="/simulateurs/licenciement" className="soft-card min-w-0 rounded-3xl p-5">
+              <h2 className="display-font break-words text-xl font-semibold">
+                {language === "ar" ? "تعويض الفصل" : "Indemnité Licenciement"}
+              </h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+                {language === "ar" ? "تقدير التعويض القانوني والإشعار والعطل المتبقية." : "Estimation indemnité légale, préavis, congés restants."}
+              </p>
+            </Link>
+            <Link href="/outils/detecteur-fiche-paie" className="soft-card min-w-0 rounded-3xl p-5">
+              <h2 className="display-font break-words text-xl font-semibold">
+                {language === "ar" ? "كاشف ورقة الأجر" : "Détecteur de fiche de paie"}
+              </h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+                {language === "ar" ? "تحقق من مطابقة كشف الأجر والاقتطاعات." : "Vérifiez la cohérence de votre bulletin et des retenues."}
+              </p>
+            </Link>
+          </div>
+        </section>
       </div>
     </main>
   );

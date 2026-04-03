@@ -159,7 +159,7 @@ export const INTENT_PAGES: Record<string, IntentPageDefinition> = {
   },
   "cnss-pension": {
     title: "Pension CNSS",
-    kicker: "Conges & CNSS",
+    kicker: "Congés et CNSS",
     description:
       "Projetez votre pension CNSS, vos annees cotisees et l'ecart eventuel a combler pour votre retraite.",
     primaryCtaLabel: "Projeter ma pension",
@@ -179,7 +179,7 @@ export const INTENT_PAGES: Record<string, IntentPageDefinition> = {
   },
   "conge-maternite": {
     title: "Conge maternite Maroc",
-    kicker: "Conges & CNSS",
+    kicker: "Congés et CNSS",
     description:
       "Estimez votre revenu pendant le conge maternite, verifiez vos droits CNSS et preparez les documents utiles.",
     primaryCtaLabel: "Estimer mon conge maternite",
@@ -199,7 +199,7 @@ export const INTENT_PAGES: Record<string, IntentPageDefinition> = {
   },
   "heures-supplementaires": {
     title: "Heures supplementaires Maroc",
-    kicker: "Conges & CNSS",
+    kicker: "Congés et CNSS",
     description:
       "Calculez vos heures supplementaires, les majorations applicables et la difference entre une simple estimation et une reclamation.",
     primaryCtaLabel: "Calculer mes heures",
@@ -219,7 +219,7 @@ export const INTENT_PAGES: Record<string, IntentPageDefinition> = {
   },
   "arret-maladie": {
     title: "Arret maladie Maroc",
-    kicker: "Conges & CNSS",
+    kicker: "Congés et CNSS",
     description:
       "Estimez l'impact financier d'un arret maladie, la periode de carence et les demarches utiles selon votre situation.",
     primaryCtaLabel: "Simuler mon arret maladie",

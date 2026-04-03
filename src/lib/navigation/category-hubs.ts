@@ -140,7 +140,7 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       ar: "العطل والغياب وحقوق CNSS",
     },
     kicker: {
-      fr: "Conges & CNSS",
+      fr: "Congés et CNSS",
       ar: "العطل و CNSS",
     },
     description: {

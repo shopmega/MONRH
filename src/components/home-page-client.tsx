@@ -129,6 +129,9 @@ export function HomePageClient({
             <Link href="/contrat-depart" className="btn-muted text-base px-8 py-3.5">
               {heroCtas.document}
             </Link>
+            <Link href="/outils" className="btn-muted text-base px-8 py-3.5">
+              {t("home.ctaProtection")}
+            </Link>
             <Link href="/litiges" className="btn-muted text-base px-8 py-3.5">
               {heroCtas.library}
             </Link>

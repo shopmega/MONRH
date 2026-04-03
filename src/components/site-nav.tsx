@@ -57,65 +57,6 @@ function isActive(pathname: string, href: string): boolean {
   return pathname.startsWith(href);
 }
 
-function MobileIcon({ itemKey }: { itemKey: NavKey }) {
-  const baseClass = "h-4 w-4";
-  if (itemKey === "home") {
-    return (
-      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M3 10.5L12 3l9 7.5" />
-        <path d="M5 9.8V21h14V9.8" />
-      </svg>
-    );
-  }
-  if (itemKey === "salary") {
-    return (
-      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-        <rect x="4" y="3" width="16" height="18" rx="2.5" />
-        <path d="M8 8h8M8 12h3M13 12h3M8 16h8" />
-      </svg>
-    );
-  }
-  if (itemKey === "departure") {
-    return (
-      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="16" x2="8" y1="13" y2="13" />
-        <line x1="16" x2="8" y1="17" y2="17" />
-        <polyline points="10 9 9 9 8 9" />
-      </svg>
-    );
-  }
-  if (itemKey === "models") {
-    return (
-      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M7 3h7l4 4v14H7z" />
-        <path d="M14 3v5h5M9 12h6M9 16h6" />
-      </svg>
-    );
-  }
-  if (itemKey === "leaveCnss") {
-    return (
-      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    );
-  }
-  if (itemKey === "disputes") {
-    return (
-      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M12 3 4 7v5c0 4.4 3.1 8.5 8 9 4.9-.5 8-4.6 8-9V7l-8-4Z" />
-        <path d="m9.5 12 1.7 1.7 3.3-3.4" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
-      <circle cx="12" cy="8" r="3.5" />
-      <path d="M5 20c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5" />
-    </svg>
-  );
-}
 
 export function SiteNav() {
   const pathname = usePathname();
@@ -394,64 +335,6 @@ export function SiteNav() {
         </div>
       ) : null}
 
-      <nav
-        className={`fixed inset-x-2 bottom-3 z-50 rounded-2xl border border-[var(--line-strong)] bg-[var(--surface)] p-1.5 shadow-xl backdrop-blur sm:inset-x-3 md:hidden print:hidden ${drawerOpen ? "invisible pointer-events-none" : ""}`}
-        role="navigation"
-        aria-label="Mobile navigation"
-        style={{ paddingBottom: "calc(0.375rem + env(safe-area-inset-bottom, 0px))" }}
-      >
-        <ul
-          className="grid gap-1"
-          role="menubar"
-          style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}
-        >
-          {navItems.filter((item) => item.key !== "home" && item.key !== "models" && item.key !== "account").map((item) => {
-            const active = isActive(pathname, item.href);
-            return (
-              <li key={item.key} role="none">
-                <Link
-                  href={item.href}
-                  aria-label={navLabel(item.key)}
-                  aria-current={active ? "page" : undefined}
-                  role="menuitem"
-                  className={`mobile-nav-link block min-w-0 rounded-xl px-1.5 py-2 text-center sm:px-2 ${
-                    active
-                      ? "bg-[var(--accent)] text-white"
-                      : "text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
-                  }`}
-                >
-                  <span className="mx-auto mb-0.5 block w-fit">
-                    <MobileIcon itemKey={item.key} />
-                  </span>
-                  <span className="mobile-nav-label block truncate text-[10px] font-semibold leading-tight sm:text-xs">
-                    {navLabel(item.key)}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-          <li role="none">
-            <Link
-              href="/compte"
-              aria-label={navLabel("account")}
-              aria-current={isActive(pathname, "/compte") || isActive(pathname, "/admin") ? "page" : undefined}
-              role="menuitem"
-              className={`mobile-nav-link block min-w-0 rounded-xl px-1.5 py-2 text-center sm:px-2 ${
-                isActive(pathname, "/compte") || isActive(pathname, "/admin")
-                  ? "bg-[var(--accent)] text-white"
-                  : "text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
-              }`}
-            >
-              <span className="mx-auto mb-0.5 block w-fit">
-                <MobileIcon itemKey="account" />
-              </span>
-              <span className="mobile-nav-label block truncate text-[10px] font-semibold leading-tight sm:text-xs">
-                {navLabel("account")}
-              </span>
-            </Link>
-          </li>
-        </ul>
-      </nav>
     </>
   );
 }

@@ -270,7 +270,7 @@ export default function SimulatePage() {
               {language === "ar" ? "العقد والمغادرة" : "Contrat & depart"}
             </Link>
             <Link href="/conges-cnss" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
-              {language === "ar" ? "العطل و CNSS" : "Conges & CNSS"}
+              {language === "ar" ? "العطل و CNSS" : "Congés et CNSS"}
             </Link>
           </div>
           <p className="mt-4 text-xs text-[var(--ink-soft)]">
@@ -330,6 +330,53 @@ export default function SimulatePage() {
           <div className="soft-card mt-2 rounded-3xl p-3">
             <AdSlot slot="6666666666" format="auto" />
           </div>
+        </section>
+
+        {/* Protection Tools Section */}
+        <section className="mt-8">
+          <p className="section-kicker pl-1">{t("simulatePage.relatedTools")}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Link href="/outils/detecteur-fiche-paie" className="soft-card min-w-0 rounded-3xl p-5">
+              <h2 className="display-font break-words text-xl font-semibold">
+                {language === "ar" ? "كاشف ورقة الأجر" : "Détecteur de fiche de paie"}
+              </h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+                {language === "ar" ? "تحقق من مطابقة كشف الأجر والاقتطاعات." : "Vérifiez la cohérence de votre bulletin et des retenues."}
+              </p>
+            </Link>
+            <Link href="/outils/audit-solde-tout-compte" className="soft-card min-w-0 rounded-3xl p-5">
+              <h2 className="display-font break-words text-xl font-semibold">
+                {language === "ar" ? "مراجعة تسوية كل الحسابات" : "Audit solde de tout compte"}
+              </h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+                {language === "ar" ? "تقدير المبالغ المستحقة في التسوية النهائية." : "Estimez les montants qui devraient apparaître dans votre solde final."}
+              </p>
+            </Link>
+            <Link href="/outils/feuille-route-pre-contentieux" className="soft-card min-w-0 rounded-3xl p-5">
+              <h2 className="display-font break-words text-xl font-semibold">
+                {language === "ar" ? "خريطة طريق ما قبل النزاع" : "Feuille route pré-contentieux"}
+              </h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+                {language === "ar" ? "خطة عمل قبل رفع دعوى قضائية." : "Obtenez un plan d'action avant saisine judiciaire."}
+              </p>
+            </Link>
+          </div>
+        </section>
+
+        {/* Related Documents Section */}
+        <section className="mt-8">
+          <p className="section-kicker pl-1">{t("simulatePage.relatedDocuments")}</p>
+          <Link href="/documents" className="soft-card mt-4 flex min-w-0 rounded-3xl p-5">
+            <div className="flex-1">
+              <h2 className="display-font break-words text-xl font-semibold">{t("simulatePage.documentsCtaTitle")}</h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">{t("simulatePage.documentsCtaDesc")}</p>
+            </div>
+            <div className="ml-4 flex-shrink-0">
+              <svg className="h-6 w-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
         </section>
       </div>
     </main>
