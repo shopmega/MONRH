@@ -16,29 +16,29 @@ type ToolId =
 
 const TEMPLATE_TITLES: Record<string, string> = {
   "contract-renewal-request": "Demande Renouvellement Contrat",
-  "formal-complaint-employer": "Reclamation Formelle Employeur",
-  "harassment-report-letter": "Signalement Harcelement",
-  "labor-inspector-complaint": "Plainte a l'Inspection du Travail",
-  "maternity-leave-request": "Demande Conge Maternite",
-  "notice-letter": "Lettre de Preavis",
+  "formal-complaint-employer": "Réclamation Formelle Employeur",
+  "harassment-report-letter": "Signalement Harcèlement",
+  "labor-inspector-complaint": "Plainte à l'Inspection du Travail",
+  "maternity-leave-request": "Demande Congé Maternité",
+  "notice-letter": "Lettre de Préavis",
   "overtime-claim-letter": "Demande Paiement Heures Sup",
-  "resignation-letter": "Lettre de Demission",
-  "salary-recovery-letter": "Demande de Salaire Impaye",
-  "unpaid-leave-request": "Demande Conge Sans Solde",
-  "work-accident-declaration": "Declaration Accident du Travail",
+  "resignation-letter": "Lettre de Démission",
+  "salary-recovery-letter": "Demande de Salaire Impayé",
+  "unpaid-leave-request": "Demande Congé Sans Solde",
+  "work-accident-declaration": "Déclaration Accident du Travail",
 };
 
 const TEMPLATE_CTA_LABELS: Record<string, string> = {
   "contract-renewal-request": "Demander le renouvellement CDD",
-  "harassment-report-letter": "Signaler le harcelement",
-  "labor-inspector-complaint": "Generer la plainte a l'inspection du travail",
-  "maternity-leave-request": "Demander le conge maternite",
-  "notice-letter": "Generer la lettre de preavis",
-  "overtime-claim-letter": "Generer la mise en demeure (heures sup.)",
-  "resignation-letter": "Generer la lettre de demission",
-  "salary-recovery-letter": "Generer la mise en demeure (salaires impayes)",
-  "unpaid-leave-request": "Demander un conge sans solde",
-  "work-accident-declaration": "Declarer l'accident du travail",
+  "harassment-report-letter": "Signaler le harcèlement",
+  "labor-inspector-complaint": "Générer la plainte à l'inspection du travail",
+  "maternity-leave-request": "Demander le congé maternité",
+  "notice-letter": "Générer la lettre de préavis",
+  "overtime-claim-letter": "Générer la mise en demeure (heures sup.)",
+  "resignation-letter": "Générer la lettre de démission",
+  "salary-recovery-letter": "Générer la mise en demeure (salaires impayés)",
+  "unpaid-leave-request": "Demander un congé sans solde",
+  "work-accident-declaration": "Déclarer l'accident du travail",
 };
 
 function titleForTemplate(templateId: string): string {
