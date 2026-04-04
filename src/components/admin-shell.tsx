@@ -2,23 +2,35 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 const ADMIN_NAV = [
-  { href: "/admin", label: "Dashboard", description: "Vue globale" },
-  { href: "/admin/activity", label: "Activity", description: "Historique recent" },
-  { href: "/admin/articles", label: "Articles", description: "Creation et edition" },
-  { href: "/admin/moderation", label: "Moderation", description: "Queue partagee" },
-  { href: "/admin/evidence", label: "Evidence", description: "Dossiers et preuves" },
-  { href: "/admin/verifications", label: "Verifications", description: "Emploi et decisions" },
-  { href: "/admin/linking", label: "Linking", description: "Liens contextuels" },
-  { href: "/admin/rules", label: "Rules", description: "Taxes et legal versions" },
-  { href: "/admin/tools", label: "Tools", description: "Configuration runtime" },
-  { href: "/admin/audit", label: "Audit", description: "Journaux et snapshots" },
+  { href: "/admin", label: "Tableau de bord", description: "Vue globale" },
+  { href: "/admin/activity", label: "Activité", description: "Historique récent" },
+  { href: "/admin/articles", label: "Articles", description: "Création et édition" },
+  { href: "/admin/moderation", label: "Modération", description: "File partagée" },
+  { href: "/admin/evidence", label: "Preuves", description: "Dossiers et preuves" },
+  { href: "/admin/verifications", label: "Vérifications", description: "Emploi et décisions" },
+  { href: "/admin/linking", label: "Liaisons", description: "Liens contextuels" },
+  { href: "/admin/rules", label: "Règles", description: "Taxes et versions légales" },
+  { href: "/admin/tools", label: "Outils", description: "Configuration d'exécution" },
+  { href: "/admin/audit", label: "Audit", description: "Journaux et instantanés" },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const breadcrumbMap: Record<string, string> = {
+    "/admin": "Tableau de bord",
+    "/admin/activity": "Activité",
+    "/admin/articles": "Articles",
+    "/admin/linking": "Liaisons",
+    "/admin/rules": "Règles",
+    "/admin/tools": "Outils",
+    "/admin/audit": "Audit",
+  };
 
   async function logout() {
     await fetch("/api/user/session", { method: "DELETE" });
@@ -31,7 +43,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <main className="paper-bg min-h-screen">
       <div className="mx-auto w-full max-w-7xl px-4 pb-10 pt-6 sm:px-6">
         <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
-          <aside className="space-y-4 lg:sticky lg:top-6">
+          <aside className={`space-y-4 lg:sticky lg:top-6 ${sidebarOpen ? "block" : "hidden lg:block"}`}>
             <section className="soft-card rounded-3xl p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -49,10 +61,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     key={item.href}
                     href={item.href}
                     className={`block rounded-2xl border px-3 py-2.5 transition ${
-                      pathname === item.href
+                      (item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href))
                         ? "border-transparent bg-[var(--accent)] text-white"
                         : "border-[var(--line)] bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-strong)]"
                     }`}
+                    aria-current={(item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href)) ? "page" : undefined}
                   >
                     <p className="text-sm font-semibold">{item.label}</p>
                     <p
@@ -82,7 +95,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   </p>
                 </div>
                 <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--ink-soft)]">
-                  Path: {pathname}
+                  Administration {breadcrumbMap[pathname] ? `→ ${breadcrumbMap[pathname]}` : ""}
                 </div>
               </div>
             </section>
@@ -91,6 +104,22 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </section>
         </div>
       </div>
+      
+      {/* Mobile hamburger menu */}
+      <button
+        type="button"
+        className="lg:hidden fixed bottom-4 right-4 z-50 rounded-full bg-[var(--accent)] p-3 text-white shadow-lg"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Menu de navigation"
+      >
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {sidebarOpen ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          )}
+        </svg>
+      </button>
     </main>
   );
 }

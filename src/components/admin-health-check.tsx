@@ -53,19 +53,19 @@ export function AdminHealthCheck() {
           <h3 className="display-font mt-1 text-2xl font-semibold">API Diagnostics</h3>
         </div>
         <button type="button" onClick={runChecks} className="btn-primary px-4 py-2 text-sm" disabled={loading}>
-          {loading ? "Verification..." : "Check APIs"}
+          {loading ? "Vérification..." : "Vérifier les API"}
         </button>
       </div>
 
       {payload ? (
         <div className="mt-4 space-y-2">
           <p className={`text-sm font-semibold ${payload.ok ? "text-emerald-700" : "text-rose-700"}`}>
-            {payload.ok ? "Tous les checks sont OK" : "Des erreurs ont ete detectees"}
+            {payload.ok ? "Tous les contrôles sont OK" : "Des erreurs ont été détectées"}
           </p>
           {payload.error ? <p className="text-xs text-[var(--ink-soft)]">{payload.error}</p> : null}
           {payload.timestamp ? (
             <p className="text-xs text-[var(--ink-soft)]">
-              Derniere verification: {new Date(payload.timestamp).toLocaleString("fr-MA")}
+              Dernière vérification : {new Date(payload.timestamp).toLocaleString("fr-MA")}
             </p>
           ) : null}
           <div className="grid gap-2 sm:grid-cols-2">

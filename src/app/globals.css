@@ -183,13 +183,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .status-success {
-  background: var(--success-bg);
-  color: var(--success-ink);
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .status-error {
-  background: var(--error-bg);
-  color: var(--error-ink);
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .status-info {
