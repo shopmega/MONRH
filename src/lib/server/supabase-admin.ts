@@ -49,11 +49,12 @@ export function getSupabaseAdminClient() {
     requiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
     serviceRoleKey,
     {
+      db: { schema: "monrh" },
       auth: {
         persistSession: false,
         autoRefreshToken: false,
       },
-    },
+    } as any,
   );
   return cachedClient;
 }
