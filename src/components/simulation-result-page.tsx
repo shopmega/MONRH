@@ -239,7 +239,7 @@ function extractEmployerCompanyHint(inputPayload?: Record<string, unknown>): Emp
 export function SimulationResultPage({ slug, expectedPath: providedExpectedPath }: { slug: string; expectedPath?: string }) {
   const { language, t, locale } = useLanguage();
   const searchParams = useSearchParams();
-  const expectedPath = providedExpectedPath ?? `/simulateurs/${slug}`;
+  const expectedPath = providedExpectedPath ?? calculatorTypeToPath(slug) ?? `/simulateurs/${slug}`;
   const simulationId = searchParams.get("simulationId");
   const [mappedRelatedItems, setMappedRelatedItems] = useState<
     Array<{ title: string; description: string; href: string }>
