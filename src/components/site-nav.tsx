@@ -11,7 +11,7 @@ import { CATEGORY_HUBS } from "@/lib/navigation/category-hubs";
 import { AccountDropdown } from "./account-dropdown";
 import { SITE_NAME } from "@/lib/seo";
 
-type NavKey = "home" | "salary" | "departure" | "leaveCnss" | "disputes" | "models" | "account";
+type NavKey = "home" | "salary" | "departure" | "leaveCnss" | "disputes" | "models" | "account" | "jobScanner";
 
 type NavItem = {
   key: NavKey;
@@ -31,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { key: "leaveCnss", href: "/conges-cnss" },
   { key: "disputes", href: "/litiges" },
   { key: "models", href: "/modeles" },
+  { key: "jobScanner", href: "https://avisine.com/job-offers" },
   { key: "account", href: "/compte" },
 ];
 
@@ -50,6 +51,7 @@ const ARABIC_NAV_LABELS: Record<NavKey, string> = {
   disputes: "النزاعات",
   models: "النماذج",
   account: "الحساب",
+  jobScanner: "ماسح الوظائف",
 };
 
 function isActive(pathname: string, href: string): boolean {
