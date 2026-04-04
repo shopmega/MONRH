@@ -50,14 +50,15 @@ export function SectionLayoutWrapper({
     <div className="relative">
       {/* Mobile menu toggle bar */}
       {shouldShowSidebar && (
-        <div className="lg:hidden sticky top-0 z-20 bg-[var(--surface-strong)] border-b border-[var(--line)] px-4 py-3">
+        <div className="lg:hidden sticky top-0 z-20 bg-gradient-to-r from-[var(--surface-strong)] to-[var(--surface-strong)]/95 backdrop-blur-md border-b border-[var(--line)] px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-[var(--heading)]">
+            <h1 className="text-lg font-semibold text-[var(--heading)] flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-[var(--accent)]"></div>
               {sidebarProps.title.fr}
             </h1>
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="rounded-lg p-2 text-[var(--ink-soft)] hover:bg-[var(--surface-strong)] hover:text-[var(--foreground)]"
+              className="rounded-lg p-2 text-[var(--ink-soft)] hover:bg-[var(--surface-strong)] hover:text-[var(--foreground)] transition-all duration-200 hover:scale-105"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -70,12 +71,12 @@ export function SectionLayoutWrapper({
         <div className="lg:hidden fixed inset-0 z-50 flex">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
           
           {/* Mobile sidebar */}
-          <div className="relative w-80 max-w-[80vw] bg-[var(--surface-strong)]">
+          <div className="relative w-80 max-w-[80vw] bg-gradient-to-b from-[var(--surface-strong)] to-[var(--surface)] shadow-2xl">
             <SectionSidebar
               {...sidebarProps}
               onClose={() => setIsMobileMenuOpen(false)}
@@ -89,7 +90,7 @@ export function SectionLayoutWrapper({
         {/* Desktop sidebar */}
         {shouldShowSidebar && (
           <aside className="hidden lg:block lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:w-60 lg:flex-shrink-0">
-            <div className="soft-card rounded-xl h-full overflow-hidden">
+            <div className="soft-card rounded-xl h-full overflow-hidden shadow-lg border border-[var(--line)]/50">
               <SectionSidebar {...sidebarProps} />
             </div>
           </aside>
