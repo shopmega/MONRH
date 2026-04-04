@@ -6,32 +6,32 @@ import { useLanguage } from "@/components/language-provider";
 const AVIS_SITE_URL = process.env.NEXT_PUBLIC_AVIS_SITE_URL?.replace(/\/$/, "") || "https://avisine.com";
 const BRAND_NAME = "AVISINE";
 
-export type ReviewlyCompany = {
+export type AvisineCompany = {
   id: string;
   name: string;
   overall_rating?: number | null;
 };
 
-export function ReviewlyPromoCard({
+export function AvisinePromoCard({
   type = "general",
   company,
 }: {
-  type?: "general" | "conflict" | "transition";
-  company?: ReviewlyCompany | null;
+  type?: "general" | "conflict" | "transition" | "salary_benchmark";
+  company?: AvisineCompany | null;
 }) {
   const { language } = useLanguage();
   const isAr = language === "ar";
 
   const content = {
     general: {
-      title: isAr ? `شارك تجربتك على ${BRAND_NAME}` : `Partagez votre experience sur ${BRAND_NAME}`,
+      title: isAr ? `شارك تجربتك على ${BRAND_NAME}` : `Partagez votre expérience sur ${BRAND_NAME}`,
       description: isAr
         ? "ساعد باحثين وموظفين آخرين عبر مشاركة تجربة موثقة عن الشركة."
-        : "Aidez d'autres salaries en partageant une experience utile et verifiee sur l'entreprise.",
+        : "Aidez d'autres salariés en partageant une expérience utile et vérifiée sur l'entreprise.",
       cta: isAr ? "Ajouter un avis" : "Ajouter un avis",
     },
     conflict: {
-      title: isAr ? "تحقق من سياق المشغل" : "Verifier le contexte employeur",
+      title: isAr ? "تحقق من سياق المشغل" : "Vérifier le contexte employeur",
       description: isAr
         ? `راجع إشارات الشركة والرواتب وآراء الموظفين على ${BRAND_NAME} قبل اتخاذ الخطوة التالية.`
         : `Consultez les signaux employeur, les salaires et les avis sur ${BRAND_NAME} avant d'agir.`,
@@ -41,13 +41,31 @@ export function ReviewlyPromoCard({
       title: isAr ? "قبل قبول العرض" : "Avant d'accepter l'offre",
       description: isAr
         ? `تحقق من السمعة والرواتب وتجارب الموظفين على ${BRAND_NAME}.`
-        : `Verifiez la reputation, les salaires et les retours employes sur ${BRAND_NAME}.`,
+        : `Vérifiez la réputation, les salaires et les retours employés sur ${BRAND_NAME}.`,
       cta: isAr ? "Rechercher l'entreprise" : "Rechercher l'entreprise",
+    },
+    salary_benchmark: {
+      title: isAr ? "مقارنة الرواتب" : "Comparaison de salaires",
+      description: isAr
+        ? `هل راتبك عادل؟ قارن مع آلاف الموظفين الآخرين على ${BRAND_NAME}.`
+        : `Votre salaire est-il juste ? Comparez avec des milliers d'autres salariés sur ${BRAND_NAME}.`,
+      cta: isAr ? "Voir les benchmarks" : "Voir les benchmarks",
     },
   };
 
   const activeContent = content[type];
-  const href = company?.id ? `${AVIS_SITE_URL}/companies/${company.id}` : `${AVIS_SITE_URL}/`;
+  
+  // Build URL with UTM parameters for acquisition tracking
+  const utmParams = new URLSearchParams({
+    utm_source: "monrh",
+    utm_medium: "promo_card",
+    utm_campaign: "flywheel",
+    utm_content: type,
+  });
+
+  const baseUrl = company?.id ? `${AVIS_SITE_URL}/companies/${company.id}` : `${AVIS_SITE_URL}/`;
+  const href = `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}${utmParams.toString()}`;
+
   const ctaLabel = company?.name
     ? (isAr ? `Voir les signaux pour ${company.name}` : `Voir les signaux pour ${company.name}`)
     : activeContent.cta;
@@ -56,7 +74,7 @@ export function ReviewlyPromoCard({
     <article className="soft-card overflow-hidden rounded-3xl border border-[var(--line)] bg-gradient-to-br from-[var(--surface)] to-[var(--surface-muted)] p-1">
       <div className="rounded-[1.4rem] bg-[var(--surface)] p-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)] text-lg font-bold text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)] text-lg font-bold text-white shadow-sm">
             A
           </div>
           <div>

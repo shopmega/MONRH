@@ -18,7 +18,7 @@ import {
   localizeCalculatorTitle,
 } from "@/lib/i18n/simulator-localization";
 import { calculatorTypeToPath } from "@/lib/simulations/calculator-path";
-import { ReviewlyPromoCard } from "@/components/reviewly-promo-card";
+import { AvisinePromoCard } from "@/components/avisine-promo-card";
 import { type SimulationResultSnapshot } from "@/lib/simulations/result-snapshot";
 import { buildSimulationResultDocumentLink } from "@/lib/tools/result-document-links";
 import type { PieSlice } from "@/components/charts/breakdown-pie-chart";
@@ -133,6 +133,8 @@ function pickKeyMetrics(snapshot: SimulationResultSnapshot): Array<[string, numb
     .slice(0, 3);
 }
 
+import { getCompanySalaryBenchmarks, type AVisCompanySalaryBenchmarksResult } from "@/lib/avis-api";
+
 /* ── Chart data helpers ──────────────────────────────────────────────── */
 
 const PIE_CHART_TYPES = new Set(["net_gross", "employer_total_cost"]);
@@ -245,6 +247,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
     Array<{ title: string; description: string; href: string }>
   >([]);
   const [employerCompany, setEmployerCompany] = useState<EmployerCompanyContext | null>(null);
+  const [salaryBenchmarks, setSalaryBenchmarks] = useState<AVisCompanySalaryBenchmarksResult | null>(null);
   const [copyStatus, setCopyStatus] = useState<string>();
   const relatedLabels =
     language === "ar"
@@ -471,6 +474,25 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
     };
   }, [employerHint]);
 
+  useEffect(() => {
+    if (!employerCompany?.id || resolvedSnapshot?.calculatorType !== "salaire") {
+      setSalaryBenchmarks(null);
+      return;
+    }
+
+    let active = true;
+    async function loadBenchmarks() {
+      try {
+        const data = await getCompanySalaryBenchmarks(employerCompany!.id);
+        if (active) setSalaryBenchmarks(data);
+      } catch (err) {
+        console.error("Failed to load salary benchmarks", err);
+      }
+    }
+    void loadBenchmarks();
+    return () => { active = false; };
+  }, [employerCompany, resolvedSnapshot]);
+
   if (simulationId && !snapshot && historySnapshot === undefined) {
     return (
       <main className="paper-bg min-h-screen">
@@ -651,12 +673,28 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
                 {employerCompany?.id ? (
                   <CompanyTrustSummary companyId={employerCompany.id} />
                 ) : null}
-                <ReviewlyPromoCard
+                
+                {salaryBenchmarks?.salaryBenchmarks && (
+                  <div className="rounded-2xl border border-[var(--accent-soft)] bg-gradient-to-br from-[var(--surface)] to-[var(--surface-muted)] p-4 shadow-sm">
+                    <p className="section-kicker text-[var(--accent)]">Insights Marché (Avisine)</p>
+                    <p className="mt-1 text-sm font-semibold">
+                      Salaire médian : {salaryBenchmarks.salaryBenchmarks.medianMonthlySalary?.toLocaleString() ?? "N/A"} MAD
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--ink-soft)]">
+                      Basé sur {salaryBenchmarks.salaryBenchmarks.submissionCount} avis vérifiés.
+                      {salaryBenchmarks.salaryBenchmarks.pctAboveCityAvg ? ` (${salaryBenchmarks.salaryBenchmarks.pctAboveCityAvg}% au-dessus de la moyenne ville)` : ""}
+                    </p>
+                  </div>
+                )}
+
+                <AvisinePromoCard
                   type={
                     resolvedSnapshot.calculatorType === "licenciement" ||
                       resolvedSnapshot.calculatorType === "unpaid_salary_recovery"
                       ? "conflict"
-                      : "general"
+                      : resolvedSnapshot.calculatorType === "salaire"
+                        ? "salary_benchmark"
+                        : "general"
                   }
                   company={employerCompany && employerCompany.name ? employerCompany : null}
                 />

@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { AdSlot } from "@/components/ad-slot";
 import { CompanyContextCard } from "@/components/company-context-card";
 import { CompanySearchInput, type CompanyOption } from "@/components/company-search-input";
-import { ReviewlyRatingBadge } from "@/components/reviewly-rating-badge";
+import { AvisineRatingBadge } from "@/components/avisine-rating-badge";
 import { useLanguage } from "@/components/language-provider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -394,9 +394,7 @@ export function DocumentGeneratorClient({
 
           {companyInsight ? (
             <div className="mt-4 space-y-3 print:hidden">
-              <ReviewlyRatingBadge
-                companyName={companyInsight.companyName}
-                businessId={companyInsight.businessId}
+              <AvisineRatingBadge
                 rating={companyInsight.rating}
               />
               <CompanyContextCard

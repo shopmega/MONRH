@@ -13,6 +13,7 @@ export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
 
   return createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+    db: { schema: "monrh" },
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -30,6 +31,7 @@ export async function createSupabaseServerClient() {
 
 export function createSupabaseRouteClient(request: NextRequest, response: NextResponse) {
   return createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+    db: { schema: "monrh" },
     cookies: {
       getAll() {
         return request.cookies.getAll();

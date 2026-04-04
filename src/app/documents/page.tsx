@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AdSlot } from "@/components/ad-slot";
 import { useLanguage } from "@/components/language-provider";
-import { ReviewlyPromoCard } from "@/components/reviewly-promo-card";
+import { AvisinePromoCard } from "@/components/avisine-promo-card";
 import type { DocumentTemplate } from "@/lib/content/home-content";
 
 type GeneratorGroup = {
@@ -167,7 +167,7 @@ export default function DocumentsPage() {
         <section className="mt-5">
           <p className="section-kicker pl-1">{t("common.partner")}</p>
           <div className="mt-2">
-            <ReviewlyPromoCard type="transition" />
+            <AvisinePromoCard type="transition" />
           </div>
         </section>
 

@@ -5,6 +5,10 @@ let cachedClient: ReturnType<typeof createBrowserClient> | null = null;
 
 export function createSupabaseClient() {
   if (cachedClient) return cachedClient;
-  cachedClient = createBrowserClient(getSupabaseUrl(), getSupabaseAnonKey());
+  cachedClient = createBrowserClient(
+    getSupabaseUrl(), 
+    getSupabaseAnonKey(), 
+    { db: { schema: "monrh" } }
+  );
   return cachedClient;
 }
