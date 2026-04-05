@@ -130,7 +130,8 @@ export async function listSimulations(userId?: string): Promise<SavedSimulation[
   }
   const { data, error } = await query;
   if (error || !data) {
-    throw new Error(error?.message ?? "simulation_list_failed");
+    console.error("[app-store] listSimulations failed:", error?.message ?? "no data");
+    return [];
   }
   return (data as Array<Record<string, unknown>>).map((row) => ({
     id: String(row.id),
@@ -211,7 +212,8 @@ export async function listDocuments(userId?: string): Promise<SavedDocument[]> {
   }
   const { data, error } = await query;
   if (error || !data) {
-    throw new Error(error?.message ?? "document_list_failed");
+    console.error("[app-store] listDocuments failed:", error?.message ?? "no data");
+    return [];
   }
   return (data as Array<Record<string, unknown>>).map((row) => ({
     id: String(row.id),
@@ -278,7 +280,8 @@ export async function listCases(userId?: string): Promise<SavedCase[]> {
 
   const { data, error } = await query;
   if (error || !data) {
-    throw new Error(error?.message ?? "case_list_failed");
+    console.error("[app-store] listCases failed:", error?.message ?? "no data");
+    return [];
   }
 
   return (data as Array<Record<string, unknown>>).map((row) => ({

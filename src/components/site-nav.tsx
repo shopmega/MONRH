@@ -116,8 +116,8 @@ export function SiteNav() {
     <>
       <header className="sticky top-0 z-40 border-b border-[var(--line)]/90 bg-[var(--header-bg)] backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-3 sm:px-6">
-          <Link href="/" className="group min-w-0 flex-1">
-            <div className="flex min-w-0 items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <Link href="/" className="flex items-center gap-2.5 group">
               {websiteSettings.logoUrl ? (
                 <Image
                   src={websiteSettings.logoUrl}
@@ -132,16 +132,11 @@ export function SiteNav() {
                   S
                 </div>
               )}
-              <div className="min-w-0">
-                <p className="display-font truncate text-lg font-semibold tracking-tight text-[var(--foreground)]">
-                  {websiteSettings.siteName.trim() || SITE_NAME}
-                </p>
-                <p className="hidden text-[11px] uppercase tracking-[0.15em] text-[var(--ink-soft)] sm:block">
-                  {websiteSettings.siteSubtitle.trim() || t("nav.subtitle")}
-                </p>
-              </div>
-            </div>
-          </Link>
+              <p className="display-font text-lg font-semibold tracking-tight text-[var(--foreground)] hidden sm:block">
+                {websiteSettings.siteName.trim() || SITE_NAME}
+              </p>
+            </Link>
+          </div>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 print:hidden">
             <button
@@ -277,6 +272,17 @@ export function SiteNav() {
                 );
               })}
             </nav>
+
+            <Link
+              href="https://avisine.com/job-offers"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest border border-primary/20 hover:bg-primary hover:text-white transition-all whitespace-nowrap"
+            >
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary"></span>
+              </span>
+              {t('nav.jobScanner')}
+            </Link>
 
             <AccountDropdown adminVisible={adminVisible} />
           </div>

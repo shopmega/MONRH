@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { getSupabaseSchema } from "@/lib/supabase/config";
 
 function requiredEnv(name: "NEXT_PUBLIC_SUPABASE_URL" | "SUPABASE_SERVICE_ROLE_KEY"): string {
   const value = process.env[name];
@@ -38,6 +39,7 @@ function validateServiceRoleKey(serviceRoleKey: string) {
 }
 
 let cachedClient: ReturnType<typeof createClient> | null = null;
+let cachedPublicClient: ReturnType<typeof createClient> | null = null;
 
 export function getSupabaseAdminClient() {
   if (cachedClient) {
@@ -49,7 +51,7 @@ export function getSupabaseAdminClient() {
     requiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
     serviceRoleKey,
     {
-      db: { schema: "monrh" },
+      db: { schema: getSupabaseSchema() },
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -57,4 +59,26 @@ export function getSupabaseAdminClient() {
     } as any,
   );
   return cachedClient;
+}
+
+/**
+ * Admin client that targets the PUBLIC schema.
+ * Use this for content tables (articles, document_templates) that are
+ * always in 'public' regardless of the monrh schema setting.
+ */
+export function getPublicSupabaseAdminClient() {
+  if (cachedPublicClient) return cachedPublicClient;
+  const serviceRoleKey = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
+  validateServiceRoleKey(serviceRoleKey);
+  cachedPublicClient = createClient(
+    requiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    serviceRoleKey,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    },
+  );
+  return cachedPublicClient;
 }

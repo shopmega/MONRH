@@ -1,5 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
-import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/config";
+import { getSupabaseAnonKey, getSupabaseUrl, getSupabaseSchema } from "@/lib/supabase/config";
 
 let cachedClient: ReturnType<typeof createBrowserClient> | null = null;
 
@@ -8,7 +8,7 @@ export function createSupabaseClient() {
   cachedClient = createBrowserClient(
     getSupabaseUrl(), 
     getSupabaseAnonKey(), 
-    { db: { schema: "monrh" } }
+    { db: { schema: getSupabaseSchema() } }
   );
   return cachedClient;
 }

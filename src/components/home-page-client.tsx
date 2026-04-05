@@ -197,7 +197,7 @@ export function HomePageClient({
                   ),
                   title: language === "ar" ? "الساعات الاضافية" : "Heures supplementaires",
                   description: language === "ar" ? "احسب الزيادات القانونية والعطل والغيابات." : "Calculez les majorations, jours feries et autres droits lies au temps de travail.",
-                  href: "/conges-cnss",
+                  href: "/conges-cnss/heures-supplementaires",
                   category: language === "ar" ? "وقت" : "Temps"
                 },
                 {
@@ -224,7 +224,7 @@ export function HomePageClient({
                 }
               ].map((tool) => (
                 <Link
-                  key={tool.href}
+                  key={tool.title}
                   href={tool.href}
                   className="soft-card flex flex-col p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-1 bg-[var(--surface)] group"
                 >

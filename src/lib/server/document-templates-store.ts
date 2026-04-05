@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DocumentTemplate } from "@/lib/content/home-content";
-import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { getPublicSupabaseAdminClient } from "@/lib/server/supabase-admin";
 
 type ListTemplateOptions = {
   includeInactive?: boolean;
@@ -21,7 +21,7 @@ export async function listDocumentTemplatesWithOptions(
   options: ListTemplateOptions = {},
 ): Promise<DocumentTemplate[]> {
   const includeInactive = options.includeInactive ?? false;
-  const supabase = getSupabaseAdminClient() as any;
+  const supabase = getPublicSupabaseAdminClient() as any;
   let query = supabase
     .from("document_templates")
     .select("id, title, description, fields, is_active")
@@ -32,7 +32,8 @@ export async function listDocumentTemplatesWithOptions(
   }
   const { data, error } = await query;
   if (error || !data) {
-    throw new Error(error?.message ?? "document_templates_list_failed");
+    console.error("[document-templates-store] listDocumentTemplates failed:", error?.message ?? "no data");
+    return [];
   }
 
   return (data as Array<Record<string, unknown>>).map((row) =>
