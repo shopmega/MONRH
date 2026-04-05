@@ -11,7 +11,7 @@ import { CATEGORY_HUBS } from "@/lib/navigation/category-hubs";
 import { AccountDropdown } from "./account-dropdown";
 import { SITE_NAME } from "@/lib/seo";
 
-type NavKey = "home" | "simulate" | "plan" | "tools" | "documents" | "library" | "account" | "admin";
+type NavKey = "home" | "simulate" | "plan" | "tools" | "documents" | "contracts" | "library" | "account" | "admin";
 
 type NavItem = {
   key: NavKey;
@@ -30,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { key: "plan", href: "/planifier" },
   { key: "tools", href: "/outils" },
   { key: "documents", href: "/documents" },
+  { key: "contracts", href: "/contracts" },
   { key: "library", href: "/bibliotheque" },
   { key: "account", href: "/compte" },
 ];
@@ -96,6 +97,16 @@ const MobileIcon = ({ itemKey, baseClass }: { itemKey: NavKey; baseClass: string
       </svg>
     );
   }
+  if (itemKey === "contracts") {
+    return (
+      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="12" y1="18" x2="12" y2="12" />
+        <line x1="9" y1="15" x2="15" y2="15" />
+      </svg>
+    );
+  }
   // Default account fallback
   return (
     <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -118,6 +129,7 @@ const ARABIC_NAV_LABELS: Record<NavKey, string> = {
   plan: "تخطيط",
   tools: "أدوات",
   documents: "وثائق",
+  contracts: "عقود",
   library: "مكتبة",
   account: "الحساب",
   admin: "الإدارة",
@@ -416,20 +428,20 @@ export function SiteNav() {
       {/* Bottom Navigation for Mobile */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--line)]/50 bg-[var(--surface)]/80 p-2 backdrop-blur-xl md:hidden print:hidden">
         <div className="flex items-center justify-around">
-          {NAV_ITEMS.filter(item => ["home", "simulate", "plan", "tools", "documents"].includes(item.key)).map((item) => {
+          {NAV_ITEMS.filter(item => ["home", "simulate", "plan", "tools", "documents", "contracts"].includes(item.key)).map((item) => {
             const active = isActive(pathname, item.href);
             return (
               <Link
                 key={item.key}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 transition-all ${
+                className={`flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-all ${
                   active ? "text-[var(--accent)]" : "text-[var(--ink-soft)]"
                 }`}
               >
                 <div className={`rounded-lg p-1 transition-all ${active ? "bg-[var(--accent)]/10" : ""}`}>
                   <MobileIcon itemKey={item.key} baseClass="h-6 w-6" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider">{navLabel(item.key)}</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider">{navLabel(item.key)}</span>
               </Link>
             );
           })}

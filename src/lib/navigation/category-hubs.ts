@@ -270,6 +270,11 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
     },
     links: [
       {
+        title: { fr: "Générateur de contrats", ar: "منشئ العقود" },
+        description: { fr: "Créez des contrats CDI/CDD professionnels", ar: "أنشئ عقود عمل احترافية" },
+        href: "/contracts",
+      },
+      {
         title: { fr: "Depart & demission", ar: "المغادرة والاستقالة" },
         description: { fr: "Demission, preavis, rupture amiable.", ar: "استقالة وإشعار وإنهاء ودي." },
         href: "/contrat-depart/lettre-demission",
