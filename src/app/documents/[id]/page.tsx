@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/ad-slot";
-import { DocumentGeneratorClient } from "@/components/document-generator-client";
+import { DocumentGeneratorFormClient } from "@/components/document-generator-form-client";
 import { RelatedContent } from "@/components/related-content";
 import { resolveRelatedItems } from "@/lib/linking/resolve-related";
 import { SITE_NAME, buildOgImageUrl } from "@/lib/seo";
@@ -136,7 +136,7 @@ export default async function DocumentGeneratorPage({
             <AdSlot slot="1212121212" format="auto" />
           </div>
         </section>
-        <DocumentGeneratorClient
+        <DocumentGeneratorFormClient
           template={template}
           initialValues={initialValues}
           caseId={typeof caseId === "string" ? caseId : undefined}

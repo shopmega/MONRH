@@ -10,14 +10,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <div className="w-full">
         <input
           ref={ref}
-          className={`h-11 w-full px-4 rounded-lg border bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+          className={`h-11 w-full rounded-lg border bg-[var(--surface)] px-4 text-[var(--foreground)] shadow-sm placeholder:text-[var(--ink-soft)] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 focus:ring-offset-[var(--background)] ${
             error
-              ? 'border-red-500 focus:border-red-500'
-              : 'border-slate-300 focus:border-blue-500'
+              ? "border-[var(--error-ink)] focus:border-[var(--error-ink)]"
+              : "border-[var(--line)] focus:border-[var(--accent)]"
           } ${className}`}
           {...props}
         />
-        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+        {error ? <p className="mt-1 text-sm text-[var(--error-ink)]">{error}</p> : null}
       </div>
     );
   }

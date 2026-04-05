@@ -1,6 +1,7 @@
 export const MESSAGES = {
   fr: {
     nav: {
+      home: "Accueil",
       simulate: "Simulateurs",
       plan: "Planifier",
       tools: "Outils",
@@ -8,6 +9,11 @@ export const MESSAGES = {
       library: "Bibliotheque",
       account: "Compte",
       admin: "Admin",
+      jobScanner: "Scanner emploi",
+      openMenu: "Ouvrir le menu",
+      mobileMenu: "Menu mobile",
+      menu: "Menu",
+      closeMenu: "Fermer le menu",
       subtitle: "Labour Clarity Platform",
       switchToFrench: "Passer en francais",
       switchToArabic: "Passer en arabe",
@@ -422,6 +428,10 @@ export const MESSAGES = {
       copyError: "Copie impossible sur ce navigateur.",
       attachments: "Pieces a joindre",
       nextSteps: "Prochaines etapes",
+      continueToPreview: "Voir l'apercu et le resultat",
+      previewHint: "L'apercu du document s'affiche sur la page suivante, apres validation des champs obligatoires.",
+      previewLoading: "Chargement de l'apercu...",
+      editFields: "Modifier les champs",
     },
     simulator: {
       title: "Simulateur",
@@ -621,6 +631,11 @@ export const MESSAGES = {
       library: "المقالات",
       account: "الحساب",
       admin: "الإدارة",
+      jobScanner: "ماسح العروض",
+      openMenu: "فتح القائمة",
+      mobileMenu: "القائمة",
+      menu: "القائمة",
+      closeMenu: "إغلاق القائمة",
       subtitle: "منصة تبسيط قانون الشغل",
       switchToFrench: "التبديل إلى الفرنسية",
       switchToArabic: "التبديل إلى العربية",
@@ -1014,6 +1029,10 @@ export const MESSAGES = {
       copyError: "تعذر النسخ في هذا المتصفح.",
       attachments: "المرفقات المطلوبة",
       nextSteps: "الخطوات التالية",
+      continueToPreview: "عرض المعاينة والنتيجة",
+      previewHint: "تُعرض معاينة الوثيقة في الصفحة التالية بعد التحقق من الحقول الإلزامية.",
+      previewLoading: "جاري تحميل المعاينة...",
+      editFields: "تعديل الحقول",
     },
     simulator: {
       title: "محاكي",
