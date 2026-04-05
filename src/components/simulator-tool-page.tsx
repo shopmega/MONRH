@@ -158,23 +158,28 @@ export function SimulatorToolPage({
           modelsDescription: "Accedez aux lettres et modeles associes a la meme demarche.",
           articlesTitle: "Guides pratiques",
           articlesDescription: "Lisez les explications utiles avant de passer a l'action.",
-          back: "Retour a Salaire",
+          back: "Retour aux Simulateurs",
         };
   const relatedItems = [
     {
-      title: relatedLabels.toolsTitle,
-      description: relatedLabels.toolsDescription,
-      href: "/salaire",
+      title: t("nav.simulate"),
+      description: t("common.simulateDesc"),
+      href: "/simulateurs",
     },
     {
-      title: relatedLabels.modelsTitle,
-      description: relatedLabels.modelsDescription,
-      href: "/modeles",
+      title: t("nav.plan"),
+      description: t("common.planifierDesc"),
+      href: "/planifier",
     },
     {
-      title: relatedLabels.articlesTitle,
-      description: relatedLabels.articlesDescription,
-      href: "/articles",
+      title: t("nav.tools"),
+      description: t("common.toolsDesc"),
+      href: "/outils",
+    },
+    {
+      title: t("nav.documents"),
+      description: t("common.documentsDesc"),
+      href: "/documents",
     },
   ];
 
@@ -260,7 +265,7 @@ export function SimulatorToolPage({
             <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-[var(--ink-soft)]">2. {t("simulator.stepCompute")}</span>
             <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-[var(--ink-soft)]">3. {t("simulator.stepResult")}</span>
           </div>
-          <Link href="/salaire" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
+          <Link href="/simulateurs" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
             {relatedLabels.back}
           </Link>
         </section>

@@ -6,7 +6,7 @@ import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
 import type { ToolPolicy } from "@/lib/tools/tool-catalog";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 type SimulatorItem = {
   title: { fr: string; ar: string };
@@ -243,13 +243,33 @@ export default function SimulatePage() {
   const visibleGroups = useMemo(
     () =>
       simulatorGroups
-        .map((group) => ({
+        .map((group: SimulatorGroup) => ({
           ...group,
-          items: group.items.filter((item) => resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)).visible),
+          items: group.items.filter((item: SimulatorItem) => resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)).visible),
         }))
         .filter((group) => group.items.length > 0),
     [toolPolicies],
   );
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) return visibleGroups;
+    
+    const query = searchQuery.toLowerCase();
+    return visibleGroups
+      .map((group) => ({
+        ...group,
+        items: group.items.filter(
+          (item) =>
+            item.title.fr.toLowerCase().includes(query) ||
+            item.title.ar.toLowerCase().includes(query) ||
+            item.description.fr.toLowerCase().includes(query) ||
+            item.description.ar.toLowerCase().includes(query)
+        ),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [visibleGroups, searchQuery]);
 
   return (
     <main className="paper-bg min-h-screen">
@@ -262,22 +282,22 @@ export default function SimulatePage() {
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--ink-soft)]">
             {t("simulatePage.description")}
           </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <Link href="/salaire" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
-              {language === "ar" ? "الأجر وورقة الأجر" : "Salaire & fiche de paie"}
-            </Link>
-            <Link href="/contrat-depart" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
-              {language === "ar" ? "العقد والمغادرة" : "Contrat & depart"}
-            </Link>
-            <Link href="/conges-cnss" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
-              {language === "ar" ? "العطل و CNSS" : "Congés et CNSS"}
-            </Link>
+          <div className="mt-6">
+            <div className="relative max-w-xl">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <svg className="h-5 w-5 text-[var(--ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder={t("common.searchPlaceholder")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full rounded-2xl border border-[var(--line)] bg-[var(--surface)] py-3.5 pl-11 pr-4 text-sm font-medium focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+              />
+            </div>
           </div>
-          <p className="mt-4 text-xs text-[var(--ink-soft)]">
-            {language === "ar"
-              ? "هذه الصفحة ما زالت متاحة، لكن التصفح الجديد أصبح منظما حسب المشكلة التي تريد حلها."
-              : "Cette page reste accessible, mais la nouvelle navigation est desormais organisee par probleme utilisateur."}
-          </p>
         </section>
 
         <section className="mt-5">
@@ -288,41 +308,56 @@ export default function SimulatePage() {
         </section>
 
         <div className="mt-5 space-y-5">
-          {visibleGroups.map((group, groupIndex) => (
-            <section
-              key={group.titleKey}
-              className={`rounded-3xl p-5 ${groupIndex % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
-            >
-              <div className="mb-4">
-                <p className="section-kicker">{t(group.titleKey)}</p>
-                <p className="mt-1 text-sm text-[var(--ink-soft)]">
-                  {t(group.subtitleKey)} ({t("simulatePage.toolsCount", { count: group.items.length })})
-                </p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {group.items.map((item, index) => (
-                  <article
-                    key={item.href}
-                    className={`rounded-2xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
-                  >
-                    <h2 className="display-font text-xl font-semibold leading-tight">{item.title[language]}</h2>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">{item.description[language]}</p>
-                    {canUseTool(resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)), userAuthenticated) ? (
-                      <Link href={item.href} className="btn-primary mt-4 px-4 py-2 text-sm">
-                        {t("common.open")}
-                      </Link>
-                    ) : (
-                      <div className="mt-4 rounded-xl border border-[var(--line)] bg-[var(--surface-muted)] px-3 py-2 text-xs text-[var(--ink-soft)]">
-                        {resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)).enabled
-                          ? "Reserve aux utilisateurs connectes."
-                          : "Desactive par administration."}
-                      </div>
-                    )}
-                  </article>
-                ))}
-              </div>
+          {filteredGroups.length > 0 ? (
+            filteredGroups.map((group, groupIndex) => (
+              <section
+                key={group.titleKey}
+                className={`rounded-3xl p-5 ${groupIndex % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
+              >
+                <div className="mb-4">
+                  <p className="section-kicker">{t(group.titleKey)}</p>
+                  <p className="mt-1 text-sm text-[var(--ink-soft)]">
+                    {t(group.subtitleKey)} ({t("simulatePage.toolsCount", { count: group.items.length })})
+                  </p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.items.map((item, index) => (
+                    <article
+                      key={item.href}
+                      className={`rounded-2xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
+                    >
+                      <h2 className="display-font text-xl font-semibold leading-tight">{item.title[language]}</h2>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">{item.description[language]}</p>
+                      {canUseTool(resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)), userAuthenticated) ? (
+                        <Link href={item.href} className="btn-primary mt-4 px-4 py-2 text-sm">
+                          {t("common.open")}
+                        </Link>
+                      ) : (
+                        <div className="mt-4 rounded-xl border border-[var(--line)] bg-[var(--surface-muted)] px-3 py-2 text-xs text-[var(--ink-soft)]">
+                          {resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)).enabled
+                            ? "Reserve aux utilisateurs connectes."
+                            : "Desactive par administration."}
+                        </div>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ))
+          ) : (
+            <section className="soft-card flex flex-col items-center justify-center rounded-[2rem] p-12 text-center">
+              <svg className="mb-4 h-12 w-12 text-[var(--ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-lg font-semibold text-[var(--foreground)]">{t("common.noResults", { query: searchQuery })}</p>
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="mt-4 text-sm font-bold text-[var(--accent)] hover:underline"
+              >
+                {language === "ar" ? "مسح البحث" : "Effacer la recherche"}
+              </button>
             </section>
-          ))}
+          )}
         </div>
 
         <section className="mt-5">
@@ -363,20 +398,35 @@ export default function SimulatePage() {
           </div>
         </section>
 
-        {/* Related Documents Section */}
-        <section className="mt-8">
-          <p className="section-kicker pl-1">{t("simulatePage.relatedDocuments")}</p>
-          <Link href="/documents" className="soft-card mt-4 flex min-w-0 rounded-3xl p-5">
-            <div className="flex-1">
-              <h2 className="display-font break-words text-xl font-semibold">{t("simulatePage.documentsCtaTitle")}</h2>
-              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">{t("simulatePage.documentsCtaDesc")}</p>
-            </div>
-            <div className="ml-4 flex-shrink-0">
-              <svg className="h-6 w-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </Link>
+        {/* Cross-section Links */}
+        <section className="mt-12 border-t border-[var(--line)] pt-12">
+          <p className="section-kicker text-center">{t("common.exploreSections")}</p>
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            <Link href="/planifier" className="soft-card group rounded-[2rem] p-6 transition-all hover:-translate-y-1">
+              <p className="section-kicker">{t("nav.plan")}</p>
+              <h3 className="display-font mt-2 text-xl font-bold">{language === "ar" ? "تخطيط مستقبلي" : "Planification Pro"}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--ink-soft)]">{t("common.planifierDesc")}</p>
+              <div className="mt-4 flex items-center text-xs font-bold text-[var(--accent)] group-hover:underline">
+                {t("common.explore")} &rarr;
+              </div>
+            </Link>
+            <Link href="/outils" className="soft-card group rounded-[2rem] p-6 transition-all hover:-translate-y-1">
+              <p className="section-kicker">{t("nav.tools")}</p>
+              <h3 className="display-font mt-2 text-xl font-bold">{language === "ar" ? "أدوات الحماية" : "Outils Protection"}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--ink-soft)]">{t("common.toolsDesc")}</p>
+              <div className="mt-4 flex items-center text-xs font-bold text-[var(--accent)] group-hover:underline">
+                {t("common.explore")} &rarr;
+              </div>
+            </Link>
+            <Link href="/documents" className="soft-card group rounded-[2rem] p-6 transition-all hover:-translate-y-1">
+              <p className="section-kicker">{t("nav.documents")}</p>
+              <h3 className="display-font mt-2 text-xl font-bold">{language === "ar" ? "نماذج قانونية" : "Modèles Docs"}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--ink-soft)]">{t("common.documentsDesc")}</p>
+              <div className="mt-4 flex items-center text-xs font-bold text-[var(--accent)] group-hover:underline">
+                {t("common.explore")} &rarr;
+              </div>
+            </Link>
+          </div>
         </section>
       </div>
     </main>

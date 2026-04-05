@@ -11,7 +11,7 @@ import { CATEGORY_HUBS } from "@/lib/navigation/category-hubs";
 import { AccountDropdown } from "./account-dropdown";
 import { SITE_NAME } from "@/lib/seo";
 
-type NavKey = "home" | "salary" | "departure" | "leaveCnss" | "disputes" | "models" | "account" | "jobScanner";
+type NavKey = "home" | "simulate" | "plan" | "tools" | "documents" | "library" | "account" | "admin";
 
 type NavItem = {
   key: NavKey;
@@ -26,32 +26,101 @@ type MegaMenuSection = {
 
 const NAV_ITEMS: NavItem[] = [
   { key: "home", href: "/" },
-  { key: "salary", href: "/salaire" },
-  { key: "departure", href: "/contrat-depart" },
-  { key: "leaveCnss", href: "/conges-cnss" },
-  { key: "disputes", href: "/litiges" },
-  { key: "models", href: "/modeles" },
-  { key: "jobScanner", href: "https://avisine.com/job-offers" },
+  { key: "simulate", href: "/simulateurs" },
+  { key: "plan", href: "/planifier" },
+  { key: "tools", href: "/outils" },
+  { key: "documents", href: "/documents" },
+  { key: "library", href: "/bibliotheque" },
   { key: "account", href: "/compte" },
 ];
 
+const MobileIcon = ({ itemKey, baseClass }: { itemKey: NavKey; baseClass: string }) => {
+  if (itemKey === "home") {
+    return (
+      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M3 9.5L12 3l9 6.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    );
+  }
+  if (itemKey === "simulate") {
+    return (
+      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <line x1="12" y1="8" x2="12" y2="16" />
+        <line x1="8" y1="12" x2="16" y2="12" />
+      </svg>
+    );
+  }
+  if (itemKey === "plan") {
+    return (
+      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+    );
+  }
+  if (itemKey === "library") {
+    return (
+      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      </svg>
+    );
+  }
+  if (itemKey === "tools") {
+    return (
+      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 3l7 4v5c0 4.3-2.6 7.8-7 9-4.4-1.2-7-4.7-7-9V7l7-4Z" />
+        <path d="M9 12h6M12 9v6" />
+      </svg>
+    );
+  }
+  if (itemKey === "admin") {
+    return (
+      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    );
+  }
+  if (itemKey === "documents") {
+    return (
+      <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+        <polyline points="10 9 9 9 8 9" />
+      </svg>
+    );
+  }
+  // Default account fallback
+  return (
+    <svg viewBox="0 0 24 24" className={baseClass} fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5" />
+    </svg>
+  );
+};
+
 const DESKTOP_MENU_SECTIONS: MegaMenuSection[] = [
-  { labelKey: "salary", href: "/salaire", hubKey: "salaire" },
-  { labelKey: "departure", href: "/contrat-depart", hubKey: "contrat-depart" },
-  { labelKey: "leaveCnss", href: "/conges-cnss", hubKey: "conges-cnss" },
-  { labelKey: "disputes", href: "/litiges", hubKey: "litiges" },
-  { labelKey: "models", href: "/modeles", hubKey: "modeles" },
+  { labelKey: "simulate", href: "/simulateurs", hubKey: "salaire" },
+  { labelKey: "plan", href: "/planifier", hubKey: "carriere" },
+  { labelKey: "tools", href: "/outils", hubKey: "litiges" },
+  { labelKey: "documents", href: "/documents", hubKey: "modeles" },
 ];
 
 const ARABIC_NAV_LABELS: Record<NavKey, string> = {
   home: "الرئيسية",
-  salary: "الأجر",
-  departure: "العقد والمغادرة",
-  leaveCnss: "العطل و CNSS",
-  disputes: "النزاعات",
-  models: "النماذج",
+  simulate: "محاكاة",
+  plan: "تخطيط",
+  tools: "أدوات",
+  documents: "وثائق",
+  library: "مكتبة",
   account: "الحساب",
-  jobScanner: "ماسح الوظائف",
+  admin: "الإدارة",
 };
 
 function isActive(pathname: string, href: string): boolean {
@@ -326,12 +395,13 @@ export function SiteNav() {
                         href={item.href}
                         onClick={() => setDrawerOpen(false)}
                         aria-current={active ? "page" : undefined}
-                        className={`block rounded-xl px-3 py-2 text-sm font-semibold ${
+                        className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all ${
                           active
-                            ? "bg-[var(--accent)] text-white"
+                            ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/20"
                             : "text-[var(--foreground)] hover:bg-[var(--surface-strong)]"
                         }`}
                       >
+                        <MobileIcon itemKey={item.key} baseClass="h-5 w-5" />
                         {navLabel(item.key)}
                       </Link>
                     </li>
@@ -343,6 +413,28 @@ export function SiteNav() {
         </div>
       ) : null}
 
+      {/* Bottom Navigation for Mobile */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--line)]/50 bg-[var(--surface)]/80 p-2 backdrop-blur-xl md:hidden print:hidden">
+        <div className="flex items-center justify-around">
+          {NAV_ITEMS.filter(item => ["home", "simulate", "plan", "tools", "documents"].includes(item.key)).map((item) => {
+            const active = isActive(pathname, item.href);
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                className={`flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 transition-all ${
+                  active ? "text-[var(--accent)]" : "text-[var(--ink-soft)]"
+                }`}
+              >
+                <div className={`rounded-lg p-1 transition-all ${active ? "bg-[var(--accent)]/10" : ""}`}>
+                  <MobileIcon itemKey={item.key} baseClass="h-6 w-6" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider">{navLabel(item.key)}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </>
   );
 }

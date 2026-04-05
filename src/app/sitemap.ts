@@ -15,21 +15,22 @@ const staticPages = [
   "/rh-pro",
   "/articles",
   "/simulateurs",
+  "/planifier",
   "/documents",
   "/bibliotheque",
   "/outils",
   "/outils/detecteur-fiche-paie",
   "/outils/alerte-retard-salaire",
   "/outils/score-risque-conformite",
+  "/outils/audit-solde-tout-compte",
+  "/outils/controle-procedure-disciplinaire",
+  "/outils/risque-requalification-cdd",
+  "/outils/feuille-route-pre-contentieux",
   "/journal/overtime",
   "/journal/violations",
   "/salaire/brut-net",
   "/salaire/ir-igr",
-  "/salaire/prime-bonus",
-  "/salaire/avantages-nature",
   "/salaire/smig-smag",
-  "/salaire/bulletin-paie",
-  "/salaire/optimisation-remuneration",
   "/contrat-depart/licenciement",
   "/contrat-depart/demission",
   "/contrat-depart/duree-preavis",
@@ -41,24 +42,29 @@ const staticPages = [
   "/conges-cnss/jour-ferie",
   "/conges-cnss/arret-maladie",
   "/conges-cnss/conge-maternite",
-  "/conges-cnss/indemnite-chomage",
   "/conges-cnss/pension-cnss",
-  "/conges-cnss/retraite-cnss",
   "/conges-cnss/accident-travail",
   "/litiges/salaire-impaye",
   "/litiges/heures-sup-impayees",
   "/litiges/harcelement",
-  "/carriere/comparaison-scenarios",
-  "/carriere/augmentation-salaire",
-  "/carriere/promotion",
-  "/carriere/freelance-vs-salarie",
-  "/carriere/capacite-credit",
-  "/carriere/auto-entrepreneur",
-  "/carriere/tarification-freelance",
-  "/carriere/benefice-net",
+  "/planifier/comparaison-scenarios",
+  "/planifier/augmentation-salaire",
+  "/planifier/simulation-prime",
+  "/planifier/igr-detail",
+  "/planifier/avantages-nature",
+  "/planifier/scenario-promotion",
+  "/planifier/freelance-vs-salarie",
+  "/planifier/capacite-credit",
+  "/planifier/indemnite-chomage",
+  "/planifier/retraite-avancee",
+  "/planifier/bulletin-paie",
+  "/planifier/masse-salariale",
+  "/planifier/cout-recrutement",
+  "/planifier/optimisation-remuneration",
+  "/planifier/auto-entrepreneur",
+  "/planifier/tarification-freelance",
+  "/planifier/benefice-net",
   "/rh-pro/cout-employeur-total",
-  "/rh-pro/masse-salariale",
-  "/rh-pro/cout-recrutement",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -79,7 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ? "daily"
         : path.startsWith("/journal")
           ? "daily"
-          : path === "/simulateurs" || path === "/documents" || path === "/bibliotheque"
+          : path === "/simulateurs" || path === "/planifier" || path === "/documents" || path === "/bibliotheque"
             ? "monthly"
             : "weekly",
     priority:
@@ -96,12 +102,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
               path.startsWith("/contrat-depart/") ||
               path.startsWith("/conges-cnss/") ||
               path.startsWith("/litiges/") ||
-              path.startsWith("/carriere/")
+              path.startsWith("/carriere/") ||
+              path.startsWith("/planifier/")
             ? 0.85
             : path.startsWith("/rh-pro/")
               ? 0.7
             : path.startsWith("/simulateurs/") ||
                 path === "/simulateurs" ||
+                path === "/planifier" ||
                 path === "/documents" ||
                 path === "/bibliotheque"
               ? 0.45

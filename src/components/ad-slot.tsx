@@ -25,6 +25,7 @@ export function AdSlot({
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
   const { t } = useLanguage();
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const slotRef = useRef<HTMLModElement | null>(null);
 
   useEffect(() => {
     if (!adsenseClient) {
@@ -78,10 +79,28 @@ export function AdSlot({
       }
     });
 
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === "attributes" && mutation.attributeName === "data-ad-status") {
+          const status = adNode.getAttribute("data-ad-status");
+          if (status === "unfilled") {
+            adNode.style.display = "none";
+            if (root) root.style.display = "none";
+          } else if (status === "filled") {
+            adNode.style.display = "block";
+            if (root) root.style.display = "block";
+          }
+        }
+      });
+    });
+
+    observer.observe(adNode, { attributes: true });
+
     resizeObserver.observe(adNode);
 
     return () => {
       resizeObserver.disconnect();
+      observer.disconnect();
     };
   }, [adsenseClient, format, responsive, slot]);
 
@@ -92,11 +111,13 @@ export function AdSlot({
   return (
     <div ref={rootRef} className={className}>
       <ins
-        className="adsbygoogle block min-h-24 w-full overflow-hidden rounded-2xl bg-white"
+        ref={slotRef}
+        className="adsbygoogle block w-full overflow-hidden"
         data-ad-client={adsenseClient}
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive={responsive ? "true" : "false"}
+        style={{ minHeight: '1px' }}
       />
     </div>
   );

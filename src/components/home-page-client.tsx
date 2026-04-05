@@ -97,14 +97,16 @@ export function HomePageClient({
   const heroCtas =
     language === "ar"
       ? {
-          simulate: "افهم أجري",
-          document: "أغادر عملي",
-          library: "أحل نزاعا",
+          simulate: "محاكاة حقوقي",
+          planifier: "تخطيط مساري",
+          tools: "أدوات الحماية",
+          documents: "إنشاء وثيقة",
         }
       : {
           simulate: t("home.ctaSimulate"),
-          document: t("home.ctaDocument"),
-          library: t("home.ctaLibrary"),
+          planifier: t("home.ctaPlan"),
+          tools: t("home.ctaTools"),
+          documents: t("home.ctaDocuments"),
         };
 
   return (
@@ -123,18 +125,32 @@ export function HomePageClient({
             {t("home.description")}
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-x-6 gap-y-4">
-            <Link href="/salaire" className="btn-primary text-base px-8 py-3.5 shadow-md">
+            <Link href="/simulateurs" className="btn-primary text-base px-8 py-3.5 shadow-md">
               {heroCtas.simulate}
             </Link>
-            <Link href="/contrat-depart" className="btn-muted text-base px-8 py-3.5">
-              {heroCtas.document}
+            <Link href="/planifier" className="btn-muted text-base px-8 py-3.5">
+              {heroCtas.planifier}
             </Link>
             <Link href="/outils" className="btn-muted text-base px-8 py-3.5">
-              {t("home.ctaProtection")}
+              {heroCtas.tools}
             </Link>
-            <Link href="/litiges" className="btn-muted text-base px-8 py-3.5">
-              {heroCtas.library}
+            <Link href="/documents" className="btn-muted text-base px-8 py-3.5">
+              {heroCtas.documents}
             </Link>
+          </div>
+
+          <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4 max-w-4xl w-full">
+            {[
+              { id: "sim", label: t("home.statsSimulations"), count: "20+" },
+              { id: "plan", label: t("home.statsPlanifier"), count: "17" },
+              { id: "prot", label: t("home.statsTools"), count: "7" },
+              { id: "doc", label: t("home.statsDocuments"), count: "50+" },
+            ].map((stat) => (
+              <div key={stat.id} className="panel-strong flex flex-col items-center justify-center p-6 text-center">
+                <span className="text-3xl font-black text-[var(--accent)] mb-1">{stat.count}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--ink-soft)]">{stat.label}</span>
+              </div>
+            ))}
           </div>
         </Container>
       </section>
