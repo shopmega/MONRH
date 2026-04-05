@@ -14,6 +14,16 @@ type HealthPayload = {
   scope?: "basic" | "all";
   timestamp?: string;
   error?: string;
+  summary?: {
+    total: number;
+    passed: number;
+    failed: number;
+  };
+  failures?: Array<{
+    name: string;
+    error: string;
+    durationMs: number;
+  }>;
   checks?: {
     env?: Array<{ name: string; present: boolean }>;
     base?: CheckResult[];
@@ -62,12 +72,32 @@ export function AdminHealthCheck() {
           <p className={`text-sm font-semibold ${payload.ok ? "text-emerald-700" : "text-rose-700"}`}>
             {payload.ok ? "Tous les contrôles sont OK" : "Des erreurs ont été détectées"}
           </p>
+          {payload.summary ? (
+            <p className="text-xs text-[var(--ink-soft)]">
+              Résumé: {payload.summary.passed}/{payload.summary.total} réussis, {payload.summary.failed} échoués
+            </p>
+          ) : null}
           {payload.error ? <p className="text-xs text-[var(--ink-soft)]">{payload.error}</p> : null}
           {payload.timestamp ? (
             <p className="text-xs text-[var(--ink-soft)]">
               Dernière vérification : {new Date(payload.timestamp).toLocaleString("fr-MA")}
             </p>
           ) : null}
+          
+          {/* Display failures prominently */}
+          {payload.failures && payload.failures.length > 0 ? (
+            <div className="mt-3 rounded-lg bg-rose-50 p-3 border border-rose-200">
+              <p className="text-sm font-semibold text-rose-800 mb-2">Échecs détectés:</p>
+              <ul className="space-y-1">
+                {payload.failures.map((failure, idx) => (
+                  <li key={idx} className="text-xs text-rose-700">
+                    <span className="font-medium">{failure.name}</span>: {failure.error}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          
           <div className="grid gap-2 sm:grid-cols-2">
             {items.map((item) => (
               <article key={item.name} className="panel-strong rounded-xl p-3 text-xs">
@@ -76,7 +106,7 @@ export function AdminHealthCheck() {
                   {item.ok ? "OK" : "Erreur"}
                 </p>
                 <p className="mt-1 text-[var(--ink-soft)]">{item.durationMs} ms</p>
-                {item.error ? <p className="mt-1 break-words text-[var(--ink-soft)]">{item.error}</p> : null}
+                {item.error ? <p className="mt-1 break-words text-[var(--ink-soft)] font-mono text-[10px]">{item.error}</p> : null}
               </article>
             ))}
           </div>

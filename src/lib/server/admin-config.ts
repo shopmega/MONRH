@@ -149,7 +149,7 @@ async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
     };
     const { data, error } = await appSettings
       .select("value,updated_at")
-      .eq("name", SETTINGS_KEY)
+      .eq("key", SETTINGS_KEY)
       .maybeSingle();
     if (error) return null;
     if (!data) return DEFAULT_ADMIN_CONFIG;
@@ -166,7 +166,7 @@ async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
 async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminConfig> {
   const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
     upsert: (
-      values: { name: string; value: unknown; updated_at: string },
+      values: { key: string; value: unknown; updated_at: string },
       options: { onConflict: string },
     ) => {
       select: (columns: string) => {
@@ -188,11 +188,11 @@ async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminCon
   const { data, error } = await appSettings
     .upsert(
       {
-        name: SETTINGS_KEY,
+        key: SETTINGS_KEY,
         value: payload,
         updated_at: config.updatedAt,
       },
-      { onConflict: "name" },
+      { onConflict: "key" },
     )
     .select("value,updated_at")
     .single();

@@ -32,11 +32,13 @@ async function timedCheck(name: string, run: () => Promise<void>): Promise<Check
     await run();
     return { name, ok: true, durationMs: Date.now() - started, error: null };
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "unknown_error";
+    const fullError = error instanceof Error ? `${errorMessage}${error.stack ? `\n${error.stack}` : ''}` : errorMessage;
     return {
       name,
       ok: false,
       durationMs: Date.now() - started,
-      error: error instanceof Error ? error.message : "unknown_error",
+      error: errorMessage,
     };
   }
 }
@@ -101,77 +103,80 @@ export async function GET(request: NextRequest) {
   const deepChecks: CheckResult[] = [];
   if (supabaseReady) {
     const supabase = getSupabaseAdminClient();
-    deepChecks.push(
-      ...(await Promise.all([
-        timedCheck("db.articles", async () => {
-          const { error } = await supabase.from("articles").select("slug").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.document_templates", async () => {
-          const { error } = await supabase.from("document_templates").select("id").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.app_settings", async () => {
-          const { error } = await supabase.from("app_settings").select("name").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.admin_users", async () => {
-          const { error } = await supabase.from("admin_users").select("user_id").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.user_simulations", async () => {
-          const { error } = await supabase.from("user_simulations").select("id").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.user_documents", async () => {
-          const { error } = await supabase.from("user_documents").select("id").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.user_cases", async () => {
-          const { error } = await supabase.from("user_cases").select("id").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.evidence_artifacts", async () => {
-          const { error } = await supabase.from("evidence_artifacts").select("id").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.employment_verifications", async () => {
-          const { error } = await supabase.from("employment_verifications").select("id").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.user_violation_logs", async () => {
-          const { error } = await supabase.from("user_violation_logs").select("id").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-        timedCheck("db.user_overtime_logs", async () => {
-          const { error } = await supabase.from("user_overtime_logs").select("id").limit(1);
-          if (error) throw new Error(error.message);
-        }),
-      ])),
-    );
+    
+    // Check tables sequentially with correct column names
+    const tableChecks = [
+      { name: "articles", column: "slug" },
+      { name: "document_templates", column: "id" },
+      { name: "app_settings", column: "key" }, // Note: uses 'key' not 'name'
+      { name: "admin_users", column: "user_id" },
+      { name: "user_simulations", column: "id" },
+      { name: "user_documents", column: "id" },
+      { name: "user_cases", column: "id" },
+      { name: "evidence_artifacts", column: "id" },
+      { name: "employment_verifications", column: "id" },
+      { name: "user_violation_logs", column: "id" },
+      { name: "user_overtime_logs", column: "id" }
+    ];
+    
+    for (const tableCheck of tableChecks) {
+      const check = await timedCheck(`db.${tableCheck.name}`, async () => {
+        const { error } = await supabase.from(tableCheck.name).select(tableCheck.column).limit(1);
+        if (error) throw new Error(`${error.code || 'UNKNOWN'}: ${error.message}`);
+      });
+      deepChecks.push(check);
+    }
   }
 
   const apiChecksBase = await Promise.all([
     timedCheck("api.admin.config", async () => {
-      await readAdminConfig();
+      try {
+        await readAdminConfig();
+      } catch (error) {
+        throw new Error(`Failed to read admin config: ${error instanceof Error ? error.message : 'unknown'}`);
+      }
     }),
     timedCheck("api.admin.rules", async () => {
-      await readLawRulesBundle();
+      try {
+        await readLawRulesBundle();
+      } catch (error) {
+        throw new Error(`Failed to read law rules: ${error instanceof Error ? error.message : 'unknown'}`);
+      }
     }),
     timedCheck("api.admin.linking", async () => {
-      await readLinkMap();
+      try {
+        await readLinkMap();
+      } catch (error) {
+        throw new Error(`Failed to read link map: ${error instanceof Error ? error.message : 'unknown'}`);
+      }
     }),
     timedCheck("api.articles", async () => {
-      await listArticles();
+      try {
+        await listArticles();
+      } catch (error) {
+        throw new Error(`Failed to list articles: ${error instanceof Error ? error.message : 'unknown'}`);
+      }
     }),
     timedCheck("api.documents.templates", async () => {
-      await listDocumentTemplatesWithOptions({ includeInactive: true });
+      try {
+        await listDocumentTemplatesWithOptions({ includeInactive: true });
+      } catch (error) {
+        throw new Error(`Failed to list document templates: ${error instanceof Error ? error.message : 'unknown'}`);
+      }
     }),
     timedCheck("api.simulations", async () => {
-      await listSimulations();
+      try {
+        await listSimulations();
+      } catch (error) {
+        throw new Error(`Failed to list simulations: ${error instanceof Error ? error.message : 'unknown'}`);
+      }
     }),
     timedCheck("api.documents.generated", async () => {
-      await listDocuments();
+      try {
+        await listDocuments();
+      } catch (error) {
+        throw new Error(`Failed to list documents: ${error instanceof Error ? error.message : 'unknown'}`);
+      }
     }),
   ]);
 
@@ -194,11 +199,27 @@ export async function GET(request: NextRequest) {
 
   const healthy = env.ok && baseChecks.every((item) => item.ok) && deepChecks.every((item) => item.ok);
 
+  // Collect summary of failures for easier debugging
+  const failures = [
+    ...baseChecks.filter(item => !item.ok),
+    ...deepChecks.filter(item => !item.ok),
+  ];
+
   return NextResponse.json(
     {
       ok: healthy,
       scope: "all",
       timestamp: new Date().toISOString(),
+      summary: {
+        total: baseChecks.length + deepChecks.length,
+        passed: baseChecks.filter(item => item.ok).length + deepChecks.filter(item => item.ok).length,
+        failed: failures.length,
+      },
+      failures: failures.map(f => ({
+        name: f.name,
+        error: f.error,
+        durationMs: f.durationMs,
+      })),
       checks: {
         env: env.checks,
         base: baseChecks,

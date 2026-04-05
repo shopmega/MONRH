@@ -135,7 +135,7 @@ async function readRulesFromSupabase(): Promise<LawRulesBundle | null> {
     };
     const { data, error } = await appSettings
       .select("value")
-      .eq("name", SETTINGS_KEY)
+      .eq("key", SETTINGS_KEY)
       .maybeSingle();
     if (error) return null;
     if (!data) return getDefaultRulesBundle();
@@ -150,18 +150,18 @@ async function writeRulesToSupabase(bundle: LawRulesBundle): Promise<boolean> {
   try {
     const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
       upsert: (
-        values: { name: string; value: unknown; updated_at: string },
+        values: { key: string; value: unknown; updated_at: string },
         options: { onConflict: string },
       ) => Promise<{ error: unknown }>;
     };
     const { error } = await appSettings
       .upsert(
         {
-          name: SETTINGS_KEY,
+          key: SETTINGS_KEY,
           value: bundle,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "name" },
+        { onConflict: "key" },
       );
     return !error;
   } catch {
