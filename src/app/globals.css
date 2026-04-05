@@ -1,66 +1,143 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #64748b;
-  --heading: #0f172a;
-  
-  --surface: #ffffff;
-  --surface-elevated: #ffffff;
-  --surface-strong: #f1f5f9;
-  --surface-muted: #f8fafc;
-  
-  --line: #e2e8f0;
-  --line-strong: #cbd5e1;
-  
-  --accent: #4f46e5;
-  --accent-strong: #4338ca;
-  --accent-soft: #e0e7ff;
-  
-  --ink-soft: #94a3b8;
-  
-  --success-bg: #dcfce7;
-  --success-ink: #166534;
-  --error-bg: #fee2e2;
-  --error-ink: #991b1b;
-  --info-bg: #e0f2fe;
-  --info-ink: #075985;
+  /* Fondements */
+  --bg: #F5F3EF;
+  --bg-elevated: #FFFFFF;
+  --card: #FFFFFF;
+  --card-hover: #FAFAF8;
+  --border: #E2DED6;
+  --border-focus: #B5622E;
 
-  /* Simulator Premium Theme */
+  /* Texte */
+  --fg: #1A1815;
+  --fg-muted: #6B6560;
+  --fg-dim: #9C9690;
+
+  /* Accent — même famille chaude, adaptée au fond clair */
+  --accent: #B5622E;
+  --accent-light: #C87A3F;
+  --accent-glow: rgba(181, 98, 46, 0.12);
+  --accent-soft: rgba(181, 98, 46, 0.05);
+
+  /* Sémantique — assombris pour être lisibles sur fond clair */
+  --ok: #1E8A52;
+  --ok-bg: rgba(30, 138, 82, 0.07);
+  --err: #C43E3E;
+  --err-bg: rgba(196, 62, 62, 0.06);
+  --warn: #B58A1E;
+  --warn-bg: rgba(181, 138, 30, 0.06);
+
+  /* Maroc */
+  --ma: #A82228;
+  --ma-s: rgba(168, 34, 40, 0.05);
+
+  /* Inputs spécifiques */
+  --input-bg: #FFFFFF;
+  --input-placeholder: #B5AFA8;
+
+  /* Legacy variables for backward compatibility */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --heading: var(--fg);
+  
+  --surface: var(--card);
+  --surface-elevated: var(--bg-elevated);
+  --surface-strong: var(--card-hover);
+  --surface-muted: var(--bg);
+  
+  --line: var(--border);
+  --line-strong: var(--border-focus);
+  
+  --accent-strong: var(--accent-light);
+  
+  --ink-soft: var(--fg-dim);
+  
+  --success-bg: var(--ok-bg);
+  --success-ink: var(--ok);
+  --error-bg: var(--err-bg);
+  --error-ink: var(--err);
+  --info-bg: var(--warn-bg);
+  --info-ink: var(--warn);
+
+  /* Simulator Premium Theme - Light */
+  --sim-bg: #F5F3EF;
+  --sim-card: #FFFFFF;
+  --sim-border: #E2DED6;
+  --sim-text: #1A1815;
+  --sim-accent: #B5622E;
+  --sim-accent-soft: rgba(181, 98, 46, 0.12);
+  --sim-ink-soft: #6B6560;
+}
+
+:root[data-theme="dark"] {
+  /* Fondements */
+  --bg: #111519;
+  --bg-elevated: #161B22;
+  --card: #161B22;
+  --card-hover: #1D242C;
+  --border: #252C37;
+  --border-focus: #C2783C;
+
+  /* Texte */
+  --fg: #ECEEF1;
+  --fg-muted: #8B949E;
+  --fg-dim: #6E7681;
+
+  /* Accent — version sombre de la famille chaude */
+  --accent: #C2783C;
+  --accent-light: #D9894E;
+  --accent-glow: rgba(194, 120, 60, 0.15);
+  --accent-soft: rgba(194, 120, 60, 0.15);
+
+  /* Sémantique — adaptés pour le fond sombre */
+  --ok: #6ee7b7;
+  --ok-bg: rgba(30, 138, 82, 0.15);
+  --err: #fca5a5;
+  --err-bg: rgba(196, 62, 62, 0.15);
+  --warn: #7dd3fc;
+  --warn-bg: rgba(181, 138, 30, 0.15);
+
+  /* Maroc */
+  --ma: #D42A30;
+  --ma-s: rgba(212, 42, 48, 0.1);
+
+  /* Inputs spécifiques */
+  --input-bg: #161B22;
+  --input-placeholder: #6E7681;
+
+  /* Legacy variables for backward compatibility */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --heading: var(--fg);
+  
+  --surface: var(--card);
+  --surface-elevated: var(--bg-elevated);
+  --surface-strong: var(--card-hover);
+  --surface-muted: var(--bg);
+  
+  --line: var(--border);
+  --line-strong: #30363D;
+  
+  --accent-strong: var(--accent-light);
+  
+  --ink-soft: var(--fg-muted);
+  
+  --success-bg: var(--ok-bg);
+  --success-ink: var(--ok);
+  --error-bg: var(--err-bg);
+  --error-ink: var(--err);
+  --info-bg: var(--warn-bg);
+  --info-ink: var(--warn);
+
+  /* Simulator Premium Theme - Dark */
   --sim-bg: #111519;
   --sim-card: #161B22;
   --sim-border: #252C37;
   --sim-text: #ECEEF1;
   --sim-accent: #C2783C;
-  --sim-accent-soft: rgba(194, 120, 60, 0.1);
+  --sim-accent-soft: rgba(194, 120, 60, 0.15);
   --sim-ink-soft: #8B949E;
-}
-
-:root[data-theme="dark"] {
-  --background: #111519;
-  --foreground: #ECEEF1;
-  --heading: #ffffff;
-  
-  --surface: #161B22;
-  --surface-elevated: #161B22;
-  --surface-strong: #1D242C;
-  --surface-muted: #0D1117;
-  
-  --line: #252C37;
-  --line-strong: #30363D;
-  
-  --accent: #C2783C;
-  --accent-strong: #D9894E;
-  --accent-soft: rgba(194, 120, 60, 0.15);
-  
-  --ink-soft: #8B949E;
-  
-  --success-bg: #064e3b;
-  --success-ink: #6ee7b7;
-  --error-bg: #7f1d1d;
-  --error-ink: #fca5a5;
-  --info-bg: #0c4a6e;
-  --info-ink: #7dd3fc;
 }
 
 @theme inline {
@@ -397,4 +474,446 @@ input:checked + .sim-toggle-track .sim-toggle-thumb {
   ::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* ===== LIGHT THEME COMPONENT STYLES ===== */
+
+/* Inputs */
+:root[data-theme="light"] .fi,
+:root[data-theme="light"] .fs,
+:root[data-theme="light"] .fd {
+  background: var(--input-bg);
+  border-color: var(--border);
+  color: var(--fg);
+}
+:root[data-theme="light"] .fi:hover,
+:root[data-theme="light"] .fs:hover,
+:root[data-theme="light"] .fd:hover {
+  border-color: #CCC8C0;
+}
+:root[data-theme="light"] .fi:focus,
+:root[data-theme="light"] .fs:focus,
+:root[data-theme="light"] .fd:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+:root[data-theme="light"] .fi::placeholder,
+:root[data-theme="light"] .ti::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* Date picker — light */
+:root[data-theme="light"] .fd {
+  color-scheme: light;
+}
+:root[data-theme="light"] .fd::-webkit-calendar-picker-indicator {
+  filter: none;
+  opacity: 0.5;
+}
+
+/* Select flèche */
+:root[data-theme="light"] .fs {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236B6560' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+}
+
+/* Toggle */
+:root[data-theme="light"] .tw {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .tw:hover {
+  background: var(--card-hover);
+}
+:root[data-theme="light"] .tw.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+:root[data-theme="light"] .ttr {
+  background: #D6D0C8;
+}
+:root[data-theme="light"] .tw.on .ttr {
+  background: var(--accent);
+}
+
+/* Radio cards */
+:root[data-theme="light"] .ri {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .ri:hover {
+  background: var(--card-hover);
+}
+:root[data-theme="light"] .ri.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* Checkboxes */
+:root[data-theme="light"] .ci {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .ci:hover {
+  background: var(--card-hover);
+}
+:root[data-theme="light"] .ci.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+:root[data-theme="light"] .cb {
+  border-color: #C8C2BA;
+}
+:root[data-theme="light"] .ci.on .cb {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Stepper */
+:root[data-theme="light"] .st {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .sb:hover {
+  background: var(--card-hover);
+}
+:root[data-theme="light"] .sb:active {
+  background: var(--accent-soft);
+}
+
+/* Range slider */
+:root[data-theme="light"] .rbg {
+  background: #E2DED6;
+}
+:root[data-theme="light"] input[type="range"]::-webkit-slider-thumb {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+:root[data-theme="light"] input[type="range"]::-moz-range-thumb {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+/* Tags */
+:root[data-theme="light"] .tw2 {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .tg {
+  background: var(--accent-soft);
+  border-color: rgba(181, 98, 46, 0.15);
+  color: var(--accent);
+}
+
+/* Dropdowns (tags + search) */
+:root[data-theme="light"] .tdd,
+:root[data-theme="light"] .sdd {
+  background: var(--input-bg);
+  border-color: var(--border);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+:root[data-theme="light"] .tdi:hover,
+:root[data-theme="light"] .so:hover {
+  background: var(--accent-soft);
+}
+
+/* Cards / sections */
+:root[data-theme="light"] .pc {
+  background: var(--card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .pc:hover {
+  border-color: #D6D0C8;
+}
+
+/* Badges */
+:root[data-theme="light"] .bb {
+  background: var(--err-bg);
+  color: var(--err);
+  border-color: rgba(196, 62, 62, 0.1);
+}
+:root[data-theme="light"] .ba {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: rgba(30, 138, 82, 0.1);
+}
+:root[data-theme="light"] .bl {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: rgba(181, 98, 46, 0.1);
+}
+:root[data-theme="light"] .badge-ma,
+:root[data-theme="light"] .bm {
+  background: var(--ma-s);
+  color: var(--ma);
+  border-color: rgba(168, 34, 40, 0.1);
+}
+
+/* Validation states */
+:root[data-theme="light"] .fi.err {
+  border-color: var(--err);
+  box-shadow: 0 0 0 3px var(--err-bg);
+}
+:root[data-theme="light"] .fi.ok {
+  border-color: var(--ok);
+  box-shadow: 0 0 0 3px var(--ok-bg);
+}
+
+/* Ref / code inline */
+:root[data-theme="light"] .ref {
+  background: #EDEBE7;
+  border-color: var(--border);
+  color: var(--fg-muted);
+}
+
+/* Suffix / icon */
+:root[data-theme="light"] .sf {
+  color: var(--fg-dim);
+}
+:root[data-theme="light"] .ic {
+  color: var(--fg-dim);
+}
+:root[data-theme="light"] .iw:focus-within .ic {
+  color: var(--accent);
+}
+
+/* Toast */
+:root[data-theme="light"] .toast {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+/* Grid de fond — supprimer ou adoucir */
+:root[data-theme="light"] .bg-grid {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+}
+
+/* Blobs atmosphère — supprimer ou très légers */
+:root[data-theme="light"] .bg-atmos::before {
+  background: radial-gradient(circle, rgba(181,98,46,0.04) 0%, transparent 70%);
+}
+:root[data-theme="light"] .bg-atmos::after {
+  background: radial-gradient(circle, rgba(168,34,40,0.03) 0%, transparent 70%);
+}
+
+/* ===== DARK THEME COMPONENT STYLES ===== */
+
+/* Inputs */
+:root[data-theme="dark"] .fi,
+:root[data-theme="dark"] .fs,
+:root[data-theme="dark"] .fd {
+  background: var(--input-bg);
+  border-color: var(--border);
+  color: var(--fg);
+}
+:root[data-theme="dark"] .fi:hover,
+:root[data-theme="dark"] .fs:hover,
+:root[data-theme="dark"] .fd:hover {
+  border-color: #3A4250;
+}
+:root[data-theme="dark"] .fi:focus,
+:root[data-theme="dark"] .fs:focus,
+:root[data-theme="dark"] .fd:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+:root[data-theme="dark"] .fi::placeholder,
+:root[data-theme="dark"] .ti::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* Date picker — dark */
+:root[data-theme="dark"] .fd {
+  color-scheme: dark;
+}
+:root[data-theme="dark"] .fd::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+}
+
+/* Select flèche */
+:root[data-theme="dark"] .fs {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238B949E' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+}
+
+/* Toggle */
+:root[data-theme="dark"] .tw {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .tw:hover {
+  background: var(--card-hover);
+}
+:root[data-theme="dark"] .tw.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+:root[data-theme="dark"] .ttr {
+  background: #3A4250;
+}
+:root[data-theme="dark"] .tw.on .ttr {
+  background: var(--accent);
+}
+
+/* Radio cards */
+:root[data-theme="dark"] .ri {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .ri:hover {
+  background: var(--card-hover);
+}
+:root[data-theme="dark"] .ri.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* Checkboxes */
+:root[data-theme="dark"] .ci {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .ci:hover {
+  background: var(--card-hover);
+}
+:root[data-theme="dark"] .ci.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+:root[data-theme="dark"] .cb {
+  border-color: #3A4250;
+}
+:root[data-theme="dark"] .ci.on .cb {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Stepper */
+:root[data-theme="dark"] .st {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .sb:hover {
+  background: var(--card-hover);
+}
+:root[data-theme="dark"] .sb:active {
+  background: var(--accent-soft);
+}
+
+/* Range slider */
+:root[data-theme="dark"] .rbg {
+  background: #252C37;
+}
+:root[data-theme="dark"] input[type="range"]::-webkit-slider-thumb {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+:root[data-theme="dark"] input[type="range"]::-moz-range-thumb {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+/* Tags */
+:root[data-theme="dark"] .tw2 {
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .tg {
+  background: var(--accent-soft);
+  border-color: rgba(194, 120, 60, 0.25);
+  color: var(--accent-light);
+}
+
+/* Dropdowns (tags + search) */
+:root[data-theme="dark"] .tdd,
+:root[data-theme="dark"] .sdd {
+  background: var(--input-bg);
+  border-color: var(--border);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+:root[data-theme="dark"] .tdi:hover,
+:root[data-theme="dark"] .so:hover {
+  background: var(--accent-soft);
+}
+
+/* Cards / sections */
+:root[data-theme="dark"] .pc {
+  background: var(--card);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .pc:hover {
+  border-color: #3A4250;
+}
+
+/* Badges */
+:root[data-theme="dark"] .bb {
+  background: var(--err-bg);
+  color: var(--err);
+  border-color: rgba(252, 165, 165, 0.15);
+}
+:root[data-theme="dark"] .ba {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: rgba(110, 231, 183, 0.15);
+}
+:root[data-theme="dark"] .bl {
+  background: var(--accent-soft);
+  color: var(--accent-light);
+  border-color: rgba(194, 120, 60, 0.2);
+}
+:root[data-theme="dark"] .badge-ma,
+:root[data-theme="dark"] .bm {
+  background: var(--ma-s);
+  color: var(--ma);
+  border-color: rgba(212, 42, 48, 0.15);
+}
+
+/* Validation states */
+:root[data-theme="dark"] .fi.err {
+  border-color: var(--err);
+  box-shadow: 0 0 0 3px var(--err-bg);
+}
+:root[data-theme="dark"] .fi.ok {
+  border-color: var(--ok);
+  box-shadow: 0 0 0 3px var(--ok-bg);
+}
+
+/* Ref / code inline */
+:root[data-theme="dark"] .ref {
+  background: #1D242C;
+  border-color: var(--border);
+  color: var(--fg-muted);
+}
+
+/* Suffix / icon */
+:root[data-theme="dark"] .sf {
+  color: var(--fg-dim);
+}
+:root[data-theme="dark"] .ic {
+  color: var(--fg-dim);
+}
+:root[data-theme="dark"] .iw:focus-within .ic {
+  color: var(--accent);
+}
+
+/* Toast */
+:root[data-theme="dark"] .toast {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+/* Grid de fond — sombre */
+:root[data-theme="dark"] .bg-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+}
+
+/* Blobs atmosphère — sombre */
+:root[data-theme="dark"] .bg-atmos::before {
+  background: radial-gradient(circle, rgba(194,120,60,0.08) 0%, transparent 70%);
+}
+:root[data-theme="dark"] .bg-atmos::after {
+  background: radial-gradient(circle, rgba(212,42,48,0.06) 0%, transparent 70%);
 }
