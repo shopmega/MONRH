@@ -39,7 +39,7 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       fr: "Comprendre ma fiche de paie",
       ar: "فهم ورقة أجري",
     },
-    featuredHref: "/salaire/brut-net",
+    featuredHref: "/simulateurs/brut-net",
     featuredDescription: {
       fr: "Le point d'entree le plus simple pour verifier net, brut, IR et cotisations.",
       ar: "أسهل نقطة انطلاق للتحقق من الصافي والإجمالي والضريبة والاقتطاعات.",
@@ -48,17 +48,17 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       {
         title: { fr: "Calcul brut -> net", ar: "حساب الإجمالي إلى الصافي" },
         description: { fr: "Net, brut, cotisations et cout employeur.", ar: "الصافي والإجمالي والاقتطاعات وكلفة المشغل." },
-        href: "/salaire/brut-net",
+        href: "/simulateurs/brut-net",
       },
       {
         title: { fr: "IR / IGR", ar: "الضريبة على الدخل" },
         description: { fr: "Vue annuelle de l'impot et du taux effectif.", ar: "عرض سنوي للضريبة والمعدل الفعلي." },
-        href: "/salaire/ir-igr",
+        href: "/simulateurs/ir-annuel",
       },
       {
         title: { fr: "SMIG / SMAG", ar: "مطابقة SMIG / SMAG" },
         description: { fr: "Controle rapide du minimum legal.", ar: "فحص سريع للحد الادنى القانوني." },
-        href: "/salaire/smig-smag",
+        href: "/simulateurs/conformite-smig",
       },
       {
         title: { fr: "Prime & bonus", ar: "المنح والمكافآت" },
@@ -95,7 +95,7 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       fr: "Je quitte mon travail",
       ar: "سأغادر عملي",
     },
-    featuredHref: "/contrat-depart/licenciement",
+    featuredHref: "/simulateurs/licenciement",
     featuredDescription: {
       fr: "Commencez par vos droits financiers, puis ouvrez la lettre adaptee a votre situation.",
       ar: "ابدأ بحقوقك المالية ثم افتح الرسالة المناسبة لوضعك.",
@@ -104,27 +104,27 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       {
         title: { fr: "Licenciement", ar: "الفصل" },
         description: { fr: "Indemnite, preavis, conges restants.", ar: "التعويض والإشعار والعطل المتبقية." },
-        href: "/contrat-depart/licenciement",
+        href: "/simulateurs/licenciement",
       },
       {
         title: { fr: "Demission", ar: "الاستقالة" },
         description: { fr: "Impact financier d'une demission.", ar: "الأثر المالي للاستقالة." },
-        href: "/contrat-depart/demission",
+        href: "/simulateurs/demission",
       },
       {
         title: { fr: "Duree de preavis", ar: "مدة الإشعار" },
         description: { fr: "Calculez la duree legale de preavis.", ar: "احسب مدة الإشعار القانونية." },
-        href: "/contrat-depart/duree-preavis",
+        href: "/simulateurs/duree-preavis",
       },
       {
         title: { fr: "Fin de CDD", ar: "نهاية عقد CDD" },
         description: { fr: "Prime de precarite et compensation.", ar: "منحة الهشاشة والتعويض." },
-        href: "/contrat-depart/fin-cdd",
+        href: "/simulateurs/fin-cdd",
       },
       {
         title: { fr: "Periode d'essai", ar: "فترة التجربة" },
         description: { fr: "Rupture et delais applicables.", ar: "الإنهاء والآجال المطبقة." },
-        href: "/contrat-depart/periode-essai",
+        href: "/simulateurs/rupture-periode-essai",
       },
       {
         title: { fr: "Lettre de demission", ar: "رسالة استقالة" },
@@ -151,7 +151,7 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       fr: "Mes droits CNSS",
       ar: "حقوقي في CNSS",
     },
-    featuredHref: "/conges-cnss/pension-cnss",
+    featuredHref: "/simulateurs/pension-cnss",
     featuredDescription: {
       fr: "Accedez aux outils lies aux conges, aux indemnites et a la couverture sociale.",
       ar: "الوصول إلى أدوات العطل والتعويضات والحماية الاجتماعية.",
@@ -160,32 +160,32 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       {
         title: { fr: "Conges acquis", ar: "العطل المكتسبة" },
         description: { fr: "Suivez vos droits acquis et votre reliquat.", ar: "تابع حقوقك المكتسبة ورصيدك المتبقي." },
-        href: "/conges-cnss/conges-acquis",
+        href: "/simulateurs/acquisition-conges",
       },
       {
         title: { fr: "Heures supplementaires", ar: "الساعات الإضافية" },
         description: { fr: "Calculez les majorations legales.", ar: "احسب الزيادات القانونية." },
-        href: "/conges-cnss/heures-supplementaires",
+        href: "/simulateurs/heures-supplementaires",
       },
       {
         title: { fr: "Arret maladie", ar: "التوقف المرضي" },
         description: { fr: "Estimez l'impact d'un arret maladie.", ar: "قدّر أثر التوقف المرضي." },
-        href: "/conges-cnss/arret-maladie",
+        href: "/simulateurs/conge-maladie",
       },
       {
         title: { fr: "Conge maternite", ar: "عطلة الأمومة" },
         description: { fr: "Revenu CNSS et demarches utiles.", ar: "دخل CNSS والإجراءات المفيدة." },
-        href: "/conges-cnss/conge-maternite",
+        href: "/simulateurs/conge-maternite",
       },
       {
         title: { fr: "Pension CNSS", ar: "معاش CNSS" },
         description: { fr: "Projection simplifiee de votre pension.", ar: "توقع مبسط لمعاشك." },
-        href: "/conges-cnss/pension-cnss",
+        href: "/simulateurs/pension-cnss",
       },
       {
         title: { fr: "Accident du travail", ar: "حادثة شغل" },
         description: { fr: "Estimation d'indemnisation et declaration.", ar: "تقدير التعويض والتصريح." },
-        href: "/conges-cnss/accident-travail",
+        href: "/simulateurs/accident-travail",
       },
     ],
   },
@@ -207,7 +207,7 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       fr: "Resoudre un probleme au travail",
       ar: "حل مشكلة في العمل",
     },
-    featuredHref: "/litiges/salaire-impaye",
+    featuredHref: "/simulateurs/recouvrement-salaire-impaye",
     featuredDescription: {
       fr: "Calculez le montant du, puis ouvrez la reclamation ou la plainte adaptee.",
       ar: "احسب المبلغ المستحق ثم افتح المطالبة أو الشكاية المناسبة.",
@@ -216,17 +216,17 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       {
         title: { fr: "Salaire impaye", ar: "الأجر غير المؤدى" },
         description: { fr: "Estimez principal et penalites.", ar: "قدّر الأصل والغرامات." },
-        href: "/litiges/salaire-impaye",
+        href: "/simulateurs/recouvrement-salaire-impaye",
       },
       {
         title: { fr: "Heures sup impayees", ar: "الساعات الإضافية غير المؤداة" },
         description: { fr: "Recouvrez les heures dues.", ar: "استرجع الساعات المستحقة." },
-        href: "/litiges/heures-sup-impayees",
+        href: "/simulateurs/recouvrement-heures-supplementaires",
       },
       {
         title: { fr: "Harcelement", ar: "التحرش" },
         description: { fr: "Evaluez votre dossier et les prochaines etapes.", ar: "قيّم ملفك والخطوات القادمة." },
-        href: "/litiges/harcelement",
+        href: "/simulateurs/scenario-harcelement",
       },
       {
         title: { fr: "Reclamation employeur", ar: "مراسلة المشغل" },
@@ -355,7 +355,7 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       fr: "Voir le cout employeur",
       ar: "عرض كلفة المشغل",
     },
-    featuredHref: "/rh-pro/cout-employeur-total",
+    featuredHref: "/simulateurs/cout-employeur-total",
     featuredDescription: {
       fr: "Un espace distinct pour les outils entreprise qui ne concernent pas directement le salarie.",
       ar: "فضاء منفصل لأدوات المؤسسة التي لا تخص الأجير بشكل مباشر.",
@@ -364,7 +364,7 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       {
         title: { fr: "Cout total employeur", ar: "الكلفة الإجمالية للمشغل" },
         description: { fr: "Calculez le cout complet d'un salaire pour l'entreprise.", ar: "احسب الكلفة الكاملة للأجر على المؤسسة." },
-        href: "/rh-pro/cout-employeur-total",
+        href: "/simulateurs/cout-employeur-total",
       },
       {
         title: { fr: "Masse salariale", ar: "الكتلة الأجرية" },

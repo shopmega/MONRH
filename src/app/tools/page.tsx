@@ -147,7 +147,7 @@ export default function ToolsIndexPage() {
                 {language === "ar" ? "احسب الزيادات القانونية والساعات المستحقة." : "Calculez les majorations légales et heures dues."}
               </p>
             </Link>
-            <Link href="/simulateurs/salaire-impaye" className="soft-card min-w-0 rounded-3xl p-5">
+            <Link href="/simulateurs/recouvrement-salaire-impaye" className="soft-card min-w-0 rounded-3xl p-5">
               <h2 className="display-font break-words text-xl font-semibold">
                 {language === "ar" ? "استرداد الأجر غير المدفوع" : "Recouvrement Salaire Impayé"}
               </h2>

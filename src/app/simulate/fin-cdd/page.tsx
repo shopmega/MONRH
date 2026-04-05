@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Fin de CDD",
   description: "Calcul de prime de precarite, conges restants et compensation preavis.",
-  canonicalPath: "/contrat-depart/fin-cdd",
+  canonicalPath: "/simulateurs/fin-cdd",
 });
 
 export default function FinCddPage() {

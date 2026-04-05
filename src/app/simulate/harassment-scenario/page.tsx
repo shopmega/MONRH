@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Scenario Harcelement",
   description: "Evaluation du dossier de harcelement moral ou sexuel et niveau d'escalade recommande.",
-  canonicalPath: "/litiges/harcelement",
+  canonicalPath: "/simulateurs/scenario-harcelement",
 });
 
 export default function HarassmentScenarioPage() {

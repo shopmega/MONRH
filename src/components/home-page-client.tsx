@@ -213,7 +213,7 @@ export function HomePageClient({
                   ),
                   title: language === "ar" ? "الساعات الاضافية" : "Heures supplementaires",
                   description: language === "ar" ? "احسب الزيادات القانونية والعطل والغيابات." : "Calculez les majorations, jours feries et autres droits lies au temps de travail.",
-                  href: "/conges-cnss/heures-supplementaires",
+                  href: "/simulateurs/heures-supplementaires",
                   category: language === "ar" ? "وقت" : "Temps"
                 },
                 {

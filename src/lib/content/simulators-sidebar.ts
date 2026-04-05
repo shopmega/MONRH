@@ -14,7 +14,7 @@ export const simulatorSidebarGroups = [
       },
       {
         title: { fr: "IR Annuel", ar: "الضريبة السنوية" },
-        href: "/simulateurs/ir-igr",
+        href: "/simulateurs/ir-annuel",
       },
     ],
   },
@@ -39,11 +39,11 @@ export const simulatorSidebarGroups = [
       },
       {
         title: { fr: "Rupture en Période d'Essai", ar: "الإنهاء خلال فترة التجربة" },
-        href: "/simulateurs/periode-essai",
+        href: "/simulateurs/rupture-periode-essai",
       },
       {
         title: { fr: "Croissance Ancienneté", ar: "نمو الأقدمية" },
-        href: "/simulateurs/anciennete-indemnites",
+        href: "/simulateurs/progression-anciennete",
       },
     ],
   },
@@ -52,7 +52,7 @@ export const simulatorSidebarGroups = [
     items: [
       {
         title: { fr: "Congés Acquis", ar: "العطل المكتسبة" },
-        href: "/simulateurs/conges-acquis",
+        href: "/simulateurs/acquisition-conges",
       },
       {
         title: { fr: "Heures Supplémentaires", ar: "الساعات الإضافية" },
@@ -60,7 +60,7 @@ export const simulatorSidebarGroups = [
       },
       {
         title: { fr: "Travail Jour Férié", ar: "العمل في يوم عطلة" },
-        href: "/simulateurs/jour-ferie",
+        href: "/simulateurs/compensation-jours-feries",
       },
       {
         title: { fr: "Congé Maternité", ar: "عطلة الأمومة" },
@@ -68,7 +68,7 @@ export const simulatorSidebarGroups = [
       },
       {
         title: { fr: "Arrêt Maladie", ar: "التوقف المرضي" },
-        href: "/simulateurs/arret-maladie",
+        href: "/simulateurs/conge-maladie",
       },
       {
         title: { fr: "Projection Pension CNSS", ar: "تقاعد CNSS" },
@@ -80,7 +80,7 @@ export const simulatorSidebarGroups = [
       },
       {
         title: { fr: "Conformité SMIG / SMAG", ar: "مطابقة SMIG / SMAG" },
-        href: "/simulateurs/smig-smag",
+        href: "/simulateurs/conformite-smig",
       },
     ],
   },
@@ -89,15 +89,15 @@ export const simulatorSidebarGroups = [
     items: [
       {
         title: { fr: "Scénario Harcèlement", ar: "سيناريو التحرش" },
-        href: "/simulateurs/harcelement",
+        href: "/simulateurs/scenario-harcelement",
       },
       {
         title: { fr: "Recouvrement Salaire Impayé", ar: "استرداد الأجر غير المدفوع" },
-        href: "/simulateurs/salaire-impaye",
+        href: "/simulateurs/recouvrement-salaire-impaye",
       },
       {
         title: { fr: "Recouvrement Heures Sup", ar: "استرداد الساعات الإضافية" },
-        href: "/simulateurs/heures-sup-impayees",
+        href: "/simulateurs/recouvrement-heures-supplementaires",
       },
     ],
   },

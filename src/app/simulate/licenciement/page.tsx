@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Indemnite Licenciement",
   description: "Estimation de l'indemnite legale, preavis, conges restants et total.",
-  canonicalPath: "/contrat-depart/licenciement",
+  canonicalPath: "/simulateurs/licenciement",
 });
 
 export default function LicenciementPage() {

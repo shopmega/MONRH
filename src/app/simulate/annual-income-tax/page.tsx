@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "IR Annuel",
   description: "Simulation annuelle de l'impot sur le revenu avec bonus et 13e mois.",
-  canonicalPath: "/salaire/ir-igr",
+  canonicalPath: "/simulateurs/ir-annuel",
 });
 
 export default function AnnualIncomeTaxPage() {

@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Travail Jour Ferie",
   description: "Estimation de compensation pour heures travaillees pendant un jour ferie.",
-  canonicalPath: "/conges-cnss/jour-ferie",
+  canonicalPath: "/simulateurs/compensation-jours-feries",
 });
 
 export default function PublicHolidayCompensationPage() {

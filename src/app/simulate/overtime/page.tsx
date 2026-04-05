@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Heures Supplementaires",
   description: "Calculez les majorations jour, nuit, weekend et jours feries.",
-  canonicalPath: "/conges-cnss/heures-supplementaires",
+  canonicalPath: "/simulateurs/heures-supplementaires",
 });
 
 export default function OvertimePage() {

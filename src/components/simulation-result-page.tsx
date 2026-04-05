@@ -17,7 +17,7 @@ import {
   localizeCalculatorDescription,
   localizeCalculatorTitle,
 } from "@/lib/i18n/simulator-localization";
-import { calculatorTypeToPath } from "@/lib/simulations/calculator-path";
+import { calculatorTypeToPath, savedSimulationPathMatches } from "@/lib/simulations/calculator-path";
 import { AvisinePromoCard } from "@/components/avisine-promo-card";
 import { type SimulationResultSnapshot } from "@/lib/simulations/result-snapshot";
 import { buildSimulationResultDocumentLink } from "@/lib/tools/result-document-links";
@@ -285,7 +285,9 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
     if (!snapshotRaw) return null;
     try {
       const parsed = JSON.parse(snapshotRaw) as SimulationResultSnapshot;
-      if (!parsed || parsed.calculatorPath !== expectedPath) return null;
+      if (!parsed?.calculatorType) return null;
+      const canonical = calculatorTypeToPath(parsed.calculatorType);
+      if (!savedSimulationPathMatches(expectedPath, parsed.calculatorType, canonical)) return null;
       return parsed;
     } catch {
       return null;
@@ -336,8 +338,8 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
           return;
         }
 
-        const path = calculatorTypeToPath(data.item.calculatorType) ?? expectedPath;
-        if (path !== expectedPath) {
+        const canonical = calculatorTypeToPath(data.item.calculatorType);
+        if (!savedSimulationPathMatches(expectedPath, data.item.calculatorType, canonical)) {
           setHistorySnapshot(null);
           return;
         }

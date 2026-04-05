@@ -5,7 +5,7 @@ import { SimulatorToolPage } from "@/components/simulator-tool-page";
 export const metadata: Metadata = buildPageMetadata({
   title: "Projection Pension CNSS",
   description: "Estimation simplifiee de pension mensuelle selon salaire moyen et jours cotises.",
-  canonicalPath: "/conges-cnss/pension-cnss",
+  canonicalPath: "/simulateurs/pension-cnss",
 });
 
 export default function CnssPensionPage() {
