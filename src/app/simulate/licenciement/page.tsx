@@ -25,6 +25,23 @@ export default function LicenciementPage() {
           options: [
             { value: "CDI", label: "CDI" },
             { value: "CDD", label: "CDD" },
+            { value: "apprentissage", label: "Apprentissage" },
+            { value: "interim", label: "Intérim" },
+            { value: "temps_partiel", label: "Temps partiel" },
+          ],
+        },
+        {
+          key: "dismissalReason",
+          label: "Motif de rupture",
+          type: "select",
+          defaultValue: "licenciement",
+          options: [
+            { value: "licenciement", label: "Licenciement" },
+            { value: "demission", label: "Démission" },
+            { value: "faute_grave", label: "Faute grave" },
+            { value: "force_majeure", label: "Force majeure" },
+            { value: "retraite", label: "Départ retraite" },
+            { value: "abandon", label: "Abandon de poste" },
           ],
         },
         {

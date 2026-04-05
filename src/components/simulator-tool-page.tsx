@@ -22,23 +22,36 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { 
+  SmartDate, 
+  SmartAmount, 
+  SmartToggle, 
+  SmartRadioCards, 
+  SmartStepper,
+  SmartLookup,
+  SmartTagInput
+} from "@/components/ui/smart-inputs";
 
-type FieldType = "number" | "date" | "checkbox" | "select" | "text";
+type FieldType = "number" | "date" | "checkbox" | "select" | "text" | "amount" | "stepper" | "tags" | "lookup";
 
 type FieldOption = {
   label: string;
   value: string;
+  description?: string;
+  icon?: React.ReactNode;
 };
 
 export type SimulatorField = {
   key: string;
   label: string;
   type: FieldType;
-  defaultValue: string | boolean;
+  defaultValue: string | boolean | number | string[];
   min?: number;
   max?: number;
   step?: number;
   options?: FieldOption[];
+  subtitle?: string;
+  visibleIf?: (values: Record<string, any>) => boolean;
 };
 
 type GenericSimulationResult = {
@@ -68,7 +81,7 @@ type ValuesState = Record<string, string | boolean>;
 function createInitialState(fields: SimulatorField[]): ValuesState {
   const state: ValuesState = {};
   for (const field of fields) {
-    state[field.key] = field.defaultValue;
+    state[field.key] = field.defaultValue as string | boolean;
   }
   return state;
 }
@@ -89,7 +102,7 @@ function toPayload(values: ValuesState, fields: SimulatorField[]) {
 }
 
 function formatPreviewValue(
-  value: string | boolean,
+  value: any,
   field: SimulatorField,
   locale: string,
   yesLabel: string,
@@ -98,7 +111,10 @@ function formatPreviewValue(
   if (field.type === "checkbox") {
     return value ? yesLabel : noLabel;
   }
-  if (field.type === "number" && String(value).trim().length > 0) {
+  if (Array.isArray(value)) {
+    return (value as string[]).join(", ");
+  }
+  if ((field.type === "number" || field.type === "amount" || field.type === "stepper") && String(value).trim().length > 0) {
     const asNumber = Number(value);
     if (Number.isFinite(asNumber)) {
       return asNumber.toLocaleString(locale);
@@ -279,19 +295,26 @@ export function SimulatorToolPage({
               {t("simulator.completionRate", { rate: completionRate })}
             </p>
 
-            <div className="mt-6 flex flex-col gap-6">
-              {fields.map((field) => (
-                <FieldRenderer
-                  key={field.key}
-                  field={field}
-                  language={language}
-                  value={values[field.key]}
-                  onChange={(val) => {
-                    setValues((prev) => ({ ...prev, [field.key]: val }));
-                    setMessage(undefined);
-                  }}
-                />
-              ))}
+            <div className="mt-6 flex flex-col gap-8">
+              {fields.map((field) => {
+                const isVisible = field.visibleIf ? field.visibleIf(values) : true;
+                return (
+                  <div 
+                    key={field.key} 
+                    className={`conditional-container ${isVisible ? "conditional-visible" : "conditional-hidden"}`}
+                  >
+                    <FieldRenderer
+                      field={field}
+                      language={language}
+                      value={values[field.key]}
+                      onChange={(val) => {
+                        setValues((prev) => ({ ...prev, [field.key]: val }));
+                        setMessage(undefined);
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
 
             <Button
@@ -383,85 +406,145 @@ function FieldRenderer({
 }: {
   field: SimulatorField;
   language: "fr" | "ar";
-  value: string | boolean | undefined;
-  onChange: (value: string | boolean) => void;
+  value: any;
+  onChange: (value: any) => void;
 }) {
-  if (field.type === "checkbox") {
-    return (
-      <div className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface-elevated)] p-4 transition-colors hover:border-[var(--accent)]">
-        <input
-          id={`field-${field.key}`}
-          type="checkbox"
-          checked={Boolean(value)}
-          onChange={(event) => onChange(event.target.checked)}
-          className="h-5 w-5 rounded-md border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-        />
-        <Label 
-          htmlFor={`field-${field.key}`} 
-          className="cursor-pointer font-semibold text-[var(--foreground)] mt-0"
-        >
-          {localizeFieldLabel(field.key, field.label, language)}
-        </Label>
-      </div>
-    );
+  const label = localizeFieldLabel(field.key, field.label, language);
+
+  // Heuristics for smarter component selection if types are generic
+  let effectiveType = field.type;
+  if (effectiveType === "number") {
+    if (field.key.toLowerCase().includes("salaire") || 
+        field.key.toLowerCase().includes("montant") || 
+        field.key.toLowerCase().includes("brut") ||
+        field.key.toLowerCase().includes("indemnite") ||
+        field.key.toLowerCase().includes("plafond")) {
+      effectiveType = "amount";
+    } else if (field.key.toLowerCase().includes("anciennete") || 
+               field.key.toLowerCase().includes("mois") || 
+               field.key.toLowerCase().includes("jours") ||
+               field.key.toLowerCase().includes("enfants")) {
+      effectiveType = "stepper";
+    }
   }
 
-  if (field.type === "select") {
-    return (
-      <div className="space-y-3">
-        <Label htmlFor={`field-${field.key}`} className="font-semibold text-[var(--foreground)]">
-          {localizeFieldLabel(field.key, field.label, language)}
-        </Label>
-        <Select
-          id={`field-${field.key}`}
-          value={String(value ?? "")}
-          onChange={(event) => onChange(event.target.value)}
+  switch (effectiveType) {
+    case "date":
+      return (
+        <SmartDate
+          label={label}
+          value={String(value || "")}
+          onChange={onChange}
           required
-        >
-          {field.options?.map((item) => (
-            <option key={item.value} value={item.value}>
-              {localizeOptionLabel(item.value, item.label, language)}
-            </option>
-          ))}
-        </Select>
-      </div>
-    );
-  }
-
-  if (field.type === "text") {
-    return (
-      <div className="space-y-3">
-        <Label htmlFor={`field-${field.key}`} className="font-semibold text-[var(--foreground)]">
-          {localizeFieldLabel(field.key, field.label, language)}
-        </Label>
-        <Input
-          id={`field-${field.key}`}
-          type="text"
-          value={String(value ?? "")}
-          onChange={(event) => onChange(event.target.value)}
-          required
-          placeholder={localizeFieldLabel(field.key, field.label, language)}
         />
-      </div>
-    );
-  }
+      );
 
-  return (
-    <div className="space-y-3">
-      <Label htmlFor={`field-${field.key}`} className="font-semibold text-[var(--foreground)]">
-        {localizeFieldLabel(field.key, field.label, language)}
-      </Label>
-      <Input
-        id={`field-${field.key}`}
-        type={field.type}
-        min={field.min}
-        max={field.max}
-        step={field.step}
-        value={String(value ?? "")}
-        onChange={(event) => onChange(event.target.value)}
-        required
-        placeholder={localizeFieldLabel(field.key, field.label, language)}
-      />
-    </div>
-  );
+    case "amount":
+      return (
+        <SmartAmount
+          label={label}
+          value={String(value || "")}
+          onChange={onChange}
+          required
+          hint={field.key.toLowerCase().includes("salaire") ? "SMIG 2025: 4 000 DH" : undefined}
+        />
+      );
+
+    case "checkbox":
+      // Infer subtitle for Moroccan context if not provided
+      let subtitle = field.subtitle;
+      if (!subtitle) {
+        if (field.key === "publicSector") subtitle = "RCAR, 40h, 30 jours congé";
+        if (field.key === "cadre") subtitle = "Régime cadre (CIMR, préavis étendu)";
+      }
+      return (
+        <SmartToggle
+          label={label}
+          value={Boolean(value)}
+          onChange={onChange}
+          subtitle={subtitle}
+        />
+      );
+
+    case "stepper":
+      return (
+        <SmartStepper
+          label={label}
+          value={Number(value || 0)}
+          onChange={onChange}
+          min={field.min ?? 0}
+          max={field.max ?? 100}
+        />
+      );
+
+    case "select":
+      if (field.options && field.options.length <= 4) {
+        return (
+          <SmartRadioCards
+            label={label}
+            value={String(value || "")}
+            onChange={onChange}
+            options={field.options.map(opt => ({
+              ...opt,
+              label: localizeOptionLabel(opt.value, opt.label, language)
+            }))}
+          />
+        );
+      }
+      return (
+        <SmartLookup
+          label={label}
+          value={String(value || "")}
+          onChange={onChange}
+          options={field.options?.map(opt => ({
+            ...opt,
+            label: localizeOptionLabel(opt.value, opt.label, language)
+          })) || []}
+          required
+        />
+      );
+
+    case "tags":
+      return (
+        <SmartTagInput
+          label={label}
+          value={Array.isArray(value) ? value : []}
+          onChange={onChange}
+        />
+      );
+
+    case "text":
+      return (
+        <div className="sim-input-container">
+          <label className="sim-label sim-field-required">{label}</label>
+          <div className="sim-input-wrapper">
+            <input
+              type="text"
+              value={String(value || "")}
+              onChange={(e) => onChange(e.target.value)}
+              className="sim-input"
+              required
+              placeholder={label}
+            />
+          </div>
+        </div>
+      );
+
+    default:
+      return (
+        <div className="sim-input-container">
+          <label className="sim-label sim-field-required">{label}</label>
+          <div className="sim-input-wrapper">
+            <input
+              type={effectiveType}
+              value={String(value || "")}
+              onChange={(e) => onChange(e.target.value)}
+              className="sim-input"
+              required
+              placeholder={label}
+            />
+          </div>
+        </div>
+      );
+  }
 }

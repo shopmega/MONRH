@@ -26,6 +26,9 @@ export function AdSlot({
   const { t } = useLanguage();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const slotRef = useRef<HTMLModElement | null>(null);
+  const observerRef = useRef<MutationObserver | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 
   useEffect(() => {
     if (!adsenseClient) {
@@ -33,8 +36,8 @@ export function AdSlot({
     }
 
     const root = rootRef.current;
-    const adNode = root?.querySelector("ins.adsbygoogle") as HTMLElement | null;
-    if (!adNode) {
+    const adNode = slotRef.current;
+    if (!adNode || !root) {
       return;
     }
 
@@ -43,11 +46,10 @@ export function AdSlot({
     }
 
     const initializeAd = () => {
+      if (adNode.dataset.adInitialized === "1") return true;
       const rect = adNode.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) {
-        return false;
-      }
-
+      // Only push if there's space; otherwise AdSense might throw an error or not load
+      // But for responsive, we just push and let it figure it out
       adNode.dataset.adInitialized = "1";
 
       try {
@@ -55,70 +57,63 @@ export function AdSlot({
         window.adsbygoogle.push({});
         return true;
       } catch {
-        // Ignore runtime ad-loader errors in local/dev.
         return true;
       }
     };
 
-    // Try to initialize immediately
-    if (initializeAd()) {
-      return;
-    }
+    // 1. Initial attempt
+    initializeAd();
 
-    // If dimensions are not available, wait for them
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.target === adNode) {
-          const { width, height } = entry.contentRect;
-          if (width > 0 && height > 0) {
-            initializeAd();
-            resizeObserver.disconnect();
-            break;
-          }
-        }
-      }
-    });
-
-    const observer = new MutationObserver((mutations) => {
+    // 2. Observer for explicit unfilled status
+    observerRef.current = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === "attributes" && mutation.attributeName === "data-ad-status") {
           const status = adNode.getAttribute("data-ad-status");
           if (status === "unfilled") {
             adNode.style.display = "none";
-            if (root) root.style.display = "none";
-          } else if (status === "filled") {
-            adNode.style.display = "block";
-            if (root) root.style.display = "block";
+            root.style.display = "none";
           }
         }
       });
     });
 
-    observer.observe(adNode, { attributes: true });
+    observerRef.current.observe(adNode, { attributes: true });
 
-    resizeObserver.observe(adNode);
+    // 3. Fallback: Check after 5 seconds if anything actually loaded
+    timeoutRef.current = setTimeout(() => {
+      const iframe = adNode.querySelector('iframe');
+      const hasContent = iframe && (iframe.offsetHeight > 0 || iframe.dataset.adStatus === 'filled');
+      const adStatus = adNode.getAttribute('data-ad-status');
+      
+      if (!hasContent && adStatus !== 'filled') {
+        // If it's not explicitly filled, and we don't see a visible iframe, collapse.
+        adNode.style.display = "none";
+        root.style.display = "none";
+      }
+    }, 5000);
 
     return () => {
-      resizeObserver.disconnect();
-      observer.disconnect();
+      if (observerRef.current) observerRef.current.disconnect();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [adsenseClient, format, responsive, slot]);
+  }, [adsenseClient, slot]);
 
   if (!adsenseClient) {
     return null;
   }
 
   return (
-    <div ref={rootRef} className={className}>
+    <div ref={rootRef} className={className} style={{ display: 'block' }}>
       <ins
         ref={slotRef}
-        className="adsbygoogle block w-full overflow-hidden"
+        className="adsbygoogle block"
         data-ad-client={adsenseClient}
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive={responsive ? "true" : "false"}
-        style={{ minHeight: '1px' }}
+        style={{ display: 'block', height: 'auto' }}
       />
     </div>
   );
 }
+

@@ -31,7 +31,10 @@ export default function LicenciementEnhancedPage() {
           defaultValue: "CDI",
           options: [
             { value: "CDI", label: "CDI" },
-            { value: "CDD", label: "CDD" }
+            { value: "CDD", label: "CDD" },
+            { value: "apprentissage", label: "Apprentissage" },
+            { value: "interim", label: "Intérim" },
+            { value: "temps_partiel", label: "Temps partiel" }
           ]
         },
         { 
@@ -74,14 +77,17 @@ export default function LicenciementEnhancedPage() {
         },
         { 
           key: "dismissalReason", 
-          label: "Motif du licenciement", 
+          label: "Motif de rupture", 
           type: "select", 
-          defaultValue: "economic",
+          defaultValue: "personal",
           options: [
+            { value: "personal", label: "Licenciement (motif personnel)" },
             { value: "economic", label: "Motif économique" },
-            { value: "personal", label: "Motif personnel" },
+            { value: "demission", label: "Démission" },
             { value: "misconduct", label: "Faute grave" },
-            { value: "other", label: "Autre motif" }
+            { value: "force_majeure", label: "Force majeure" },
+            { value: "retraite", label: "Départ retraite" },
+            { value: "abandon", label: "Abandon de poste" }
           ]
         },
         { 

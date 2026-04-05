@@ -7,16 +7,27 @@ import { useUserJourney } from '@/lib/context/user-journey-context';
 import { detectUserScenario, getRecommendedDocuments, getNextSteps } from '@/lib/context/scenario-detection';
 import { addSimulationToJourney } from '@/lib/context/user-journey-context';
 import { Button } from '@/components/ui/button';
+import { 
+  SmartDate, 
+  SmartAmount, 
+  SmartToggle, 
+  SmartRadioCards, 
+  SmartStepper,
+  SmartLookup,
+  SmartTagInput
+} from '@/components/ui/smart-inputs';
 
 interface Field {
   key: string;
   label: string;
-  type: 'number' | 'date' | 'checkbox' | 'select' | 'text';
-  defaultValue?: string | number | boolean;
+  type: 'number' | 'date' | 'checkbox' | 'select' | 'text' | 'amount' | 'stepper' | 'tags' | 'lookup';
+  defaultValue?: string | number | boolean | string[];
   min?: number;
   max?: number;
   step?: number;
-  options?: Array<{ value: string; label: string }>;
+  options?: Array<{ value: string; label: string; description?: string; icon?: React.ReactNode }>;
+  subtitle?: string;
+  visibleIf?: (values: Record<string, any>) => boolean;
 }
 
 // Simple field renderer based on the existing pattern
@@ -31,88 +42,133 @@ function SimpleFieldRenderer({
 }) {
   const { t } = useLanguage();
 
-  switch (field.type) {
-    case 'number':
-      return (
-        <input
-          type="number"
-          id={field.key}
-          min={field.min}
-          max={field.max}
-          step={field.step}
-          value={value || ''}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
-          className="w-full p-2 border rounded-md"
-          placeholder={field.label}
-        />
-      );
-    
+  // Heuristics for smarter component selection
+  let effectiveType = field.type;
+  if (effectiveType === 'number') {
+    if (field.key.toLowerCase().includes('salaire') || 
+        field.key.toLowerCase().includes('montant') || 
+        field.key.toLowerCase().includes('brut') ||
+        field.key.toLowerCase().includes('indemnite') ||
+        field.key.toLowerCase().includes('plafond')) {
+      effectiveType = 'amount';
+    } else if (field.key.toLowerCase().includes('anciennete') || 
+               field.key.toLowerCase().includes('mois') || 
+               field.key.toLowerCase().includes('jours') ||
+               field.key.toLowerCase().includes('enfants')) {
+      effectiveType = 'stepper';
+    }
+  }
+
+  switch (effectiveType) {
     case 'date':
       return (
-        <input
-          type="date"
-          id={field.key}
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full p-2 border rounded-md"
+        <SmartDate
+          label={field.label}
+          value={String(value || '')}
+          onChange={onChange}
+          required
         />
       );
-    
+
+    case 'amount':
+      return (
+        <SmartAmount
+          label={field.label}
+          value={String(value || '')}
+          onChange={onChange}
+          required
+          hint={field.key.toLowerCase().includes('salaire') ? "SMIG 2025: 4 000 DH" : undefined}
+        />
+      );
+
     case 'checkbox':
+      let subtitle = field.subtitle;
+      if (!subtitle) {
+        if (field.key === 'publicSector') subtitle = "RCAR, 40h, 30 jours congé";
+        if (field.key === 'cadre') subtitle = "Régime cadre (CIMR, préavis étendu)";
+      }
       return (
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id={field.key}
-            checked={value || false}
-            onChange={(e) => onChange(e.target.checked)}
-            className="rounded"
-          />
-          <label htmlFor={field.key} className="text-sm font-medium">
-            {field.label}
-          </label>
-        </div>
+        <SmartToggle
+          label={field.label}
+          value={Boolean(value)}
+          onChange={onChange}
+          subtitle={subtitle}
+        />
       );
-    
+
+    case 'stepper':
+      return (
+        <SmartStepper
+          label={field.label}
+          value={Number(value || 0)}
+          onChange={onChange}
+          min={field.min ?? 0}
+          max={field.max ?? 100}
+        />
+      );
+
     case 'select':
+      if (field.options && field.options.length <= 4) {
+        return (
+          <SmartRadioCards
+            label={field.label}
+            value={String(value || '')}
+            onChange={onChange}
+            options={field.options}
+          />
+        );
+      }
       return (
-        <select
-          id={field.key}
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full p-2 border rounded-md"
-        >
-          <option value="">{field.label}</option>
-          {field.options?.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <SmartLookup
+          label={field.label}
+          value={String(value || '')}
+          onChange={onChange}
+          options={field.options || []}
+          required
+        />
       );
-    
+
+    case 'tags':
+      return (
+        <SmartTagInput
+          label={field.label}
+          value={Array.isArray(value) ? value : []}
+          onChange={onChange}
+        />
+      );
+
     case 'text':
       return (
-        <input
-          type="text"
-          id={field.key}
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full p-2 border rounded-md"
-          placeholder={field.label}
-        />
+        <div className="sim-input-container">
+          <label className="sim-label sim-field-required">{field.label}</label>
+          <div className="sim-input-wrapper">
+            <input
+              type="text"
+              value={String(value || '')}
+              onChange={(e) => onChange(e.target.value)}
+              className="sim-input"
+              required
+              placeholder={field.label}
+            />
+          </div>
+        </div>
       );
-    
+
     default:
       return (
-        <input
-          type="text"
-          id={field.key}
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full p-2 border rounded-md"
-          placeholder={field.label}
-        />
+        <div className="sim-input-container">
+          <label className="sim-label sim-field-required">{field.label}</label>
+          <div className="sim-input-wrapper">
+            <input
+              type={effectiveType as any}
+              value={String(value || '')}
+              onChange={(e) => onChange(e.target.value)}
+              className="sim-input"
+              required
+              placeholder={field.label}
+            />
+          </div>
+        </div>
       );
   }
 }
@@ -289,18 +345,23 @@ export function EnhancedSimulatorToolPage({
       <div className="bg-white p-6 rounded-lg border shadow-sm">
         <h2 className="text-xl font-semibold mb-4">Parameters</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {fields.map((field) => (
-            <div key={field.key} className="space-y-2">
-              <label htmlFor={field.key} className="text-sm font-medium block">
-                {field.label}
-              </label>
-              <SimpleFieldRenderer
-                field={field}
-                value={values[field.key]}
-                onChange={(value) => handleValueChange(field.key, value)}
-              />
-            </div>
-          ))}
+          {fields.map((field) => {
+            const isVisible = field.visibleIf ? field.visibleIf(values) : true;
+            return (
+              <div 
+                key={field.key} 
+                className={`conditional-container ${isVisible ? "conditional-visible" : "conditional-hidden"}`}
+              >
+                <div className="space-y-2">
+                  <SimpleFieldRenderer
+                    field={field}
+                    value={values[field.key]}
+                    onChange={(value) => handleValueChange(field.key, value)}
+                  />
+                </div>
+              </div>
+            );
+          })}
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-md">

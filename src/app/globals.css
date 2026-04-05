@@ -25,26 +25,35 @@
   --error-ink: #991b1b;
   --info-bg: #e0f2fe;
   --info-ink: #075985;
+
+  /* Simulator Premium Theme */
+  --sim-bg: #111519;
+  --sim-card: #161B22;
+  --sim-border: #252C37;
+  --sim-text: #ECEEF1;
+  --sim-accent: #C2783C;
+  --sim-accent-soft: rgba(194, 120, 60, 0.1);
+  --sim-ink-soft: #8B949E;
 }
 
 :root[data-theme="dark"] {
-  --background: #0f172a;
-  --foreground: #94a3b8;
-  --heading: #f8fafc;
+  --background: #111519;
+  --foreground: #ECEEF1;
+  --heading: #ffffff;
   
-  --surface: #1e293b;
-  --surface-elevated: #1e293b;
-  --surface-strong: #334155;
-  --surface-muted: #0f172a;
+  --surface: #161B22;
+  --surface-elevated: #161B22;
+  --surface-strong: #1D242C;
+  --surface-muted: #0D1117;
   
-  --line: #334155;
-  --line-strong: #475569;
+  --line: #252C37;
+  --line-strong: #30363D;
   
-  --accent: #6366f1;
-  --accent-strong: #818cf8;
-  --accent-soft: #312e81;
+  --accent: #C2783C;
+  --accent-strong: #D9894E;
+  --accent-soft: rgba(194, 120, 60, 0.15);
   
-  --ink-soft: #64748b;
+  --ink-soft: #8B949E;
   
   --success-bg: #064e3b;
   --success-ink: #6ee7b7;
@@ -172,6 +181,135 @@ h1, h2, h3, h4, h5, h6 {
 
 .input-shell::placeholder {
   color: var(--ink-soft);
+}
+
+/* Premium Simulator Inputs */
+.sim-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sim-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sim-ink-soft);
+}
+
+.sim-field-required::after {
+  content: " *";
+  color: #ef4444;
+}
+
+.sim-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sim-input {
+  width: 100%;
+  padding: 11px 15px;
+  border-radius: 9px;
+  border: 1.5px solid var(--sim-border);
+  background: var(--sim-card);
+  color: var(--sim-text);
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  color-scheme: dark;
+}
+
+.sim-input:focus {
+  outline: none;
+  border-color: var(--sim-accent);
+  box-shadow: 0 0 0 3px var(--sim-accent-soft);
+}
+
+.sim-input-error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.sim-hint {
+  font-size: 0.75rem;
+  color: var(--sim-ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.sim-error-text {
+  color: #ef4444;
+}
+
+.sim-amount-suffix {
+  position: absolute;
+  right: 12px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--sim-ink-soft);
+  pointer-events: none;
+}
+
+.sim-icon-left {
+  position: absolute;
+  left: 12px;
+  color: var(--sim-ink-soft);
+  pointer-events: none;
+}
+
+.sim-input-with-icon {
+  padding-left: 38px;
+}
+
+.sim-input-with-suffix {
+  padding-right: 48px;
+}
+
+.sim-toggle-track {
+  width: 44px;
+  height: 24px;
+  background: var(--sim-border);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.sim-toggle-thumb {
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:checked + .sim-toggle-track {
+  background: var(--sim-accent);
+}
+
+input:checked + .sim-toggle-track .sim-toggle-thumb {
+  transform: translateX(20px);
+}
+
+.conditional-container {
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.conditional-hidden {
+  max-height: 0;
+  opacity: 0;
+}
+
+.conditional-visible {
+  max-height: 1000px;
+  opacity: 1;
 }
 
 .section-kicker {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
+import { SmartToggle } from "@/components/ui/smart-inputs";
 
 type Result = {
   riskScore: number;
@@ -68,21 +69,31 @@ export default function ComplianceRiskScorePage() {
           <h1 className="display-font mt-2 break-words text-4xl font-semibold">{t("complianceTool.title")}</h1>
         </section>
 
-        <form onSubmit={onSubmit} className="soft-card mt-5 space-y-3 rounded-3xl p-5">
-          {Object.entries(form).map(([key, value]) => {
-            const label = t(`complianceTool.${key}`);
-            return (
-              <label key={key} className="flex min-w-0 items-start justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm">
-                <span className="min-w-0 break-words">{label}</span>
-                <input
-                  type="checkbox"
-                  className="mt-0.5 shrink-0"
-                  checked={value}
-                  onChange={(e) => setForm((c) => ({ ...c, [key]: e.target.checked }))}
+        <form onSubmit={onSubmit} className="soft-card mt-5 space-y-6 rounded-3xl p-5 sm:p-7">
+          <div className="grid gap-4">
+            {Object.entries(form).map(([key, value]) => {
+              const label = t(`complianceTool.${key}`);
+              // Using a mapping for subtitles based on Moroccan HR context
+              const subtitles: Record<string, string> = {
+                hasWrittenContract: "Contrat signé par les deux parties",
+                declaredToCnss: "Bordereau de déclaration mensuelle",
+                receivesPayslip: "Bulletin de paie conforme au salaire",
+                paidOvertimeWhenApplicable: "Majoration 25%, 50% ou 100%",
+                paidOnTime: "Respect du délai de paiement (art. 354 CGI)",
+                hasProofArchive: "Documents archivés pendant 10 ans",
+              };
+              
+              return (
+                <SmartToggle
+                  key={key}
+                  label={label}
+                  value={value}
+                  onChange={(checked) => setForm((c) => ({ ...c, [key]: checked }))}
+                  subtitle={subtitles[key]}
                 />
-              </label>
-            );
-          })}
+              );
+            })}
+          </div>
           <button className="btn-primary w-full px-4 py-2.5 text-sm" disabled={loading} type="submit">
             {loading ? t("complianceTool.submitting") : t("complianceTool.submit")}
           </button>

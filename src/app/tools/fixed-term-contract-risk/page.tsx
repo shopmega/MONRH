@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { buildToolResultDocumentLinks } from "@/lib/tools/result-document-links";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
+import { SmartToggle, SmartStepper } from "@/components/ui/smart-inputs";
 
 type Result = {
   riskScore: number;
@@ -90,60 +91,48 @@ export default function FixedTermContractRiskPage() {
           <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">{t("cddRiskTool.description")}</p>
         </section>
 
-        <form onSubmit={onSubmit} className="soft-card mt-5 space-y-3 rounded-3xl p-5">
-          {[
-            "contractReasonDocumented",
-            "contractHasEndDate",
-            "roleIsPermanentNeed",
-            "salaryAndHoursClear",
-            "signedByBothParties",
-          ].map((key) => (
-            <label key={key} className="flex min-w-0 items-start justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm">
-              <span className="min-w-0 break-words">{t(`cddRiskTool.${key}`)}</span>
-              <input
-                type="checkbox"
-                className="mt-0.5 shrink-0"
-                checked={form[key as keyof typeof form] as boolean}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, [key]: event.target.checked }))
+        <form onSubmit={onSubmit} className="soft-card mt-5 space-y-6 rounded-3xl p-5 sm:p-7">
+          <div className="grid gap-4">
+            {[
+              "contractReasonDocumented",
+              "contractHasEndDate",
+              "roleIsPermanentNeed",
+              "salaryAndHoursClear",
+              "signedByBothParties",
+            ].map((key) => (
+              <SmartToggle
+                key={key}
+                label={t(`cddRiskTool.${key}`)}
+                value={form[key as keyof typeof form] as boolean}
+                onChange={(checked) =>
+                  setForm((current) => ({ ...current, [key]: checked }))
                 }
               />
-            </label>
-          ))}
-          <div className="grid gap-3 sm:grid-cols-3">
-            <label className="block text-sm font-semibold">
-              {t("cddRiskTool.durationMonths")}
-              <input
-                className="input-shell mt-1"
-                type="number"
-                value={form.durationMonths}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, durationMonths: event.target.value }))
-                }
-              />
-            </label>
-            <label className="block text-sm font-semibold">
-              {t("cddRiskTool.renewalsCount")}
-              <input
-                className="input-shell mt-1"
-                type="number"
-                value={form.renewalsCount}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, renewalsCount: event.target.value }))
-                }
-              />
-            </label>
-            <label className="block text-sm font-semibold">
-              {t("cddRiskTool.trialPeriodDays")}
-              <input
-                className="input-shell mt-1"
-                type="number"
-                value={form.trialPeriodDays}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, trialPeriodDays: event.target.value }))
-                }
-              />
-            </label>
+            ))}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SmartStepper
+              label={t("cddRiskTool.durationMonths")}
+              value={Number(form.durationMonths)}
+              onChange={(val) => setForm((current) => ({ ...current, durationMonths: String(val) }))}
+              min={1}
+              max={24}
+            />
+            <SmartStepper
+              label={t("cddRiskTool.renewalsCount")}
+              value={Number(form.renewalsCount)}
+              onChange={(val) => setForm((current) => ({ ...current, renewalsCount: String(val) }))}
+              min={0}
+              max={2}
+            />
+            <SmartStepper
+              label={t("cddRiskTool.trialPeriodDays")}
+              value={Number(form.trialPeriodDays)}
+              onChange={(val) => setForm((current) => ({ ...current, trialPeriodDays: String(val) }))}
+              min={0}
+              max={90}
+            />
           </div>
           <button className="btn-primary w-full px-4 py-2.5 text-sm" disabled={loading} type="submit">
             {loading ? t("cddRiskTool.submitting") : t("cddRiskTool.submit")}

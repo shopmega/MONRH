@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { buildToolResultDocumentLinks } from "@/lib/tools/result-document-links";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
+import { SmartToggle, SmartStepper } from "@/components/ui/smart-inputs";
 
 type Result = {
   riskScore: number;
@@ -88,42 +89,39 @@ export default function DisciplinaryProcedureCheckPage() {
           <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">{t("disciplineTool.description")}</p>
         </section>
 
-        <form onSubmit={onSubmit} className="soft-card mt-5 space-y-3 rounded-3xl p-5">
-          {[
-            "hasWrittenNotice",
-            "noticeDescribesFacts",
-            "hearingHeld",
-            "employeeCanDefend",
-            "sanctionWithinReasonableDelay",
-            "priorSanctionsDocumented",
-            "hasProofArchive",
-          ].map((key) => (
-            <label key={key} className="flex min-w-0 items-start justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm">
-              <span className="min-w-0 break-words">{t(`disciplineTool.${key}`)}</span>
-              <input
-                type="checkbox"
-                className="mt-0.5 shrink-0"
-                checked={form[key as keyof typeof form] as boolean}
-                onChange={(event) =>
+        <form onSubmit={onSubmit} className="soft-card mt-5 space-y-6 rounded-3xl p-5 sm:p-7">
+          <div className="grid gap-4">
+            {[
+              "hasWrittenNotice",
+              "noticeDescribesFacts",
+              "hearingHeld",
+              "employeeCanDefend",
+              "sanctionWithinReasonableDelay",
+              "priorSanctionsDocumented",
+              "hasProofArchive",
+            ].map((key) => (
+              <SmartToggle
+                key={key}
+                label={t(`disciplineTool.${key}`)}
+                value={form[key as keyof typeof form] as boolean}
+                onChange={(checked) =>
                   setForm((current) => ({
                     ...current,
-                    [key]: event.target.checked,
+                    [key]: checked,
                   }))
                 }
+                subtitle={key === "hearingHeld" ? "Convocation 48h à l'avance" : undefined}
               />
-            </label>
-          ))}
-          <label className="block text-sm font-semibold">
-            {t("disciplineTool.hearingNoticeHours")}
-            <input
-              className="input-shell mt-1"
-              type="number"
-              value={form.hearingNoticeHours}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, hearingNoticeHours: event.target.value }))
-              }
-            />
-          </label>
+            ))}
+          </div>
+
+          <SmartStepper
+            label={t("disciplineTool.hearingNoticeHours")}
+            value={Number(form.hearingNoticeHours)}
+            onChange={(val) => setForm((current) => ({ ...current, hearingNoticeHours: String(val) }))}
+            min={0}
+            max={72}
+          />
           <button className="btn-primary w-full px-4 py-2.5 text-sm" disabled={loading} type="submit">
             {loading ? t("disciplineTool.submitting") : t("disciplineTool.submit")}
           </button>
