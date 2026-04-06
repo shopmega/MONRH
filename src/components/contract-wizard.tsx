@@ -72,6 +72,7 @@ export function ContractWizard({
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | null>(null);
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   const [isAttemptingToProceed, setIsAttemptingToProceed] = useState(false);
+  const [isCalculatingNet, setIsCalculatingNet] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   const validationEngine = new ContractValidationEngine(validationRules);
@@ -320,9 +321,36 @@ export function ContractWizard({
   }, [formData.contract_type, selectedTemplate, touchedFields.size, isAttemptingToProceed]);
 
   const handleFieldChange = (field: keyof ContractFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      return updated;
+    });
     // Mark field as touched
     setTouchedFields(prev => new Set(prev).add(field));
+  };
+
+  const handleCalculateNet = async () => {
+    if (!formData.salary_brut) return;
+    setIsCalculatingNet(true);
+    try {
+      const res = await fetch('/api/simulate/net-gross', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          direction: 'gross_to_net',
+          amount: formData.salary_brut,
+          calculationDate: formData.start_date || new Date().toISOString().split('T')[0]
+        })
+      });
+      const data = await res.json();
+      if (data.ok && data.result) {
+        handleFieldChange('salary_net', data.result.breakdown.net);
+      }
+    } catch (e) {
+      console.error('Failed to calculate net salary', e);
+    } finally {
+      setIsCalculatingNet(false);
+    }
   };
 
   const handleCompanySelect = (company: CompanyOption) => {
@@ -539,6 +567,8 @@ export function ContractWizard({
                     value={(formData as any)[field.id]}
                     onChange={(value) => handleFieldChange(field.id, value)}
                     onCompanySelect={handleCompanySelect}
+                    onCalculateNet={field.id === 'salary_net' ? handleCalculateNet : undefined}
+                    isCalculating={field.id === 'salary_net' ? isCalculatingNet : undefined}
                     validation={validationResult ? validationEngine.getFieldValidation(field.id, formData, formData.contract_type) : undefined}
                     touched={touchedFields.has(field.id)}
                   />
@@ -609,7 +639,9 @@ function FormField({
   field, 
   value, 
   onChange, 
-  onCompanySelect, 
+  onCompanySelect,
+  onCalculateNet,
+  isCalculating,
   validation,
   touched 
 }: {
@@ -617,6 +649,8 @@ function FormField({
   value: any;
   onChange: (value: any) => void;
   onCompanySelect?: (company: CompanyOption) => void;
+  onCalculateNet?: () => void;
+  isCalculating?: boolean;
   validation?: { error?: string; warning?: string };
   touched?: boolean;
 }) {
@@ -686,7 +720,20 @@ function FormField({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={field.id}>{field.label} {field.required && "*"}</Label>
+      <div className="flex items-center justify-between">
+        <Label htmlFor={field.id}>{field.label} {field.required && "*"}</Label>
+        {onCalculateNet && (
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="h-6 text-xs px-2" 
+            onClick={onCalculateNet}
+            disabled={isCalculating}
+          >
+            {isCalculating ? t('loading') : t('nav.simulate')}
+          </Button>
+        )}
+      </div>
       <Input
         id={field.id}
         type={field.type}

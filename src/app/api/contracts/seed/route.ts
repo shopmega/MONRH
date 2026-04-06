@@ -449,6 +449,57 @@ export async function POST() {
           field_path: 'contract_date',
           value_expression: 'CURRENT_DATE',
           is_active: true
+        },
+        // Advanced cross-field validation rules
+        {
+          id: 'cdd_end_date_required',
+          contract_type: 'CDD',
+          rule_type: 'required',
+          field_path: 'end_date',
+          condition_expression: 'contract_type == "CDD"',
+          error_message: 'End date is required for CDD contracts',
+          priority: 10,
+          is_active: true
+        },
+        {
+          id: 'cdd_justification_required',
+          contract_type: 'CDD',
+          rule_type: 'required',
+          field_path: 'cdd_justification',
+          condition_expression: 'contract_type == "CDD"',
+          error_message: 'Justification is required for CDD contracts per Moroccan labor law',
+          priority: 10,
+          is_active: true
+        },
+        {
+          id: 'salary_minimum_wage_warning',
+          contract_type: 'ALL',
+          rule_type: 'warning',
+          field_path: 'salary_brut',
+          condition_expression: 'salary_brut < 3111',
+          error_message: 'Salary is below the minimum wage (SMIG). Please verify.',
+          priority: 5,
+          is_active: true
+        },
+        {
+          id: 'trial_period_cadre_max',
+          contract_type: 'CDI',
+          rule_type: 'warning',
+          field_path: 'trial_period_duration',
+          condition_expression: 'role_level == "cadre" AND trial_period_duration CONTAINS "mois"',
+          error_message: 'Trial period for cadres should not exceed 3 months (renewable once)',
+          priority: 5,
+          is_active: true
+        },
+        {
+          id: 'notice_period_cadre_min',
+          contract_type: 'ALL',
+          rule_type: 'warning',
+          field_path: 'notice_period_employee',
+          condition_expression: 'role_level == "cadre" AND notice_period_employee < 3',
+          error_message: 'Notice period for cadres should be at least 3 months',
+          priority: 5,
+          is_active: true
         }
       ] as any);
 

@@ -15,6 +15,7 @@ export class ContractTemplateEngine {
   generatePreview(formData: ContractFormData): ContractPreview {
     const sections = this.template.sections
       .sort((a, b) => a.order - b.order)
+      .filter(section => this.shouldIncludeSection(section, formData))
       .map(section => ({
         id: section.id,
         title: section.title,
@@ -88,6 +89,57 @@ Date de génération : ${new Date().toLocaleDateString('fr-MA')}
 `;
 
     return parties + articles + footer;
+  }
+
+  // Check if a section should be included based on condition
+  private shouldIncludeSection(section: any, formData: ContractFormData): boolean {
+    if (!section.condition_expression) {
+      return true; // No condition means always include
+    }
+
+    // Reuse validation engine logic for consistency
+    // For now, implement simple evaluation here
+    try {
+      const expr = section.condition_expression;
+      
+      // Handle basic conditions
+      if (expr.includes(' CONTAINS ')) {
+        const match = expr.match(/([\w\.]+)\s+CONTAINS\s+"([^"]+)"/);
+        if (match) {
+          const fieldName = match[1];
+          const expected = match[2];
+          const fieldValue = (formData as any)[fieldName];
+          if (Array.isArray(fieldValue)) {
+            return fieldValue.includes(expected);
+          }
+          return String(fieldValue) === expected;
+        }
+      }
+
+      if (expr.includes(' == ') || expr.includes(' = ')) {
+        const match = expr.match(/([\w\.]+)\s*==?\s*["']?([^"']+)["']?$/);
+        if (match) {
+          const fieldName = match[1];
+          const expected = match[2];
+          const fieldValue = (formData as any)[fieldName];
+          return String(fieldValue) === expected;
+        }
+      }
+
+      if (expr.includes(' IS NOT NULL') || expr.includes(' IS SET')) {
+        const match = expr.match(/([\w\.]+)\s+IS\s+(?:NOT\s+NULL|SET)/);
+        if (match) {
+          const fieldName = match[1];
+          const fieldValue = (formData as any)[fieldName];
+          return fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+        }
+      }
+
+      return true; // Default to include if condition can't be evaluated
+    } catch (error) {
+      console.warn('Section condition evaluation failed:', error);
+      return true; // Default to include on error
+    }
   }
 
   // Generate article-based structure

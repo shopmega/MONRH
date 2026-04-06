@@ -14,10 +14,10 @@ export class ContractValidationEngine {
     const warnings: ValidationWarning[] = [];
     const defaults: DefaultValue[] = [];
 
-    // Get relevant rules for this contract type
+    // Get relevant rules for this contract type and sort by priority
     const relevantRules = this.rules.filter(rule => 
       rule.contract_type === contractType || rule.contract_type === 'ALL'
-    );
+    ).sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
     for (const rule of relevantRules) {
       try {
@@ -170,6 +170,17 @@ export class ContractValidationEngine {
     if (!expression) return false;
 
     try {
+      // Handle complex logical expressions with AND, OR
+      if (expression.includes(' AND ')) {
+        const parts = expression.split(' AND ');
+        return parts.every(part => this.evaluateCondition(part.trim(), formData));
+      }
+      
+      if (expression.includes(' OR ')) {
+        const parts = expression.split(' OR ');
+        return parts.some(part => this.evaluateCondition(part.trim(), formData));
+      }
+
       // Handle clause inclusion checks
       if (expression.includes(' CONTAINS ')) {
         const match = expression.match(/([\w\.]+)\s+CONTAINS\s+"([^"]+)"/);
@@ -187,7 +198,51 @@ export class ContractValidationEngine {
         }
       }
 
+      // Handle equality checks
+      if (expression.includes(' == ') || expression.includes(' = ')) {
+        const match = expression.match(/([\w\.]+)\s*==?\s*["']?([^"']+)["']?$/);
+        if (match) {
+          const fieldName = match[1];
+          const expected = match[2];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          return String(fieldValue) === expected;
+        }
+      }
+
+      // Handle inequality checks
+      if (expression.includes(' != ')) {
+        const match = expression.match(/([\w\.]+)\s*!=\s*["']?([^"']+)["']?$/);
+        if (match) {
+          const fieldName = match[1];
+          const expected = match[2];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          return String(fieldValue) !== expected;
+        }
+      }
+
       // Numeric comparisons
+      if (expression.includes('<=')) {
+        const match = expression.match(/([\w\.]+)\s*<=\s*([\d\.]+)/);
+        if (match) {
+          const fieldName = match[1];
+          const threshold = parseFloat(match[2]);
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          const actualValue = parseFloat(fieldValue as any);
+          return !isNaN(actualValue) && actualValue <= threshold;
+        }
+      }
+
+      if (expression.includes('>=')) {
+        const match = expression.match(/([\w\.]+)\s*>=\s*([\d\.]+)/);
+        if (match) {
+          const fieldName = match[1];
+          const threshold = parseFloat(match[2]);
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          const actualValue = parseFloat(fieldValue as any);
+          return !isNaN(actualValue) && actualValue >= threshold;
+        }
+      }
+
       if (expression.includes('<')) {
         const match = expression.match(/([\w\.]+)\s*<\s*([\d\.]+)/);
         if (match) {
@@ -207,6 +262,26 @@ export class ContractValidationEngine {
           const fieldValue = this.getFieldValue(formData, fieldName);
           const actualValue = parseFloat(fieldValue as any);
           return !isNaN(actualValue) && actualValue > threshold;
+        }
+      }
+
+      // Check if field is filled
+      if (expression.includes(' IS NOT NULL') || expression.includes(' IS SET')) {
+        const match = expression.match(/([\w\.]+)\s+IS\s+(?:NOT\s+NULL|SET)/);
+        if (match) {
+          const fieldName = match[1];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          return fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+        }
+      }
+
+      // Check if field is empty
+      if (expression.includes(' IS NULL') || expression.includes(' IS EMPTY')) {
+        const match = expression.match(/([\w\.]+)\s+IS\s+(?:NULL|EMPTY)/);
+        if (match) {
+          const fieldName = match[1];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          return fieldValue === null || fieldValue === undefined || fieldValue === '';
         }
       }
 

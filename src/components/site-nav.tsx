@@ -30,7 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { key: "plan", href: "/planifier" },
   { key: "tools", href: "/outils" },
   { key: "documents", href: "/documents" },
-  { key: "contracts", href: "/contracts" },
+  { key: "contracts", href: "/contrat" },
   { key: "library", href: "/bibliotheque" },
   { key: "account", href: "/compte" },
 ];
@@ -291,6 +291,16 @@ export function SiteNav() {
               >
                 {navLabel("home")}
               </Link>
+              <Link
+                href="/contrat"
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isActive(pathname, "/contrat")
+                    ? "bg-[var(--accent)] text-white"
+                    : "text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
+                }`}
+              >
+                {navLabel("contracts")}
+              </Link>
               {DESKTOP_MENU_SECTIONS.map((section) => {
                 const active = isActive(pathname, section.href);
                 const hub = CATEGORY_HUBS[section.hubKey];
@@ -428,7 +438,7 @@ export function SiteNav() {
       {/* Bottom Navigation for Mobile */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--line)]/50 bg-[var(--surface)]/80 p-2 backdrop-blur-xl md:hidden print:hidden">
         <div className="flex items-center justify-around">
-          {NAV_ITEMS.filter(item => ["home", "simulate", "plan", "tools", "documents", "contracts"].includes(item.key)).map((item) => {
+          {NAV_ITEMS.filter(item => ["home", "simulate", "documents", "contracts", "tools"].includes(item.key)).map((item) => {
             const active = isActive(pathname, item.href);
             return (
               <Link

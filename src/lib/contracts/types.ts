@@ -16,6 +16,7 @@ export interface ContractSection {
   title: string;
   order: number;
   content: string; // Template with {{variables}}
+  condition_expression?: string; // Optional condition to include/exclude section
 }
 
 export interface ContractClause {
@@ -37,6 +38,12 @@ export interface ValidationRule {
   value_expression?: string;
   error_message?: string;
   is_active: boolean;
+  priority?: number; // Higher priority rules are evaluated first
+  logic_config?: {
+    cross_field_dependencies?: string[];
+    smart_defaults?: Record<string, any>;
+    visibility_rules?: string;
+  };
   created_at: string;
 }
 
@@ -156,6 +163,11 @@ export interface FormField {
   depends_on?: {
     field: keyof ContractFormData;
     value: any;
+  };
+  logic?: {
+    visibility_condition?: string; // Expression to determine field visibility
+    default_value_expression?: string; // Expression to calculate default value
+    smart_suggestions?: string[]; // Field IDs that provide suggestions for this field
   };
 }
 

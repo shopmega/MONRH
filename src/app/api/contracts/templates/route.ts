@@ -19,7 +19,8 @@ export async function GET() {
       .from("contract_clauses")
       .select("*")
       .eq("is_active", true)
-      .order("category, title");
+      .order("category")
+      .order("title");
 
     if (clausesError) {
       throw new Error(clausesError.message);
@@ -29,7 +30,8 @@ export async function GET() {
       .from("contract_validation_rules")
       .select("*")
       .eq("is_active", true)
-      .order("contract_type, rule_type");
+      .order("contract_type")
+      .order("rule_type");
 
     if (rulesError) {
       throw new Error(rulesError.message);
