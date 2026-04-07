@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLanguage } from "@/components/language-provider";
+import { RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,18 +84,24 @@ export function ContractWizard({
   useEffect(() => {
     if (templateEngine) {
       const timeoutId = setTimeout(() => {
-        const requiredFields = validationRules
-          .filter(r => r.rule_type === 'required' && (r.contract_type === formData.contract_type || r.contract_type === 'ALL'))
-          .map(r => r.field_path);
-        const contractPreview = templateEngine.generatePreview(formData, requiredFields);
-        setPreview(contractPreview);
-        onPreview?.(contractPreview);
+        try {
+          const requiredFields = (validationRules || [])
+            .filter(r => r.rule_type === 'required' && (r.contract_type === formData.contract_type || r.contract_type === 'ALL'))
+            .map(r => r.field_path);
+          
+          const contractPreview = templateEngine.generatePreview(formData, requiredFields);
+          setPreview(contractPreview);
+          onPreview?.(contractPreview);
+        } catch (error) {
+          console.error('[ContractWizard] Preview generation failed:', error);
+          // Don't set preview to null if it failed, keep the last good one or just ignore
+        }
       }, 150);
       return () => clearTimeout(timeoutId);
     } else {
       setPreview(null);
     }
-  }, [formData, templateEngine, onPreview]);
+  }, [formData, templateEngine, onPreview, validationRules]);
 
   // Wizard steps definition
   const wizardSteps: ContractWizardStep[] = [
@@ -288,8 +295,11 @@ export function ContractWizard({
 
   // Initialize form with template selection
   useEffect(() => {
-    if (formData.contract_type) {
-      const template = templates.find(t => t.contract_type === formData.contract_type);
+    if (formData.contract_type && templates.length > 0) {
+      const template = templates.find(t => 
+        t.contract_type.toUpperCase() === formData.contract_type.toUpperCase() ||
+        t.id.toUpperCase() === formData.contract_type.toUpperCase()
+      );
       setSelectedTemplate(template || null);
     }
   }, [formData.contract_type, templates]);
@@ -345,25 +355,33 @@ export function ContractWizard({
     setTouchedFields(prev => new Set(prev).add(field));
   };
 
-  const handleCalculateNet = async () => {
-    if (!formData.salary_brut) return;
+  const handleSalaryConversion = async (direction: 'gross_to_net' | 'net_to_gross') => {
+    const amount = direction === 'gross_to_net' ? formData.salary_brut : formData.salary_net;
+    if (!amount || amount <= 0) return;
+
     setIsCalculatingNet(true);
     try {
       const res = await fetch('/api/simulate/net-gross', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          direction: 'gross_to_net',
-          amount: formData.salary_brut,
+          direction,
+          amount: Number(amount),
           calculationDate: formData.start_date || new Date().toISOString().split('T')[0]
         })
       });
       const data = await res.json();
       if (data.ok && data.result) {
-        handleFieldChange('salary_net', data.result.breakdown.net);
+        const targetField = direction === 'gross_to_net' ? 'salary_net' : 'salary_brut';
+        // Get the value from breakdown (mid is net for GtN, gross for NtG)
+        const resultingValue = direction === 'gross_to_net' 
+          ? data.result.breakdown.net 
+          : data.result.breakdown.gross;
+        
+        handleFieldChange(targetField, resultingValue);
       }
     } catch (e) {
-      console.error('Failed to calculate net salary', e);
+      console.error('Failed to convert salary', e);
     } finally {
       setIsCalculatingNet(false);
     }
@@ -606,8 +624,14 @@ export function ContractWizard({
                     value={(formData as any)[field.id]}
                     onChange={(value) => handleFieldChange(field.id, value)}
                     onCompanySelect={handleCompanySelect}
-                    onCalculateNet={field.id === 'salary_net' ? handleCalculateNet : undefined}
-                    isCalculating={field.id === 'salary_net' ? isCalculatingNet : undefined}
+                    onCalculateNet={
+                      field.id === 'salary_net' 
+                        ? () => handleSalaryConversion('gross_to_net') 
+                        : field.id === 'salary_brut' 
+                          ? () => handleSalaryConversion('net_to_gross') 
+                          : undefined
+                    }
+                    isCalculating={isCalculatingNet}
                     validation={validationResult ? validationEngine.getFieldValidation(field.id, formData, formData.contract_type) : undefined}
                     touched={touchedFields.has(field.id)}
                   />
@@ -774,21 +798,23 @@ function FormField({
   if (field.type === "number" || field.id.includes("salary") || field.id.includes("amount")) {
     return (
       <div className="relative">
-        {onCalculateNet && (
-          <div className="absolute right-0 top-0 z-10 flex justify-end">
+        <div className="flex justify-between items-center mb-1 pr-1">
+          <Label className="text-xs uppercase font-bold text-zinc-500">{field.label} {field.required && "*"}</Label>
+          {onCalculateNet && (
             <Button 
               type="button" 
               variant="outline" 
-              className="h-6 text-[10px] px-2" 
+              className="h-5 text-[10px] px-1.5 hover:bg-zinc-100 flex items-center gap-1.5 text-zinc-600 font-bold transition-colors border-none shadow-none" 
               onClick={onCalculateNet}
               disabled={isCalculating}
             >
-              {isCalculating ? t('loading') : t('nav.simulate')}
+              <RefreshCw className={`w-3 h-3 ${isCalculating ? 'animate-spin' : ''}`} />
+              {isCalculating ? t('loading') : t('contractWizard.calculate')}
             </Button>
-          </div>
-        )}
+          )}
+        </div>
         <SmartAmount
-          label={field.label}
+          label="" // Blank label because we handled it above for better spacing
           value={value || ""}
           onChange={(val) => onChange(Number(val))}
           required={field.required}

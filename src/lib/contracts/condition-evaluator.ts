@@ -97,7 +97,7 @@ export class ContractConditionEvaluator {
       return true; // Default to true if expression is unparseable but not empty
     } catch (error) {
       console.warn('[ConditionEvaluator] Evaluation failed:', expression, error);
-      return false;
+      return true; // Default to true on error to ensure section stays visible
     }
   }
 

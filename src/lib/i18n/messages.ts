@@ -611,6 +611,7 @@ export const MESSAGES = {
         minValue: "La valeur minimale est {min}",
         maxValue: "La valeur maximale est {max}",
       },
+      calculate: "Calculer",
       api: {
         missingData: "Template ID and contract data are required",
         templateNotFound: "Template not found",
@@ -1231,6 +1232,7 @@ export const MESSAGES = {
         minValue: "القيمة الدنيا هي {min}",
         maxValue: "القيمة القصوى هي {max}",
       },
+      calculate: "حساب",
       api: {
         missingData: "معرف القالب وبيانات العقد مطلوبان",
         templateNotFound: "القالب غير موجود",
