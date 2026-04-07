@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ContractValidationEngine } from "@/lib/contracts/validation-engine";
 import { ContractTemplateEngine } from "@/lib/contracts/template-engine";
 import { ContractTemplate } from "@/lib/contracts/types";
+import { syncContractToAvisine } from "@/lib/contracts/salary-sync";
 
 // Error messages that should be translated in the frontend
 const ERROR_MESSAGES = {
@@ -25,6 +27,8 @@ export async function POST(request: Request) {
     }
 
     const supabase = getSupabaseAdminClient();
+    const serverSupabase = await createSupabaseServerClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
 
     // Get template - handle both contract_type and template_id
     const { data: template, error: templateError } = await supabase
@@ -91,6 +95,7 @@ export async function POST(request: Request) {
       .from("generated_contracts")
       .insert({
         template_id: templateId,
+        user_id: user?.id,
         contract_data: finalContractData,
         rendered_content: contractContent
       } as any)
@@ -100,6 +105,12 @@ export async function POST(request: Request) {
     if (saveError) {
       throw new Error(saveError.message);
     }
+
+    // Trigger sync to AVISINE for salary insights (background/asynchronous)
+    // We pass the company_id if available in the contract data
+    syncContractToAvisine(finalContractData).catch(err => {
+      console.error("[MONRH-TO-AVISINE-SYNC] Failed to sync contract data:", err);
+    });
 
     return NextResponse.json({
       ok: true,

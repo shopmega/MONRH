@@ -53,6 +53,7 @@ COMMENT ON COLUMN public.contract_validation_rules.logic_config IS
 CREATE TABLE IF NOT EXISTS public.generated_contracts (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     template_id text NOT NULL REFERENCES public.contract_templates(id) ON DELETE CASCADE,
+    user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
     contract_data jsonb NOT NULL,
     rendered_content text NOT NULL,
     created_at timestamptz DEFAULT now() NOT NULL,
@@ -91,15 +92,13 @@ create policy contract_validation_rules_select_public
 -- Generated contracts are private (only insert for users)
 drop policy if exists generated_contracts_insert_user on public.generated_contracts;
 create policy generated_contracts_insert_user
-  on public.generated_contracts
-  for insert
-  with check (true);
+  on public.generated_contracts for insert with check (auth.uid() is not null);
 
 drop policy if exists generated_contracts_select_user on public.generated_contracts;
 create policy generated_contracts_select_user
   on public.generated_contracts
   for select
-  using (true);
+  using (auth.uid() = user_id);
 
 -- No direct mutation policies for templates, clauses, rules (admin only)
 drop policy if exists contract_validation_rules_admin_insert ON public.contract_validation_rules;

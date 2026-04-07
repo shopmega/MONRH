@@ -91,7 +91,11 @@ export interface ContractFormData {
   
   // Clauses
   selected_clauses: string[];
-  clause_variables: Record<string, string>; // Variables for selected clauses
+  clause_variables: Record<string, Record<string, string>>; // Variables for selected clauses, keyed by clauseId
+  
+  // CDD specifics (renewal)
+  renewal_times?: string;
+  max_duration?: string;
   
   // Termination
   notice_period_employee: string;
@@ -151,7 +155,7 @@ export interface ContractWizardStep {
 export interface FormField {
   id: keyof ContractFormData;
   label: string;
-  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'company' | 'employee';
+  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'company' | 'employee' | 'email';
   placeholder?: string;
   required?: boolean;
   options?: Array<{ value: string; label: string }>;

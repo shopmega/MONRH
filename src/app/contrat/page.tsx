@@ -88,11 +88,13 @@ export default function ContratPage() {
 
   const handleDownload = () => {
     if (!generatedContract) return;
+    // For now, still text, but with better naming and encoding
     const blob = new Blob([generatedContract.content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `contrat_${generatedContract.id ?? Date.now()}.txt`;
+    const fileName = `contrat_monrh_${generatedContract.id.slice(0, 8)}.txt`;
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -101,16 +103,94 @@ export default function ContratPage() {
 
   const handlePrint = () => {
     if (!generatedContract) return;
-    const win = window.open("", "_blank");
-    if (!win) return;
-    win.document.write(`<html><head><title>Contrat de Travail</title>
-      <style>
-        body { font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.6; padding: 40px; max-width: 800px; margin: 0 auto; }
-        pre { white-space: pre-wrap; word-wrap: break-word; }
-      </style>
-    </head><body><pre>${generatedContract.content}</pre></body></html>`);
-    win.document.close();
-    win.print();
+    
+    // Securely determine title
+    const isCDI = generatedContract.content.includes("DURÉE INDÉTERMINÉE") || generatedContract.content.includes("CDI");
+    const contractTitle = isCDI 
+      ? 'CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE (CDI)' 
+      : 'CONTRAT DE TRAVAIL À DURÉE DÉTERMINÉE (CDD)';
+
+    // Escape content for safe HTML insertion
+    const escapedContent = generatedContract.content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <title>Impression Contrat - MONRH</title>
+        <style>
+          @page { size: A4; margin: 2.5cm; }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            font-family: "Cambria", "Times New Roman", serif; 
+            line-height: 1.6; 
+            color: #1a1a1a; 
+            background: white;
+            padding: 2cm;
+            max-width: 21cm;
+            margin: 0 auto;
+          }
+          .header { 
+            text-align: center; 
+            border-bottom: 2px solid #000; 
+            padding-bottom: 1cm; 
+            margin-bottom: 1.5cm; 
+          }
+          .brand { font-size: 20pt; font-weight: bold; letter-spacing: 4px; color: #000; }
+          .tagline { font-size: 10pt; color: #666; margin-top: 5px; font-style: italic; }
+          .title { 
+            text-align: center; 
+            font-size: 16pt; 
+            font-weight: bold; 
+            text-decoration: underline; 
+            margin: 2cm 0 1cm 0; 
+            text-transform: uppercase;
+          }
+          .content { 
+            font-size: 11pt; 
+            white-space: pre-wrap; 
+            text-align: justify; 
+            font-family: inherit;
+          }
+          .footer { 
+            margin-top: 3cm; 
+            padding-top: 0.5cm; 
+            border-top: 1px solid #eee;
+            font-size: 9pt; 
+            color: #777; 
+            text-align: center; 
+          }
+          @media print {
+            body { padding: 0; margin: 0; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="brand">MONRH</div>
+          <div class="tagline">Solutions de Gestion des Ressources Humaines au Maroc</div>
+        </div>
+        <div class="title">${contractTitle}</div>
+        <div class="content">${escapedContent}</div>
+        <div class="footer">
+          <div>Document généré via la plateforme MONRH.ma</div>
+          <div style="margin-top: 4px;">Conforme au Code du Travail Marocain (Loi 65-99)</div>
+        </div>
+        <script>
+            setTimeout(function() { window.print(); }, 500);
+        </script>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   };
 
   const handleReset = () => {

@@ -24,6 +24,13 @@ type DocumentItem = {
   templateTitle: string;
 };
 
+type ContractItem = {
+  id: string;
+  createdAt: string;
+  templateTitle: string;
+  contractType: string;
+};
+
 type CaseItem = {
   id: string;
   createdAt: string;
@@ -80,7 +87,7 @@ type ActivityItem = {
   title: string;
   date: string;
   status: string;
-  kind: "simulation" | "document" | "tool";
+  kind: "simulation" | "document" | "tool" | "contract";
   href?: string;
 };
 
@@ -108,6 +115,7 @@ export default function ComptePage() {
   const router = useRouter();
   const [simulations, setSimulations] = useState<SimulationItem[]>([]);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [contracts, setContracts] = useState<ContractItem[]>([]);
   const [cases, setCases] = useState<CaseItem[]>([]);
   const [verifications, setVerifications] = useState<VerificationItem[]>([]);
   const [evidenceArtifacts, setEvidenceArtifacts] = useState<EvidenceArtifactItem[]>([]);
@@ -122,7 +130,7 @@ export default function ComptePage() {
 
     async function load() {
       try {
-        const [simRes, docRes, caseRes, verificationRes, evidenceRes, violationsRes, overtimeRes] = await Promise.all([
+        const responses = await Promise.all([
           fetch("/api/simulations"),
           fetch("/api/documents/generated"),
           fetch("/api/cases"),
@@ -130,9 +138,12 @@ export default function ComptePage() {
           fetch("/api/evidence-artifacts?limit=20"),
           fetch("/api/journal/violations"),
           fetch("/api/journal/overtime"),
+          fetch("/api/contracts/user")
         ]);
 
-        const [simData, docData, caseData, verificationData, evidenceData, violationsData, overtimeData] = await Promise.all([
+        const [simRes, docRes, caseRes, verificationRes, evidenceRes, violationsRes, overtimeRes, contractsRes] = responses;
+
+        const dataObjects = await Promise.all([
           readJsonSafe<{ items?: SimulationItem[] }>(simRes),
           readJsonSafe<{ items?: DocumentItem[] }>(docRes),
           readJsonSafe<{ items?: CaseItem[] }>(caseRes),
@@ -140,7 +151,10 @@ export default function ComptePage() {
           readJsonSafe<{ items?: EvidenceArtifactItem[] }>(evidenceRes),
           readJsonSafe<{ items?: ViolationItem[] }>(violationsRes),
           readJsonSafe<{ items?: OvertimeItem[] }>(overtimeRes),
+          readJsonSafe<{ items?: ContractItem[] }>(contractsRes)
         ]);
+
+        const [simData, docData, caseData, verificationData, evidenceData, violationsData, overtimeData, contractsData] = dataObjects;
 
         if (!active) return;
         setSimulations(simRes.ok ? simData?.items ?? [] : []);
@@ -150,6 +164,9 @@ export default function ComptePage() {
         setEvidenceArtifacts(evidenceRes.ok ? evidenceData?.items ?? [] : []);
         setViolations(violationsRes.ok ? violationsData?.items ?? [] : []);
         setOvertimeLogs(overtimeRes.ok ? overtimeData?.items ?? [] : []);
+        setContracts(contractsRes.ok ? contractsData?.items ?? [] : []);
+      } catch (error) {
+        console.error("Failed to load account data:", error);
       } finally {
         if (active) {
           setLoading(false);
@@ -208,6 +225,15 @@ export default function ComptePage() {
       kind: "document",
     }));
 
+    const contractActivity: ActivityItem[] = contracts.map((item) => ({
+      id: `ct-${item.id}`,
+      title: `Contrat: ${item.templateTitle}`,
+      date: item.createdAt,
+      status: "Généré",
+      kind: "contract",
+      href: `/compte/contrats`,
+    }));
+
     const caseActivity: ActivityItem[] = cases.map((item) => ({
       id: `c-${item.id}`,
       title: item.companyName ? `${item.title} - ${item.companyName}` : item.title,
@@ -241,15 +267,16 @@ export default function ComptePage() {
       href: "/journal/overtime",
     }));
 
-    return [...simulationActivity, ...documentActivity, ...caseActivity, ...violationActivity, ...overtimeActivity]
+    return [...simulationActivity, ...documentActivity, ...contractActivity, ...caseActivity, ...violationActivity, ...overtimeActivity]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 10);
-  }, [cases, documents, language, overtimeLogs, simulations, t, violations]);
+  }, [cases, documents, contracts, language, overtimeLogs, simulations, t, violations]);
 
   const seniorityValue = useMemo(() => {
     const dates = [
       ...simulations.map((item) => new Date(item.createdAt)),
       ...documents.map((item) => new Date(item.createdAt)),
+      ...contracts.map((item) => new Date(item.createdAt)),
     ].filter((date) => !Number.isNaN(date.getTime()));
     if (dates.length === 0) return t("accountPage.notEvaluated");
 
@@ -262,7 +289,7 @@ export default function ComptePage() {
     const years = Math.floor(totalMonths / 12);
     const months = totalMonths % 12;
     return language === "ar" ? `${years} سنة ${months} شهر` : `${years} ans ${months} mois`;
-  }, [documents, language, simulations, t]);
+  }, [documents, contracts, language, simulations, t]);
 
   const smigStatus = useMemo(() => {
     const latestSmig = simulations
@@ -279,6 +306,7 @@ export default function ComptePage() {
   const stats = [
     { label: t("common.simulationsLabel"), value: simulations.length.toString() },
     { label: t("common.documentsLabel"), value: documents.length.toString() },
+    { label: "Contrats", value: contracts.length.toString() },
     { label: "Dossiers", value: cases.length.toString() },
     { label: "Verifications", value: verifications.length.toString() },
     { label: "Preuves", value: evidenceArtifacts.length.toString() },
@@ -319,7 +347,7 @@ export default function ComptePage() {
           </div>
         </section>
 
-        <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {stats.map((item) => (
             <article
               key={item.label}
@@ -334,6 +362,50 @@ export default function ComptePage() {
 
         <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]">
           <div className="space-y-4">
+          <section className="soft-card rounded-3xl p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="display-font text-3xl font-semibold">Mes Contrats Premium</h2>
+              <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                {contracts.length}
+              </span>
+            </div>
+            <p className="mt-2 text-sm text-[var(--ink-soft)]">
+              Accédez à vos contrats de travail générés et téléchargez-les.
+            </p>
+            <div className="mt-4 space-y-2">
+              {loading ? (
+                <div className="panel-strong rounded-2xl p-3 text-sm text-[var(--ink-soft)]">
+                  {t("common.loading")}
+                </div>
+              ) : contracts.length === 0 ? (
+                <Link href="/contrat" className="panel-strong block rounded-2xl p-4 text-center border-dashed border-2 border-[var(--line)] hover:border-[var(--accent)] transition-colors">
+                  <p className="text-sm font-medium text-[var(--accent)]">Générer mon premier contrat</p>
+                </Link>
+              ) : (
+                <>
+                {contracts.slice(0, 3).map((item) => (
+                  <Link key={item.id} href={`/compte/contrats`} className="panel-strong block rounded-2xl p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="line-clamp-1 font-semibold">{item.templateTitle}</p>
+                      <span className="rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--ink-soft)]">
+                        {item.contractType}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs text-[var(--ink-soft)]">
+                      Généré le {formatDate(item.createdAt, locale)}
+                    </div>
+                  </Link>
+                ))}
+                {contracts.length > 3 && (
+                  <Link href="/compte/contrats" className="block text-center text-xs font-semibold text-[var(--accent)] pt-2">
+                    Voir les {contracts.length} contrats
+                  </Link>
+                )}
+                </>
+              )}
+            </div>
+          </section>
+
           <section className="soft-card rounded-3xl p-5">
             <div className="flex items-center justify-between">
               <h2 className="display-font text-3xl font-semibold">Mon dossier</h2>
@@ -376,12 +448,6 @@ export default function ComptePage() {
                           {linkedDocuments.length} document{linkedDocuments.length > 1 ? "s" : ""}
                         </span>
                       </div>
-                      <div className="mt-2 flex items-center justify-between gap-2 text-xs text-[var(--ink-soft)]">
-                        <span className="line-clamp-1">
-                          {linkedDocuments[0]?.templateTitle ?? "Aucun document rattache"}
-                        </span>
-                        <span className="text-[var(--accent)]">{t("common.open")}</span>
-                      </div>
                     </>
                   );
 
@@ -406,12 +472,6 @@ export default function ComptePage() {
                 {activity.length}
               </span>
             </div>
-            <p className="mt-2 text-sm text-[var(--ink-soft)]">
-              {t("accountPage.sessionLabel")}:{" "}
-              <span className="font-semibold text-[var(--foreground)]">{t("accountPage.sessionConnected")}</span>
-            </p>
-            {sessionStatus ? <p className="mt-2 text-xs text-[var(--ink-soft)]">{sessionStatus}</p> : null}
-
             <div className="mt-4 space-y-2">
               {loading ? (
                 <div className="panel-strong rounded-2xl p-3 text-sm text-[var(--ink-soft)]">
@@ -431,6 +491,8 @@ export default function ComptePage() {
                           className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] ${
                             item.kind === "simulation"
                               ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                              : item.kind === "contract"
+                              ? "bg-emerald-100 text-emerald-700"
                               : "bg-[var(--surface-muted)] text-[var(--ink-soft)]"
                           }`}
                         >
@@ -465,11 +527,14 @@ export default function ComptePage() {
             <section className="soft-card rounded-3xl p-4">
               <p className="section-kicker">{t("common.explore")}</p>
               <div className="mt-3 space-y-2">
+                <Link href="/compte/contrats" className="panel-strong block rounded-2xl p-3 border border-[var(--accent)]/20 shadow-sm">
+                  <p className="font-semibold text-[var(--accent)]">Générateur de Contrat</p>
+                  <p className="mt-1 text-xs text-[var(--ink-soft)]">Accédez à votre historique legal et créez de nouveaux contrats.</p>
+                </Link>
                 <div className="panel-strong rounded-2xl p-3">
                   <p className="font-semibold">Verification emploi</p>
                   <p className="mt-1 text-xs text-[var(--ink-soft)]">
-                    {verifications.filter((item) => item.status === "pending").length} verification(s) en attente,{" "}
-                    {evidenceArtifacts.length} preuve(s) enregistree(s).
+                    {verifications.filter((item) => item.status === "pending").length} verification(s) en attente.
                   </p>
                   <Link href="/compte/verifications" className="mt-2 inline-flex text-xs font-semibold text-[var(--accent)]">
                     Ouvrir la boite de verification
@@ -478,10 +543,6 @@ export default function ComptePage() {
                 <Link href="/compte/protection" className="panel-strong block rounded-2xl p-3">
                   <p className="font-semibold">{t("accountPage.shortcutProtection")}</p>
                   <p className="mt-1 text-xs text-[var(--ink-soft)]">{t("accountPage.shortcutProtectionDesc")}</p>
-                </Link>
-                <Link href="/outils/detecteur-fiche-paie" className="panel-strong block rounded-2xl p-3">
-                  <p className="font-semibold">{t("accountPage.shortcutPayslip")}</p>
-                  <p className="mt-1 text-xs text-[var(--ink-soft)]">{t("accountPage.shortcutPayslipDesc")}</p>
                 </Link>
                 <Link href="/journal/violations" className="panel-strong block rounded-2xl p-3">
                   <p className="font-semibold">{t("accountPage.shortcutViolations")}</p>
