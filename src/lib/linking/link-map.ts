@@ -1,6 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { getPublicSupabaseAdminClient } from "@/lib/server/supabase-admin";
 
 export type LinkSourceType = "article" | "simulator" | "document";
 
@@ -55,7 +55,7 @@ async function ensureStoreFile() {
 
 async function readLinkMapFromSupabase(): Promise<LinkMapData | null> {
   try {
-    const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
+    const appSettings = getPublicSupabaseAdminClient().from("app_settings") as unknown as {
       select: (
         columns: string,
       ) => {
@@ -67,10 +67,15 @@ async function readLinkMapFromSupabase(): Promise<LinkMapData | null> {
         };
       };
     };
-    const { data, error } = await appSettings
+    let { data, error } = await appSettings
       .select("value")
-      .eq("name", SETTINGS_KEY)
+      .eq("key", SETTINGS_KEY)
       .maybeSingle();
+    if (error) {
+      const fallback = await appSettings.select("value").eq("name", SETTINGS_KEY).maybeSingle();
+      data = fallback.data;
+      error = fallback.error;
+    }
     if (error) return null;
     if (!data) return DEFAULT_LINK_MAP;
 
@@ -93,9 +98,9 @@ async function readLinkMapFromSupabase(): Promise<LinkMapData | null> {
 
 async function writeLinkMapToSupabase(map: LinkMapData): Promise<LinkMapData | null> {
   try {
-    const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
+    const appSettings = getPublicSupabaseAdminClient().from("app_settings") as unknown as {
       upsert: (
-        values: { name: string; value: unknown; updated_at: string },
+        values: { key?: string; name?: string; value: unknown; updated_at: string },
         options: { onConflict: string },
       ) => {
         select: (columns: string) => {
@@ -106,17 +111,32 @@ async function writeLinkMapToSupabase(map: LinkMapData): Promise<LinkMapData | n
         };
       };
     };
-    const { data, error } = await appSettings
+    let { data, error } = await appSettings
       .upsert(
         {
-          name: SETTINGS_KEY,
+          key: SETTINGS_KEY,
           value: map,
           updated_at: map.updatedAt,
         },
-        { onConflict: "name" },
+        { onConflict: "key" },
       )
       .select("value")
       .single();
+    if (error) {
+      const fallback = await appSettings
+        .upsert(
+          {
+            name: SETTINGS_KEY,
+            value: map,
+            updated_at: map.updatedAt,
+          },
+          { onConflict: "name" },
+        )
+        .select("value")
+        .single();
+      data = fallback.data;
+      error = fallback.error;
+    }
     if (error) return null;
     const row = data as { value?: unknown };
     const parsed = (row.value ?? {}) as Partial<LinkMapData>;
