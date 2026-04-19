@@ -1,7 +1,6 @@
 // Rule-based Validation Engine - No AI, Deterministic
 
 import type { ContractFormData, ValidationRule, ValidationResult, ValidationError, ValidationWarning, DefaultValue } from './types';
-import { ContractConditionEvaluator } from './condition-evaluator';
 
 export class ContractValidationEngine {
   private rules: ValidationRule[] = [];
@@ -87,26 +86,221 @@ export class ContractValidationEngine {
     return null;
   }
 
-  private getFieldValue(formData: ContractFormData, path: string): any {
-    return ContractConditionEvaluator.getFieldValue(formData, path);
-  }
+  private getFieldValue(formData: ContractFormData, fieldPath: string): string | number | boolean | undefined {
+    // Support nested paths like "clause_variables.non_competition_duration" or "selected_clauses"
+    if (!fieldPath) return undefined;
 
-  private isRequiredSatisfied(fieldValue: any, condition?: string, formData?: ContractFormData): boolean {
-    if (!condition) {
-      // Simple required check
-      return fieldValue !== null && fieldValue !== undefined && String(fieldValue).trim() !== '';
+    const pathParts = fieldPath.split('.');
+
+    let current: ContractFormData | string | number | boolean | Record<string, string> = formData;
+    for (const part of pathParts) {
+      if (current === null || current === undefined) return undefined;
+      if (typeof current === 'object' && !Array.isArray(current)) {
+        current = (current as Record<string, unknown>)[part] as string | number | boolean | Record<string, string>;
+      } else {
+        // Handle the case where current is a primitive value
+        return undefined;
+      }
     }
 
-    // Use the shared evaluator
-    return ContractConditionEvaluator.evaluate(condition, formData || ({} as any));
+    // Final return should be the actual value, not an object
+    if (typeof current === 'object' && !Array.isArray(current)) {
+      return undefined;
+    }
+
+    return current as string | number | boolean;
   }
 
-  /**
-   * Evaluates a DSL expression against form data.
-   * Delegated to the shared ContractConditionEvaluator.
-   */
-  private evaluateCondition(expression: string | null | undefined, formData: ContractFormData): boolean {
-    return ContractConditionEvaluator.evaluate(expression, formData);
+  private isRequiredSatisfied(fieldValue: string | number | boolean | undefined, condition?: string, formData?: ContractFormData): boolean {
+    if (!condition) {
+      // Simple required check
+      return fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+    }
+
+    // Handle SQL-style conditions
+    if (condition.includes('IS NOT NULL') && condition.includes('!= ""')) {
+      // Pattern: "field_name IS NOT NULL AND field_name != """
+      return fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+    }
+
+    if (condition.includes(' CONTAINS ')) {
+      if (!formData) {
+        return false;
+      }
+      const match = condition.match(/(\w+)\s+CONTAINS\s+"([^"]+)"/);
+      if (match) {
+        const fieldName = match[1];
+        const expected = match[2];
+        const fieldValue = this.getFieldValue(formData, fieldName);
+        if (Array.isArray(fieldValue)) {
+          return fieldValue.includes(expected);
+        }
+        if (typeof fieldValue === 'string') {
+          return fieldValue === expected;
+        }
+        return false;
+      }
+    }
+
+    if (condition.includes('>')) {
+      if (!formData) {
+        return false;
+      }
+      // Pattern: "field_name > value"
+      const match = condition.match(/([\w\.]+)\s*>\s*([\d\.]+)/);
+      if (match) {
+        const fieldName = match[1];
+        const threshold = parseFloat(match[2]);
+        const fieldValueFromData = this.getFieldValue(formData, fieldName);
+        const actualValue = typeof fieldValueFromData === 'number' ? fieldValueFromData : parseFloat(String(fieldValueFromData));
+        return !isNaN(actualValue) && actualValue > threshold;
+      }
+    }
+
+    if (condition.includes('<')) {
+      if (!formData) {
+        return false;
+      }
+      // Pattern: "field_name < value"
+      const match = condition.match(/([\w\.]+)\s*<\s*([\d\.]+)/);
+      if (match) {
+        const fieldName = match[1];
+        const threshold = parseFloat(match[2]);
+        const fieldValueFromData = this.getFieldValue(formData, fieldName);
+        const actualValue = typeof fieldValueFromData === 'number' ? fieldValueFromData : parseFloat(String(fieldValueFromData));
+        return !isNaN(actualValue) && actualValue < threshold;
+      }
+    }
+
+    // Default to simple check if condition parsing fails
+    return fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+  }
+
+  private evaluateCondition(expression: string, formData: ContractFormData): boolean {
+    if (!expression) return false;
+
+    try {
+      // Handle complex logical expressions with AND, OR
+      if (expression.includes(' AND ')) {
+        const parts = expression.split(' AND ');
+        return parts.every(part => this.evaluateCondition(part.trim(), formData));
+      }
+      
+      if (expression.includes(' OR ')) {
+        const parts = expression.split(' OR ');
+        return parts.some(part => this.evaluateCondition(part.trim(), formData));
+      }
+
+      // Handle clause inclusion checks
+      if (expression.includes(' CONTAINS ')) {
+        const match = expression.match(/([\w\.]+)\s+CONTAINS\s+"([^"]+)"/);
+        if (match) {
+          const fieldName = match[1];
+          const expected = match[2];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          if (Array.isArray(fieldValue)) {
+            return fieldValue.includes(expected);
+          }
+          if (typeof fieldValue === 'string') {
+            return fieldValue === expected;
+          }
+          return false;
+        }
+      }
+
+      // Handle equality checks
+      if (expression.includes(' == ') || expression.includes(' = ')) {
+        const match = expression.match(/([\w\.]+)\s*==?\s*["']?([^"']+)["']?$/);
+        if (match) {
+          const fieldName = match[1];
+          const expected = match[2];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          return String(fieldValue) === expected;
+        }
+      }
+
+      // Handle inequality checks
+      if (expression.includes(' != ')) {
+        const match = expression.match(/([\w\.]+)\s*!=\s*["']?([^"']+)["']?$/);
+        if (match) {
+          const fieldName = match[1];
+          const expected = match[2];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          return String(fieldValue) !== expected;
+        }
+      }
+
+      // Numeric comparisons
+      if (expression.includes('<=')) {
+        const match = expression.match(/([\w\.]+)\s*<=\s*([\d\.]+)/);
+        if (match) {
+          const fieldName = match[1];
+          const threshold = parseFloat(match[2]);
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          const actualValue = parseFloat(fieldValue as any);
+          return !isNaN(actualValue) && actualValue <= threshold;
+        }
+      }
+
+      if (expression.includes('>=')) {
+        const match = expression.match(/([\w\.]+)\s*>=\s*([\d\.]+)/);
+        if (match) {
+          const fieldName = match[1];
+          const threshold = parseFloat(match[2]);
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          const actualValue = parseFloat(fieldValue as any);
+          return !isNaN(actualValue) && actualValue >= threshold;
+        }
+      }
+
+      if (expression.includes('<')) {
+        const match = expression.match(/([\w\.]+)\s*<\s*([\d\.]+)/);
+        if (match) {
+          const fieldName = match[1];
+          const threshold = parseFloat(match[2]);
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          const actualValue = parseFloat(fieldValue as any);
+          return !isNaN(actualValue) && actualValue < threshold;
+        }
+      }
+
+      if (expression.includes('>')) {
+        const match = expression.match(/([\w\.]+)\s*>\s*([\d\.]+)/);
+        if (match) {
+          const fieldName = match[1];
+          const threshold = parseFloat(match[2]);
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          const actualValue = parseFloat(fieldValue as any);
+          return !isNaN(actualValue) && actualValue > threshold;
+        }
+      }
+
+      // Check if field is filled
+      if (expression.includes(' IS NOT NULL') || expression.includes(' IS SET')) {
+        const match = expression.match(/([\w\.]+)\s+IS\s+(?:NOT\s+NULL|SET)/);
+        if (match) {
+          const fieldName = match[1];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          return fieldValue !== null && fieldValue !== undefined && fieldValue !== '';
+        }
+      }
+
+      // Check if field is empty
+      if (expression.includes(' IS NULL') || expression.includes(' IS EMPTY')) {
+        const match = expression.match(/([\w\.]+)\s+IS\s+(?:NULL|EMPTY)/);
+        if (match) {
+          const fieldName = match[1];
+          const fieldValue = this.getFieldValue(formData, fieldName);
+          return fieldValue === null || fieldValue === undefined || fieldValue === '';
+        }
+      }
+
+      // Default to false for unsupported conditions
+      return false;
+    } catch (error) {
+      console.warn('Condition evaluation failed:', error);
+      return false;
+    }
   }
 
   private evaluateDefault(expression: string, formData: ContractFormData): string {
@@ -116,13 +310,6 @@ export class ContractValidationEngine {
       // Handle simple default values
       if (expression.startsWith("'") && expression.endsWith("'")) {
         return expression.slice(1, -1); // Remove quotes
-      }
-      if (expression.startsWith('"') && expression.endsWith('"')) {
-        return expression.slice(1, -1); // Remove quotes
-      }
-      
-      if (expression === 'CURRENT_DATE') {
-        return new Date().toISOString().split('T')[0];
       }
       
       if (!isNaN(Number(expression))) {
@@ -136,15 +323,47 @@ export class ContractValidationEngine {
     }
   }
 
+  private formatValue(value: string | number | boolean): string {
+    if (typeof value === 'string') {
+      return `"${value}"`;
+    }
+    if (typeof value === 'number') {
+      return value.toString();
+    }
+    if (typeof value === 'boolean') {
+      return value.toString();
+    }
+    return 'null';
+  }
+
+  private safeEval(expression: string): boolean {
+    // Very limited safe evaluation - no AI, deterministic
+    // Only allow basic comparisons and logical operators
+    
+    // Whitelist allowed characters and operators
+    const allowedPattern = /^[\d\s"'.=><!&|()]+$/;
+    if (!allowedPattern.test(expression)) {
+      throw new Error('Unsafe expression');
+    }
+
+    try {
+      // Use Function constructor for safer evaluation
+      const result = new Function('return ' + expression)();
+      return Boolean(result);
+    } catch (error) {
+      console.warn('Safe eval failed:', expression, error);
+      return false;
+    }
+  }
+
   // Apply default values to form data
   applyDefaults(formData: ContractFormData, defaults: DefaultValue[]): ContractFormData {
     const updatedData = { ...formData };
 
-    defaults.forEach(defaultValue => {
-      // Only apply if field is empty
-      const currentValue = this.getFieldValue(updatedData, defaultValue.field);
-      if (currentValue === null || currentValue === undefined || String(currentValue).trim() === '') {
-        (updatedData as any)[defaultValue.field] = defaultValue.value;
+    defaults.forEach((defaultValue) => {
+      const field = defaultValue.field as keyof ContractFormData;
+      if (field in updatedData) {
+        (updatedData as any)[field] = defaultValue.value;
       }
     });
 

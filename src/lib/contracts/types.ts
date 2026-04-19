@@ -41,7 +41,7 @@ export interface ValidationRule {
   priority?: number; // Higher priority rules are evaluated first
   logic_config?: {
     cross_field_dependencies?: string[];
-    smart_defaults?: Record<string, any>;
+    smart_defaults?: Record<string, string | number | boolean>;
     visibility_rules?: string;
   };
   created_at: string;
@@ -91,11 +91,7 @@ export interface ContractFormData {
   
   // Clauses
   selected_clauses: string[];
-  clause_variables: Record<string, Record<string, string>>; // Variables for selected clauses, keyed by clauseId
-  
-  // CDD specifics (renewal)
-  renewal_times?: string;
-  max_duration?: string;
+  clause_variables: Record<string, string>; // Variables for selected clauses
   
   // Termination
   notice_period_employee: string;
@@ -155,7 +151,7 @@ export interface ContractWizardStep {
 export interface FormField {
   id: keyof ContractFormData;
   label: string;
-  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'company' | 'employee' | 'email';
+  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'company' | 'employee';
   placeholder?: string;
   required?: boolean;
   options?: Array<{ value: string; label: string }>;
@@ -166,7 +162,7 @@ export interface FormField {
   };
   depends_on?: {
     field: keyof ContractFormData;
-    value: any;
+    value: string | number | boolean;
   };
   logic?: {
     visibility_condition?: string; // Expression to determine field visibility

@@ -1,7 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { isAdminAuthenticated } from "@/lib/server/admin-auth";
+import { isSameOriginRequest } from "@/lib/server/csrf";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
+  }
+  const authenticated = await isAdminAuthenticated();
+  if (!authenticated) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
+
   try {
     const supabase = getSupabaseAdminClient();
     
@@ -154,7 +164,7 @@ export async function POST() {
               "id": "renewal",
               "title": "Renouvellement",
               "order": 9,
-              "content": "Le présent contrat pourra être renouvelé {{renewal_times}} fois sans pour autant que sa durée totale excède {{max_duration}} mois, conformément à la législation en vigueur."
+              "content": "Le contrat peut être renouvelé {{renewal_times}} fois pour une durée maximale totale de {{max_duration}} mois."
             },
             {
               "id": "clauses",
@@ -166,13 +176,13 @@ export async function POST() {
               "id": "termination",
               "title": "Rupture Anticipée",
               "order": 11,
-              "content": "En cas de rupture anticipée du contrat par l'une des parties en dehors de la période d'essai ou faute grave, les indemnités prévues par l'article 41 du Code du travail marocain seront applicables."
+              "content": "En cas de rupture anticipée, les indemnités prévues par l'article 41 du Code du travail s'appliqueront."
             },
             {
               "id": "signature",
               "title": "Signatures",
               "order": 12,
-              "content": "Fait à {{contract_location}}, le {{contract_date}}\n\nPour l'employeur:\n\nPour le salarié:"
+              "content": "Fait à {{contract_location}}, le {{contract_date}}"
             }
           ],
           is_active: true
@@ -452,12 +462,12 @@ export async function POST() {
         },
         // Advanced cross-field validation rules
         {
-          id: 'cdd_end_date_contract_type_required',
+          id: 'cdd_end_date_required',
           contract_type: 'CDD',
           rule_type: 'required',
           field_path: 'end_date',
           condition_expression: 'contract_type == "CDD"',
-          error_message: 'La date de fin est obligatoire pour les contrats CDD',
+          error_message: 'End date is required for CDD contracts',
           priority: 10,
           is_active: true
         },

@@ -59,9 +59,9 @@ function verifyTypes() {
     
     // Clauses
     selected_clauses: ['confidentiality', 'non_competition'], // Must be string[]
-    clause_variables: { // Must be Record<string, Record<string, string>>
-      confidentiality: { duration: '2 ans' },
-      non_competition: { radius: '100 km' }
+    clause_variables: { // Must be Record<string, string>
+      confidentiality_duration: '2 ans',
+      non_competition_radius: '100 km'
     },
     
     // Termination

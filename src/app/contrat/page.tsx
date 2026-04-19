@@ -201,7 +201,7 @@ export default function ContratPage() {
   // ─── Loading State ────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <main className="paper-bg min-h-screen">
+      <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
         <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
           <div className="soft-card rounded-[2rem] p-8 text-center">
             <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-[var(--accent)] border-t-transparent" />
@@ -215,7 +215,7 @@ export default function ContratPage() {
   // ─── Error State ──────────────────────────────────────────────────────────────
   if (error) {
     return (
-      <main className="paper-bg min-h-screen">
+      <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
         <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
           <div className="soft-card rounded-[2rem] p-8 text-center space-y-4">
             <div className="text-4xl">⚠️</div>
@@ -232,7 +232,7 @@ export default function ContratPage() {
   // ─── Generated Contract View ─────────────────────────────────────────────────
   if (generatedContract) {
     return (
-      <main className="paper-bg min-h-screen pb-24">
+      <main className="paper-bg min-h-screen max-w-full overflow-x-hidden pb-24">
         <div className="relative z-10 mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
           {/* Success Header */}
           <section className="soft-card rounded-[2rem] p-6 sm:p-8 mb-6">
@@ -260,7 +260,7 @@ export default function ContratPage() {
                 </button>
                 <button
                   onClick={handlePrint}
-                  className="flex items-center gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-2.5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-strong)]"
+                  className="panel-tonal flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-semibold text-[var(--foreground)] transition"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
                     <polyline points="6 9 6 2 18 2 18 9" />
@@ -271,7 +271,7 @@ export default function ContratPage() {
                 </button>
                 <button
                   onClick={handleReset}
-                  className="flex items-center gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-2.5 text-sm font-semibold text-[var(--ink-soft)] transition hover:bg-[var(--surface-strong)]"
+                  className="panel-tonal flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-semibold text-[var(--ink-soft)] transition"
                 >
                   Nouveau contrat
                 </button>
@@ -296,7 +296,7 @@ export default function ContratPage() {
             <h2 className="display-font text-xl font-semibold text-[var(--foreground)] mb-4">
               Aperçu du contrat
             </h2>
-            <div className="max-h-[70vh] overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] p-6">
+            <div className="panel-tonal max-h-[70vh] overflow-y-auto rounded-2xl p-6">
               <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-[var(--foreground)]">
                 {generatedContract.content}
               </pre>
@@ -319,7 +319,7 @@ export default function ContratPage() {
 
   // ─── Main Wizard View ────────────────────────────────────────────────────────
   return (
-    <main className="paper-bg min-h-screen pb-24" dir={language === "ar" ? "rtl" : "ltr"}>
+    <main className="paper-bg min-h-screen max-w-full overflow-x-hidden pb-24" dir={language === "ar" ? "rtl" : "ltr"}>
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
 
         {/* Page Header */}
@@ -333,6 +333,26 @@ export default function ContratPage() {
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--ink-soft)]">
             {t("contractsPage.description")}
           </p>
+          <div className="mt-5 grid gap-2 sm:grid-cols-3">
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "Ù…Ù†ØªØ¬ Ø§Ù„Ø¹Ù‚Ø¯" : "Cadre"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">CDI + CDD</p>
+            </article>
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "Ù…Ø±Ø§Ø­Ù„ Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡" : "Parcours"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">8 etapes</p>
+            </article>
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "Ø§Ù„Ù…Ø·Ø§Ø¨Ù‚Ø©" : "Conformite"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">Loi 65-99</p>
+            </article>
+          </div>
 
           {/* Feature Badges */}
           <div className="mt-5 flex flex-wrap gap-2">
@@ -345,7 +365,7 @@ export default function ContratPage() {
             ].map((badge) => (
               <span
                 key={badge}
-                className="inline-flex items-center rounded-full border border-[var(--accent-soft)] bg-[var(--accent)]/5 px-3 py-1 text-xs font-semibold text-[var(--accent)]"
+                className="inline-flex items-center rounded-full bg-[var(--juris-surface-low)] px-3 py-1 text-xs font-semibold text-[var(--foreground)]"
               >
                 {badge}
               </span>
@@ -413,7 +433,7 @@ export default function ContratPage() {
                 : "Document prêt à signer, conforme au droit marocain",
             },
           ].map((step) => (
-            <div key={step.title} className="soft-card rounded-[1.4rem] p-5">
+            <div key={step.title} className="panel-tonal rounded-[1.4rem] p-5">
               <div className="mb-3 text-3xl">{step.icon}</div>
               <h3 className="font-semibold text-[var(--foreground)]">{step.title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-[var(--ink-soft)]">{step.desc}</p>
