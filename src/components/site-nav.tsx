@@ -13,7 +13,6 @@ type NavItem = {
   href: string;
   icon: string;
   label: { fr: string; ar: string };
-  color: string;
 };
 
 const NAV_ITEMS: NavItem[] = [
@@ -22,49 +21,42 @@ const NAV_ITEMS: NavItem[] = [
     href: "/", 
     icon: "home",
     label: { fr: "Accueil", ar: "Accueil" },
-    color: "text-blue-600"
   },
   { 
     key: "salaire", 
     href: "/situation/mon-salaire", 
     icon: "wallet",
     label: { fr: "Mon Salaire", ar: "Mon Salaire" },
-    color: "text-green-600"
   },
   { 
     key: "carriere", 
     href: "/situation/ma-carriere", 
     icon: "trending-up",
     label: { fr: "Ma Carrière", ar: "Ma Carrière" },
-    color: "text-purple-600"
   },
   { 
     key: "depart", 
     href: "/situation/depart-rupture", 
     icon: "log-out",
     label: { fr: "Départ", ar: "Départ" },
-    color: "text-orange-600"
   },
   { 
     key: "bibliotheque", 
     href: "/bibliotheque", 
     icon: "book-open",
     label: { fr: "Bibliothèque", ar: "Bibliothèque" },
-    color: "text-indigo-600"
   },
   { 
     key: "modeles", 
     href: "/modeles", 
     icon: "file-text",
     label: { fr: "Modèles", ar: "Modèles" },
-    color: "text-pink-600"
   },
   { 
     key: "account", 
     href: "/compte", 
     icon: "user",
     label: { fr: "Mon Compte", ar: "Mon Compte" },
-    color: "text-gray-600"
   },
 ];
 
@@ -274,14 +266,14 @@ function DesktopNav() {
 
   return (
     <nav className="hidden lg:flex items-center space-x-1">
-      {NAV_ITEMS.slice(0, 5).map((item) => (
+      {NAV_ITEMS.map((item) => (
         <Link
           key={item.key}
           href={item.href}
           className={`group relative px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
             isActive(pathname, item.href)
               ? "bg-[var(--accent)] text-white shadow-md"
-              : "text-[var(--ink)] hover:bg-[var(--highlight)] hover:scale-105"
+              : "text-[var(--ink)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent)]"
           }`}
         >
           <CustomIcon icon={item.icon} className="h-4 w-4" />
@@ -291,104 +283,6 @@ function DesktopNav() {
           )}
         </Link>
       ))}
-      
-      {/* Simple Mega Menu */}
-      <div className="relative group">
-        <button
-          className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-[var(--ink)] hover:bg-[var(--highlight)] transition-all duration-200 hover:scale-105"
-          aria-expanded="false"
-          aria-haspopup="true"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <span>{language === "ar" ? "Plus" : "Plus"}</span>
-        </button>
-        
-        <div className="absolute right-0 top-full mt-2 w-screen max-w-4xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-          <div className="soft-card rounded-2xl shadow-2xl p-6 w-full max-w-4xl border border-[var(--line)]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <CustomIcon icon="wallet" className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">Mon Salaire</h3>
-                    <p className="text-sm text-[var(--ink-soft)]">Calcul et optimisation</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Link href="/simulateurs/brut-net" className="block p-3 rounded-lg hover:bg-[var(--highlight)] transition-all duration-200">
-                    <h4 className="font-semibold text-sm">Calcul Brut/Net</h4>
-                    <p className="text-xs text-[var(--ink-soft)]">Salaire net et brut</p>
-                  </Link>
-                  <Link href="/simulateurs/ir-annuel" className="block p-3 rounded-lg hover:bg-[var(--highlight)] transition-all duration-200">
-                    <h4 className="font-semibold text-sm">IR/IGR</h4>
-                    <p className="text-xs text-[var(--ink-soft)]">Impôt sur le revenu</p>
-                  </Link>
-                  <Link href="/simulateurs/conformite-smig" className="block p-3 rounded-lg hover:bg-[var(--highlight)] transition-all duration-200">
-                    <h4 className="font-semibold text-sm">SMIG/SMAG</h4>
-                    <p className="text-xs text-[var(--ink-soft)]">Salaire minimum</p>
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <CustomIcon icon="trending-up" className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">Ma Carrière</h3>
-                    <p className="text-sm text-[var(--ink-soft)]">Évolution et croissance</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Link href="/carriere/comparaison-scenarios" className="block p-3 rounded-lg hover:bg-[var(--highlight)] transition-all duration-200">
-                    <h4 className="font-semibold text-sm">Comparaison Scenarios</h4>
-                    <p className="text-xs text-[var(--ink-soft)]">Analyse comparative</p>
-                  </Link>
-                  <Link href="/carriere/augmentation-salaire" className="block p-3 rounded-lg hover:bg-[var(--highlight)] transition-all duration-200">
-                    <h4 className="font-semibold text-sm">Augmentation</h4>
-                    <p className="text-xs text-[var(--ink-soft)]">Simulation de hausse</p>
-                  </Link>
-                  <Link href="/carriere/freelance-vs-salarie" className="block p-3 rounded-lg hover:bg-[var(--highlight)] transition-all duration-200">
-                    <h4 className="font-semibold text-sm">Freelance vs Salarié</h4>
-                    <p className="text-xs text-[var(--ink-soft)]">Mode de travail</p>
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <CustomIcon icon="log-out" className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">Départ & Rupture</h3>
-                    <p className="text-sm text-[var(--ink-soft)]">Fin de contrat</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Link href="/simulateurs/licenciement" className="block p-3 rounded-lg hover:bg-[var(--highlight)] transition-all duration-200">
-                    <h4 className="font-semibold text-sm">Licenciement</h4>
-                    <p className="text-xs text-[var(--ink-soft)]">Indemnités et droits</p>
-                  </Link>
-                  <Link href="/simulateurs/demission" className="block p-3 rounded-lg hover:bg-[var(--highlight)] transition-all duration-200">
-                    <h4 className="font-semibold text-sm">Démission</h4>
-                    <p className="text-xs text-[var(--ink-soft)]">Procédure et délais</p>
-                  </Link>
-                  <Link href="/simulateurs/duree-preavis" className="block p-3 rounded-lg hover:bg-[var(--highlight)] transition-all duration-200">
-                    <h4 className="font-semibold text-sm">Préavis</h4>
-                    <p className="text-xs text-[var(--ink-soft)]">Durée légale</p>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </nav>
   );
 }
