@@ -3,16 +3,16 @@ import { buildPageMetadata } from "@/lib/seo";
 import { SimulatorToolPage } from "@/components/simulator-tool-page";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Salaire Net / Brut",
-  description: "Resultat detaille avec charges sociales, IR et cout employeur.",
+  title: "Calcul Salaire Brut Net Maroc",
+  description: "Calculez votre salaire brut en net au Maroc avec CNSS, AMO, IR et cout employeur.",
   canonicalPath: "/simulateurs/brut-net",
 });
 
 export default function NetGrossSimulationPage() {
   return (
     <SimulatorToolPage
-      title="Salaire Net / Brut"
-      description="Resultat detaille avec charges sociales, IR et cout employeur."
+      title="Calcul salaire brut net Maroc"
+      description="Simulez votre salaire net ou brut au Maroc avec le detail CNSS, AMO, IR et cout employeur."
       apiPath="/api/simulate/net-gross"
       calculatorType="net_gross"
       fields={[

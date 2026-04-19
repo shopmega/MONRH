@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
+import { SmartToggle } from "@/components/ui/smart-inputs";
 import { buildToolResultDocumentLinks } from "@/lib/tools/result-document-links";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
 
@@ -30,7 +31,7 @@ type Result = {
 };
 
 export default function FinalSettlementAuditPage() {
-  const { t, locale, language } = useLanguage();
+  const { t, locale } = useLanguage();
   const [form, setForm] = useState({
     calculationDate: "2026-02-12",
     monthlySalary: "9000",
@@ -51,13 +52,24 @@ export default function FinalSettlementAuditPage() {
   const toolPolicy = resolveToolPolicy(config.toolPolicies, "final_settlement_audit");
   const userAuthenticated = config.userAuthenticated;
   const usable = canUseTool(toolPolicy, userAuthenticated);
-  const relatedModelsLabel = language === "ar" ? "نماذج مفيدة" : "Modeles utiles";
+  const relatedModelsLabel = t("toolsPage.relatedDocuments");
+  const checklist = [
+    "Confirmez salaire, anciennete et type de contrat.",
+    "Renseignez les soldes restants (conges, salaires, heures).",
+    "Validez le contexte de rupture avant calcul final.",
+  ];
   const relatedDocs = result
     ? buildToolResultDocumentLinks({
         toolId: "final_settlement_audit",
         result,
       })
     : [];
+
+  function getRiskUi(level: Result["level"]) {
+    if (level === "high") return { badge: "bg-[#fde8e8] text-[#b42318]" };
+    if (level === "medium") return { badge: "bg-[#fff4e5] text-[#b54708]" };
+    return { badge: "bg-[#e8f6ed] text-[#067647]" };
+  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -114,10 +126,32 @@ export default function FinalSettlementAuditPage() {
           <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
             {t("finalSettlementTool.description")}
           </p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Sortie</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Montant global estime</p>
+            </article>
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Audit</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Conformite des composantes</p>
+            </article>
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Actions</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Modeles de recours</p>
+            </article>
+          </div>
         </section>
 
         <form onSubmit={onSubmit} className="soft-card mt-5 grid gap-3 rounded-3xl p-5 sm:grid-cols-2">
-          <label className="block text-sm font-semibold">
+          <div className="panel-strong rounded-2xl p-4 sm:col-span-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">Checklist avant audit</p>
+            <ul className="mt-2 space-y-1 text-sm text-[var(--ink-soft)]">
+              {checklist.map((line) => (
+                <li key={line}>- {line}</li>
+              ))}
+            </ul>
+          </div>
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("finalSettlementTool.monthlySalary")}
             <input
               type="number"
@@ -128,7 +162,7 @@ export default function FinalSettlementAuditPage() {
               }
             />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("finalSettlementTool.calculationDate")}
             <input
               type="date"
@@ -139,7 +173,7 @@ export default function FinalSettlementAuditPage() {
               }
             />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("finalSettlementTool.contractType")}
             <select
               className="input-shell mt-1"
@@ -152,7 +186,7 @@ export default function FinalSettlementAuditPage() {
               <option value="CDD">CDD</option>
             </select>
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("finalSettlementTool.workerCategory")}
             <select
               className="input-shell mt-1"
@@ -166,7 +200,7 @@ export default function FinalSettlementAuditPage() {
               <option value="ouvrier">{t("finalSettlementTool.categoryOuvrier")}</option>
             </select>
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("finalSettlementTool.yearsOfService")}
             <input
               type="number"
@@ -177,7 +211,7 @@ export default function FinalSettlementAuditPage() {
               }
             />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("finalSettlementTool.monthsOfService")}
             <input
               type="number"
@@ -188,7 +222,7 @@ export default function FinalSettlementAuditPage() {
               }
             />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("finalSettlementTool.unusedLeaveDays")}
             <input
               type="number"
@@ -199,7 +233,7 @@ export default function FinalSettlementAuditPage() {
               }
             />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("finalSettlementTool.unpaidSalaryMonths")}
             <input
               type="number"
@@ -210,7 +244,7 @@ export default function FinalSettlementAuditPage() {
               }
             />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("finalSettlementTool.overtimeDue")}
             <input
               type="number"
@@ -222,30 +256,30 @@ export default function FinalSettlementAuditPage() {
             />
           </label>
           <div className="grid gap-2">
-            <label className="flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm">
-              <input
-                type="checkbox"
-                checked={form.noticeAlreadyPaid}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, noticeAlreadyPaid: event.target.checked }))
+            <div className="rounded-2xl bg-[var(--surface-elevated)] p-2">
+              <SmartToggle
+                label={t("finalSettlementTool.noticeAlreadyPaid")}
+                value={form.noticeAlreadyPaid}
+                onChange={(checked) =>
+                  setForm((current) => ({ ...current, noticeAlreadyPaid: checked }))
                 }
               />
-              {t("finalSettlementTool.noticeAlreadyPaid")}
-            </label>
-            <label className="flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm">
-              <input
-                type="checkbox"
-                checked={form.abusiveDismissal}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, abusiveDismissal: event.target.checked }))
+            </div>
+            <div className="rounded-2xl bg-[var(--surface-elevated)] p-2">
+              <SmartToggle
+                label={t("finalSettlementTool.abusiveDismissal")}
+                value={form.abusiveDismissal}
+                onChange={(checked) =>
+                  setForm((current) => ({ ...current, abusiveDismissal: checked }))
                 }
               />
-              {t("finalSettlementTool.abusiveDismissal")}
-            </label>
+            </div>
           </div>
-          <button type="submit" className="btn-primary sm:col-span-2 px-4 py-2.5 text-sm" disabled={loading}>
-            {loading ? t("finalSettlementTool.submitting") : t("finalSettlementTool.submit")}
-          </button>
+          <div className="sticky bottom-2 z-10 rounded-2xl border border-[var(--line)] bg-[var(--surface)]/95 p-2 backdrop-blur sm:col-span-2">
+            <button type="submit" className="btn-primary w-full px-4 py-2.5 text-sm" disabled={loading}>
+              {loading ? t("finalSettlementTool.submitting") : t("finalSettlementTool.submit")}
+            </button>
+          </div>
           {!usable ? (
             <p className="sm:col-span-2 break-words text-xs text-[var(--ink-soft)]">
               {toolPolicy?.enabled === false
@@ -262,11 +296,16 @@ export default function FinalSettlementAuditPage() {
         {result ? (
           <section className="soft-card mt-4 min-w-0 rounded-3xl p-5">
             <p className="section-kicker">{t("finalSettlementTool.result")}</p>
-            <p className="display-font mt-2 break-words text-3xl font-semibold">
-              {t("finalSettlementTool.estimatedDue", {
-                amount: result.breakdown.totalEstimatedDue.toLocaleString(locale),
-              })}
-            </p>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+              <p className="display-font break-words text-3xl font-semibold">
+                {t("finalSettlementTool.estimatedDue", {
+                  amount: result.breakdown.totalEstimatedDue.toLocaleString(locale),
+                })}
+              </p>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskUi(result.level).badge}`}>
+                {t(`finalSettlementTool.${result.level}`)}
+              </span>
+            </div>
             <p className="mt-1 break-words text-sm text-[var(--ink-soft)]">
               {t("finalSettlementTool.riskLevel", {
                 score: result.riskScore,

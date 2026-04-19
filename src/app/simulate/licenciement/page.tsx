@@ -3,16 +3,16 @@ import { buildPageMetadata } from "@/lib/seo";
 import { SimulatorToolPage } from "@/components/simulator-tool-page";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Indemnite Licenciement",
-  description: "Estimation de l'indemnite legale, preavis, conges restants et total.",
+  title: "Calcul Indemnite Licenciement Maroc",
+  description: "Estimez vos indemnites de licenciement au Maroc: indemnite legale, preavis, conges et total de sortie.",
   canonicalPath: "/simulateurs/licenciement",
 });
 
 export default function LicenciementPage() {
   return (
     <SimulatorToolPage
-      title="Indemnite Licenciement"
-      description="Estimation de l'indemnite legale, preavis, conges restants et total."
+      title="Calcul indemnite licenciement Maroc"
+      description="Estimez l'indemnite legale, le preavis, les conges restants et le total de sortie au Maroc."
       apiPath="/api/simulate/licenciement"
       calculatorType="licenciement"
       fields={[

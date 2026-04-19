@@ -67,13 +67,13 @@ const staticPages = [
   "/litiges/salaire-impaye",
   "/litiges/heures-sup-impayees",
   "/litiges/harcelement",
-  "/planifier/comparaison-scenarios",
-  "/planifier/augmentation-salaire",
+  "/carriere/comparaison-scenarios",
+  "/carriere/augmentation-salaire",
   "/planifier/simulation-prime",
   "/planifier/igr-detail",
   "/planifier/avantages-nature",
-  "/planifier/scenario-promotion",
-  "/planifier/freelance-vs-salarie",
+  "/carriere/promotion",
+  "/carriere/freelance-vs-salarie",
   "/planifier/capacite-credit",
   "/planifier/indemnite-chomage",
   "/planifier/retraite-avancee",
@@ -81,7 +81,7 @@ const staticPages = [
   "/planifier/masse-salariale",
   "/planifier/cout-recrutement",
   "/planifier/optimisation-remuneration",
-  "/planifier/auto-entrepreneur",
+  "/carriere/auto-entrepreneur",
   "/planifier/tarification-freelance",
   "/planifier/benefice-net",
   "/rh-pro/cout-employeur-total",
@@ -105,7 +105,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ? "daily"
         : path.startsWith("/journal")
           ? "daily"
-          : path === "/simulateurs" || path === "/planifier" || path === "/documents" || path === "/bibliotheque"
+        : path === "/simulateurs" || path === "/planifier" || path === "/documents" || path === "/bibliotheque"
             ? "monthly"
             : "weekly",
     priority:

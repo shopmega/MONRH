@@ -40,14 +40,14 @@ export default function SimulateLayout({
 }>) {
   return (
     <SectionLayoutWrapper
-      indexPath="/simulateurs"
+      indexPath="/simulate"
       sidebarProps={{
         title: { fr: "Simulateurs", ar: "المحاكيات" },
         groups: simulatorSidebarGroups.map(group => ({
           title: group.title,
           items: [...group.items]
         })),
-        backHref: "/simulateurs",
+        backHref: "/simulate",
         backLabel: { fr: "Retour simulateurs", ar: "الرجوع إلى المحاكيات" },
       }}
     >
@@ -55,3 +55,4 @@ export default function SimulateLayout({
     </SectionLayoutWrapper>
   );
 }
+

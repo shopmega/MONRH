@@ -5,7 +5,7 @@ import { EnhancedSimulatorToolPage } from "@/components/enhanced-simulator-tool-
 export const metadata: Metadata = buildPageMetadata({
   title: "Indemnité Licenciement Améliorée",
   description: "Calcul des indemnités de licenciement avec motifs et contexte juridique complet.",
-  canonicalPath: "/simulateurs/licenciement-ameliore",
+  canonicalPath: "/simulateurs/licenciement-avance",
 });
 
 export default function LicenciementEnhancedPage() {

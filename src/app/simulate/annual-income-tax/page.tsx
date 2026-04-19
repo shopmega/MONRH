@@ -3,16 +3,16 @@ import { buildPageMetadata } from "@/lib/seo";
 import { SimulatorToolPage } from "@/components/simulator-tool-page";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "IR Annuel",
-  description: "Simulation annuelle de l'impot sur le revenu avec bonus et 13e mois.",
+  title: "Calcul IR Maroc et Cotisations CNSS",
+  description: "Simulez votre impot sur le revenu au Maroc avec salaire annuel, bonus, 13e mois et charges sociales.",
   canonicalPath: "/simulateurs/ir-annuel",
 });
 
 export default function AnnualIncomeTaxPage() {
   return (
     <SimulatorToolPage
-      title="IR Annuel"
-      description="Simulation annuelle de l'impot sur le revenu avec bonus et 13e mois."
+      title="Calcul IR Maroc"
+      description="Calculez l'impot sur le revenu au Maroc avec salaire annuel, bonus, 13e mois et charges sociales."
       apiPath="/api/simulate/annual-income-tax"
       calculatorType="annual_income_tax"
       fields={[

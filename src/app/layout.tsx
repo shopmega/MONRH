@@ -7,6 +7,7 @@ import { MaintenanceBanner } from "@/components/maintenance-banner";
 import { PublicConfigProvider } from "@/components/public-config-provider";
 import { PwaRegistration } from "@/components/pwa-registration";
 import { SiteNav } from "@/components/site-nav";
+import { CommandCenter } from "@/components/command-center";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
   DEFAULT_OG_IMAGE_ALT,
@@ -17,13 +18,19 @@ import {
   absoluteUrl,
 } from "@/lib/seo";
 import { readAdminConfig } from "@/lib/server/admin-config";
-import { Inter } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-manrope",
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -91,6 +98,13 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
     },
     manifest: "/manifest.webmanifest",
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "64x64" },
+        { url: "/logo.svg", type: "image/svg+xml" },
+      ],
+      apple: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+    },
     other: {
       "theme-color": "#0f172a",
       ...(adsenseClient ? { "google-adsense-account": adsenseClient } : {}),
@@ -123,43 +137,49 @@ export default async function RootLayout({
   const supportEmail = config.websiteSettings.supportEmail.trim();
   const logoUrl = config.websiteSettings.logoUrl.trim();
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() ?? "";
+  const organizationId = absoluteUrl("/#organization");
+  const websiteId = absoluteUrl("/#website");
+  const rootJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": organizationId,
+        name: siteName,
+        url: SITE_URL,
+        ...(logoUrl ? { logo: absoluteUrl(logoUrl) } : {}),
+        ...(supportEmail ? { email: supportEmail } : {}),
+        ...(sameAs.length > 0 ? { sameAs } : {}),
+      },
+      {
+        "@type": "WebSite",
+        "@id": websiteId,
+        name: siteName,
+        url: SITE_URL,
+        inLanguage: ["fr-MA", "ar-MA"],
+        description: siteDescription,
+        publisher: {
+          "@id": organizationId,
+        },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${SITE_URL}/articles?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
 
   return (
     <html lang={initialLanguage} dir={initialLanguage === "ar" ? "rtl" : "ltr"} data-theme={initialTheme}>
       <head>
         {adsenseClient ? <meta name="google-adsense-account" content={adsenseClient} /> : null}
       </head>
-      <body className={`${inter.variable} antialiased bg-[var(--background)] text-[var(--foreground)]`}>
+      <body className={`${inter.variable} ${manrope.variable} antialiased bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--juris-primary-container)] selection:text-white`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: siteName,
-              url: SITE_URL,
-              inLanguage: ["fr-MA", "ar-MA"],
-              description: siteDescription,
-              potentialAction: {
-                "@type": "SearchAction",
-                target: `${SITE_URL}/articles?q={search_term_string}`,
-                "query-input": "required name=search_term_string",
-              },
-            }),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: siteName,
-              url: SITE_URL,
-              ...(logoUrl ? { logo: logoUrl } : {}),
-              ...(supportEmail ? { email: supportEmail } : {}),
-              ...(sameAs.length > 0 ? { sameAs } : {}),
-            }),
+            __html: JSON.stringify(rootJsonLd),
           }}
         />
         <LanguageProvider initialLanguage={initialLanguage}>
@@ -170,6 +190,7 @@ export default async function RootLayout({
               <AdsenseScript />
               <MaintenanceBanner />
               <SiteNav />
+              <CommandCenter />
               <div className="pb-24 md:pb-8">{children}</div>
             </PublicConfigProvider>
           </ThemeProvider>

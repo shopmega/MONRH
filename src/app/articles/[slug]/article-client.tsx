@@ -1,11 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import type { ImageProps } from "next/image";
 import { useState, useEffect } from "react";
 import { AdSlot } from "@/components/ad-slot";
 import { RelatedContent } from "@/components/related-content";
 import { renderArticleContentBlocks } from "@/lib/articles/content-render";
 import type { Article } from "@/lib/content/home-content";
+
+type RelatedItem = {
+  title: string;
+  description: string;
+  href: string;
+};
 
 // Image placeholder component
 function ImagePlaceholder({ className }: { className?: string }) {
@@ -19,7 +26,12 @@ function ImagePlaceholder({ className }: { className?: string }) {
 }
 
 // Safe image component with fallback
-function SafeImage({ src, alt, className, ...props }: any) {
+type SafeImageProps = Omit<ImageProps, "src" | "alt"> & {
+  src?: string;
+  alt: string;
+};
+
+function SafeImage({ src, alt, className, ...props }: SafeImageProps) {
   const [hasError, setHasError] = useState(false);
 
   if (hasError || !src) {
@@ -48,11 +60,11 @@ function categoryName(slug: string) {
 interface ArticleClientProps {
   article: Article;
   coverImage: string;
-  articleJsonLd: any;
+  articleJsonLd: Record<string, unknown>;
 }
 
 export function ArticleClient({ article, coverImage, articleJsonLd }: ArticleClientProps) {
-  const [relatedItems, setRelatedItems] = useState<any[]>([]);
+  const [relatedItems, setRelatedItems] = useState<RelatedItem[]>([]);
 
   useEffect(() => {
     const loadRelated = async () => {
@@ -64,7 +76,14 @@ export function ArticleClient({ article, coverImage, articleJsonLd }: ArticleCli
         }
         const data = await response.json();
         if (data.ok && Array.isArray(data.items)) {
-          setRelatedItems(data.items);
+          setRelatedItems(
+            data.items.filter(
+              (item: Partial<RelatedItem>) =>
+                typeof item.title === "string" &&
+                typeof item.description === "string" &&
+                typeof item.href === "string",
+            ),
+          );
         } else {
           setRelatedItems([]);
         }

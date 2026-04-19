@@ -3,16 +3,16 @@ import { buildPageMetadata } from "@/lib/seo";
 import { SimulatorToolPage } from "@/components/simulator-tool-page";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Scenario Demission",
-  description: "Estimation de l'impact financier d'une demission.",
+  title: "Demissionner au Maroc: Droits et Preavis",
+  description: "Simulez vos droits apres demission au Maroc: preavis, conges restants et impact financier.",
   canonicalPath: "/simulateurs/demission",
 });
 
 export default function DemissionPage() {
   return (
     <SimulatorToolPage
-      title="Scenario Demission"
-      description="Estimation de l'impact financier d'une demission."
+      title="Demissionner au Maroc"
+      description="Estimez vos droits apres demission: preavis, conges restants et impact financier."
       apiPath="/api/simulate/demission"
       calculatorType="demission"
       fields={[

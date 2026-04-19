@@ -5,7 +5,7 @@ import { EnhancedSimulatorToolPage } from "@/components/enhanced-simulator-tool-
 export const metadata: Metadata = buildPageMetadata({
   title: "Calculateur Brut/Net Amélioré",
   description: "Calcul du salaire brut/net avec situation familiale et avantages légaux.",
-  canonicalPath: "/simulateurs/net-gross-ameliore",
+  canonicalPath: "/simulateurs/brut-net-avance",
 });
 
 export default function NetGrossEnhancedPage() {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
+import { SmartToggle } from "@/components/ui/smart-inputs";
 import { buildToolResultDocumentLinks } from "@/lib/tools/result-document-links";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
 
@@ -21,7 +22,7 @@ type Result = {
 };
 
 export default function PreLitigationTimelinePage() {
-  const { t, locale, language } = useLanguage();
+  const { t, locale } = useLanguage();
   const [form, setForm] = useState({
     incidentDate: "2026-02-01",
     scenario: "salary_delay",
@@ -36,7 +37,12 @@ export default function PreLitigationTimelinePage() {
   const toolPolicy = resolveToolPolicy(config.toolPolicies, "pre_litigation_timeline");
   const userAuthenticated = config.userAuthenticated;
   const usable = canUseTool(toolPolicy, userAuthenticated);
-  const relatedModelsLabel = language === "ar" ? "نماذج مفيدة" : "Modeles utiles";
+  const relatedModelsLabel = t("toolsPage.relatedDocuments");
+  const checklist = [
+    "Precisez la date exacte de l'incident.",
+    "Selectionnez le scenario le plus proche du cas reel.",
+    "Indiquez l'etat des preuves avant generation du planning.",
+  ];
   const relatedDocs = result
     ? buildToolResultDocumentLinks({
         toolId: "pre_litigation_timeline",
@@ -82,10 +88,32 @@ export default function PreLitigationTimelinePage() {
           <p className="section-kicker">{t("timelineTool.kicker")}</p>
           <h1 className="display-font mt-2 break-words text-4xl font-semibold">{t("timelineTool.title")}</h1>
           <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">{t("timelineTool.description")}</p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Sortie</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Roadmap d'action</p>
+            </article>
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Priorisation</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Risque + delais</p>
+            </article>
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Docs lies</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Modeles pre-remplis</p>
+            </article>
+          </div>
         </section>
 
         <form onSubmit={onSubmit} className="soft-card mt-5 grid gap-3 rounded-3xl p-5 sm:grid-cols-2">
-          <label className="block text-sm font-semibold">
+          <div className="panel-strong rounded-2xl p-4 sm:col-span-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">Checklist avant generation</p>
+            <ul className="mt-2 space-y-1 text-sm text-[var(--ink-soft)]">
+              {checklist.map((line) => (
+                <li key={line}>- {line}</li>
+              ))}
+            </ul>
+          </div>
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("timelineTool.incidentDate")}
             <input
               className="input-shell mt-1"
@@ -96,7 +124,7 @@ export default function PreLitigationTimelinePage() {
               }
             />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("timelineTool.scenario")}
             <select
               className="input-shell mt-1"
@@ -110,42 +138,39 @@ export default function PreLitigationTimelinePage() {
               <option value="harassment">{t("timelineTool.scenario_harassment")}</option>
             </select>
           </label>
-          <label className="flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm">
-            <input
-              type="checkbox"
-              checked={form.evidenceReady}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, evidenceReady: event.target.checked }))
-              }
+          <div className="rounded-2xl bg-[var(--surface-elevated)] p-2">
+            <SmartToggle
+              label={t("timelineTool.evidenceReady")}
+              value={form.evidenceReady}
+              onChange={(checked) => setForm((current) => ({ ...current, evidenceReady: checked }))}
             />
-            {t("timelineTool.evidenceReady")}
-          </label>
-          <label className="flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm">
-            <input
-              type="checkbox"
-              checked={form.internalResolutionAttempted}
-              onChange={(event) =>
+          </div>
+          <div className="rounded-2xl bg-[var(--surface-elevated)] p-2">
+            <SmartToggle
+              label={t("timelineTool.internalAttempted")}
+              value={form.internalResolutionAttempted}
+              onChange={(checked) =>
                 setForm((current) => ({
                   ...current,
-                  internalResolutionAttempted: event.target.checked,
+                  internalResolutionAttempted: checked,
                 }))
               }
             />
-            {t("timelineTool.internalAttempted")}
-          </label>
-          <label className="flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm sm:col-span-2">
-            <input
-              type="checkbox"
-              checked={form.urgentFinancialPressure}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, urgentFinancialPressure: event.target.checked }))
+          </div>
+          <div className="rounded-2xl bg-[var(--surface-elevated)] p-2 sm:col-span-2">
+            <SmartToggle
+              label={t("timelineTool.urgentPressure")}
+              value={form.urgentFinancialPressure}
+              onChange={(checked) =>
+                setForm((current) => ({ ...current, urgentFinancialPressure: checked }))
               }
             />
-            {t("timelineTool.urgentPressure")}
-          </label>
-          <button className="btn-primary sm:col-span-2 px-4 py-2.5 text-sm" disabled={loading} type="submit">
-            {loading ? t("timelineTool.submitting") : t("timelineTool.submit")}
-          </button>
+          </div>
+          <div className="sticky bottom-2 z-10 rounded-2xl border border-[var(--line)] bg-[var(--surface)]/95 p-2 backdrop-blur sm:col-span-2">
+            <button className="btn-primary w-full px-4 py-2.5 text-sm" disabled={loading} type="submit">
+              {loading ? t("timelineTool.submitting") : t("timelineTool.submit")}
+            </button>
+          </div>
           {!usable ? (
             <p className="sm:col-span-2 break-words text-xs text-[var(--ink-soft)]">
               {toolPolicy?.enabled === false
@@ -161,9 +186,14 @@ export default function PreLitigationTimelinePage() {
 
         {result ? (
           <section className="soft-card mt-4 min-w-0 rounded-3xl p-5">
-            <p className="display-font break-words text-3xl font-semibold">
-              {t("timelineTool.risk", { score: result.riskScore, level: t(`timelineTool.${result.level}`) })}
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="display-font break-words text-3xl font-semibold">
+                {t("timelineTool.risk", { score: result.riskScore, level: t(`timelineTool.${result.level}`) })}
+              </p>
+              <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                {result.steps.length} etape(s)
+              </span>
+            </div>
             <p className="mt-1 break-words text-sm text-[var(--ink-soft)]">{t("timelineTool.timelineTitle")}</p>
             <div className="mt-4 space-y-3">
               {result.steps.map((step, index) => (

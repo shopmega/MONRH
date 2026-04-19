@@ -3,16 +3,16 @@ import { buildPageMetadata } from "@/lib/seo";
 import { SimulatorToolPage } from "@/components/simulator-tool-page";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Duree de Preavis",
-  description: "Calcul de la duree de preavis selon type de contrat, categorie et anciennete.",
+  title: "Calcul Preavis Demission Maroc",
+  description: "Calculez la duree de preavis au Maroc selon le contrat, la categorie professionnelle et l'anciennete.",
   canonicalPath: "/simulateurs/duree-preavis",
 });
 
 export default function DureePreavisPage() {
   return (
     <SimulatorToolPage
-      title="Duree de Preavis"
-      description="Calculez le preavis requis (CDI ou CDD) selon la categorie professionnelle."
+      title="Calcul preavis demission Maroc"
+      description="Calculez le preavis requis en CDI ou CDD selon la categorie professionnelle et l'anciennete."
       apiPath="/api/simulate/duree-preavis"
       calculatorType="duree_preavis"
       fields={[

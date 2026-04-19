@@ -39,10 +39,10 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       fr: "Comprendre ma fiche de paie",
       ar: "فهم ورقة أجري",
     },
-    featuredHref: "/simulateurs/brut-net",
+    featuredHref: "/planifier/bulletin-paie",
     featuredDescription: {
-      fr: "Le point d'entree le plus simple pour verifier net, brut, IR et cotisations.",
-      ar: "أسهل نقطة انطلاق للتحقق من الصافي والإجمالي والضريبة والاقتطاعات.",
+      fr: "Generez un bulletin de paie detaille et conforme a la legislation marocaine.",
+      ar: "أنشئ ورقة أجر مفصلة ومطابقة للتشريع المغربي.",
     },
     links: [
       {
@@ -73,7 +73,7 @@ export const CATEGORY_HUBS: Record<string, CategoryHub> = {
       {
         title: { fr: "Bulletin de paie", ar: "ورقة الأجر" },
         description: { fr: "Generez un bulletin detaille et conforme.", ar: "أنشئ ورقة أجر مفصلة ومطابقة." },
-        href: "/salaire/bulletin-paie",
+        href: "/planifier/bulletin-paie",
       },
     ],
   },

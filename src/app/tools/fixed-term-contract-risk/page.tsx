@@ -20,7 +20,7 @@ type Result = {
 };
 
 export default function FixedTermContractRiskPage() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     contractReasonDocumented: true,
     contractHasEndDate: true,
@@ -38,13 +38,24 @@ export default function FixedTermContractRiskPage() {
   const toolPolicy = resolveToolPolicy(config.toolPolicies, "fixed_term_contract_risk");
   const userAuthenticated = config.userAuthenticated;
   const usable = canUseTool(toolPolicy, userAuthenticated);
-  const relatedModelsLabel = language === "ar" ? "نماذج مفيدة" : "Modeles utiles";
+  const relatedModelsLabel = t("toolsPage.relatedDocuments");
+  const checklist = [
+    "Confirmez le motif legal et la duree du CDD.",
+    "Renseignez les renouvellements et la periode d'essai.",
+    "Verifiez les clauses salariales et la signature des parties.",
+  ];
   const relatedDocs = result
     ? buildToolResultDocumentLinks({
         toolId: "fixed_term_contract_risk",
         result,
       })
     : [];
+
+  function getRiskUi(level: Result["level"]) {
+    if (level === "high") return { badge: "bg-[#fde8e8] text-[#b42318]", label: "Risque Eleve" };
+    if (level === "medium") return { badge: "bg-[#fff4e5] text-[#b54708]", label: "Risque Moyen" };
+    return { badge: "bg-[#e8f6ed] text-[#067647]", label: "Risque Faible" };
+  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -89,9 +100,31 @@ export default function FixedTermContractRiskPage() {
           <p className="section-kicker">{t("cddRiskTool.kicker")}</p>
           <h1 className="display-font mt-2 break-words text-4xl font-semibold">{t("cddRiskTool.title")}</h1>
           <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">{t("cddRiskTool.description")}</p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Analyse</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Risque de requalification</p>
+            </article>
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Sortie</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Score + recommandations</p>
+            </article>
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Actions</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Modeles lies</p>
+            </article>
+          </div>
         </section>
 
         <form onSubmit={onSubmit} className="soft-card mt-5 space-y-6 rounded-3xl p-5 sm:p-7">
+          <div className="panel-strong rounded-2xl p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">Checklist avant verification</p>
+            <ul className="mt-2 space-y-1 text-sm text-[var(--ink-soft)]">
+              {checklist.map((line) => (
+                <li key={line}>- {line}</li>
+              ))}
+            </ul>
+          </div>
           <div className="grid gap-4">
             {[
               "contractReasonDocumented",
@@ -100,14 +133,15 @@ export default function FixedTermContractRiskPage() {
               "salaryAndHoursClear",
               "signedByBothParties",
             ].map((key) => (
-              <SmartToggle
-                key={key}
-                label={t(`cddRiskTool.${key}`)}
-                value={form[key as keyof typeof form] as boolean}
-                onChange={(checked) =>
-                  setForm((current) => ({ ...current, [key]: checked }))
-                }
-              />
+              <div key={key} className="rounded-2xl bg-[var(--surface-elevated)] p-2">
+                <SmartToggle
+                  label={t(`cddRiskTool.${key}`)}
+                  value={form[key as keyof typeof form] as boolean}
+                  onChange={(checked) =>
+                    setForm((current) => ({ ...current, [key]: checked }))
+                  }
+                />
+              </div>
             ))}
           </div>
 
@@ -134,9 +168,11 @@ export default function FixedTermContractRiskPage() {
               max={90}
             />
           </div>
-          <button className="btn-primary w-full px-4 py-2.5 text-sm" disabled={loading} type="submit">
-            {loading ? t("cddRiskTool.submitting") : t("cddRiskTool.submit")}
-          </button>
+          <div className="sticky bottom-2 z-10 rounded-2xl border border-[var(--line)] bg-[var(--surface)]/95 p-2 backdrop-blur">
+            <button className="btn-primary w-full px-4 py-2.5 text-sm" disabled={loading} type="submit">
+              {loading ? t("cddRiskTool.submitting") : t("cddRiskTool.submit")}
+            </button>
+          </div>
           {!usable ? (
             <p className="break-words text-xs text-[var(--ink-soft)]">
               {toolPolicy?.enabled === false
@@ -152,17 +188,34 @@ export default function FixedTermContractRiskPage() {
 
         {result ? (
           <section className="soft-card mt-4 min-w-0 rounded-3xl p-5">
-            <p className="display-font break-words text-3xl font-semibold">
-              {t("cddRiskTool.risk", { score: result.riskScore })}
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="display-font break-words text-3xl font-semibold">
+                {t("cddRiskTool.risk", { score: result.riskScore })}
+              </p>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskUi(result.level).badge}`}>
+                {getRiskUi(result.level).label}
+              </span>
+            </div>
             <p className="mt-1 break-words text-sm text-[var(--ink-soft)]">
               {t("cddRiskTool.level", { level: t(`cddRiskTool.${result.level}`) })}
             </p>
-            <ul className="mt-4 list-disc space-y-1 break-words pl-5 text-sm">
+            <ul className="mt-4 space-y-2 break-words text-sm">
               {result.recommendationCodes.map((code) => (
-                <li key={code}>{t(`cddRiskTool.reco_${code}`)}</li>
+                <li key={code} className="panel-strong rounded-xl p-3">{t(`cddRiskTool.reco_${code}`)}</li>
               ))}
             </ul>
+            {result.issues.length > 0 ? (
+              <div className="mt-4 space-y-2">
+                {result.issues.map((issue) => (
+                  <article key={issue.code} className="panel-strong rounded-xl p-3 text-sm">
+                    <p className="font-semibold">
+                      {issue.code} ({t(`cddRiskTool.${issue.severity}`)})
+                    </p>
+                    <p className="mt-1 text-[var(--ink-soft)]">{issue.message}</p>
+                  </article>
+                ))}
+              </div>
+            ) : null}
             {relatedDocs.length > 0 ? (
               <div className="mt-5 rounded-2xl border border-[var(--line)] bg-[var(--surface-elevated)] p-4">
                 <p className="section-kicker">{relatedModelsLabel}</p>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">MON RH</title>
+  <desc id="desc">Theme-aware MON RH balance mark</desc>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --mark-bg: #8a5022;
+      --mark-bg-2: #c6824f;
+      --mark-fg: #ffffff;
+      --mark-line: rgba(255, 255, 255, 0.7);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --mark-bg: #ffb783;
+        --mark-bg-2: #6d390b;
+        --mark-fg: #462000;
+        --mark-line: rgba(70, 32, 0, 0.55);
+      }
+    }
+  </style>
+  <rect width="64" height="64" rx="14" fill="var(--mark-bg)" />
+  <path d="M12 50h40" stroke="var(--mark-fg)" stroke-width="4" stroke-linecap="round" />
+  <path d="M32 15v35" stroke="var(--mark-fg)" stroke-width="4" stroke-linecap="round" />
+  <path d="M18 22h28" stroke="var(--mark-fg)" stroke-width="4" stroke-linecap="round" />
+  <path d="M18 22l-7 17h14l-7-17Z" fill="none" stroke="var(--mark-fg)" stroke-width="3" stroke-linejoin="round" />
+  <path d="M46 22l-7 17h14l-7-17Z" fill="none" stroke="var(--mark-fg)" stroke-width="3" stroke-linejoin="round" />
+  <path d="M25 50h14" stroke="var(--mark-bg-2)" stroke-width="4" stroke-linecap="round" />
+  <path d="M17 27h2M45 27h2M30 20h4" stroke="var(--mark-line)" stroke-width="2" stroke-linecap="round" />
+</svg>

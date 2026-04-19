@@ -25,7 +25,7 @@ export async function generateMetadata({
   const coverImage =
     article.coverImageUrl || article.thumbnailUrl || config.websiteSettings.defaultArticleCoverUrl.trim();
   const siteName = config.websiteSettings.siteName.trim() || SITE_NAME;
-  const imageUrl = buildOgImageUrl(article.title, description, siteName);
+  const imageUrl = coverImage ? absoluteUrl(coverImage) : buildOgImageUrl(article.title, description, siteName);
   return {
     title: article.title,
     description,
@@ -85,25 +85,35 @@ export default async function ArticlePage({
   const coverImage =
     article.coverImageUrl || article.thumbnailUrl || config.websiteSettings.defaultArticleCoverUrl.trim();
   const siteName = config.websiteSettings.siteName.trim() || SITE_NAME;
+  const logoUrl = config.websiteSettings.logoUrl.trim();
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "@id": absoluteUrl(`${article.href}#article`),
     headline: article.title,
     description: article.excerpt,
     url: absoluteUrl(article.href),
+    inLanguage: "fr-MA",
+    isAccessibleForFree: (article.access ?? "public") === "public",
     datePublished: article.lastUpdated,
     dateModified: article.lastUpdated,
     author: {
       "@type": "Organization",
+      "@id": absoluteUrl("/#organization"),
       name: siteName,
     },
     publisher: {
       "@type": "Organization",
+      "@id": absoluteUrl("/#organization"),
       name: siteName,
-      logo: {
-        "@type": "ImageObject",
-        url: absoluteUrl(config.websiteSettings.logoUrl.trim() || ""),
-      },
+      ...(logoUrl
+        ? {
+            logo: {
+              "@type": "ImageObject",
+              url: absoluteUrl(logoUrl),
+            },
+          }
+        : {}),
     },
     mainEntityOfPage: {
       "@type": "WebPage",
@@ -113,12 +123,6 @@ export default async function ArticlePage({
   };
 
   return (
-    <main>
-      <article>
-        <section>
-          <ArticleClient article={article} coverImage={coverImage} articleJsonLd={articleJsonLd} />
-        </section>
-      </article>
-    </main>
+    <ArticleClient article={article} coverImage={coverImage} articleJsonLd={articleJsonLd} />
   );
 }

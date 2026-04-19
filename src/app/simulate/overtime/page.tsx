@@ -3,16 +3,16 @@ import { buildPageMetadata } from "@/lib/seo";
 import { SimulatorToolPage } from "@/components/simulator-tool-page";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Heures Supplementaires",
-  description: "Calculez les majorations jour, nuit, weekend et jours feries.",
+  title: "Majoration Salaire Maroc: Heures Supplementaires",
+  description: "Calculez les majorations de salaire au Maroc pour heures supplementaires, nuit, weekend et jours feries.",
   canonicalPath: "/simulateurs/heures-supplementaires",
 });
 
 export default function OvertimePage() {
   return (
     <SimulatorToolPage
-      title="Heures Supplementaires"
-      description="Calculez les majorations jour, nuit, weekend et jours feries."
+      title="Majoration salaire Maroc"
+      description="Calculez les majorations pour heures supplementaires de jour, nuit, weekend et jours feries."
       apiPath="/api/simulate/overtime"
       calculatorType="overtime"
       fields={[

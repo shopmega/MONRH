@@ -252,6 +252,10 @@ export default function SimulatePage() {
   );
 
   const [searchQuery, setSearchQuery] = useState("");
+  const totalVisibleSimulators = useMemo(
+    () => visibleGroups.reduce((count, group) => count + group.items.length, 0),
+    [visibleGroups],
+  );
 
   const filteredGroups = useMemo(() => {
     if (!searchQuery.trim()) return visibleGroups;
@@ -272,7 +276,7 @@ export default function SimulatePage() {
   }, [visibleGroups, searchQuery]);
 
   return (
-    <main className="paper-bg min-h-screen">
+    <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
         <section className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">{t("simulatePage.kicker")}</p>
@@ -282,6 +286,37 @@ export default function SimulatePage() {
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--ink-soft)]">
             {t("simulatePage.description")}
           </p>
+          <div className="mt-5 grid gap-2 sm:grid-cols-3">
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "Ø§Ù„Ù…Ø³Ø§Ø±Ø§Øª Ø§Ù„Ù†Ø´Ø·Ø©" : "Parcours actifs"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">{visibleGroups.length}</p>
+            </article>
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…Ø­Ø§ÙƒÙŠØ§Øª" : "Simulateurs"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">{totalVisibleSimulators}</p>
+            </article>
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "Ø§Ù„Ø§Ø±ØªØ¨Ø§Ø·Ø§Øª" : "Connexions"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">Tools + Docs</p>
+            </article>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/outils" className="rounded-full bg-[var(--juris-surface-low)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]">
+              {t("nav.tools")}
+            </Link>
+            <Link href="/documents" className="rounded-full bg-[var(--juris-surface-low)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]">
+              {t("nav.documents")}
+            </Link>
+            <Link href="/contrat" className="rounded-full bg-[var(--juris-surface-low)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]">
+              {language === "ar" ? "Ù…ÙˆÙ„Ø¯ Ø§Ù„Ø¹Ù‚ÙˆØ¯" : "Generateur de contrats"}
+            </Link>
+          </div>
           <div className="mt-6">
             <div className="relative max-w-xl">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
@@ -294,7 +329,7 @@ export default function SimulatePage() {
                 placeholder={t("common.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full rounded-2xl border border-[var(--line)] bg-[var(--surface)] py-3.5 pl-11 pr-4 text-sm font-medium focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                className="block w-full rounded-2xl border border-transparent bg-[var(--juris-surface-low)] py-3.5 pl-11 pr-4 text-sm font-medium focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
               />
             </div>
           </div>
@@ -312,7 +347,7 @@ export default function SimulatePage() {
             filteredGroups.map((group, groupIndex) => (
               <section
                 key={group.titleKey}
-                className={`rounded-3xl p-5 ${groupIndex % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
+                className={`rounded-3xl p-5 ${groupIndex % 2 === 0 ? "soft-card" : "panel-tonal"}`}
               >
                 <div className="mb-4">
                   <p className="section-kicker">{t(group.titleKey)}</p>
@@ -324,7 +359,7 @@ export default function SimulatePage() {
                   {group.items.map((item, index) => (
                     <article
                       key={item.href}
-                      className={`rounded-2xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
+                      className={`rounded-2xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-tonal"}`}
                     >
                       <h2 className="display-font text-xl font-semibold leading-tight">{item.title[language]}</h2>
                       <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">{item.description[language]}</p>
@@ -333,7 +368,7 @@ export default function SimulatePage() {
                           {t("common.open")}
                         </Link>
                       ) : (
-                        <div className="mt-4 rounded-xl border border-[var(--line)] bg-[var(--surface-muted)] px-3 py-2 text-xs text-[var(--ink-soft)]">
+                        <div className="mt-4 rounded-xl bg-[var(--juris-surface-low)] px-3 py-2 text-xs text-[var(--ink-soft)]">
                           {resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)).enabled
                             ? "Reserve aux utilisateurs connectes."
                             : "Desactive par administration."}
@@ -399,9 +434,9 @@ export default function SimulatePage() {
         </section>
 
         {/* Cross-section Links */}
-        <section className="mt-12 border-t border-[var(--line)] pt-12">
+        <section className="soft-card mt-10 rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker text-center">{t("common.exploreSections")}</p>
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          <div className="mt-6 grid gap-6 sm:grid-cols-3">
             <Link href="/planifier" className="soft-card group rounded-[2rem] p-6 transition-all hover:-translate-y-1">
               <p className="section-kicker">{t("nav.plan")}</p>
               <h3 className="display-font mt-2 text-xl font-bold">{language === "ar" ? "تخطيط مستقبلي" : "Planification Pro"}</h3>

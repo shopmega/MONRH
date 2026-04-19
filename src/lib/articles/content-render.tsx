@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 const AUTO_LINK_REGEX =
-  /((?:https?:\/\/[^\s]+)|(?:\/(?:simulateurs|simulate|documents|bibliotheque|articles|tools|outils|salaire|contrat-depart|conges-cnss|litiges|modeles|carriere|rh-pro)\/[a-z0-9\-_/]+))/gi;
+  /((?:https?:\/\/[^\s]+)|(?:\/(?:simulateurs|documents|bibliotheque|articles|sujets|outils|salaire|contrat-depart|conges-cnss|litiges|modeles|carriere|rh-pro)\/[a-z0-9\-_/]+))/gi;
 
 function titleCaseWords(value: string): string {
   return value
@@ -56,7 +56,10 @@ function friendlyLabelForHref(href: string): string {
   if (section === "articles") {
     return slugLabel ? `Article ${slugLabel}` : "Article";
   }
-  if (section === "tools" || section === "outils") {
+  if (section === "sujets") {
+    return slugLabel ? `Guide ${slugLabel}` : "Guide";
+  }
+  if (section === "outils") {
     return slugLabel ? `Outil ${slugLabel}` : "Outil";
   }
 
@@ -151,16 +154,25 @@ export function renderArticleContentBlocks(blocks: string[], keyPrefix: string):
     if (lines.length === 0) return;
 
     const singleLine = lines.join(" ");
-    const headingMatch = singleLine.match(/^#{1,2}\s+(.+)$/);
+    const headingMatch = singleLine.match(/^(#{1,3})\s+(.+)$/);
 
     if (headingMatch) {
-      const headingContent = headingMatch[1].trim();
+      const headingLevel = headingMatch[1].length;
+      const headingContent = headingMatch[2].trim();
       const { lead, items } = splitBulletTrail(headingContent);
-      rendered.push(
-        <h2 key={`${keyPrefix}-h2-${blockIndex}`} className="text-xl font-semibold leading-tight">
-          {renderInline(lead, `${keyPrefix}-h2-inline-${blockIndex}`)}
-        </h2>,
-      );
+      if (headingLevel >= 3) {
+        rendered.push(
+          <h3 key={`${keyPrefix}-h3-${blockIndex}`} className="text-lg font-semibold leading-tight">
+            {renderInline(lead, `${keyPrefix}-h3-inline-${blockIndex}`)}
+          </h3>,
+        );
+      } else {
+        rendered.push(
+          <h2 key={`${keyPrefix}-h2-${blockIndex}`} className="text-xl font-semibold leading-tight">
+            {renderInline(lead, `${keyPrefix}-h2-inline-${blockIndex}`)}
+          </h2>,
+        );
+      }
       if (items.length > 0) {
         rendered.push(
           <ul key={`${keyPrefix}-ul-${blockIndex}`} className="list-disc space-y-1 pl-5">
@@ -185,6 +197,20 @@ export function renderArticleContentBlocks(blocks: string[], keyPrefix: string):
             </li>
           ))}
         </ul>,
+      );
+      return;
+    }
+
+    const allNumberedLines = lines.every((line) => /^\d+\.\s+/.test(line));
+    if (allNumberedLines) {
+      rendered.push(
+        <ol key={`${keyPrefix}-ol-lines-${blockIndex}`} className="list-decimal space-y-1 pl-5">
+          {lines.map((line, itemIndex) => (
+            <li key={`${keyPrefix}-line-oli-${blockIndex}-${itemIndex}`}>
+              {renderInline(line.replace(/^\d+\.\s+/, ""), `${keyPrefix}-line-ol-inline-${blockIndex}-${itemIndex}`)}
+            </li>
+          ))}
+        </ol>,
       );
       return;
     }

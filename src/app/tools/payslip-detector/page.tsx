@@ -41,6 +41,17 @@ export default function PayslipDetectorPage() {
   const toolPolicy = resolveToolPolicy(config.toolPolicies, "payslip_detector");
   const userAuthenticated = config.userAuthenticated;
   const usable = canUseTool(toolPolicy, userAuthenticated);
+  const checklist = [
+    "Utilisez les valeurs du bulletin du meme mois.",
+    "Renseignez brut, net et retenues sans approximation.",
+    "Ajoutez les heures supplementaires si elles existent.",
+  ];
+
+  function getRiskBadge(score: number) {
+    if (score >= 70) return "bg-[#fde8e8] text-[#b42318]";
+    if (score >= 40) return "bg-[#fff4e5] text-[#b54708]";
+    return "bg-[#e8f6ed] text-[#067647]";
+  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -90,40 +101,64 @@ export default function PayslipDetectorPage() {
           <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
             {t("payslipTool.description")}
           </p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Entrees</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">7 champs</p>
+            </article>
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Analyse</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Ecart brut/net</p>
+            </article>
+            <article className="panel-strong rounded-xl p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">Sortie</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">Score + anomalies</p>
+            </article>
+          </div>
         </section>
 
         <form onSubmit={onSubmit} className="soft-card mt-5 grid gap-3 rounded-3xl p-5 sm:grid-cols-2">
-          <label className="block text-sm font-semibold">
+          <div className="panel-strong rounded-2xl p-4 sm:col-span-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">Checklist avant detection</p>
+            <ul className="mt-2 space-y-1 text-sm text-[var(--ink-soft)]">
+              {checklist.map((line) => (
+                <li key={line}>- {line}</li>
+              ))}
+            </ul>
+          </div>
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.grossSalary")}
             <input type="number" value={form.grossSalary} onChange={(event) => setForm((current) => ({ ...current, grossSalary: event.target.value }))} className="input-shell mt-1" />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.netReported")}
             <input type="number" value={form.netSalaryReported} onChange={(event) => setForm((current) => ({ ...current, netSalaryReported: event.target.value }))} className="input-shell mt-1" />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.cnssReported")}
             <input type="number" value={form.cnssEmployeeReported} onChange={(event) => setForm((current) => ({ ...current, cnssEmployeeReported: event.target.value }))} className="input-shell mt-1" />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.taxReported")}
             <input type="number" value={form.incomeTaxReported} onChange={(event) => setForm((current) => ({ ...current, incomeTaxReported: event.target.value }))} className="input-shell mt-1" />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.overtimePaid")}
             <input type="number" value={form.overtimePaidReported} onChange={(event) => setForm((current) => ({ ...current, overtimePaidReported: event.target.value }))} className="input-shell mt-1" />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.overtimeExpected")}
             <input type="number" value={form.overtimeExpected} onChange={(event) => setForm((current) => ({ ...current, overtimeExpected: event.target.value }))} className="input-shell mt-1" />
           </label>
-          <label className="block text-sm font-semibold sm:col-span-2">
+          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold sm:col-span-2">
             {t("payslipTool.calculationDate")}
             <input type="date" value={form.calculationDate} onChange={(event) => setForm((current) => ({ ...current, calculationDate: event.target.value }))} className="input-shell mt-1" />
           </label>
-          <button type="submit" className="btn-primary sm:col-span-2 px-4 py-2.5 text-sm" disabled={loading}>
-            {loading ? t("payslipTool.submitting") : t("payslipTool.submit")}
-          </button>
+          <div className="sticky bottom-2 z-10 rounded-2xl border border-[var(--line)] bg-[var(--surface)]/95 p-2 backdrop-blur sm:col-span-2">
+            <button type="submit" className="btn-primary w-full px-4 py-2.5 text-sm" disabled={loading}>
+              {loading ? t("payslipTool.submitting") : t("payslipTool.submit")}
+            </button>
+          </div>
           {!usable ? (
             <p className="sm:col-span-2 break-words text-xs text-[var(--ink-soft)]">
               {toolPolicy?.enabled === false
@@ -140,7 +175,12 @@ export default function PayslipDetectorPage() {
         {result ? (
           <section className="soft-card mt-4 min-w-0 rounded-3xl p-5">
             <p className="section-kicker">{t("payslipTool.result")}</p>
-            <p className="display-font mt-2 break-words text-3xl font-semibold">{t("payslipTool.riskScore", { score: result.riskScore })}</p>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+              <p className="display-font break-words text-3xl font-semibold">{t("payslipTool.riskScore", { score: result.riskScore })}</p>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskBadge(result.riskScore)}`}>
+                {result.issues.length} anomalie(s)
+              </span>
+            </div>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <div className="panel-strong rounded-xl p-3 text-sm break-words">{t("payslipTool.expectedNet", { amount: result.expected.netSalary.toLocaleString(locale) })}</div>
               <div className="panel-strong rounded-xl p-3 text-sm break-words">{t("payslipTool.expectedCnss", { amount: result.expected.cnssEmployee.toLocaleString(locale) })}</div>
