@@ -16,14 +16,14 @@ export default function AutoEntrepreneurPage() {
       apiPath="/api/simulate/auto-entrepreneur"
       calculatorType="auto_entrepreneur"
       fields={[
-        { key: "monthlyRevenue", label: "Chiffre d'affaires mensuel (MAD)", type: "number", defaultValue: "15000", min: 1, step: 0.01 },
-        { key: "activityType", label: "Type d'activite", type: "select", defaultValue: "services", options: [
+        { key: "monthlyRevenue", label: "Chiffre d'affaires mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "activityType", label: "Type d'activite", type: "select", options: [
           { label: "Prestations de services (2%)", value: "services" },
           { label: "Commerce / Artisanat (1%)", value: "trade" },
           { label: "Professions liberales (2%)", value: "liberal" },
         ]},
-        { key: "voluntaryCnssMonthly", label: "Cotisation CNSS volontaire (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "monthlyExpenses", label: "Charges professionnelles (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
+        { key: "voluntaryCnssMonthly", label: "Cotisation CNSS volontaire (MAD)", type: "number", min: 0, step: 0.01 },
+        { key: "monthlyExpenses", label: "Charges professionnelles (MAD)", type: "number", min: 0, step: 0.01 },
       ]}
       breakdownLabels={{
         monthlyRevenue: "CA mensuel",

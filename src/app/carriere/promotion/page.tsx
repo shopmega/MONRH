@@ -16,9 +16,8 @@ export default function PromotionScenarioPage() {
       apiPath="/api/simulate/promotion-scenario"
       calculatorType="promotion_scenario"
       fields={[
-        { key: "currentGross", label: "Salaire brut actuel (MAD)", type: "number", defaultValue: "12000", min: 1, step: 0.01 },
-        { key: "proposedGross", label: "Nouveau salaire propose (MAD)", type: "number", defaultValue: "15000", min: 1, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
+        { key: "currentGross", label: "Salaire brut actuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "proposedGross", label: "Nouveau salaire propose (MAD)", type: "number", min: 1, step: 0.01 },
       ]}
       breakdownLabels={{
         rawRaisePercent: "Augmentation brute",

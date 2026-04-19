@@ -16,10 +16,9 @@ export default function ScenarioComparisonPage() {
       apiPath="/api/simulate/salary-increase"
       calculatorType="salary_increase"
       fields={[
-        { key: "currentGross", label: "Scenario A — Salaire brut (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "newGross", label: "Scenario B — Salaire brut (MAD)", type: "number", defaultValue: "13000", min: 1, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
-        { key: "includeCimr", label: "Inclure CIMR", type: "checkbox", defaultValue: false },
+        { key: "currentGross", label: "Scenario A — Salaire brut (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "newGross", label: "Scenario B — Salaire brut (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "includeCimr", label: "Inclure CIMR", type: "checkbox" },
       ]}
       breakdownLabels={{
         "current.net": "Net Scenario A",

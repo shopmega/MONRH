@@ -16,15 +16,14 @@ export default function FreelanceVsSalariePage() {
       apiPath="/api/simulate/freelance-vs-salary"
       calculatorType="freelance_vs_salary"
       fields={[
-        { key: "salaryGross", label: "Salaire brut actuel (MAD)", type: "number", defaultValue: "12000", min: 1, step: 0.01 },
-        { key: "freelanceMonthlyRevenue", label: "CA mensuel freelance (MAD)", type: "number", defaultValue: "20000", min: 1, step: 0.01 },
-        { key: "activityType", label: "Type d'activite AE", type: "select", defaultValue: "services", options: [
+        { key: "salaryGross", label: "Salaire brut actuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "freelanceMonthlyRevenue", label: "CA mensuel freelance (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "activityType", label: "Type d'activite AE", type: "select", options: [
           { label: "Prestations de services (2%)", value: "services" },
           { label: "Commerce / Artisanat (1%)", value: "trade" },
         ]},
-        { key: "voluntaryCnssMonthly", label: "Cotisation CNSS volontaire (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
-        { key: "workingMonthsPerYear", label: "Mois facturables/an", type: "number", defaultValue: "11", min: 1, max: 12, step: 1 },
+        { key: "voluntaryCnssMonthly", label: "Cotisation CNSS volontaire (MAD)", type: "number", min: 0, step: 0.01 },
+        { key: "workingMonthsPerYear", label: "Mois facturables/an", type: "number", min: 1, max: 12, step: 1 },
       ]}
       breakdownLabels={{
         "salaried.net": "Net salarie",

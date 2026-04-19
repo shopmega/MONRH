@@ -16,10 +16,9 @@ export default function SalaryIncreasePage() {
       apiPath="/api/simulate/salary-increase"
       calculatorType="salary_increase"
       fields={[
-        { key: "currentGross", label: "Salaire brut actuel (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "newGross", label: "Salaire brut propose (MAD)", type: "number", defaultValue: "12000", min: 1, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
-        { key: "includeCimr", label: "Inclure CIMR (6%)", type: "checkbox", defaultValue: false },
+        { key: "currentGross", label: "Salaire brut actuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "newGross", label: "Salaire brut propose (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "includeCimr", label: "Inclure CIMR (6%)", type: "checkbox" },
       ]}
       breakdownLabels={{
         currentGross: "Brut actuel",
