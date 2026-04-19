@@ -10,7 +10,7 @@
       "ar": "\u0627\u0644\u0631\u0627\u062a\u0628"
     },
     "description": {
-      "fr": "Calculez votre salaire net, vÃ©rifiez vos retenues et comprenez votre fiche de paie au Maroc.",
+      "fr": "Calculez votre salaire net, vérifiez vos retenues et comprenez votre fiche de paie au Maroc.",
       "ar": "\u0627\u062d\u0633\u0628 \u0631\u0627\u062a\u0628\u0643 \u0627\u0644\u0635\u0627\u0641\u064a \u0648\u062a\u062d\u0642\u0642 \u0645\u0646 \u0627\u0644\u0627\u0642\u062a\u0637\u0627\u0639\u0627\u062a \u0648\u0627\u0641\u0647\u0645 \u0648\u0631\u0642\u0629 \u0627\u0644\u0623\u062c\u0631 \u0627\u0644\u062e\u0627\u0635\u0629 \u0628\u0643 \u0641\u064a \u0627\u0644\u0645\u063a\u0631\u0628."
     },
     "featuredLabel": {
@@ -19,7 +19,7 @@
     },
     "featuredHref": "/planifier/bulletin-paie",
     "featuredDescription": {
-      "fr": "GÃ©nÃ©rez un bulletin de paie dÃ©taillÃ© et conforme Ã  la lÃ©gislation marocaine.",
+      "fr": "Générez un bulletin de paie détaillé et conforme à la législation marocaine.",
       "ar": "\u0623\u0646\u0634\u0626 \u0648\u0631\u0642\u0629 \u0623\u062c\u0631 \u0645\u0641\u0635\u0644\u0629 \u0648\u0645\u0637\u0627\u0628\u0642\u0629 \u0644\u0644\u062a\u0634\u0631\u064a\u0639 \u0627\u0644\u0645\u063a\u0631\u0628\u064a."
     },
     "tools": [
@@ -84,31 +84,31 @@
   "ma-carriere": {
     "slug": "ma-carriere",
     "title": {
-      "fr": "Ma CarriÃ¨re & Ã‰volution",
+      "fr": "Ma Carrière & Évolution",
       "ar": "\u0645\u0633\u0627\u0631\u064a \u0627\u0644\u0645\u0647\u0646\u064a \u0648\u0627\u0644\u062a\u0637\u0648\u064a\u0631"
     },
     "kicker": {
-      "fr": "CarriÃ¨re",
+      "fr": "Carrière",
       "ar": "\u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0645\u0647\u0646\u064a"
     },
     "description": {
-      "fr": "Comparez des scÃ©narios de carriÃ¨re, d'augmentation, de freelance ou de retraite.",
+      "fr": "Comparez des scénarios de carrière, d'augmentation, de freelance ou de retraite.",
       "ar": "\u0642\u0627\u0631\u0646 \u0628\u064a\u0646 \u0633\u064a\u0646\u0627\u0631\u064a\u0648\u0647\u0627\u062a \u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0645\u0647\u0646\u064a \u0648\u0627\u0644\u0632\u064a\u0627\u062f\u0629 \u0648\u0627\u0644\u0639\u0645\u0644 \u0627\u0644\u062d\u0631 \u0648\u0627\u0644\u062a\u0642\u0627\u0639\u062f."
     },
     "featuredLabel": {
-      "fr": "Comparer deux scÃ©narios",
+      "fr": "Comparer deux scénarios",
       "ar": "\u0642\u0627\u0631\u0646 \u0628\u064a\u0646 \u0633\u064a\u0646\u0627\u0631\u064a\u0648\u064a\u0646"
     },
     "featuredHref": "/carriere/comparaison-scenarios",
     "featuredDescription": {
-      "fr": "Une zone secondaire pour les dÃ©cisions de projection et d'optimisation.",
+      "fr": "Une zone secondaire pour les décisions de projection et d'optimisation.",
       "ar": "\u0645\u0633\u0627\u062d\u0629 \u062b\u0627\u0646\u0648\u064a\u0629 \u0644\u0642\u0631\u0627\u0631\u0627\u062a \u0627\u0644\u062a\u062e\u0637\u064a\u0637 \u0648\u0627\u0644\u062a\u062d\u0633\u064a\u0646."
     },
     "tools": [
       {
         "type": "calculator",
-        "title": { "fr": "Comparaison de scÃ©narios", "ar": "\u0645\u0642\u0627\u0631\u0646\u0629 \u0627\u0644\u0633\u064a\u0646\u0627\u0631\u064a\u0648\u0647\u0627\u062a" },
-        "description": { "fr": "Comparez deux situations (offres, scÃ©narios carriÃ¨re).", "ar": "\u0642\u0627\u0631\u0646 \u0628\u064a\u0646 \u0648\u0636\u0639\u064a\u062a\u064a\u0646 (\u0639\u0631\u0648\u0636\u060c \u0645\u0633\u0627\u0631\u0627\u062a \u0645\u0647\u0646\u064a\u0629)." },
+        "title": { "fr": "Comparaison de scénarios", "ar": "\u0645\u0642\u0627\u0631\u0646\u0629 \u0627\u0644\u0633\u064a\u0646\u0627\u0631\u064a\u0648\u0647\u0627\u062a" },
+        "description": { "fr": "Comparez deux situations (offres, scénarios carrière).", "ar": "\u0642\u0627\u0631\u0646 \u0628\u064a\u0646 \u0648\u0636\u0639\u064a\u062a\u064a\u0646 (\u0639\u0631\u0648\u0636\u060c \u0645\u0633\u0627\u0631\u0627\u062a \u0645\u0647\u0646\u064a\u0629)." },
         "href": "/carriere/comparaison-scenarios",
         "category": "career"
       },
@@ -152,15 +152,15 @@
   "depart-rupture": {
     "slug": "depart-rupture",
     "title": {
-      "fr": "DÃ©part & Rupture",
+      "fr": "Départ & Rupture",
       "ar": "\u0627\u0644\u0645\u063a\u0627\u062f\u0631\u0629 \u0648\u0627\u0644\u0625\u0646\u0647\u0627\u0621"
     },
     "kicker": {
-      "fr": "DÃ©part",
+      "fr": "Départ",
       "ar": "\u0627\u0644\u0645\u063a\u0627\u062f\u0631\u0629"
     },
     "description": {
-      "fr": "Estimez vos indemnitÃ©s, votre prÃ©avis et les documents Ã  prÃ©parer quand vous changez ou quittez un emploi.",
+      "fr": "Estimez vos indemnités, votre préavis et les documents à préparer quand vous changez ou quittez un emploi.",
       "ar": "\u0642\u062f\u0651\u0631 \u062a\u0639\u0648\u064a\u0636\u0627\u062a\u0643 \u0648\u0625\u0634\u0639\u0627\u0631\u0643 \u0648\u0627\u0644\u0648\u062b\u0627\u0626\u0642 \u0627\u0644\u062a\u064a \u062a\u062d\u062a\u0627\u062c\u0647\u0627 \u0639\u0646\u062f \u062a\u063a\u064a\u064a\u0631 \u0627\u0644\u0639\u0645\u0644 \u0623\u0648 \u0645\u063a\u0627\u062f\u0631\u062a\u0647."
     },
     "featuredLabel": {
@@ -169,14 +169,14 @@
     },
     "featuredHref": "/simulate/licenciement",
     "featuredDescription": {
-      "fr": "Commencez par vos droits financiers, puis ouvrez la lettre adaptÃ©e Ã  votre situation.",
+      "fr": "Commencez par vos droits financiers, puis ouvrez la lettre adaptée à votre situation.",
       "ar": "\u0627\u0628\u062f\u0623 \u0628\u062d\u0642\u0648\u0642\u0643 \u0627\u0644\u0645\u0627\u0644\u064a\u0629 \u062b\u0645 \u0627\u0641\u062a\u062d \u0627\u0644\u0631\u0633\u0627\u0644\u0629 \u0627\u0644\u0645\u0646\u0627\u0633\u0628\u0629 \u0644\u0648\u0636\u0639\u0643."
     },
     "tools": [
       {
         "type": "calculator",
         "title": { "fr": "Licenciement", "ar": "\u0627\u0644\u0641\u0635\u0644" },
-        "description": { "fr": "IndemnitÃ©, prÃ©avis, congÃ©s restants.", "ar": "\u0627\u0644\u062a\u0639\u0648\u064a\u0636 \u0648\u0627\u0644\u0625\u0634\u0639\u0627\u0631 \u0648\u0627\u0644\u0639\u0637\u0644 \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629." },
+        "description": { "fr": "Indemnité, préavis, congés restants.", "ar": "\u0627\u0644\u062a\u0639\u0648\u064a\u0636 \u0648\u0627\u0644\u0625\u0634\u0639\u0627\u0631 \u0648\u0627\u0644\u0639\u0637\u0644 \u0627\u0644\u0645\u062a\u0628\u0642\u064a\u0629." },
         "href": "/simulate/licenciement",
         "category": "termination"
       },
@@ -189,36 +189,36 @@
       },
       {
         "type": "calculator",
-        "title": { "fr": "DurÃ©e de prÃ©avis", "ar": "\u0645\u062f\u0629 \u0627\u0644\u0625\u0634\u0639\u0627\u0631" },
-        "description": { "fr": "Calculez la durÃ©e lÃ©gale de prÃ©avis.", "ar": "\u0627\u062d\u0633\u0628 \u0645\u062f\u0629 \u0627\u0644\u0625\u0634\u0639\u0627\u0631 \u0627\u0644\u0642\u0627\u0646\u0648\u0646\u064a\u0629." },
+        "title": { "fr": "Durée de préavis", "ar": "\u0645\u062f\u0629 \u0627\u0644\u0625\u0634\u0639\u0627\u0631" },
+        "description": { "fr": "Calculez la durée légale de préavis.", "ar": "\u0627\u062d\u0633\u0628 \u0645\u062f\u0629 \u0627\u0644\u0625\u0634\u0639\u0627\u0631 \u0627\u0644\u0642\u0627\u0646\u0648\u0646\u064a\u0629." },
         "href": "/simulate/duree-preavis",
         "category": "termination"
       },
       {
         "type": "calculator",
         "title": { "fr": "Fin de CDD", "ar": "\u0646\u0647\u0627\u064a\u0629 \u0639\u0642\u062f CDD" },
-        "description": { "fr": "Prime de prÃ©caritÃ© et compensation.", "ar": "\u0645\u0646\u062d\u0629 \u0627\u0644\u0647\u0634\u0627\u0634\u0629 \u0648\u0627\u0644\u062a\u0639\u0648\u064a\u0636." },
+        "description": { "fr": "Prime de précarité et compensation.", "ar": "\u0645\u0646\u062d\u0629 \u0627\u0644\u0647\u0634\u0627\u0634\u0629 \u0648\u0627\u0644\u062a\u0639\u0648\u064a\u0636." },
         "href": "/simulate/fin-cdd",
         "category": "termination"
       },
       {
         "type": "calculator",
-        "title": { "fr": "PÃ©riode d'essai", "ar": "\u0641\u062a\u0631\u0629 \u0627\u0644\u062a\u062c\u0631\u0628\u0629" },
-        "description": { "fr": "Rupture et dÃ©lais applicables.", "ar": "\u0627\u0644\u0625\u0646\u0647\u0627\u0621 \u0648\u0627\u0644\u0622\u062c\u0627\u0644 \u0627\u0644\u0645\u0637\u0628\u0642\u0629." },
+        "title": { "fr": "Période d'essai", "ar": "\u0641\u062a\u0631\u0629 \u0627\u0644\u062a\u062c\u0631\u0628\u0629" },
+        "description": { "fr": "Rupture et délais applicables.", "ar": "\u0627\u0644\u0625\u0646\u0647\u0627\u0621 \u0648\u0627\u0644\u0622\u062c\u0627\u0644 \u0627\u0644\u0645\u0637\u0628\u0642\u0629." },
         "href": "/simulate/probation-termination",
         "category": "termination"
       },
       {
         "type": "document",
-        "title": { "fr": "Lettre de dÃ©mission", "ar": "\u0631\u0633\u0627\u0644\u0629 \u0627\u0633\u062a\u0642\u0627\u0644\u0629" },
-        "description": { "fr": "ModÃ¨le prÃ©-rempli et imprimable.", "ar": "\u0646\u0645\u0648\u0630\u062c \u062c\u0627\u0647\u0632 \u0648\u0642\u0627\u0628\u0644 \u0644\u0644\u0637\u0628\u0627\u0639\u0629." },
+        "title": { "fr": "Lettre de démission", "ar": "\u0631\u0633\u0627\u0644\u0629 \u0627\u0633\u062a\u0642\u0627\u0644\u0629" },
+        "description": { "fr": "Modèle pré-rempli et imprimable.", "ar": "\u0646\u0645\u0648\u0630\u062c \u062c\u0627\u0647\u0632 \u0648\u0642\u0627\u0628\u0644 \u0644\u0644\u0637\u0628\u0627\u0639\u0629." },
         "href": "/contrat-depart/demission",
         "category": "document"
       },
       {
         "type": "calculator",
         "title": { "fr": "Cout employeur total", "ar": "\u0627\u0644\u0643\u0644\u0641\u0629 \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a\u0629 \u0644\u0644\u0645\u0634\u063a\u0644" },
-        "description": { "fr": "Calculez le coÃ»t complet d'un salaire pour l'entreprise.", "ar": "\u0627\u062d\u0633\u0628 \u0627\u0644\u0643\u0644\u0641\u0629 \u0627\u0644\u0643\u0627\u0645\u0644\u0629 \u0644\u0644\u0631\u0627\u062a\u0628 \u0639\u0644\u0649 \u0627\u0644\u0645\u0624\u0633\u0633\u0629." },
+        "description": { "fr": "Calculez le coût complet d'un salaire pour l'entreprise.", "ar": "\u0627\u062d\u0633\u0628 \u0627\u0644\u0643\u0644\u0641\u0629 \u0627\u0644\u0643\u0627\u0645\u0644\u0629 \u0644\u0644\u0631\u0627\u062a\u0628 \u0639\u0644\u0649 \u0627\u0644\u0645\u0624\u0633\u0633\u0629." },
         "href": "/simulate/employer-total-cost",
         "category": "employer"
       }
@@ -235,65 +235,65 @@
       "ar": "\u0627\u0644\u0646\u0632\u0627\u0639\u0627\u062a"
     },
     "description": {
-      "fr": "RÃ©agissez vite en cas de salaire impayÃ©, heures sup non payÃ©es, harcÃ¨lement ou conflit avec l'employeur.",
+      "fr": "Réagissez vite en cas de salaire impayé, heures sup non payées, harcèlement ou conflit avec l'employeur.",
       "ar": "\u062a\u062d\u0631\u0643 \u0628\u0633\u0631\u0639\u0629 \u0641\u064a \u062d\u0627\u0644\u0629 \u0627\u0644\u0631\u0627\u062a\u0628 \u063a\u064a\u0631 \u0627\u0644\u0645\u0624\u062f\u0649 \u0623\u0648 \u0627\u0644\u0633\u0627\u0639\u0627\u062a \u0627\u0644\u0625\u0636\u0627\u0641\u064a\u0629 \u063a\u064a\u0631 \u0627\u0644\u0645\u0624\u062f\u0627\u0629 \u0623\u0648 \u0627\u0644\u062a\u062d\u0631\u0634 \u0623\u0648 \u0627\u0644\u0646\u0632\u0627\u0639 \u0645\u0639 \u0627\u0644\u0645\u0634\u063a\u0644."
     },
     "featuredLabel": {
-      "fr": "RÃ©soudre un problÃ¨me au travail",
+      "fr": "Résoudre un problème au travail",
       "ar": "\u062d\u0644 \u0645\u0634\u0643\u0644\u0629 \u0641\u064a \u0627\u0644\u0639\u0645\u0644"
     },
     "featuredHref": "/simulate/unpaid-salary-recovery",
     "featuredDescription": {
-      "fr": "Calculez le montant dÃ», puis ouvrez la rÃ©clamation ou la plainte adaptÃ©e.",
+      "fr": "Calculez le montant dû, puis ouvrez la réclamation ou la plainte adaptée.",
       "ar": "\u0627\u062d\u0633\u0628 \u0627\u0644\u0645\u0628\u0644\u063a \u0627\u0644\u0645\u0633\u062a\u062d\u0642 \u062b\u0645 \u0627\u0641\u062a\u062d \u0627\u0644\u0645\u0637\u0627\u0644\u0628\u0629 \u0623\u0648 \u0627\u0644\u0634\u0643\u0627\u064a\u0629 \u0627\u0644\u0645\u0646\u0627\u0633\u0628\u0629."
     },
     "tools": [
       {
         "type": "calculator",
-        "title": { "fr": "Salaire impayÃ©", "ar": "\u0627\u0644\u0631\u0627\u062a\u0628 \u063a\u064a\u0631 \u0627\u0644\u0645\u0624\u062f\u0649" },
-        "description": { "fr": "Estimez principal et pÃ©nalitÃ©s.", "ar": "\u0642\u062f\u0651\u0631 \u0627\u0644\u0623\u0635\u0644 \u0648\u0627\u0644\u063a\u0631\u0627\u0645\u0627\u062a." },
+        "title": { "fr": "Salaire impayé", "ar": "\u0627\u0644\u0631\u0627\u062a\u0628 \u063a\u064a\u0631 \u0627\u0644\u0645\u0624\u062f\u0649" },
+        "description": { "fr": "Estimez principal et pénalités.", "ar": "\u0642\u062f\u0651\u0631 \u0627\u0644\u0623\u0635\u0644 \u0648\u0627\u0644\u063a\u0631\u0627\u0645\u0627\u062a." },
         "href": "/simulate/unpaid-salary-recovery",
         "category": "dispute"
       },
       {
         "type": "calculator",
-        "title": { "fr": "Heures sup impayÃ©es", "ar": "\u0627\u0644\u0633\u0627\u0639\u0627\u062a \u0627\u0644\u0625\u0636\u0627\u0641\u064a\u0629 \u063a\u064a\u0631 \u0627\u0644\u0645\u0624\u062f\u0627\u0629" },
+        "title": { "fr": "Heures sup impayées", "ar": "\u0627\u0644\u0633\u0627\u0639\u0627\u062a \u0627\u0644\u0625\u0636\u0627\u0641\u064a\u0629 \u063a\u064a\u0631 \u0627\u0644\u0645\u0624\u062f\u0627\u0629" },
         "description": { "fr": "Recouvrez les heures dues.", "ar": "\u0627\u0633\u062a\u0631\u062c\u0639 \u0627\u0644\u0633\u0627\u0639\u0627\u062a \u0627\u0644\u0645\u0633\u062a\u062d\u0642\u0629." },
         "href": "/simulate/unpaid-overtime-recovery",
         "category": "dispute"
       },
       {
         "type": "calculator",
-        "title": { "fr": "HarcÃ¨lement", "ar": "\u0627\u0644\u062a\u062d\u0631\u0634" },
-        "description": { "fr": "Ã‰valuez votre dossier et les prochaines Ã©tapes.", "ar": "\u0642\u064a\u0651\u0645 \u0645\u0644\u0641\u0643 \u0648\u0627\u0644\u062e\u0637\u0648\u0627\u062a \u0627\u0644\u0642\u0627\u062f\u0645\u0629." },
+        "title": { "fr": "Harcèlement", "ar": "\u0627\u0644\u062a\u062d\u0631\u0634" },
+        "description": { "fr": "Évaluez votre dossier et les prochaines étapes.", "ar": "\u0642\u064a\u0651\u0645 \u0645\u0644\u0641\u0643 \u0648\u0627\u0644\u062e\u0637\u0648\u0627\u062a \u0627\u0644\u0642\u0627\u062f\u0645\u0629." },
         "href": "/simulate/harassment-scenario",
         "category": "dispute"
       },
       {
         "type": "document",
-        "title": { "fr": "RÃ©clamation employeur", "ar": "\u0645\u0631\u0627\u0633\u0644\u0629 \u0627\u0644\u0645\u0634\u063a\u0644" },
-        "description": { "fr": "ModÃ¨le de rÃ©clamation formelle.", "ar": "\u0646\u0645\u0648\u0630\u062c \u062a\u0638\u0644\u0645 \u0631\u0633\u0645\u064a." },
+        "title": { "fr": "Réclamation employeur", "ar": "\u0645\u0631\u0627\u0633\u0644\u0629 \u0627\u0644\u0645\u0634\u063a\u0644" },
+        "description": { "fr": "Modèle de réclamation formelle.", "ar": "\u0646\u0645\u0648\u0630\u062c \u062a\u0638\u0644\u0645 \u0631\u0633\u0645\u064a." },
         "href": "/litiges/wizard",
         "category": "document"
       },
       {
         "type": "document",
         "title": { "fr": "Inspection du travail", "ar": "\u0645\u0641\u062a\u0634\u064a\u0629 \u0627\u0644\u0634\u063a\u0644" },
-        "description": { "fr": "PrÃ©parez une plainte exploitable.", "ar": "\u062d\u0636\u0651\u0631 \u0634\u0643\u0627\u064a\u0629 \u0642\u0627\u0628\u0644\u0629 \u0644\u0644\u0627\u0633\u062a\u0639\u0645\u0627\u0644." },
+        "description": { "fr": "Préparez une plainte exploitable.", "ar": "\u062d\u0636\u0651\u0631 \u0634\u0643\u0627\u064a\u0629 \u0642\u0627\u0628\u0644\u0629 \u0644\u0644\u0627\u0633\u062a\u0639\u0645\u0627\u0644." },
         "href": "/litiges/wizard",
         "category": "document"
       },
       {
         "type": "tool",
-        "title": { "fr": "PrÃ©-contentieux", "ar": "\u0645\u0627 \u0642\u0628\u0644 \u0627\u0644\u0646\u0632\u0627\u0639 \u0627\u0644\u0642\u0636\u0627\u0626\u064a" },
+        "title": { "fr": "Pré-contentieux", "ar": "\u0645\u0627 \u0642\u0628\u0644 \u0627\u0644\u0646\u0632\u0627\u0639 \u0627\u0644\u0642\u0636\u0627\u0626\u064a" },
         "description": { "fr": "Feuille de route avant escalation.", "ar": "\u062e\u0631\u064a\u0637\u0629 \u0637\u0631\u064a\u0642 \u0642\u0628\u0644 \u0627\u0644\u062a\u0635\u0639\u064a\u062f." },
         "href": "/tools/pre-litigation-timeline",
         "category": "tool"
       },
       {
         "type": "calculator",
-        "title": { "fr": "DÃ©tection fraude fiche paie", "ar": "\u0627\u0643\u062a\u0634\u0627\u0641 \u0627\u0644\u062a\u062d\u0627\u064a\u0644 \u0641\u064a \u0648\u0631\u0642\u0629 \u0627\u0644\u0623\u062c\u0631" },
-        "description": { "fr": "VÃ©rifiez si votre fiche de paie contient des erreurs.", "ar": "\u062a\u062d\u0642\u0642 \u0645\u0646 \u0625\u062f\u0627\u0621\u0629 \u0648\u0631\u0642\u0629 \u0623\u062c\u0631\u0643." },
+        "title": { "fr": "Détection fraude fiche paie", "ar": "\u0627\u0643\u062a\u0634\u0627\u0641 \u0627\u0644\u062a\u062d\u0627\u064a\u0644 \u0641\u064a \u0648\u0631\u0642\u0629 \u0627\u0644\u0623\u062c\u0631" },
+        "description": { "fr": "Vérifiez si votre fiche de paie contient des erreurs.", "ar": "\u062a\u062d\u0642\u0642 \u0645\u0646 \u0625\u062f\u0627\u0621\u0629 \u0648\u0631\u0642\u0629 \u0623\u062c\u0631\u0643." },
         "href": "/tools/payslip-detector",
         "category": "tool"
       }
