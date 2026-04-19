@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -66,7 +67,7 @@ export const freelanceVsSalaryInputSchema = z.object({
   freelanceMonthlyRevenue: z.number().positive(),
   activityType: z.enum(["services", "trade"]).default("services"),
   voluntaryCnssMonthly: z.number().min(0).default(0),
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   // Opportunity cost factors
   paidVacationDaysPerYear: z.number().min(0).max(60).default(18),
   workingMonthsPerYear: z.number().min(1).max(12).default(11),

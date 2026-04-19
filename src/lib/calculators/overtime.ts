@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getOvertimeRulesByDate } from "@/lib/rules/default-rules";
 
 export const overtimeInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   overtimeDayHours: z.number().min(0).default(0),
   overtimeNightHours: z.number().min(0).default(0),

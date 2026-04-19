@@ -16,13 +16,12 @@ export default function FinCddPage() {
       apiPath="/api/simulate/fin-cdd"
       calculatorType="fin_cdd"
       fields={[
-        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "7000", min: 1, step: 0.01 },
-        { key: "contractMonths", label: "Duree du contrat (mois)", type: "number", defaultValue: "12", min: 1, step: 1 },
+        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "contractMonths", label: "Duree du contrat (mois)", type: "number", min: 1, step: 1 },
         {
           key: "contractSubtype",
           label: "Type de CDD",
           type: "select",
-          defaultValue: "standard",
           options: [
             { label: "Standard", value: "standard" },
             { label: "Saisonnier", value: "seasonal" },
@@ -31,11 +30,10 @@ export default function FinCddPage() {
             { label: "Apprentissage", value: "apprenticeship" },
           ],
         },
-        { key: "unusedLeaveDays", label: "Conges restants (jours)", type: "number", defaultValue: "6", min: 0, step: 0.5 },
-        { key: "renewalCount", label: "Nombre de renouvellements", type: "number", defaultValue: "0", min: 0, max: 5, step: 1 },
-        { key: "totalMonthsWithRenewals", label: "Duree totale avec renouvellements (mois)", type: "number", defaultValue: "12", min: 1, max: 72, step: 1 },
-        { key: "noticeDays", label: "Preavis compense (jours)", type: "number", defaultValue: "0", min: 0, step: 1 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "unusedLeaveDays", label: "Conges restants (jours)", type: "number", min: 0, step: 0.5 },
+        { key: "renewalCount", label: "Nombre de renouvellements", type: "number", min: 0, max: 5, step: 1 },
+        { key: "totalMonthsWithRenewals", label: "Duree totale avec renouvellements (mois)", type: "number", min: 1, max: 72, step: 1 },
+        { key: "noticeDays", label: "Preavis compense (jours)", type: "number", min: 0, step: 1 },
       ]}
       breakdownLabels={{
         contractSubtype: "Type de CDD",

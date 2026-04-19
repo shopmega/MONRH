@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { getSmigRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 /** Moroccan salary claims prescribe after 2 years (Art. 399 CT) */
 const PRESCRIPTION_YEARS = 2;
 
 export const unpaidSalaryRecoveryInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   unpaidMonths: z.number().min(1).max(36),
   /** Were any partial payments made? If so, enter the shortfall per month */

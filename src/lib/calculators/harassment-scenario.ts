@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 /** Harassment type determines legal framework and valid escalation paths */
 export const harassmentScenarioInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   harassmentType: z.enum(["moral", "sexual"]).default("moral"),
   perpetratorRelationship: z.enum(["supervisor", "colleague", "client"]).default("supervisor"),
   incidentsCount: z.number().min(1).max(200),

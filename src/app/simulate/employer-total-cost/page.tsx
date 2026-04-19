@@ -16,12 +16,11 @@ export default function EmployerTotalCostPage() {
       apiPath="/api/simulate/employer-total-cost"
       calculatorType="employer_total_cost"
       fields={[
-        { key: "grossSalary", label: "Salaire brut (MAD)", type: "number", defaultValue: "9000", min: 1, step: 0.01 },
+        { key: "grossSalary", label: "Salaire brut (MAD)", type: "number", min: 1, step: 0.01 },
         {
           key: "companySize",
           label: "Taille entreprise",
           type: "select",
-          defaultValue: "large",
           options: [
             { label: "<= 20 salaries", value: "small" },
             { label: "> 20 salaries", value: "large" },
@@ -31,7 +30,6 @@ export default function EmployerTotalCostPage() {
           key: "sectorRisk",
           label: "Risque secteur (AT/MP)",
           type: "select",
-          defaultValue: "medium",
           options: [
             { label: "Faible", value: "low" },
             { label: "Moyen", value: "medium" },
@@ -39,10 +37,9 @@ export default function EmployerTotalCostPage() {
             { label: "Tres eleve", value: "very_high" },
           ],
         },
-        { key: "additionalBenefitsMad", label: "Avantages complementaires (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "months", label: "Nombre de mois", type: "number", defaultValue: "12", min: 1, max: 14, step: 1 },
-        { key: "include13thMonth", label: "Inclure 13e mois", type: "checkbox", defaultValue: false },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "additionalBenefitsMad", label: "Avantages complementaires (MAD)", type: "number", min: 0, step: 0.01 },
+        { key: "months", label: "Nombre de mois", type: "number", min: 1, max: 14, step: 1 },
+        { key: "include13thMonth", label: "Inclure 13e mois", type: "checkbox" },
       ]}
       breakdownLabels={{
         grossSalary: "Brut",

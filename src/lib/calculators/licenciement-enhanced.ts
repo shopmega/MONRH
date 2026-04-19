@@ -1,15 +1,21 @@
 import { z } from "zod";
 import { getTerminationRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import {
+  getCurrentDateISO,
+  type CalculatorExplanation,
+  roundMAD,
+  serviceYearsFromPeriod,
+} from "@/lib/calculators/shared";
 
 export const licenciementEnhancedInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-03-31"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   contractType: z.enum(["CDI", "CDD"]).default("CDI"),
   workerCategory: z.enum(["cadre", "employe", "ouvrier"]).default("employe"),
-  yearsOfService: z.number().min(0).max(50).default(3),
+  hireDate: z.string().date().optional(),
+  yearsOfService: z.number().min(0).max(50).default(0),
   monthsOfService: z.number().min(0).max(11).default(0),
-  unusedLeaveDays: z.number().min(0).max(365).default(6),
+  unusedLeaveDays: z.number().min(0).max(365).default(0),
   dismissalReason: z.enum(["economic", "personal", "misconduct", "other"]).default("economic"),
   dismissalReasonDetails: z.string().default(""),
   priorWarnings: z.number().min(0).max(10).default(0),
@@ -31,6 +37,8 @@ export type LicenciementEnhancedResult = {
   versionCode: string;
   breakdown: {
     legalIndemnity: number;
+    hireDate?: string;
+    totalServiceYears: number;
     noticeIndemnity: number;
     leavePayout: number;
     abusiveDamages: number;
@@ -49,6 +57,8 @@ const DISMISSAL_FACTORS: Record<string, { indemnityMultiplier: number; noticeMul
   misconduct: { indemnityMultiplier: 0.5, noticeMultiplier: 0.5, abusiveRisk: 0.0 },
   other: { indemnityMultiplier: 1.0, noticeMultiplier: 1.0, abusiveRisk: 0.3 }
 };
+
+type TerminationRules = ReturnType<typeof getTerminationRulesByDate>;
 
 // Procedural compliance scoring
 function calculateProceduralCompliance(input: LicenciementEnhancedInput): number {
@@ -85,8 +95,9 @@ function calculateProceduralCompliance(input: LicenciementEnhancedInput): number
 // Calculate abusive dismissal damages
 function calculateAbusiveDamages(
   input: LicenciementEnhancedInput,
+  totalServiceYears: number,
   legalIndemnity: number,
-  rules: any
+  rules: TerminationRules
 ): { amount: number; explanation: string; riskLevel: number } {
   if (!input.abusive || input.dismissalReason === 'misconduct') {
     return { 
@@ -97,7 +108,7 @@ function calculateAbusiveDamages(
   }
   
   // Base calculation: 1 month per year of service
-  const baseDamages = (input.yearsOfService + input.monthsOfService / 12) * input.monthlySalary;
+  const baseDamages = totalServiceYears * input.monthlySalary;
   
   // Apply caps and multipliers
   const maxDamages = rules.abusiveCapMonths * input.monthlySalary;
@@ -112,7 +123,7 @@ function calculateAbusiveDamages(
   
   return {
     amount: roundMAD(finalAmount),
-    explanation: `Dommages abusifs: ${finalAmount.toFixed(2)} MAD (${input.yearsOfService} mois de salaire)`,
+    explanation: `Dommages abusifs: ${finalAmount.toFixed(2)} MAD (${totalServiceYears.toFixed(1)} mois de salaire)`,
     riskLevel: Math.min(10, Math.round((finalAmount / input.monthlySalary) * 2))
   };
 }
@@ -120,7 +131,8 @@ function calculateAbusiveDamages(
 // Calculate notice period indemnity
 function calculateNoticeIndemnity(
   input: LicenciementEnhancedInput,
-  rules: any
+  totalServiceYears: number,
+  rules: TerminationRules
 ): { months: number; amount: number; explanation: string } {
   if (input.contractType === "CDD") {
     // CDD notice is typically in days, not months
@@ -135,12 +147,12 @@ function calculateNoticeIndemnity(
   
   // CDI notice period
   const noticeMonths = rules.cdiNoticeMonthsByCategory[input.workerCategory];
-  let applicableMonths = noticeMonths;
+  let applicableMonths: number;
   
   // Adjust based on years of service
-  if (input.yearsOfService < 1) {
+  if (totalServiceYears < 1) {
     applicableMonths = noticeMonths.lt1;
-  } else if (input.yearsOfService < 5) {
+  } else if (totalServiceYears < 5) {
     applicableMonths = noticeMonths.gte1lt5;
   } else {
     applicableMonths = noticeMonths.gte5;
@@ -166,7 +178,7 @@ export function simulateLicenciementEnhanced(
   const rules = getTerminationRulesByDate(input.calculationDate);
   
   // Calculate total service years
-  const totalServiceYears = input.yearsOfService + input.monthsOfService / 12;
+  const totalServiceYears = serviceYearsFromPeriod(input);
   
   // Check if contract type is eligible for legal indemnity
   const isEligibleForIndemnity = rules.legalIndemnityContractTypes.includes(input.contractType);
@@ -191,14 +203,14 @@ export function simulateLicenciementEnhanced(
   }
   
   // Calculate notice indemnity
-  const noticeResult = calculateNoticeIndemnity(input, rules);
+  const noticeResult = calculateNoticeIndemnity(input, totalServiceYears, rules);
   
   // Calculate leave payout
   const dailyRate = input.monthlySalary / 191; // Standard monthly hours in Morocco
   const leavePayout = input.unusedLeaveDays * dailyRate;
   
   // Calculate abusive damages
-  const abusiveResult = calculateAbusiveDamages(input, legalIndemnity, rules);
+  const abusiveResult = calculateAbusiveDamages(input, totalServiceYears, legalIndemnity, rules);
   
   // Calculate total estimated amount
   const totalEstimated = legalIndemnity + noticeResult.amount + leavePayout + abusiveResult.amount;
@@ -244,6 +256,8 @@ export function simulateLicenciementEnhanced(
     versionCode: rules.versionCode,
     breakdown: {
       legalIndemnity: roundMAD(legalIndemnity),
+      ...(input.hireDate ? { hireDate: input.hireDate } : {}),
+      totalServiceYears: roundMAD(totalServiceYears),
       noticeIndemnity: roundMAD(noticeResult.amount),
       leavePayout: roundMAD(leavePayout),
       abusiveDamages: roundMAD(abusiveResult.amount),

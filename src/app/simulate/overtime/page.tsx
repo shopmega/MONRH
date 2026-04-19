@@ -16,12 +16,11 @@ export default function OvertimePage() {
       apiPath="/api/simulate/overtime"
       calculatorType="overtime"
       fields={[
-        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "9000", min: 0, step: 0.01 },
-        { key: "overtimeDayHours", label: "Heures sup de jour", type: "number", defaultValue: "0", min: 0, step: 0.5 },
-        { key: "overtimeNightHours", label: "Heures sup de nuit", type: "number", defaultValue: "0", min: 0, step: 0.5 },
-        { key: "overtimeWeekendHours", label: "Heures sup weekend", type: "number", defaultValue: "0", min: 0, step: 0.5 },
-        { key: "overtimeHolidayHours", label: "Heures sup jour ferie", type: "number", defaultValue: "0", min: 0, step: 0.5 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 0, step: 0.01 },
+        { key: "overtimeDayHours", label: "Heures sup de jour", type: "number", min: 0, step: 0.5 },
+        { key: "overtimeNightHours", label: "Heures sup de nuit", type: "number", min: 0, step: 0.5 },
+        { key: "overtimeWeekendHours", label: "Heures sup weekend", type: "number", min: 0, step: 0.5 },
+        { key: "overtimeHolidayHours", label: "Heures sup jour ferie", type: "number", min: 0, step: 0.5 },
       ]}
       breakdownLabels={{
         baseHourlyRate: "Taux horaire base",

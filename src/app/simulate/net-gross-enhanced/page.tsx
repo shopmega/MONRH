@@ -16,29 +16,26 @@ export default function NetGrossEnhancedPage() {
       apiPath="/api/simulate/net-gross-enhanced"
       calculatorType="net_gross_enhanced"
       fields={[
-        { 
-          key: "direction", 
-          label: "Type de calcul", 
-          type: "select", 
-          defaultValue: "gross_to_net",
+        {
+          key: "direction",
+          label: "Type de calcul",
+          type: "select",
           options: [
             { value: "gross_to_net", label: "Brut vers Net" },
             { value: "net_to_gross", label: "Net vers Brut" }
           ]
         },
-        { 
-          key: "amount", 
-          label: "Montant (MAD)", 
-          type: "number", 
-          defaultValue: "9000", 
-          min: 0, 
-          step: 0.01 
+        {
+          key: "amount",
+          label: "Montant (MAD)",
+          type: "number",
+          min: 0,
+          step: 0.01
         },
-        { 
-          key: "familySituation", 
-          label: "Situation familiale", 
-          type: "select", 
-          defaultValue: "single",
+        {
+          key: "familySituation",
+          label: "Situation familiale",
+          type: "select",
           options: [
             { value: "single", label: "Célibataire" },
             { value: "married", label: "Marié(e)" },
@@ -47,51 +44,45 @@ export default function NetGrossEnhancedPage() {
             { value: "widowed", label: "Veuf(ve)" }
           ]
         },
-        { 
-          key: "dependentChildren", 
-          label: "Enfants à charge", 
-          type: "number", 
-          defaultValue: 0, 
-          min: 0, 
-          max: 10 
+        {
+          key: "dependentChildren",
+          label: "Enfants à charge",
+          type: "number",
+          min: 0,
+          max: 10
         },
-        { 
-          key: "disabledChildren", 
-          label: "Enfants handicapés à charge", 
-          type: "number", 
-          defaultValue: 0, 
-          min: 0, 
-          max: 10 
+        {
+          key: "disabledChildren",
+          label: "Enfants handicapés à charge",
+          type: "number",
+          min: 0,
+          max: 10
         },
-        { 
-          key: "elderlyDependents", 
-          label: "Personnes âgées à charge", 
-          type: "number", 
-          defaultValue: 0, 
-          min: 0, 
-          max: 5 
+        {
+          key: "elderlyDependents",
+          label: "Personnes âgées à charge",
+          type: "number",
+          min: 0,
+          max: 5
         },
-        { 
-          key: "transportAllowance", 
-          label: "Indemnité de transport (MAD/mois)", 
-          type: "number", 
-          defaultValue: 0, 
-          min: 0, 
-          step: 0.01 
+        {
+          key: "transportAllowance",
+          label: "Indemnité de transport (MAD/mois)",
+          type: "number",
+          min: 0,
+          step: 0.01
         },
-        { 
-          key: "accommodationAllowance", 
-          label: "Indemnité de logement (MAD/mois)", 
-          type: "number", 
-          defaultValue: 0, 
-          min: 0, 
-          step: 0.01 
+        {
+          key: "accommodationAllowance",
+          label: "Indemnité de logement (MAD/mois)",
+          type: "number",
+          min: 0,
+          step: 0.01
         },
-        { 
-          key: "benefitsInNature", 
-          label: "Avantages en nature", 
-          type: "select", 
-          defaultValue: "none",
+        {
+          key: "benefitsInNature",
+          label: "Avantages en nature",
+          type: "select",
           options: [
             { value: "none", label: "Aucun" },
             { value: "housing", label: "Logement" },
@@ -100,19 +91,17 @@ export default function NetGrossEnhancedPage() {
             { value: "mixed", label: "Mixte" }
           ]
         },
-        { 
-          key: "benefitsInNatureAmount", 
-          label: "Valeur des avantages en nature (MAD/mois)", 
-          type: "number", 
-          defaultValue: 0, 
-          min: 0, 
-          step: 0.01 
+        {
+          key: "benefitsInNatureAmount",
+          label: "Valeur des avantages en nature (MAD/mois)",
+          type: "number",
+          min: 0,
+          step: 0.01
         },
-        { 
-          key: "regionCode", 
-          label: "Région", 
-          type: "select", 
-          defaultValue: "national",
+        {
+          key: "regionCode",
+          label: "Région",
+          type: "select",
           options: [
             { value: "national", label: "National" },
             { value: "grand_casablanca", label: "Grand Casablanca" },
@@ -122,51 +111,41 @@ export default function NetGrossEnhancedPage() {
             { value: "souss_massa", label: "Souss-Massa" }
           ]
         },
-        { 
-          key: "professionalExpensesOption", 
-          label: "Frais professionnels", 
-          type: "select", 
-          defaultValue: "standard",
+        {
+          key: "professionalExpensesOption",
+          label: "Frais professionnels",
+          type: "select",
           options: [
             { value: "standard", label: "Déduction standard (20%)" },
             { value: "actual", label: "Frais réels" }
           ]
         },
-        { 
-          key: "actualProfessionalExpenses", 
-          label: "Montant des frais professionnels réels (MAD/an)", 
-          type: "number", 
-          defaultValue: 0, 
-          min: 0, 
-          step: 0.01 
+        {
+          key: "actualProfessionalExpenses",
+          label: "Montant des frais professionnels réels (MAD/an)",
+          type: "number",
+          min: 0,
+          step: 0.01
         },
-        { 
-          key: "includeCimr", 
-          label: "Cotisation CIMR", 
-          type: "checkbox", 
-          defaultValue: false 
+        {
+          key: "includeCimr",
+          label: "Cotisation CIMR",
+          type: "checkbox"
         },
-        { 
-          key: "cimrRate", 
-          label: "Taux CIMR (%)", 
-          type: "number", 
-          defaultValue: 6, 
-          min: 0, 
-          max: 20, 
-          step: 0.1 
-        },
-        { 
-          key: "calculationDate", 
-          label: "Date de calcul", 
-          type: "date", 
-          defaultValue: "2026-03-31" 
+        {
+          key: "cimrRate",
+          label: "Taux CIMR (%)",
+          type: "number",
+          min: 0,
+          max: 20,
+          step: 0.1
         },
       ]}
       breakdownLabels={{
         grossSalary: "Salaire brut",
         netSalary: "Salaire net",
         cnssEmployee: "CNSS employé",
-        cnssEmployer: "CNSS employeur", 
+        cnssEmployer: "CNSS employeur",
         amoEmployee: "AMO employé",
         amoEmployer: "AMO employeur",
         professionalDeduction: "Déduction professionnelle",
@@ -182,7 +161,7 @@ export default function NetGrossEnhancedPage() {
         netSalary: "MAD",
         cnssEmployee: "MAD",
         cnssEmployer: "MAD",
-        amoEmployee: "MAD", 
+        amoEmployee: "MAD",
         amoEmployer: "MAD",
         professionalDeduction: "MAD",
         taxableIncome: "MAD",

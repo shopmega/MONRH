@@ -16,19 +16,17 @@ export default function LicenciementEnhancedPage() {
       apiPath="/api/simulate/licenciement-enhanced"
       calculatorType="licenciement_enhanced"
       fields={[
-        { 
-          key: "monthlySalary", 
-          label: "Salaire mensuel (MAD)", 
-          type: "number", 
-          defaultValue: "9000", 
-          min: 1, 
-          step: 0.01 
+        {
+          key: "monthlySalary",
+          label: "Salaire mensuel (MAD)",
+          type: "number",
+          min: 1,
+          step: 0.01
         },
-        { 
-          key: "contractType", 
-          label: "Type de contrat", 
-          type: "select", 
-          defaultValue: "CDI",
+        {
+          key: "contractType",
+          label: "Type de contrat",
+          type: "select",
           options: [
             { value: "CDI", label: "CDI" },
             { value: "CDD", label: "CDD" },
@@ -37,49 +35,33 @@ export default function LicenciementEnhancedPage() {
             { value: "temps_partiel", label: "Temps partiel" }
           ]
         },
-        { 
-          key: "workerCategory", 
-          label: "Catégorie professionnelle", 
-          type: "select", 
-          defaultValue: "employe",
+        {
+          key: "workerCategory",
+          label: "Catégorie professionnelle",
+          type: "select",
           options: [
             { value: "cadre", label: "Cadre" },
             { value: "employe", label: "Employé" },
             { value: "ouvrier", label: "Ouvrier" }
           ]
         },
-        { 
-          key: "yearsOfService", 
-          label: "Années d'ancienneté", 
-          type: "number", 
-          defaultValue: 3, 
-          min: 0, 
-          max: 50, 
-          step: 1 
+        {
+          key: "hireDate",
+          label: "Date d'embauche",
+          type: "date",
         },
-        { 
-          key: "monthsOfService", 
-          label: "Mois supplémentaires", 
-          type: "number", 
-          defaultValue: 0, 
-          min: 0, 
-          max: 11, 
-          step: 1 
+        {
+          key: "unusedLeaveDays",
+          label: "Jours de congés restants",
+          type: "number",
+          min: 0,
+          max: 365,
+          step: 0.5
         },
-        { 
-          key: "unusedLeaveDays", 
-          label: "Jours de congés restants", 
-          type: "number", 
-          defaultValue: 6, 
-          min: 0, 
-          max: 365, 
-          step: 0.5 
-        },
-        { 
-          key: "dismissalReason", 
-          label: "Motif de rupture", 
-          type: "select", 
-          defaultValue: "personal",
+        {
+          key: "dismissalReason",
+          label: "Motif de rupture",
+          type: "select",
           options: [
             { value: "personal", label: "Licenciement (motif personnel)" },
             { value: "economic", label: "Motif économique" },
@@ -90,85 +72,70 @@ export default function LicenciementEnhancedPage() {
             { value: "abandon", label: "Abandon de poste" }
           ]
         },
-        { 
-          key: "dismissalReasonDetails", 
-          label: "Détails du motif", 
-          type: "text", 
-          defaultValue: "" 
+        {
+          key: "dismissalReasonDetails",
+          label: "Détails du motif",
+          type: "text"
         },
-        { 
-          key: "priorWarnings", 
-          label: "Avertissements préalables", 
-          type: "number", 
-          defaultValue: 0, 
-          min: 0, 
-          max: 10 
+        {
+          key: "priorWarnings",
+          label: "Avertissements préalables",
+          type: "number",
+          min: 0,
+          max: 10
         },
-        { 
-          key: "warningDates", 
-          label: "Dates des avertissements", 
-          type: "text", 
-          defaultValue: "" 
+        {
+          key: "warningDates",
+          label: "Dates des avertissements",
+          type: "text"
         },
-        { 
-          key: "unionRepresentative", 
-          label: "Représentant syndical", 
-          type: "checkbox", 
-          defaultValue: false 
+        {
+          key: "unionRepresentative",
+          label: "Représentant syndical",
+          type: "checkbox"
         },
-        { 
-          key: "departmentSize", 
-          label: "Taille du département", 
-          type: "number", 
-          defaultValue: 10, 
-          min: 1, 
-          max: 1000 
+        {
+          key: "departmentSize",
+          label: "Taille du département",
+          type: "number",
+          min: 1,
+          max: 1000
         },
-        { 
-          key: "priorDisciplinaryActions", 
-          label: "Actions disciplinaires antérieures", 
-          type: "checkbox", 
-          defaultValue: false 
+        {
+          key: "priorDisciplinaryActions",
+          label: "Actions disciplinaires antérieures",
+          type: "checkbox"
         },
-        { 
-          key: "performanceReviews", 
-          label: "Évaluations de performance", 
-          type: "checkbox", 
-          defaultValue: false 
+        {
+          key: "performanceReviews",
+          label: "Évaluations de performance",
+          type: "checkbox"
         },
-        { 
-          key: "hrNotified", 
-          label: "Notification RH écrite", 
-          type: "checkbox", 
-          defaultValue: false 
+        {
+          key: "hrNotified",
+          label: "Notification RH écrite",
+          type: "checkbox"
         },
-        { 
-          key: "hrNotificationDate", 
-          label: "Date de notification RH", 
-          type: "date", 
-          defaultValue: "" 
+        {
+          key: "hrNotificationDate",
+          label: "Date de notification RH",
+          type: "date"
         },
-        { 
-          key: "abusive", 
-          label: "Licenciement abusif présumé", 
-          type: "checkbox", 
-          defaultValue: false 
+        {
+          key: "abusive",
+          label: "Licenciement abusif présumé",
+          type: "checkbox"
         },
-        { 
-          key: "abusiveDetails", 
-          label: "Détails abusif", 
-          type: "text", 
-          defaultValue: "" 
-        },
-        { 
-          key: "calculationDate", 
-          label: "Date de calcul", 
-          type: "date", 
-          defaultValue: "2026-03-31" 
+        {
+          key: "abusiveDetails",
+          label: "Détails abusif",
+          type: "text"
         },
       ]}
       breakdownLabels={{
         legalIndemnity: "Indemnité légale",
+        hireDate: "Date d'embauche",
+        totalServiceYears: "Anciennete",
         noticeIndemnity: "Indemnité de préavis",
         leavePayout: "Paiement congés restants",
         abusiveDamages: "Dommages abusifs",
@@ -179,6 +146,7 @@ export default function LicenciementEnhancedPage() {
       }}
       units={{
         legalIndemnity: "MAD",
+        totalServiceYears: "ans",
         noticeIndemnity: "MAD",
         leavePayout: "MAD",
         abusiveDamages: "MAD",

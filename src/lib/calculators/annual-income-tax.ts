@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const annualIncomeTaxInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   paidMonths: z.number().min(1).max(14).default(12),
   bonusAmount: z.number().min(0).default(0),

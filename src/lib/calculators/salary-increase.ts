@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 // ─── Shared IR helper (same logic as net-gross) ───────────────────────────────
@@ -70,7 +71,7 @@ function calcNet(
 export const salaryIncreaseInputSchema = z.object({
   currentGross: z.number().positive(),
   newGross: z.number().positive(),
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   includeCimr: z.boolean().default(false),
   cimrRate: z.number().min(0).max(0.12).default(0.06),
 });

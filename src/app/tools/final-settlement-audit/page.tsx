@@ -44,8 +44,7 @@ export default function FinalSettlementAuditPage() {
     monthlySalary: "",
     contractType: "",
     workerCategory: "",
-    yearsOfService: "",
-    monthsOfService: "",
+    hireDate: "",
     unusedLeaveDays: "",
     unpaidSalaryMonths: "",
     overtimeDueMad: "",
@@ -103,8 +102,7 @@ export default function FinalSettlementAuditPage() {
           monthlySalary: Number(form.monthlySalary),
           contractType: form.contractType,
           workerCategory: form.workerCategory,
-          yearsOfService: Number(form.yearsOfService),
-          monthsOfService: Number(form.monthsOfService),
+          hireDate: form.hireDate,
           unusedLeaveDays: Number(form.unusedLeaveDays),
           unpaidSalaryMonths: Number(form.unpaidSalaryMonths),
           overtimeDueMad: Number(form.overtimeDueMad),
@@ -202,26 +200,14 @@ export default function FinalSettlementAuditPage() {
             </select>
           </label>
           <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
-            {t("finalSettlementTool.yearsOfService")}
+            Date d&apos;embauche
             <input
-              type="number"
+              type="date"
               className="input-shell mt-1"
-              value={form.yearsOfService}
+              value={form.hireDate}
               required
               onChange={(event) =>
-                setForm((current) => ({ ...current, yearsOfService: event.target.value }))
-              }
-            />
-          </label>
-          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
-            {t("finalSettlementTool.monthsOfService")}
-            <input
-              type="number"
-              className="input-shell mt-1"
-              value={form.monthsOfService}
-              required
-              onChange={(event) =>
-                setForm((current) => ({ ...current, monthsOfService: event.target.value }))
+                setForm((current) => ({ ...current, hireDate: event.target.value }))
               }
             />
           </label>

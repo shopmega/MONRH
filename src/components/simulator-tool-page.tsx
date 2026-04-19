@@ -138,6 +138,9 @@ function toPayload(values: ValuesState, fields: SimulatorField[]) {
       continue;
     }
     const value = values[field.key];
+    if (value === "" || value === undefined || value === null) {
+      continue;
+    }
     if (field.type === "checkbox") {
       payload[field.key] = Boolean(value);
     } else if (field.type === "number") {

@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { getLeaveRulesByDate } from "@/lib/rules/default-rules";
+import { getCurrentDateISO, serviceYearsFromPeriod } from "@/lib/calculators/shared";
 
 export const leaveAccrualInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthsWorked: z.number().min(0).max(720),
+  hireDate: z.string().date().optional(),
   seniorityYears: z.number().min(0).max(60).default(0),
   usedLeaveDays: z.number().min(0).max(365).default(0),
   carriedDays: z.number().min(0).max(365).default(0),
@@ -16,6 +18,8 @@ export type LeaveAccrualResult = {
   versionCode: string;
   breakdown: {
     accrualDays: number;
+    hireDate?: string;
+    seniorityYears: number;
     seniorityBonusDays: number;
     totalAvailableDays: number;
     usedLeaveDays: number;
@@ -38,10 +42,15 @@ function round(value: number) {
 export function simulateLeaveAccrual(rawInput: LeaveAccrualInput): LeaveAccrualResult {
   const input = leaveAccrualInputSchema.parse(rawInput);
   const rules = getLeaveRulesByDate(input.calculationDate);
+  const seniorityYears = serviceYearsFromPeriod({
+    hireDate: input.hireDate,
+    calculationDate: input.calculationDate,
+    yearsOfService: input.seniorityYears,
+  });
 
   const accrualDays = input.monthsWorked * rules.accrualDaysPerMonth;
   const seniorityBonusDays =
-    input.seniorityYears >= 5
+    seniorityYears >= 5
       ? input.monthsWorked * rules.seniorityBonusDaysPerMonthAfter5Years
       : 0;
   const totalAvailableDays = accrualDays + seniorityBonusDays + input.carriedDays;
@@ -53,6 +62,8 @@ export function simulateLeaveAccrual(rawInput: LeaveAccrualInput): LeaveAccrualR
     versionCode: rules.versionCode,
     breakdown: {
       accrualDays: round(accrualDays),
+      ...(input.hireDate ? { hireDate: input.hireDate } : {}),
+      seniorityYears: round(seniorityYears),
       seniorityBonusDays: round(seniorityBonusDays),
       totalAvailableDays: round(totalAvailableDays),
       usedLeaveDays: round(input.usedLeaveDays),
@@ -63,7 +74,7 @@ export function simulateLeaveAccrual(rawInput: LeaveAccrualInput): LeaveAccrualR
       summary: `Vous disposez d'environ ${round(remainingDays)} jours de conges restants sur la periode saisie.`,
       assumptions: [
         "Acquisition de base calculee sur 1.5 jour par mois.",
-        input.seniorityYears >= 5
+        seniorityYears >= 5
           ? "Bonus anciennete applique (anciennete >= 5 ans)."
           : "Pas de bonus anciennete applique (anciennete < 5 ans).",
         "Le reliquat saisi est ajoute avant deduction des jours consommes.",

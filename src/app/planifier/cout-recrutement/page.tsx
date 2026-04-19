@@ -16,16 +16,15 @@ export default function HiringCostPage() {
       apiPath="/api/simulate/hiring-cost"
       calculatorType="hiring_cost"
       fields={[
-        { key: "offeredGross", label: "Salaire brut offert (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
-        { key: "companySize", label: "Taille entreprise", type: "select", defaultValue: "large", options: [
+        { key: "offeredGross", label: "Salaire brut offert (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "companySize", label: "Taille entreprise", type: "select", options: [
           { label: "Grande (> 20 employes)", value: "large" },
           { label: "Petite (≤ 20 employes)", value: "small" },
         ]},
-        { key: "recruitmentAgencyFeePercent", label: "Frais cabinet recrutement (% salaire annuel)", type: "number", defaultValue: "0", min: 0, max: 0.3, step: 0.01 },
-        { key: "jobBoardCost", label: "Cout offres emploi (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "onboardingMonths", label: "Mois d'onboarding", type: "number", defaultValue: "1", min: 0, max: 6, step: 1 },
-        { key: "equipmentCost", label: "Equipement / materiel (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
+        { key: "recruitmentAgencyFeePercent", label: "Frais cabinet recrutement (% salaire annuel)", type: "number", min: 0, max: 0.3, step: 0.01 },
+        { key: "jobBoardCost", label: "Cout offres emploi (MAD)", type: "number", min: 0, step: 0.01 },
+        { key: "onboardingMonths", label: "Mois d'onboarding", type: "number", min: 0, max: 6, step: 1 },
+        { key: "equipmentCost", label: "Equipement / materiel (MAD)", type: "number", min: 0, step: 0.01 },
       ]}
       breakdownLabels={{
         offeredGross: "Salaire brut offert",

@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getSocialProtectionRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const workAccidentInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   temporaryIncapacityDays: z.number().min(0).max(730).default(0),
   /** IPP% as certified by medical board — 0 means no permanent incapacity */

@@ -16,13 +16,12 @@ export default function CompensationOptimizationPage() {
       apiPath="/api/simulate/compensation-optimization"
       calculatorType="compensation_optimization"
       fields={[
-        { key: "salaryOnlyGross", label: "Scenario 1: Salaire pur brut (MAD)", type: "number", defaultValue: "12000", min: 1, step: 0.01 },
-        { key: "salaryWithBonusGross", label: "Scenario 2: Salaire base (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "annualBonusGross", label: "Scenario 2: Prime annuelle (MAD)", type: "number", defaultValue: "24000", min: 0, step: 0.01 },
-        { key: "salaryWithBenefitsGross", label: "Scenario 3: Salaire (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "benefitsMonthlyValue", label: "Scenario 3: Avantages/mois (MAD)", type: "number", defaultValue: "2000", min: 0, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
-        { key: "totalBudget", label: "Budget employeur total (MAD)", type: "number", defaultValue: "15000", min: 1, step: 0.01 },
+        { key: "salaryOnlyGross", label: "Scenario 1: Salaire pur brut (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "salaryWithBonusGross", label: "Scenario 2: Salaire base (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "annualBonusGross", label: "Scenario 2: Prime annuelle (MAD)", type: "number", min: 0, step: 0.01 },
+        { key: "salaryWithBenefitsGross", label: "Scenario 3: Salaire (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "benefitsMonthlyValue", label: "Scenario 3: Avantages/mois (MAD)", type: "number", min: 0, step: 0.01 },
+        { key: "totalBudget", label: "Budget employeur total (MAD)", type: "number", min: 1, step: 0.01 },
       ]}
       breakdownLabels={{
         bestNetScenario: "Meilleur scenario (net)",

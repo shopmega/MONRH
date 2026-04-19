@@ -1,12 +1,14 @@
 import { z } from "zod";
 import { getTerminationRulesByDate } from "@/lib/rules/default-rules";
+import { getCurrentDateISO, serviceYearsFromPeriod } from "@/lib/calculators/shared";
 
 export const licenciementInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   contractType: z.enum(["CDI", "CDD"]).default("CDI"),
   workerCategory: z.enum(["cadre", "employe", "ouvrier"]).default("employe"),
-  yearsOfService: z.number().min(0).max(60),
+  hireDate: z.string().date().optional(),
+  yearsOfService: z.number().min(0).max(60).default(0),
   monthsOfService: z.number().min(0).max(11).default(0),
   unusedLeaveDays: z.number().min(0).max(365).default(0),
   abusive: z.boolean().default(false),
@@ -20,6 +22,7 @@ export type LicenciementResult = {
   breakdown: {
     contractType: "CDI" | "CDD";
     workerCategory: "cadre" | "employe" | "ouvrier";
+    hireDate?: string;
     totalServiceYears: number;
     hourlySalary: number;
     indemnityLegale: number;
@@ -73,7 +76,7 @@ function indemnityHours(totalYears: number, rules: ReturnType<typeof getTerminat
 export function simulateLicenciement(rawInput: LicenciementInput): LicenciementResult {
   const input = licenciementInputSchema.parse(rawInput);
   const rules = getTerminationRulesByDate(input.calculationDate);
-  const totalServiceYears = input.yearsOfService + input.monthsOfService / 12;
+  const totalServiceYears = serviceYearsFromPeriod(input);
   const hourlySalary = input.monthlySalary / 191;
   const legalHours = indemnityHours(totalServiceYears, rules);
   const legalIndemnityEligible = rules.legalIndemnityContractTypes.includes(input.contractType);
@@ -100,6 +103,7 @@ export function simulateLicenciement(rawInput: LicenciementInput): LicenciementR
     breakdown: {
       contractType: input.contractType,
       workerCategory: input.workerCategory,
+      ...(input.hireDate ? { hireDate: input.hireDate } : {}),
       totalServiceYears: roundYears(totalServiceYears),
       hourlySalary: roundMAD(hourlySalary),
       indemnityLegale: roundMAD(indemnityLegale),

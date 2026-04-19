@@ -16,14 +16,15 @@ export default function LeaveAccrualPage() {
       apiPath="/api/simulate/leave-accrual"
       calculatorType="leave_accrual"
       fields={[
-        { key: "monthsWorked", label: "Mois travailles", type: "number", defaultValue: "12", min: 0, step: 1 },
-        { key: "seniorityYears", label: "Anciennete (ans)", type: "number", defaultValue: "2", min: 0, step: 1 },
-        { key: "usedLeaveDays", label: "Conges utilises (jours)", type: "number", defaultValue: "4", min: 0, step: 0.5 },
-        { key: "carriedDays", label: "Reliquat reporte (jours)", type: "number", defaultValue: "0", min: 0, step: 0.5 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "monthsWorked", label: "Mois travailles", type: "number", min: 0, step: 1 },
+        { key: "hireDate", label: "Date d'embauche", type: "date" },
+        { key: "usedLeaveDays", label: "Conges utilises (jours)", type: "number", min: 0, step: 0.5 },
+        { key: "carriedDays", label: "Reliquat reporte (jours)", type: "number", min: 0, step: 0.5 },
       ]}
       breakdownLabels={{
         accrualDays: "Acquis",
+        hireDate: "Date d'embauche",
+        seniorityYears: "Anciennete",
         seniorityBonusDays: "Bonus anciennete",
         totalAvailableDays: "Total disponible",
         usedLeaveDays: "Consomme",
@@ -32,6 +33,7 @@ export default function LeaveAccrualPage() {
       }}
       units={{
         accrualDays: "jours",
+        seniorityYears: "ans",
         seniorityBonusDays: "jours",
         totalAvailableDays: "jours",
         usedLeaveDays: "jours",

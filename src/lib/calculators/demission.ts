@@ -1,17 +1,13 @@
 import { z } from "zod";
 import { getTerminationRulesByDate } from "@/lib/rules/default-rules";
 import {
+  formatDateOnly,
+  getCurrentDateISO,
+  parseDateOnly,
   type CalculatorExplanation,
   roundMAD,
+  serviceYearsFromPeriod,
 } from "@/lib/calculators/shared";
-
-function getCurrentDateISO() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 export const demissionInputSchema = z.object({
   calculationDate: z.string().date().default(getCurrentDateISO),
@@ -60,44 +56,6 @@ function categoryNoticeMonths(
   return map.gte5;
 }
 
-function parseDateOnly(value: string): Date {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
-
-function formatDateOnly(value: Date): string {
-  const year = value.getFullYear();
-  const month = String(value.getMonth() + 1).padStart(2, "0");
-  const day = String(value.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function getServicePeriod(input: DemissionInput): { totalYears: number } {
-  if (!input.hireDate) {
-    return {
-      totalYears: input.yearsOfService + input.monthsOfService / 12,
-    };
-  }
-
-  const hireDate = parseDateOnly(input.hireDate);
-  const calculationDate = parseDateOnly(input.calculationDate);
-  if (hireDate > calculationDate) {
-    throw new Error("hireDate cannot be after calculationDate");
-  }
-
-  let totalMonths =
-    (calculationDate.getFullYear() - hireDate.getFullYear()) * 12 +
-    (calculationDate.getMonth() - hireDate.getMonth());
-  if (calculationDate.getDate() < hireDate.getDate()) {
-    totalMonths -= 1;
-  }
-  totalMonths = Math.max(0, totalMonths);
-
-  return {
-    totalYears: Math.floor(totalMonths / 12) + (totalMonths % 12) / 12,
-  };
-}
-
 function addMonths(dateISO: string, months: number): string {
   const date = parseDateOnly(dateISO);
   date.setMonth(date.getMonth() + months);
@@ -113,7 +71,7 @@ function addDays(dateISO: string, days: number): string {
 export function simulateDemission(rawInput: DemissionInput): DemissionResult {
   const input = demissionInputSchema.parse(rawInput);
   const rules = getTerminationRulesByDate(input.calculationDate);
-  const totalServiceYears = getServicePeriod(input).totalYears;
+  const totalServiceYears = serviceYearsFromPeriod(input);
 
   const requiredNoticeMonths =
     input.contractType === "CDD"

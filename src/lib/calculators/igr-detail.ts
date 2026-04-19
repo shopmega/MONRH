@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -22,7 +23,7 @@ function computeTax(
 
 export const igrDetailInputSchema = z.object({
   grossSalary: z.number().positive(),
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   includeCimr: z.boolean().default(false),
   cimrRate: z.number().min(0).max(0.12).default(0.06),
   // Optional: additional annual income for reconciliation (13th month, primes)

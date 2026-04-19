@@ -20,15 +20,13 @@ export default function NetGrossSimulationPage() {
           key: "direction",
           label: "Direction",
           type: "select",
-          defaultValue: "gross_to_net",
           options: [
             { label: "Brut vers Net", value: "gross_to_net" },
             { label: "Net vers Brut", value: "net_to_gross" },
           ],
         },
-        { key: "amount", label: "Montant (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
-        { key: "includeCimr", label: "Inclure CIMR (6%)", type: "checkbox", defaultValue: false },
+        { key: "amount", label: "Montant (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "includeCimr", label: "Inclure CIMR (6%)", type: "checkbox" },
       ]}
       breakdownLabels={{
         gross: "Brut",

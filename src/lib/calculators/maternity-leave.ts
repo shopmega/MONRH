@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getSocialProtectionRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const maternityLeaveInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   leaveWeeks: z.number().min(1).max(52).default(14),
   /** CNSS paid months in the 10 months preceding confinement (eligibility check) */

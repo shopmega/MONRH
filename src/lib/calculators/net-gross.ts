@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 const directionSchema = z.enum(["gross_to_net", "net_to_gross"]);
@@ -6,7 +7,7 @@ const directionSchema = z.enum(["gross_to_net", "net_to_gross"]);
 export const netGrossInputSchema = z.object({
   direction: directionSchema,
   amount: z.number().positive(),
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   includeCimr: z.boolean().default(false),
   cimrRate: z.number().min(0).max(0.12).default(0.06),
 });

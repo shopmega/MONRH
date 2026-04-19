@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getSocialProtectionRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const cnssPensionInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   /** Average salary for the last 5 years (reference base) */
   averageSalary: z.number().positive(),
   contributionDays: z.number().min(1).max(20000),

@@ -1,11 +1,17 @@
 import { z } from "zod";
 import { getTerminationRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import {
+  getCurrentDateISO,
+  type CalculatorExplanation,
+  roundMAD,
+  serviceYearsFromPeriod,
+} from "@/lib/calculators/shared";
 
 export const dureePreavisInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   contractType: z.enum(["CDI", "CDD"]).default("CDI"),
   workerCategory: z.enum(["cadre", "employe", "ouvrier"]).default("employe"),
+  hireDate: z.string().date().optional(),
   yearsOfService: z.number().min(0).max(60).default(0),
   monthsOfService: z.number().min(0).max(11).default(0),
 });
@@ -18,6 +24,7 @@ export type DureePreavisResult = {
   breakdown: {
     contractType: "CDI" | "CDD";
     workerCategory: "cadre" | "employe" | "ouvrier";
+    hireDate?: string;
     totalServiceYears: number;
     requiredNoticeMonths: number;
     requiredNoticeDays: number;
@@ -40,7 +47,7 @@ export function simulateDureePreavis(rawInput: DureePreavisInput): DureePreavisR
   const input = dureePreavisInputSchema.parse(rawInput);
   const rules = getTerminationRulesByDate(input.calculationDate);
 
-  const totalServiceYears = input.yearsOfService + input.monthsOfService / 12;
+  const totalServiceYears = serviceYearsFromPeriod(input);
   const requiredNoticeMonths =
     input.contractType === "CDI"
       ? cdiNoticeMonths(totalServiceYears, rules, input.workerCategory)
@@ -56,6 +63,7 @@ export function simulateDureePreavis(rawInput: DureePreavisInput): DureePreavisR
     breakdown: {
       contractType: input.contractType,
       workerCategory: input.workerCategory,
+      ...(input.hireDate ? { hireDate: input.hireDate } : {}),
       totalServiceYears: roundMAD(totalServiceYears),
       requiredNoticeMonths,
       requiredNoticeDays,
@@ -87,4 +95,3 @@ export function simulateDureePreavis(rawInput: DureePreavisInput): DureePreavisR
     },
   };
 }
-

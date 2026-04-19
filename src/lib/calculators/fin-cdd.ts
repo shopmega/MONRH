@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getTerminationRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 /**
  * Contract types exempt from prime de précarité (Art. 32 Code du Travail):
@@ -10,7 +10,7 @@ const PRECARITE_EXEMPT_TYPES = ["seasonal", "training", "replacement", "apprenti
 const PRECARITE_RATE_STANDARD = 0.06; // 6% per Art. 32 CT (not 5%)
 
 export const finCddInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   contractMonths: z.number().min(1).max(60),
   unusedLeaveDays: z.number().min(0).max(365).default(0),

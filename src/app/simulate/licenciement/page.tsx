@@ -16,12 +16,11 @@ export default function LicenciementPage() {
       apiPath="/api/simulate/licenciement"
       calculatorType="licenciement"
       fields={[
-        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "9000", min: 0, step: 0.01 },
+        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 0, step: 0.01 },
         {
           key: "contractType",
           label: "Type de contrat",
           type: "select",
-          defaultValue: "CDI",
           options: [
             { value: "CDI", label: "CDI" },
             { value: "CDD", label: "CDD" },
@@ -34,7 +33,6 @@ export default function LicenciementPage() {
           key: "dismissalReason",
           label: "Motif de rupture",
           type: "select",
-          defaultValue: "licenciement",
           options: [
             { value: "licenciement", label: "Licenciement" },
             { value: "demission", label: "Démission" },
@@ -48,22 +46,20 @@ export default function LicenciementPage() {
           key: "workerCategory",
           label: "Categorie",
           type: "select",
-          defaultValue: "employe",
           options: [
             { value: "cadre", label: "Cadre" },
             { value: "employe", label: "Employe" },
             { value: "ouvrier", label: "Ouvrier" },
           ],
         },
-        { key: "yearsOfService", label: "Annees d'anciennete", type: "number", defaultValue: "4", min: 0, step: 1 },
-        { key: "monthsOfService", label: "Mois supplementaires", type: "number", defaultValue: "0", min: 0, step: 1 },
-        { key: "unusedLeaveDays", label: "Jours de conges restants", type: "number", defaultValue: "10", min: 0, step: 0.5 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
-        { key: "abusive", label: "Licenciement abusif (estimation dommages)", type: "checkbox", defaultValue: false },
+        { key: "hireDate", label: "Date d'embauche", type: "date" },
+        { key: "unusedLeaveDays", label: "Jours de conges restants", type: "number", min: 0, step: 0.5 },
+        { key: "abusive", label: "Licenciement abusif (estimation dommages)", type: "checkbox" },
       ]}
       breakdownLabels={{
         contractType: "Type de contrat",
         workerCategory: "Categorie",
+        hireDate: "Date d'embauche",
         totalServiceYears: "Anciennete",
         indemnityLegale: "Indemnite legale",
         indemnitePreavis: "Indemnite preavis",

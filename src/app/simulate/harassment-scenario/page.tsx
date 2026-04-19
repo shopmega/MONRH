@@ -17,30 +17,29 @@ export default function HarassmentScenarioPage() {
       calculatorType="harassment_scenario"
       fields={[
         {
-          key: "harassmentType", label: "Type de harcelement", type: "select", defaultValue: "moral", options: [
+          key: "harassmentType", label: "Type de harcelement", type: "select", options: [
             { value: "moral", label: "Harcelement moral (Art. 40 CT)" },
             { value: "sexual", label: "Harcelement sexuel (Art. 40 CT + Code penal)" },
           ]
         },
         {
-          key: "perpetratorRelationship", label: "Lien avec l'auteur", type: "select", defaultValue: "supervisor", options: [
+          key: "perpetratorRelationship", label: "Lien avec l'auteur", type: "select", options: [
             { value: "supervisor", label: "Superieur hierarchique" },
             { value: "colleague", label: "Collegue" },
             { value: "client", label: "Client / Tiers" },
           ]
         },
-        { key: "incidentsCount", label: "Incidents documentes", type: "number", defaultValue: "5", min: 1, step: 1 },
-        { key: "witnessesCount", label: "Temoins disponibles", type: "number", defaultValue: "1", min: 0, step: 1 },
-        { key: "hasWrittenProof", label: "Preuves ecrites (emails, SMS...)", type: "checkbox", defaultValue: false },
-        { key: "hasMedicalProof", label: "Certificat medical", type: "checkbox", defaultValue: false },
-        { key: "hrNotified", label: "RH / DRH notifie par ecrit", type: "checkbox", defaultValue: false },
+        { key: "incidentsCount", label: "Incidents documentes", type: "number", min: 1, step: 1 },
+        { key: "witnessesCount", label: "Temoins disponibles", type: "number", min: 0, step: 1 },
+        { key: "hasWrittenProof", label: "Preuves ecrites (emails, SMS...)", type: "checkbox" },
+        { key: "hasMedicalProof", label: "Certificat medical", type: "checkbox" },
+        { key: "hrNotified", label: "RH / DRH notifie par ecrit", type: "checkbox" },
         {
-          key: "companySize", label: "Taille de l'entreprise", type: "select", defaultValue: "large", options: [
+          key: "companySize", label: "Taille de l'entreprise", type: "select", options: [
             { value: "small", label: "< 10 salaries" },
             { value: "large", label: ">= 10 salaries" },
           ]
         },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
       ]}
       breakdownLabels={{
         harassmentType: "Type",

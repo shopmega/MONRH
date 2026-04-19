@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getOvertimeRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const publicHolidayCompensationInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   holidayHoursWorked: z.number().min(0).max(200),
   alreadyPaidNormalDay: z.boolean().default(true),

@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const netGrossEnhancedInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-03-31"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   direction: z.enum(["gross_to_net", "net_to_gross"]).default("gross_to_net"),
   amount: z.number().positive(),
   familySituation: z.enum(["single", "married", "married_with_children", "divorced", "widowed"]).default("single"),

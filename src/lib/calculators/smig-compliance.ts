@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getSmigRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const smigComplianceInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   salaryType: z.enum(["smig", "smag"]).default("smig"),
   /** Monthly base salary (base fixe, hors primes variables) */
   baseSalaryMad: z.number().positive(),

@@ -16,14 +16,13 @@ export default function CnssPensionPage() {
       apiPath="/api/simulate/cnss-pension"
       calculatorType="cnss_pension"
       fields={[
-        { key: "averageSalary", label: "Salaire moyen (MAD)", type: "number", defaultValue: "9000", min: 1, step: 0.01 },
-        { key: "contributionDays", label: "Jours cotises CNSS", type: "number", defaultValue: "4320", min: 1, step: 1 },
-        { key: "retirementAge", label: "Age de depart", type: "number", defaultValue: "60", min: 50, step: 1 },
-        { key: "salaryGrowthRatePercent", label: "Croissance salaire annuelle (%)", type: "number", defaultValue: "0", min: 0, max: 20, step: 0.5 },
-        { key: "additionalContributionYears", label: "Annees de cotisation supplementaires", type: "number", defaultValue: "0", min: 0, max: 30, step: 1 },
-        { key: "hasCimr", label: "Cotisation CIMR", type: "checkbox", defaultValue: false },
-        { key: "cimrMonthlyEstimate", label: "Estimation pension CIMR (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "averageSalary", label: "Salaire moyen (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "contributionDays", label: "Jours cotises CNSS", type: "number", min: 1, step: 1 },
+        { key: "retirementAge", label: "Age de depart", type: "number", min: 50, step: 1 },
+        { key: "salaryGrowthRatePercent", label: "Croissance salaire annuelle (%)", type: "number", min: 0, max: 20, step: 0.5 },
+        { key: "additionalContributionYears", label: "Annees de cotisation supplementaires", type: "number", min: 0, max: 30, step: 1 },
+        { key: "hasCimr", label: "Cotisation CIMR", type: "checkbox" },
+        { key: "cimrMonthlyEstimate", label: "Estimation pension CIMR (MAD)", type: "number", min: 0, step: 0.01 },
       ]}
       breakdownLabels={{
         cnssEligible: "Eligibilite CNSS",

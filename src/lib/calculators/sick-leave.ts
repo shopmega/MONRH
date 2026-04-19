@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getSocialProtectionRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const sickLeaveInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   sickDays: z.number().min(1).max(730),
   /** Number of paid CNSS days in the last 54 days to check eligibility */

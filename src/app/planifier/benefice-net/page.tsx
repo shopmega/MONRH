@@ -16,9 +16,9 @@ export default function ProfitExpensePage() {
       apiPath="/api/simulate/profit-expense"
       calculatorType="profit_expense"
       fields={[
-        { key: "monthlyRevenue", label: "Chiffre d'affaires mensuel (MAD)", type: "number", defaultValue: "20000", min: 1, step: 0.01 },
-        { key: "taxRate", label: "Taux d'imposition (%)", type: "number", defaultValue: "0.02", min: 0, max: 0.5, step: 0.01 },
-        { key: "cnssMonthly", label: "CNSS mensuel (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
+        { key: "monthlyRevenue", label: "Chiffre d'affaires mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "taxRate", label: "Taux d'imposition (%)", type: "number", min: 0, max: 0.5, step: 0.01 },
+        { key: "cnssMonthly", label: "CNSS mensuel (MAD)", type: "number", min: 0, step: 0.01 },
       ]}
       breakdownLabels={{
         monthlyRevenue: "CA mensuel",

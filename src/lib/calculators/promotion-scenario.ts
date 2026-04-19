@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -39,7 +40,7 @@ export const promotionScenarioInputSchema = z.object({
   currentGross: z.number().positive(),
   proposedGross: z.number().positive(),
   newTitle: z.string().max(100).default(""),
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
 });
 
 export type PromotionScenarioInput = z.infer<typeof promotionScenarioInputSchema>;

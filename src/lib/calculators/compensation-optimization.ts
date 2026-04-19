@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -35,7 +36,7 @@ function calcScenario(gross: number, bonusGross: number, benefitsValue: number, 
 
 export const compensationOptimizationInputSchema = z.object({
   totalBudget: z.number().positive(), // employer total budget for this position
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   // Scenario: pure salary
   salaryOnlyGross: z.number().positive(),
   // Scenario: salary + bonus

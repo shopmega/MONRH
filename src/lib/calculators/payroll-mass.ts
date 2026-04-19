@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -46,7 +47,7 @@ export const payrollMassInputSchema = z.object({
   ).optional(),
   employeeCount: z.number().int().min(1).optional(),
   averageGrossSalary: z.number().positive().optional(),
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   companySize: z.enum(["small", "large"]).default("large"),
 }).refine(data => data.employees || (data.employeeCount && data.averageGrossSalary), {
   message: "Either 'employees' list or both 'employeeCount' and 'averageGrossSalary' must be provided.",

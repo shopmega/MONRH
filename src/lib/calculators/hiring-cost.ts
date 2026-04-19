@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -9,7 +10,7 @@ function roundMAD(v: number) {
 
 export const hiringCostInputSchema = z.object({
   offeredGross: z.number().positive(),
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   companySize: z.enum(["small", "large"]).default("large"),
   // Recruitment costs
   recruitmentAgencyFeePercent: z.number().min(0).max(0.3).default(0), // % of annual salary

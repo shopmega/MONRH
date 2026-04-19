@@ -16,9 +16,8 @@ export default function BonusSimulatorPage() {
       apiPath="/api/simulate/bonus-simulator"
       calculatorType="bonus_simulator"
       fields={[
-        { key: "monthlySalaryGross", label: "Salaire mensuel brut (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "bonusGross", label: "Prime brute (MAD)", type: "number", defaultValue: "5000", min: 1, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
+        { key: "monthlySalaryGross", label: "Salaire mensuel brut (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "bonusGross", label: "Prime brute (MAD)", type: "number", min: 1, step: 0.01 },
       ]}
       breakdownLabels={{
         monthlySalaryGross: "Salaire brut mensuel",

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 /**
  * AT/MP (Work Accident / Occupational Disease) sector rate ranges.
@@ -14,7 +14,7 @@ const AT_MP_RATES = {
 } as const;
 
 export const employerTotalCostInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   grossSalary: z.number().positive(),
   /** Company headcount — determines formation professionnelle rate (1% or 1.6%) */
   companySize: z.enum(["small", "large"]).default("large"),

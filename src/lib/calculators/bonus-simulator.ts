@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -39,7 +40,7 @@ function calcMonthlyNet(gross: number, calculationDate: string) {
 export const bonusSimulatorInputSchema = z.object({
   monthlySalaryGross: z.number().positive(),
   bonusGross: z.number().positive(),
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
 });
 
 export type BonusSimulatorInput = z.infer<typeof bonusSimulatorInputSchema>;

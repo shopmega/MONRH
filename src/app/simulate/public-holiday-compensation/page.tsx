@@ -16,10 +16,9 @@ export default function PublicHolidayCompensationPage() {
       apiPath="/api/simulate/public-holiday-compensation"
       calculatorType="public_holiday_compensation"
       fields={[
-        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "8000", min: 1, step: 0.01 },
-        { key: "holidayHoursWorked", label: "Heures travaillees (jour ferie)", type: "number", defaultValue: "8", min: 0, step: 0.5 },
-        { key: "alreadyPaidNormalDay", label: "Jour normal deja remunere", type: "checkbox", defaultValue: true },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "holidayHoursWorked", label: "Heures travaillees (jour ferie)", type: "number", min: 0, step: 0.5 },
+        { key: "alreadyPaidNormalDay", label: "Jour normal deja remunere", type: "checkbox" },
       ]}
       breakdownLabels={{
         baseHourlyRate: "Taux horaire base",

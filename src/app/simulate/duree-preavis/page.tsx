@@ -20,7 +20,6 @@ export default function DureePreavisPage() {
           key: "contractType",
           label: "Type de contrat",
           type: "select",
-          defaultValue: "CDI",
           options: [
             { value: "CDI", label: "CDI" },
             { value: "CDD", label: "CDD" },
@@ -30,20 +29,18 @@ export default function DureePreavisPage() {
           key: "workerCategory",
           label: "Categorie professionnelle",
           type: "select",
-          defaultValue: "employe",
           options: [
             { value: "cadre", label: "Cadre / Technicien" },
             { value: "employe", label: "Employe" },
             { value: "ouvrier", label: "Ouvrier" },
           ],
         },
-        { key: "yearsOfService", label: "Anciennete (annees)", type: "number", defaultValue: "2", min: 0, step: 1 },
-        { key: "monthsOfService", label: "Mois supplementaires", type: "number", defaultValue: "0", min: 0, max: 11, step: 1 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "hireDate", label: "Date d'embauche", type: "date" },
       ]}
       breakdownLabels={{
         contractType: "Type de contrat",
         workerCategory: "Categorie",
+        hireDate: "Date d'embauche",
         totalServiceYears: "Anciennete",
         requiredNoticeMonths: "Preavis (mois)",
         requiredNoticeDays: "Preavis (jours)",

@@ -16,10 +16,9 @@ export default function SeniorityGrowthPage() {
       apiPath="/api/simulate/seniority-growth"
       calculatorType="seniority_growth"
       fields={[
-        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "9000", min: 1, step: 0.01 },
-        { key: "currentYears", label: "Anciennete actuelle (ans)", type: "number", defaultValue: "4", min: 0, step: 1 },
-        { key: "additionalYears", label: "Annees supplementaires", type: "number", defaultValue: "3", min: 0, step: 1 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "currentYears", label: "Anciennete actuelle (ans)", type: "number", min: 0, step: 1 },
+        { key: "additionalYears", label: "Annees supplementaires", type: "number", min: 0, step: 1 },
       ]}
       breakdownLabels={{
         currentIndemnityEstimate: "Indemnite actuelle",

@@ -16,14 +16,14 @@ export default function AvantagesNaturePage() {
       apiPath="/api/simulate/avantages-nature"
       calculatorType="avantages_nature"
       fields={[
-        { key: "grossSalary", label: "Salaire brut mensuel (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "companyVehicle", label: "Vehicule de societe", type: "checkbox", defaultValue: false },
-        { key: "vehicleValue", label: "Valeur vehicule (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "housingProvided", label: "Logement de fonction", type: "checkbox", defaultValue: false },
-        { key: "housingMonthlyValue", label: "Valeur logement (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "mealVouchers", label: "Tickets repas (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "phoneSubscription", label: "Forfait telephone (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "transportAllowance", label: "Indemnite transport (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
+        { key: "grossSalary", label: "Salaire brut mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "companyVehicle", label: "Vehicule de societe", type: "checkbox" },
+        { key: "vehicleValue", label: "Valeur vehicule (MAD/mois)", type: "number", min: 0, step: 0.01 },
+        { key: "housingProvided", label: "Logement de fonction", type: "checkbox" },
+        { key: "housingMonthlyValue", label: "Valeur logement (MAD/mois)", type: "number", min: 0, step: 0.01 },
+        { key: "mealVouchers", label: "Tickets repas (MAD/mois)", type: "number", min: 0, step: 0.01 },
+        { key: "phoneSubscription", label: "Forfait telephone (MAD/mois)", type: "number", min: 0, step: 0.01 },
+        { key: "transportAllowance", label: "Indemnite transport (MAD/mois)", type: "number", min: 0, step: 0.01 },
       ]}
       breakdownLabels={{
         grossSalary: "Salaire brut",
