@@ -30,7 +30,7 @@ const planGroups: PlanGroup[] = [
           fr: "Comparez deux situations (offres, scenarios carriere) et generez un rapport de decision.",
           ar: "قارن بين وضعيتين (عروض، مسارات مهنية) وأنشئ تقرير قرار.",
         },
-        href: "/planifier/comparaison-scenarios",
+        href: "/carriere/comparaison-scenarios",
         badge: "new",
         icon: "⚖️",
       },
@@ -46,7 +46,7 @@ const planGroups: PlanGroup[] = [
           fr: "Gain net reel apres augmentation brute: IR, cout employeur, comparaison.",
           ar: "صافي الربح الحقيقي بعد الزيادة الإجمالية: الضريبة وكلفة المشغل.",
         },
-        href: "/planifier/augmentation-salaire",
+        href: "/carriere/augmentation-salaire",
         badge: "new",
         icon: "📈",
       },
@@ -86,7 +86,7 @@ const planGroups: PlanGroup[] = [
           fr: "Gain net reel d'une promotion vs augmentation brute et cout employeur.",
           ar: "صافي مكسب الترقية مقابل الزيادة الإجمالية وكلفة المشغل.",
         },
-        href: "/planifier/scenario-promotion",
+        href: "/carriere/promotion",
         badge: "new",
         icon: "🚀",
       },
@@ -102,7 +102,7 @@ const planGroups: PlanGroup[] = [
           fr: "Comparaison nette: salarie vs auto-entrepreneur. Seuil de rentabilite et TJM.",
           ar: "مقارنة صافية: أجير مقابل مقاول ذاتي. عتبة الربحية والأجر اليومي.",
         },
-        href: "/planifier/freelance-vs-salarie",
+        href: "/carriere/freelance-vs-salarie",
         badge: "new",
         icon: "⚡",
       },
@@ -194,7 +194,7 @@ const planGroups: PlanGroup[] = [
           fr: "Net apres impot AE (1%/2%), CNSS optionnel et projection annuelle.",
           ar: "الصافي بعد ضريبة المقاول الذاتي (1%/2%) والـ CNSS الاختيارية.",
         },
-        href: "/planifier/auto-entrepreneur",
+        href: "/carriere/auto-entrepreneur",
         badge: "new",
         icon: "💼",
       },
@@ -229,7 +229,7 @@ export default function PlanifierPage() {
 
   const filteredGroups = useMemo(() => {
     if (!searchQuery.trim()) return planGroups;
-    
+
     const query = searchQuery.toLowerCase();
     return planGroups
       .map((group) => ({
@@ -248,7 +248,7 @@ export default function PlanifierPage() {
   const totalTools = useMemo(() => filteredGroups.reduce((s, g) => s + g.items.length, 0), [filteredGroups]);
 
   return (
-    <main className="paper-bg min-h-screen">
+    <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
 
         {/* Hero section */}
@@ -340,7 +340,7 @@ export default function PlanifierPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-lg font-semibold text-[var(--foreground)]">{t("common.noResults", { query: searchQuery })}</p>
-              <button 
+              <button
                 onClick={() => setSearchQuery("")}
                 className="mt-4 text-sm font-bold text-[var(--accent)] hover:underline"
               >
@@ -362,7 +362,7 @@ export default function PlanifierPage() {
         <section className="mt-12 border-t border-[var(--line)] pt-12">
           <p className="section-kicker text-center">{t("common.exploreSections")}</p>
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
-            <Link href="/simulateurs" className="soft-card group rounded-[2rem] p-6 transition-all hover:-translate-y-1">
+            <Link href="/simulate" className="soft-card group rounded-[2rem] p-6 transition-all hover:-translate-y-1">
               <p className="section-kicker">{t("nav.simulate")}</p>
               <h3 className="display-font mt-2 text-xl font-bold">{language === "ar" ? "محاكاة الحقوق" : "Simulateurs Calcul"}</h3>
               <p className="mt-2 text-xs leading-relaxed text-[var(--ink-soft)]">{t("common.simulateDesc")}</p>

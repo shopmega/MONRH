@@ -3,4 +3,4 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Resultat - Planifier', robots: { index: false, follow: false } };
 
-export default function ResultPage() { return <SimulationResultPage slug='augmentation-salaire' expectedPath='/planifier/augmentation-salaire' />; }
+export default function ResultPage() { return <SimulationResultPage slug='scenario-promotion' expectedPath='/carriere/promotion' />; }
