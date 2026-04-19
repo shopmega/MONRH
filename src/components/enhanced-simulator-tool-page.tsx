@@ -7,11 +7,12 @@ import { useUserJourney } from '@/lib/context/user-journey-context';
 import { detectUserScenario, getRecommendedDocuments, getNextSteps } from '@/lib/context/scenario-detection';
 import { addSimulationToJourney } from '@/lib/context/user-journey-context';
 import { Button } from '@/components/ui/button';
-import {
-  SmartDate,
-  SmartAmount,
-  SmartToggle,
-  SmartRadioCards,
+import { writeSimulationResultSnapshot } from '@/lib/simulations/result-snapshot';
+import { 
+  SmartDate, 
+  SmartAmount, 
+  SmartToggle, 
+  SmartRadioCards, 
   SmartStepper,
   SmartLookup,
   SmartTagInput
@@ -87,22 +88,20 @@ function toSearchParams(values: Record<string, unknown>) {
 }
 
 // Simple field renderer based on the existing pattern
-function SimpleFieldRenderer({
-  field,
-  value,
-  onChange
-}: {
-  field: Field;
-  value: unknown;
+function SimpleFieldRenderer({ 
+  field, 
+  value, 
+  onChange 
+}: { 
+  field: Field; 
+  value: unknown; 
   onChange: (value: unknown) => void;
 }) {
-  const { t } = useLanguage();
-
   // Heuristics for smarter component selection
   let effectiveType = field.type;
   if (effectiveType === 'number') {
-    if (field.key.toLowerCase().includes('salaire') ||
-        field.key.toLowerCase().includes('montant') ||
+    if (field.key.toLowerCase().includes('salaire') || 
+        field.key.toLowerCase().includes('montant') || 
         field.key.toLowerCase().includes('brut') ||
         field.key.toLowerCase().includes('indemnite') ||
         field.key.toLowerCase().includes('plafond')) {
@@ -240,18 +239,17 @@ export function EnhancedSimulatorToolPage({
   apiPath,
   calculatorType,
   fields,
-  breakdownLabels,
-  units,
+  breakdownLabels = {},
+  units = {},
 }: EnhancedSimulatorToolPageProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { context, updateLegalContext, addJourneyEvent } = useUserJourney();
-
+  
   const [values, setValues] = useState<Record<string, unknown>>(() => createInitialValues(fields, searchParams));
-
+  
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
@@ -264,7 +262,7 @@ export function EnhancedSimulatorToolPage({
         prefilled[field.key] = parseFieldValue(field, paramValue);
       }
     });
-
+    
     if (Object.keys(prefilled).length > 0) {
       setValues(prev => {
         const next = { ...prev };
@@ -285,7 +283,7 @@ export function EnhancedSimulatorToolPage({
     if (context.journey.length > 0) {
       const lastSimulations = context.journey.filter(event => event.type === 'simulation');
       const currentSimulation = { type: calculatorType, result: values };
-
+      
       const scenario = detectUserScenario(lastSimulations, currentSimulation);
       updateLegalContext({
         currentScenario: scenario.type === 'salary_dispute' ? 'dispute' :
@@ -295,10 +293,10 @@ export function EnhancedSimulatorToolPage({
                        'information',
         urgencyLevel: scenario.urgencyLevel,
       });
-
+      
       setSuggestions(getRecommendedDocuments(scenario));
     }
-  }, [calculatorType, context.journey]);
+  }, [calculatorType, context.journey, updateLegalContext, values]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -331,11 +329,94 @@ export function EnhancedSimulatorToolPage({
 
       const simulationResult = await response.json();
 
+      const rawResult =
+        simulationResult && typeof simulationResult === "object" && "result" in simulationResult
+          ? (simulationResult as { result: Record<string, unknown> }).result
+          : (simulationResult as Record<string, unknown>);
+      const rawBreakdownSource =
+        rawResult?.breakdown && typeof rawResult.breakdown === "object" && !Array.isArray(rawResult.breakdown)
+          ? (rawResult.breakdown as Record<string, unknown>)
+          : {};
+      const breakdownSource = Object.fromEntries(
+        Object.entries(rawBreakdownSource).filter(([, value]) => {
+          const type = typeof value;
+          return type === "string" || type === "number" || type === "boolean";
+        }),
+      ) as Record<string, string | number | boolean>;
+      const fallbackLabels = Object.fromEntries(Object.keys(breakdownSource).map((key) => [key, key]));
+
+      writeSimulationResultSnapshot({
+        calculatorPath: window.location.pathname,
+        calculatorType,
+        title,
+        description,
+        generatedAt: new Date().toISOString(),
+        breakdownLabels: Object.keys(breakdownLabels).length > 0 ? breakdownLabels : fallbackLabels,
+        units,
+        locale,
+        inputPayload: payload,
+        result: {
+          versionCode:
+            typeof rawResult?.versionCode === "string" && rawResult.versionCode.trim().length > 0
+              ? rawResult.versionCode
+              : "ma_2026",
+          breakdown: breakdownSource,
+          explanation:
+            rawResult?.explanation && typeof rawResult.explanation === "object"
+              ? (rawResult.explanation as {
+                  summary: string;
+                  assumptions: string[];
+                  formulas: string[];
+                  warnings: string[];
+                  nextSteps: string[];
+                })
+              : undefined,
+        },
+      });
+
       addSimulationToJourney(calculatorType, simulationResult, payload);
-      setResult(simulationResult);
 
-      router.push(`${window.location.pathname}/result`);
+      let simulationId: string | undefined;
+      try {
+        const saveResponse = await fetch("/api/simulations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            calculatorType,
+            input: payload,
+            result: {
+              versionCode:
+                typeof rawResult?.versionCode === "string" && rawResult.versionCode.trim().length > 0
+                  ? rawResult.versionCode
+                  : "ma_2026",
+              breakdown: breakdownSource,
+              explanation:
+                rawResult?.explanation && typeof rawResult.explanation === "object"
+                  ? rawResult.explanation
+                  : undefined,
+            },
+          }),
+        });
+        if (saveResponse.ok) {
+          const saveData = (await saveResponse.json()) as {
+            ok?: boolean;
+            item?: { id?: string };
+          };
+          if (saveData.ok && typeof saveData.item?.id === "string") {
+            simulationId = saveData.item.id;
+          }
+        }
+      } catch {
+        // Server-side save is optional for anonymous users.
+      }
 
+      const resultHref = simulationId
+        ? `${window.location.pathname}/result?simulationId=${encodeURIComponent(simulationId)}`
+        : `${window.location.pathname}/result`;
+      router.push(resultHref);
+      
     } catch (err) {
       console.error('Simulation error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -346,7 +427,7 @@ export function EnhancedSimulatorToolPage({
 
   const handleValueChange = (key: string, value: unknown) => {
     setValues(prev => ({ ...prev, [key]: value }));
-
+    
     addJourneyEvent({
       type: 'navigation',
       data: {
@@ -364,124 +445,125 @@ export function EnhancedSimulatorToolPage({
 
   const getScenarioColor = (scenario: string) => {
     switch (scenario) {
-      case 'dispute': return 'bg-red-100 border-red-200 text-red-800';
-      case 'termination': return 'bg-orange-100 border-orange-200 text-orange-800';
-      case 'planning': return 'bg-blue-100 border-blue-200 text-blue-800';
-      default: return 'bg-gray-100 border-gray-200 text-gray-800';
+      case 'dispute': return 'bg-[var(--warning-soft)] border-[var(--warning-line)] text-[var(--foreground)]';
+      case 'termination': return 'bg-[var(--accent-soft)] border-[var(--line)] text-[var(--foreground)]';
+      case 'planning': return 'bg-[var(--surface-muted)] border-[var(--line)] text-[var(--foreground)]';
+      default: return 'bg-[var(--surface-muted)] border-[var(--line)] text-[var(--ink-soft)]';
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold">{title}</h1>
-        <p className="text-muted-foreground">{description}</p>
+    <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
+      <div className="relative z-10 mx-auto w-full max-w-5xl min-w-0 px-4 pb-10 pt-6 sm:px-6">
+        <section className="soft-card rounded-[2rem] p-5 sm:p-7">
+          <p className="section-kicker">{t("simulator.title")}</p>
+          <h1 className="display-font mt-2 break-words text-3xl font-semibold sm:text-4xl">{title}</h1>
+          <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">{description}</p>
 
-        {context.legal.currentScenario && context.legal.currentScenario !== 'information' && (
-          <div className={`p-4 rounded-lg border ${getScenarioColor(context.legal.currentScenario)}`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="font-semibold">
-                  {t(`simulator.scenario.${context.legal.currentScenario}`)}
-                </span>
-                {context.legal.urgencyLevel && (
-                  <span className="ml-2 text-sm font-medium">
-                    Urgency: {context.legal.urgencyLevel}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="bg-white p-6 rounded-lg border shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Parameters</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {fields.map((field) => {
-            if (field.key === CALCULATION_DATE_KEY) return null;
-            const isVisible = field.visibleIf ? field.visibleIf(values) : true;
-            return (
-              <div
-                key={field.key}
-                className={`conditional-container ${isVisible ? "conditional-visible" : "conditional-hidden"}`}
-              >
-                <div className="space-y-2">
-                  <SimpleFieldRenderer
-                    field={field}
-                    value={values[field.key]}
-                    onChange={(value) => handleValueChange(field.key, value)}
-                  />
-                </div>
-              </div>
-            );
-          })}
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-md">
-              <p className="text-sm">{error}</p>
+          {context.legal.currentScenario && context.legal.currentScenario !== 'information' && (
+            <div className={`mt-4 rounded-2xl border p-4 ${getScenarioColor(context.legal.currentScenario)}`}>
+              <p className="font-semibold">
+                {t(`simulator.scenario.${context.legal.currentScenario}`)}
+              </p>
+              {context.legal.urgencyLevel && (
+                <p className="mt-1 text-sm font-medium">
+                  Urgency: {context.legal.urgencyLevel}
+                </p>
+              )}
             </div>
           )}
+        </section>
 
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? 'Calculating...' : 'Calculate'}
-          </Button>
-        </form>
-      </div>
-
-      {suggestions.length > 0 && (
-        <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Recommended Documents</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {suggestions.map((documentId) => (
-              <div key={documentId} className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <h4 className="font-medium">{documentId}</h4>
-                  <p className="text-sm text-gray-600">
-                    Generate this document based on your calculation
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleDocumentSuggestion(documentId)}
+        <section className="soft-card mt-4 rounded-3xl p-5 sm:p-7">
+          <h2 className="display-font text-xl font-semibold">Parameters</h2>
+          <form onSubmit={handleSubmit} className="mt-5 space-y-6">
+            {fields.map((field) => {
+              if (field.key === CALCULATION_DATE_KEY) return null;
+              const isVisible = field.visibleIf ? field.visibleIf(values) : true;
+              return (
+                <div
+                  key={field.key}
+                  className={`conditional-container rounded-2xl ${isVisible ? "conditional-visible panel-tonal p-4" : "conditional-hidden"}`}
                 >
-                  Open
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+                  <div className="space-y-2">
+                    <SimpleFieldRenderer
+                      field={field}
+                      value={values[field.key]}
+                      onChange={(value) => handleValueChange(field.key, value)}
+                    />
+                  </div>
+                </div>
+              );
+            })}
 
-      {context.legal.currentScenario && context.legal.currentScenario !== 'information' && (
-        <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Next Steps</h2>
-          <ol className="space-y-2">
-            {getNextSteps({
-              type: context.legal.currentScenario === 'dispute' ? 'salary_dispute' :
-                     context.legal.currentScenario === 'termination' ? 'termination_preparation' :
-                     context.legal.currentScenario === 'planning' ? 'financial_planning' :
-                     'information',
-              confidence: 0.8,
-              indicators: [],
-              recommendedActions: [],
-              urgencyLevel: context.legal.urgencyLevel || 'low'
-            }).map((step, index) => (
-              <li key={index} className="flex items-start space-x-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
-                  {index + 1}
-                </span>
-                <span className="text-sm">{step}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
-    </div>
+            {error && (
+              <div className="status-error rounded-xl p-3">
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isLoading}
+              className="btn-primary h-11 w-full text-sm font-semibold"
+            >
+              {isLoading ? 'Calculating...' : 'Calculate'}
+            </Button>
+          </form>
+        </section>
+
+        {suggestions.length > 0 && (
+          <section className="soft-card mt-4 rounded-3xl p-5">
+            <h2 className="display-font text-xl font-semibold">Recommended Documents</h2>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {suggestions.map((documentId) => (
+                <div key={documentId} className="panel-tonal flex items-center justify-between gap-3 rounded-2xl p-4">
+                  <div className="min-w-0">
+                    <h4 className="truncate font-semibold">{documentId}</h4>
+                    <p className="mt-1 text-sm text-[var(--ink-soft)]">
+                      Generate this document based on your calculation
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0"
+                    onClick={() => handleDocumentSuggestion(documentId)}
+                  >
+                    Open
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {context.legal.currentScenario && context.legal.currentScenario !== 'information' && (
+          <section className="soft-card mt-4 rounded-3xl p-5">
+            <h2 className="display-font text-xl font-semibold">Next Steps</h2>
+            <ol className="mt-4 space-y-2">
+              {getNextSteps({
+                type: context.legal.currentScenario === 'dispute' ? 'salary_dispute' :
+                       context.legal.currentScenario === 'termination' ? 'termination_preparation' :
+                       context.legal.currentScenario === 'planning' ? 'financial_planning' :
+                       'information',
+                confidence: 0.8,
+                indicators: [],
+                recommendedActions: [],
+                urgencyLevel: context.legal.urgencyLevel || 'low'
+              }).map((step, index) => (
+                <li key={index} className="panel-tonal flex items-start gap-3 rounded-2xl px-3 py-2.5">
+                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-xs font-semibold text-[var(--juris-on-primary)]">
+                    {index + 1}
+                  </span>
+                  <span className="text-sm">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+      </div>
+    </main>
   );
 }

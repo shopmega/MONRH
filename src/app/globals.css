@@ -1,158 +1,147 @@
 @import "tailwindcss";
 
 :root {
-  /* Fondements */
-  --bg: #F5F3EF;
-  --bg-elevated: #FFFFFF;
-  --card: #FFFFFF;
-  --card-hover: #FAFAF8;
-  --border: #E2DED6;
-  --border-focus: #B5622E;
-
-  /* Texte */
-  --fg: #1A1815;
-  --fg-muted: #6B6560;
-  --fg-dim: #9C9690;
-
-  /* Accent — même famille chaude, adaptée au fond clair */
-  --accent: #B5622E;
-  --accent-light: #C87A3F;
-  --accent-glow: rgba(181, 98, 46, 0.12);
-  --accent-soft: rgba(181, 98, 46, 0.05);
-
-  /* Sémantique — assombris pour être lisibles sur fond clair */
-  --ok: #1E8A52;
-  --ok-bg: rgba(30, 138, 82, 0.07);
-  --err: #C43E3E;
-  --err-bg: rgba(196, 62, 62, 0.06);
-  --warn: #B58A1E;
-  --warn-bg: rgba(181, 138, 30, 0.06);
-
-  /* Maroc */
-  --ma: #A82228;
-  --ma-s: rgba(168, 34, 40, 0.05);
-
-  /* Inputs spécifiques */
-  --input-bg: #FFFFFF;
-  --input-placeholder: #B5AFA8;
-
-  /* Legacy variables for backward compatibility */
-  --background: var(--bg);
-  --foreground: var(--fg);
-  --heading: var(--fg);
+  /* The Digital Jurisconsult - Foundation */
+  --juris-primary: #8a5022;
+  --juris-primary-container: #c6824f;
+  --juris-primary-fixed: #ffdcc5;
+  --juris-on-primary: #ffffff;
   
-  --surface: var(--card);
-  --surface-elevated: var(--bg-elevated);
-  --surface-strong: var(--card-hover);
-  --surface-muted: var(--bg);
+  --juris-surface: #faf9f9;
+  --juris-surface-low: #f4f3f3;
+  --juris-surface-container: #efeded;
+  --juris-surface-highest: #ffffff;
   
-  --line: var(--border);
-  --line-strong: var(--border-focus);
+  --juris-on-surface: #1b1c1c;
+  --juris-on-surface-variant: #52443b;
+  --juris-outline-variant: rgba(215, 195, 182, 0.15); /* Ghost Border */
   
-  --accent-strong: var(--accent-light);
-  
-  --ink-soft: var(--fg-dim);
-  
-  --success-bg: var(--ok-bg);
-  --success-ink: var(--ok);
-  --error-bg: var(--err-bg);
-  --error-ink: var(--err);
-  --info-bg: var(--warn-bg);
-  --info-ink: var(--warn);
+  --juris-secondary: #5f5e5e;
+  --juris-secondary-container: #e2dfde;
+  --juris-on-secondary-container: #636262;
 
-  /* Simulator Premium Theme - Light */
-  --sim-bg: #F5F3EF;
-  --sim-card: #FFFFFF;
-  --sim-border: #E2DED6;
-  --sim-text: #1A1815;
-  --sim-accent: #B5622E;
-  --sim-accent-soft: rgba(181, 98, 46, 0.12);
-  --sim-ink-soft: #6B6560;
+  /* Legacy aliases for compatibility */
+  --background: var(--juris-surface);
+  --foreground: var(--juris-on-surface);
+  --accent: var(--juris-primary);
+  --card: var(--juris-surface-highest);
+  --border: var(--juris-outline-variant);
+  --surface: var(--juris-surface-highest);
+  --surface-muted: var(--juris-surface-low);
+  --surface-elevated: var(--juris-surface-container);
+  --surface-strong: #e8e4e2;
+  --ink: var(--juris-on-surface);
+  --ink-soft: var(--juris-on-surface-variant);
+  --heading: var(--juris-on-surface);
+  --line: rgba(82, 68, 59, 0.18);
+  --accent-soft: rgba(138, 80, 34, 0.14);
+  --accent-light: #ffdcc5;
+  --accent-dark: #6d390b;
+  --accent-strong: #c6824f;
+  --highlight: #b5622e;
+  --fg: var(--ink);
+  --fg-muted: var(--ink-soft);
+  --fg-dim: #6d5e54;
+  --input-bg: var(--surface);
+  --input-placeholder: #8b7a70;
+  --border-focus: var(--accent);
+  --card-hover: #f1efee;
+  --ok: #1e8a52;
+  --ok-bg: #e8f7ef;
+  --err: #b93d3d;
+  --err-bg: #fdeaea;
+  --ma: #a82228;
+  --ma-s: #fdecee;
+  --info-bg: #eaf2ff;
+  --info-ink: #1f3d7a;
+  --success-bg: #ecfdf5;
+  --success-ink: #065f46;
+  --warning-soft: #fff5e8;
+  --warning-line: #efcb8d;
+  --error-ink: #8f2d2d;
+  --sim-bg: var(--surface-muted);
+  --sim-card: var(--surface);
+  --sim-text: var(--ink);
+  --sim-border: var(--line);
+  --sim-accent: var(--accent);
+  --sim-accent-soft: var(--accent-soft);
+  --sim-ink-soft: var(--ink-soft);
+
+  /* Fonts */
+  --font-display: 'Manrope', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
 
 :root[data-theme="dark"] {
-  /* Fondements */
-  --bg: #111519;
-  --bg-elevated: #161B22;
-  --card: #161B22;
-  --card-hover: #1D242C;
-  --border: #252C37;
-  --border-focus: #C2783C;
-
-  /* Texte */
-  --fg: #ECEEF1;
-  --fg-muted: #8B949E;
-  --fg-dim: #6E7681;
-
-  /* Accent — version sombre de la famille chaude */
-  --accent: #C2783C;
-  --accent-light: #D9894E;
-  --accent-glow: rgba(194, 120, 60, 0.15);
-  --accent-soft: rgba(194, 120, 60, 0.15);
-
-  /* Sémantique — adaptés pour le fond sombre */
-  --ok: #6ee7b7;
-  --ok-bg: rgba(30, 138, 82, 0.15);
-  --err: #fca5a5;
-  --err-bg: rgba(196, 62, 62, 0.15);
-  --warn: #7dd3fc;
-  --warn-bg: rgba(181, 138, 30, 0.15);
-
-  /* Maroc */
-  --ma: #D42A30;
-  --ma-s: rgba(212, 42, 48, 0.1);
-
-  /* Inputs spécifiques */
-  --input-bg: #161B22;
-  --input-placeholder: #6E7681;
-
-  /* Legacy variables for backward compatibility */
-  --background: var(--bg);
-  --foreground: var(--fg);
-  --heading: var(--fg);
+  /* Digital Jurisconsult - Dark (Cohesive with Terracotta) */
+  --juris-surface: #1b1c1c;
+  --juris-surface-low: #151616;
+  --juris-surface-container: #2f3031;
+  --juris-surface-highest: #3b3c3d;
   
-  --surface: var(--card);
-  --surface-elevated: var(--bg-elevated);
-  --surface-strong: var(--card-hover);
-  --surface-muted: var(--bg);
+  --juris-on-surface: #f2f0f0;
+  --juris-on-surface-variant: #d7c3b6;
   
-  --line: var(--border);
-  --line-strong: #30363D;
-  
-  --accent-strong: var(--accent-light);
-  
-  --ink-soft: var(--fg-muted);
-  
-  --success-bg: var(--ok-bg);
-  --success-ink: var(--ok);
-  --error-bg: var(--err-bg);
-  --error-ink: var(--err);
-  --info-bg: var(--warn-bg);
-  --info-ink: var(--warn);
+  --juris-primary: #ffb783;
+  --juris-primary-container: #6d390b;
+  --juris-on-primary: #462000;
 
-  /* Simulator Premium Theme - Dark */
-  --sim-bg: #111519;
-  --sim-card: #161B22;
-  --sim-border: #252C37;
-  --sim-text: #ECEEF1;
-  --sim-accent: #C2783C;
-  --sim-accent-soft: rgba(194, 120, 60, 0.15);
-  --sim-ink-soft: #8B949E;
+  --background: var(--juris-surface);
+  --foreground: var(--juris-on-surface);
+  --accent: var(--juris-primary);
+  --surface: var(--juris-surface-highest);
+  --surface-muted: var(--juris-surface-container);
+  --surface-elevated: #343536;
+  --surface-strong: #262728;
+  --ink: var(--juris-on-surface);
+  --ink-soft: var(--juris-on-surface-variant);
+  --heading: var(--juris-on-surface);
+  --line: rgba(215, 195, 182, 0.24);
+  --accent-soft: rgba(255, 183, 131, 0.18);
+  --accent-light: #ffd8bd;
+  --accent-dark: #b16a3a;
+  --accent-strong: #ffb783;
+  --highlight: #ffbd8c;
+  --fg: var(--ink);
+  --fg-muted: var(--ink-soft);
+  --fg-dim: #bba89d;
+  --input-bg: #232425;
+  --input-placeholder: #9a877b;
+  --border-focus: var(--accent);
+  --card-hover: #2a2b2c;
+  --ok: #63d29c;
+  --ok-bg: rgba(99, 210, 156, 0.15);
+  --err: #f2a3a3;
+  --err-bg: rgba(242, 163, 163, 0.16);
+  --ma: #ff8b8f;
+  --ma-s: rgba(255, 139, 143, 0.14);
+  --info-bg: rgba(114, 168, 255, 0.18);
+  --info-ink: #cfe3ff;
+  --success-bg: rgba(99, 210, 156, 0.16);
+  --success-ink: #c8f3de;
+  --warning-soft: rgba(255, 202, 120, 0.17);
+  --warning-line: rgba(255, 202, 120, 0.35);
+  --error-ink: #f6c7c7;
+  --sim-bg: var(--surface-muted);
+  --sim-card: var(--surface);
+  --sim-text: var(--ink);
+  --sim-border: var(--line);
+  --sim-accent: var(--accent);
+  --sim-accent-soft: var(--accent-soft);
+  --sim-ink-soft: var(--ink-soft);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-heading: var(--heading);
-  --font-sans: var(--font-inter, "Inter", sans-serif);
-  --font-display: var(--font-inter, "Inter", sans-serif);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
 }
 
 html,
 body {
   min-height: 100%;
   width: 100%;
-  overflow-x: clip;
 }
 
 body {
@@ -176,15 +165,25 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .soft-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--juris-surface-highest);
+  border: 1px solid var(--juris-outline-variant);
   border-radius: 1rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.panel-tonal {
+  background: var(--juris-surface-low);
+  border-radius: 1rem;
 }
 
 .panel-strong {
-  background: var(--surface-strong);
-  border: 1px solid var(--line-strong);
+  background: var(--surface-elevated);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}
+
+.kpi-card {
+  background: linear-gradient(140deg, var(--surface) 0%, var(--surface-muted) 100%);
+  border: 1px solid var(--line);
   border-radius: 1rem;
 }
 
@@ -192,17 +191,18 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.5rem;
-  background: var(--accent);
-  color: #ffffff;
-  font-weight: 500;
-  padding: 0.75rem 1.5rem;
-  transition: opacity 160ms ease;
-  min-width: 0;
+  border-radius: 1.5rem; /* xl per strategy */
+  background: linear-gradient(135deg, var(--juris-primary) 0%, var(--juris-primary-container) 100%);
+  color: var(--juris-on-primary);
+  font-weight: 600;
+  padding: 0.875rem 2rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(138, 80, 34, 0.15);
 }
 
 .btn-primary:hover {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(138, 80, 34, 0.25);
 }
 
 .btn-primary:disabled {
@@ -410,6 +410,15 @@ input:checked + .sim-toggle-track .sim-toggle-thumb {
   background-color: #fef2f2;
   color: #991b1b;
   border: 1px solid #fecaca;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.status-warning {
+  background-color: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
   padding: 0.5rem 1rem;
   border-radius: 0.75rem;
   font-size: 0.875rem;

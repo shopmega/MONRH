@@ -9,89 +9,17 @@ import { localizeCalculatorTitle } from "@/lib/i18n/simulator-localization";
 import { calculatorTypeToPath } from "@/lib/simulations/calculator-path";
 import { TOOL_CATALOG } from "@/lib/tools/tool-catalog";
 
-type SimulationItem = {
-  id: string;
-  createdAt: string;
-  calculatorType: string;
-  result?: {
-    breakdown?: Record<string, unknown>;
-  };
-};
+type SimulationItem = { id: string; createdAt: string; calculatorType: string; result?: { breakdown?: Record<string, unknown> }; };
+type DocumentItem = { id: string; createdAt: string; templateTitle: string; };
+type ContractItem = { id: string; createdAt: string; templateTitle: string; contractType: string; };
+type CaseItem = { id: string; createdAt: string; updatedAt: string; title: string; status: string; caseType: string; companyName?: string | null; sourceSimulationId?: string | null; timeline?: { documents?: Array<{ id: string; templateTitle?: string; createdAt?: string; }>; }; };
+type VerificationItem = { id: string; status: string; companyName?: string | null; sourceCaseId?: string | null; createdAt: string; };
+type EvidenceArtifactItem = { id: string; title: string; caseId?: string | null; companyName?: string | null; createdAt: string; };
+type ViolationItem = { id: string; createdAt: string; type: string; description: string; };
+type OvertimeItem = { id: string; createdAt: string; workDate: string; hoursDay: number; hoursNight: number; hoursWeekend: number; hoursHoliday: number; };
+type ActivityItem = { id: string; title: string; date: string; status: string; kind: "simulation" | "document" | "tool" | "contract"; href?: string; };
 
-type DocumentItem = {
-  id: string;
-  createdAt: string;
-  templateTitle: string;
-};
-
-type ContractItem = {
-  id: string;
-  createdAt: string;
-  templateTitle: string;
-  contractType: string;
-};
-
-type CaseItem = {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  title: string;
-  status: string;
-  caseType: string;
-  companyName?: string | null;
-  sourceSimulationId?: string | null;
-  timeline?: {
-    documents?: Array<{
-      id: string;
-      templateTitle?: string;
-      createdAt?: string;
-    }>;
-  };
-};
-
-type VerificationItem = {
-  id: string;
-  status: string;
-  companyName?: string | null;
-  sourceCaseId?: string | null;
-  createdAt: string;
-};
-
-type EvidenceArtifactItem = {
-  id: string;
-  title: string;
-  caseId?: string | null;
-  companyName?: string | null;
-  createdAt: string;
-};
-
-type ViolationItem = {
-  id: string;
-  createdAt: string;
-  type: string;
-  description: string;
-};
-
-type OvertimeItem = {
-  id: string;
-  createdAt: string;
-  workDate: string;
-  hoursDay: number;
-  hoursNight: number;
-  hoursWeekend: number;
-  hoursHoliday: number;
-};
-
-type ActivityItem = {
-  id: string;
-  title: string;
-  date: string;
-  status: string;
-  kind: "simulation" | "document" | "tool" | "contract";
-  href?: string;
-};
-
-const TOOL_LABEL_BY_ID = Object.fromEntries(TOOL_CATALOG.map((tool) => [tool.id, tool.label]));
+const TOOL_LABEL_BY_ID = Object.fromEntries(TOOL_CATALOG.map((t) => [t.id, t.label]));
 
 function formatDate(iso: string, locale: string): string {
   return new Date(iso).toLocaleDateString(locale);
@@ -99,16 +27,23 @@ function formatDate(iso: string, locale: string): string {
 
 async function readJsonSafe<T>(response: Response): Promise<T | null> {
   const contentType = response.headers.get("content-type") ?? "";
-  if (!contentType.toLowerCase().includes("application/json")) {
-    return null;
-  }
-
-  try {
-    return (await response.json()) as T;
-  } catch {
-    return null;
-  }
+  if (!contentType.toLowerCase().includes("application/json")) return null;
+  try { return (await response.json()) as T; } catch { return null; }
 }
+
+const STATUS_COLORS: Record<string, string> = {
+  simulation: "bg-[#FFF0E6] text-[#8a5022]",
+  contract: "bg-[#E6F4EF] text-[#1e6b4a]",
+  document: "bg-[#EEF0FF] text-[#4050c8]",
+  tool: "bg-[#F0EAE4] text-[#52443b]",
+};
+
+const EXPERTISE_DOMAINS = [
+  { icon: "⚖️", label: "Droit du Travail" },
+  { icon: "💼", label: "Gestion RH" },
+  { icon: "📋", label: "Contrats & Conventions" },
+  { icon: "🏛️", label: "Protection Sociale" },
+];
 
 export default function ComptePage() {
   const { t, locale, language } = useLanguage();
@@ -121,13 +56,11 @@ export default function ComptePage() {
   const [evidenceArtifacts, setEvidenceArtifacts] = useState<EvidenceArtifactItem[]>([]);
   const [violations, setViolations] = useState<ViolationItem[]>([]);
   const [overtimeLogs, setOvertimeLogs] = useState<OvertimeItem[]>([]);
-  const [sessionStatus, setSessionStatus] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     let active = true;
-
     async function load() {
       try {
         const responses = await Promise.all([
@@ -138,11 +71,9 @@ export default function ComptePage() {
           fetch("/api/evidence-artifacts?limit=20"),
           fetch("/api/journal/violations"),
           fetch("/api/journal/overtime"),
-          fetch("/api/contracts/user")
+          fetch("/api/contracts/user"),
         ]);
-
         const [simRes, docRes, caseRes, verificationRes, evidenceRes, violationsRes, overtimeRes, contractsRes] = responses;
-
         const dataObjects = await Promise.all([
           readJsonSafe<{ items?: SimulationItem[] }>(simRes),
           readJsonSafe<{ items?: DocumentItem[] }>(docRes),
@@ -151,11 +82,9 @@ export default function ComptePage() {
           readJsonSafe<{ items?: EvidenceArtifactItem[] }>(evidenceRes),
           readJsonSafe<{ items?: ViolationItem[] }>(violationsRes),
           readJsonSafe<{ items?: OvertimeItem[] }>(overtimeRes),
-          readJsonSafe<{ items?: ContractItem[] }>(contractsRes)
+          readJsonSafe<{ items?: ContractItem[] }>(contractsRes),
         ]);
-
         const [simData, docData, caseData, verificationData, evidenceData, violationsData, overtimeData, contractsData] = dataObjects;
-
         if (!active) return;
         setSimulations(simRes.ok ? simData?.items ?? [] : []);
         setDocuments(docRes.ok ? docData?.items ?? [] : []);
@@ -168,398 +97,306 @@ export default function ComptePage() {
       } catch (error) {
         console.error("Failed to load account data:", error);
       } finally {
-        if (active) {
-          setLoading(false);
-        }
+        if (active) setLoading(false);
       }
     }
-
     load();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
   async function logoutUserSession() {
     setLoggingOut(true);
-    setSessionStatus(undefined);
     try {
       const response = await fetch("/api/user/session", { method: "DELETE" });
       const data = (await response.json()) as { ok?: boolean };
-      if (!response.ok || !data.ok) {
-        setSessionStatus(t("accountPage.sessionDenied"));
-        return;
-      }
+      if (!response.ok || !data.ok) return;
       window.dispatchEvent(new Event("salarie-auth-changed"));
       router.replace("/connexion?next=/compte");
       router.refresh();
-    } catch {
-      setSessionStatus(t("accountPage.sessionDenied"));
-    } finally {
+    } catch { /* no-op */ } finally {
       setLoggingOut(false);
     }
   }
 
   const activity = useMemo<ActivityItem[]>(() => {
-    const simulationActivity: ActivityItem[] = simulations.map((item) => ({
-      id: `s-${item.id}`,
-      title: `${t("accountPage.simulationPrefix")} ${localizeCalculatorTitle(
-        item.calculatorType,
-        TOOL_LABEL_BY_ID[item.calculatorType] ?? item.calculatorType,
-        language,
-      )}`,
-      date: item.createdAt,
-      status: t("accountPage.saved"),
-      kind: "simulation",
-      href: (() => {
-        const path = calculatorTypeToPath(item.calculatorType);
-        return path ? `${path}/result?simulationId=${encodeURIComponent(item.id)}` : undefined;
-      })(),
-    }));
-
-    const documentActivity: ActivityItem[] = documents.map((item) => ({
-      id: `d-${item.id}`,
-      title: item.templateTitle,
-      date: item.createdAt,
-      status: t("accountPage.documentCreated"),
-      kind: "document",
-    }));
-
-    const contractActivity: ActivityItem[] = contracts.map((item) => ({
-      id: `ct-${item.id}`,
-      title: `Contrat: ${item.templateTitle}`,
-      date: item.createdAt,
-      status: "Généré",
-      kind: "contract",
-      href: `/compte/contrats`,
-    }));
-
-    const caseActivity: ActivityItem[] = cases.map((item) => ({
-      id: `c-${item.id}`,
-      title: item.companyName ? `${item.title} - ${item.companyName}` : item.title,
-      date: item.createdAt,
-      status: item.status,
-      kind: "tool",
-      href: `/compte/dossiers/${encodeURIComponent(item.id)}`,
-    }));
-
-    const violationActivity: ActivityItem[] = violations.map((item) => ({
-      id: `v-${item.id}`,
-      title:
-        language === "ar"
-          ? `سجل مخالفة: ${item.type}`
-          : `Journal infraction: ${item.type}`,
-      date: item.createdAt,
-      status: t("accountPage.saved"),
-      kind: "tool",
-      href: "/journal/violations",
-    }));
-
-    const overtimeActivity: ActivityItem[] = overtimeLogs.map((item) => ({
-      id: `o-${item.id}`,
-      title:
-        language === "ar"
-          ? "سجل ساعات إضافية"
-          : "Journal heures supplementaires",
-      date: item.createdAt,
-      status: t("accountPage.saved"),
-      kind: "tool",
-      href: "/journal/overtime",
-    }));
-
-    return [...simulationActivity, ...documentActivity, ...contractActivity, ...caseActivity, ...violationActivity, ...overtimeActivity]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10);
+    return [
+      ...simulations.map((item) => ({
+        id: `s-${item.id}`,
+        title: `${t("accountPage.simulationPrefix")} ${localizeCalculatorTitle(item.calculatorType, TOOL_LABEL_BY_ID[item.calculatorType] ?? item.calculatorType, language)}`,
+        date: item.createdAt, status: t("accountPage.saved"), kind: "simulation" as const,
+        href: (() => { const path = calculatorTypeToPath(item.calculatorType); return path ? `${path}/result?simulationId=${encodeURIComponent(item.id)}` : undefined; })(),
+      })),
+      ...documents.map((item) => ({ id: `d-${item.id}`, title: item.templateTitle, date: item.createdAt, status: t("accountPage.documentCreated"), kind: "document" as const })),
+      ...contracts.map((item) => ({ id: `ct-${item.id}`, title: `Contrat: ${item.templateTitle}`, date: item.createdAt, status: "Généré", kind: "contract" as const, href: "/compte/contrats" })),
+      ...cases.map((item) => ({ id: `c-${item.id}`, title: item.companyName ? `${item.title} - ${item.companyName}` : item.title, date: item.createdAt, status: item.status, kind: "tool" as const, href: `/compte/dossiers/${encodeURIComponent(item.id)}` })),
+      ...violations.map((item) => ({ id: `v-${item.id}`, title: language === "ar" ? `سجل مخالفة: ${item.type}` : `Journal infraction: ${item.type}`, date: item.createdAt, status: t("accountPage.saved"), kind: "tool" as const, href: "/journal/violations" })),
+      ...overtimeLogs.map((item) => ({ id: `o-${item.id}`, title: language === "ar" ? "سجل ساعات إضافية" : "Journal heures supplementaires", date: item.createdAt, status: t("accountPage.saved"), kind: "tool" as const, href: "/journal/overtime" })),
+    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 15);
   }, [cases, documents, contracts, language, overtimeLogs, simulations, t, violations]);
 
   const seniorityValue = useMemo(() => {
-    const dates = [
-      ...simulations.map((item) => new Date(item.createdAt)),
-      ...documents.map((item) => new Date(item.createdAt)),
-      ...contracts.map((item) => new Date(item.createdAt)),
-    ].filter((date) => !Number.isNaN(date.getTime()));
+    const dates = [...simulations, ...documents, ...contracts].map((item) => new Date(item.createdAt)).filter((d) => !Number.isNaN(d.getTime()));
     if (dates.length === 0) return t("accountPage.notEvaluated");
-
-    const oldest = dates.reduce((min, current) => (current < min ? current : min), dates[0]);
+    const oldest = dates.reduce((min, cur) => (cur < min ? cur : min), dates[0]);
     const now = new Date();
-    const totalMonths = Math.max(
-      0,
-      (now.getFullYear() - oldest.getFullYear()) * 12 + (now.getMonth() - oldest.getMonth()),
-    );
+    const totalMonths = Math.max(0, (now.getFullYear() - oldest.getFullYear()) * 12 + (now.getMonth() - oldest.getMonth()));
     const years = Math.floor(totalMonths / 12);
     const months = totalMonths % 12;
     return language === "ar" ? `${years} سنة ${months} شهر` : `${years} ans ${months} mois`;
   }, [documents, contracts, language, simulations, t]);
 
   const smigStatus = useMemo(() => {
-    const latestSmig = simulations
-      .filter((item) => item.calculatorType === "smig_compliance")
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-
-    const compliant = latestSmig?.result?.breakdown?.compliant;
-    if (typeof compliant !== "boolean") {
-      return t("accountPage.notEvaluated");
-    }
+    const latest = simulations.filter((item) => item.calculatorType === "smig_compliance").sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+    const compliant = latest?.result?.breakdown?.compliant;
+    if (typeof compliant !== "boolean") return t("accountPage.notEvaluated");
     return compliant ? t("accountPage.compliant") : t("accountPage.nonCompliant");
   }, [simulations, t]);
 
-  const stats = [
-    { label: t("common.simulationsLabel"), value: simulations.length.toString() },
-    { label: t("common.documentsLabel"), value: documents.length.toString() },
-    { label: "Contrats", value: contracts.length.toString() },
-    { label: "Dossiers", value: cases.length.toString() },
-    { label: "Verifications", value: verifications.length.toString() },
-    { label: "Preuves", value: evidenceArtifacts.length.toString() },
-    { label: t("nav.tools"), value: (violations.length + overtimeLogs.length).toString() },
-    { label: t("accountPage.yearsSeniority"), value: seniorityValue },
-    { label: t("accountPage.smigStatus"), value: smigStatus },
-  ];
+  const totalItems = simulations.length + documents.length + contracts.length + cases.length;
 
   return (
-    <main className="paper-bg min-h-screen">
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
-        <section className="soft-card overflow-hidden rounded-[2rem]">
-          <div className="bg-gradient-to-r from-[var(--accent-soft)] via-transparent to-[var(--surface-elevated)] p-6 sm:p-8">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="section-kicker">{t("accountPage.kicker")}</p>
-                <h1 className="display-font mt-2 text-4xl font-semibold leading-tight sm:text-5xl">
-                  {t("accountPage.title")}
-                </h1>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--ink-soft)]">
-                  {t("accountPage.description")}
-                </p>
-              </div>
-              <div className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap">
-                <Link href="/salaire" className="btn-primary w-full px-4 py-2 text-xs uppercase tracking-[0.12em] sm:w-auto">
-                  {t("accountPage.newSimulation")}
-                </Link>
-                <button
-                  type="button"
-                  onClick={logoutUserSession}
-                  disabled={loggingOut}
-                  className="btn-muted w-full px-4 py-2 text-xs uppercase tracking-[0.12em] sm:w-auto"
-                >
-                  {loggingOut ? t("common.loading") : t("accountPage.sessionLogout")}
-                </button>
-              </div>
+    <div className="min-h-screen bg-[#F8F5F2] font-sans pb-16">
+
+      {/* ── PROFILE HEADER ─────────────────────────────────────────── */}
+      <div className="bg-white px-5 pt-16 pb-6">
+        {/* Avatar row */}
+        <div className="flex items-center gap-4 mb-5">
+          <div className="w-14 h-14 rounded-full bg-[#F0EAE4] flex items-center justify-center text-2xl font-black text-[#8a5022]">
+            M
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#8a5022]">jurisconsult</p>
+            <p className="text-[18px] font-extrabold text-[#1a1a1a]">{t("accountPage.title")}</p>
+          </div>
+          <button
+            onClick={logoutUserSession}
+            disabled={loggingOut}
+            className="ml-auto text-[11px] font-bold text-[#6b5e55] bg-[#F0EAE4] px-3 py-1.5 rounded-full"
+          >
+            {loggingOut ? "..." : "Déconnexion"}
+          </button>
+        </div>
+        <p className="text-sm text-[#6b5e55] leading-relaxed mb-5">{t("accountPage.description")}</p>
+
+        {/* Primary action */}
+        <Link href="/salaire" className="block w-full bg-[#8a5022] text-white font-bold text-sm text-center py-3.5 rounded-2xl">
+          + {t("accountPage.newSimulation")}
+        </Link>
+      </div>
+
+      {/* ── PROFESSIONAL PORTFOLIO ────────────────────────────────── */}
+      <div className="px-5 mt-4">
+        <div className="bg-white rounded-3xl overflow-hidden">
+          <div className="bg-[#8a5022] p-6">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1">Portfolio</p>
+            <h2 className="text-[22px] font-extrabold text-white leading-tight mb-1">
+              {language === "ar" ? "بورتفوليو مهني" : "Professional\nPortfolio"}
+            </h2>
+            <p className="text-sm text-white/70 mt-2 mb-4 leading-relaxed">
+              {language === "ar" ? "سجلك القانوني والمهني الشامل" : "Un aperçu consolidé de votre activité juridique et RH."}
+            </p>
+            {/* Stats pill */}
+            <div className="flex flex-wrap gap-2">
+              <span className="bg-white/20 text-white text-[11px] font-bold px-3 py-1 rounded-full">
+                Legal Branding
+              </span>
+              <span className="bg-white/20 text-white text-[11px] font-bold px-3 py-1 rounded-full">
+                RH Pro
+              </span>
             </div>
           </div>
-        </section>
 
-        <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {stats.map((item) => (
-            <article
-              key={item.label}
-              className="soft-card rounded-2xl border border-[var(--line)]/70 p-4"
-            >
-              <div className="mb-3 h-1.5 w-10 rounded-full bg-[var(--accent)]/70" />
-              <p className="text-xs uppercase tracking-[0.14em] text-[var(--ink-soft)]">{item.label}</p>
-              <p className="display-font mt-2 text-3xl font-semibold">{item.value}</p>
-            </article>
-          ))}
-        </section>
-
-        <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]">
-          <div className="space-y-4">
-          <section className="soft-card rounded-3xl p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="display-font text-3xl font-semibold">Mes Contrats Premium</h2>
-              <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
-                {contracts.length}
+          {/* Big stat */}
+          <div className="px-6 py-5 border-b border-[#F0EAE4]">
+            <div className="flex items-end gap-3">
+              <span className="text-[52px] font-black text-[#8a5022] leading-none">
+                {loading ? "·" : totalItems}
               </span>
+              <div className="pb-2">
+                <p className="text-[11px] font-bold text-[#1a1a1a]">Actions & Dossiers</p>
+                <p className="text-[11px] text-[#6b5e55]">Activité jurisconsult</p>
+              </div>
             </div>
-            <p className="mt-2 text-sm text-[var(--ink-soft)]">
-              Accédez à vos contrats de travail générés et téléchargez-les.
+            <p className="text-[11px] text-[#6b5e55] mt-1 font-semibold">
+              {language === "ar" ? "الأقدمية:" : "Ancienneté:"} {seniorityValue}
             </p>
-            <div className="mt-4 space-y-2">
-              {loading ? (
-                <div className="panel-strong rounded-2xl p-3 text-sm text-[var(--ink-soft)]">
-                  {t("common.loading")}
-                </div>
-              ) : contracts.length === 0 ? (
-                <Link href="/contrat" className="panel-strong block rounded-2xl p-4 text-center border-dashed border-2 border-[var(--line)] hover:border-[var(--accent)] transition-colors">
-                  <p className="text-sm font-medium text-[var(--accent)]">Générer mon premier contrat</p>
-                </Link>
-              ) : (
-                <>
-                {contracts.slice(0, 3).map((item) => (
-                  <Link key={item.id} href={`/compte/contrats`} className="panel-strong block rounded-2xl p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="line-clamp-1 font-semibold">{item.templateTitle}</p>
-                      <span className="rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--ink-soft)]">
-                        {item.contractType}
-                      </span>
-                    </div>
-                    <div className="mt-1 text-xs text-[var(--ink-soft)]">
-                      Généré le {formatDate(item.createdAt, locale)}
-                    </div>
-                  </Link>
-                ))}
-                {contracts.length > 3 && (
-                  <Link href="/compte/contrats" className="block text-center text-xs font-semibold text-[var(--accent)] pt-2">
-                    Voir les {contracts.length} contrats
-                  </Link>
-                )}
-                </>
-              )}
-            </div>
-          </section>
-
-          <section className="soft-card rounded-3xl p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="display-font text-3xl font-semibold">Mon dossier</h2>
-              <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--ink-soft)]">
-                {cases.length}
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-[var(--ink-soft)]">
-              Vos cas sauvegardes, lies a une simulation et prets pour la suite.
-            </p>
-            <div className="mt-4 space-y-2">
-              {loading ? (
-                <div className="panel-strong rounded-2xl p-3 text-sm text-[var(--ink-soft)]">
-                  {t("common.loading")}
-                </div>
-              ) : cases.length === 0 ? (
-                <div className="panel-strong rounded-2xl p-3 text-sm text-[var(--ink-soft)]">
-                  Aucun dossier sauvegarde.
-                </div>
-              ) : (
-                cases.slice(0, 4).map((item) => {
-                  const href = `/compte/dossiers/${encodeURIComponent(item.id)}`;
-                  const linkedDocuments = Array.isArray(item.timeline?.documents) ? item.timeline.documents : [];
-                  const content = (
-                    <>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="line-clamp-1 font-semibold">{item.title}</p>
-                        <span className="rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--ink-soft)]">
-                          {item.status}
-                        </span>
-                      </div>
-                      <div className="mt-1 text-sm text-[var(--ink-soft)]">
-                        {item.companyName || item.caseType} | {formatDate(item.createdAt, locale)}
-                      </div>
-                      <div className="mt-2 flex items-center justify-between gap-2 text-xs text-[var(--ink-soft)]">
-                        <span>
-                          Mis a jour le {formatDate(item.updatedAt || item.createdAt, locale)}
-                        </span>
-                        <span>
-                          {linkedDocuments.length} document{linkedDocuments.length > 1 ? "s" : ""}
-                        </span>
-                      </div>
-                    </>
-                  );
-
-                  return href ? (
-                    <Link key={item.id} href={href} className="panel-strong block rounded-2xl p-3">
-                      {content}
-                    </Link>
-                  ) : (
-                    <div key={item.id} className="panel-strong rounded-2xl p-3">
-                      {content}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </section>
-
-          <section className="soft-card rounded-3xl p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="display-font text-3xl font-semibold">{t("accountPage.recentHistory")}</h2>
-              <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--ink-soft)]">
-                {activity.length}
-              </span>
-            </div>
-            <div className="mt-4 space-y-2">
-              {loading ? (
-                <div className="panel-strong rounded-2xl p-3 text-sm text-[var(--ink-soft)]">
-                  {t("common.loading")}
-                </div>
-              ) : activity.length === 0 ? (
-                <div className="panel-strong rounded-2xl p-3 text-sm text-[var(--ink-soft)]">
-                  {t("common.noData")}
-                </div>
-              ) : (
-                activity.map((item) => {
-                  const content = (
-                    <>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="line-clamp-1 font-semibold">{item.title}</p>
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] ${
-                            item.kind === "simulation"
-                              ? "bg-[var(--accent-soft)] text-[var(--accent)]"
-                              : item.kind === "contract"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-[var(--surface-muted)] text-[var(--ink-soft)]"
-                          }`}
-                        >
-                          {item.kind}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex items-center justify-between gap-2 text-sm text-[var(--ink-soft)]">
-                        <span>
-                          {formatDate(item.date, locale)} | {item.status}
-                        </span>
-                        {item.href ? <span className="text-[var(--accent)]">{t("common.open")}</span> : null}
-                      </div>
-                    </>
-                  );
-
-                  return item.href ? (
-                    <Link key={item.id} href={item.href} className="panel-strong block rounded-2xl p-3">
-                      {content}
-                    </Link>
-                  ) : (
-                    <div key={item.id} className="panel-strong rounded-2xl p-3">
-                      {content}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </section>
           </div>
 
-          <aside className="space-y-4">
-            <section className="soft-card rounded-3xl p-4">
-              <p className="section-kicker">{t("common.explore")}</p>
-              <div className="mt-3 space-y-2">
-                <Link href="/compte/contrats" className="panel-strong block rounded-2xl p-3 border border-[var(--accent)]/20 shadow-sm">
-                  <p className="font-semibold text-[var(--accent)]">Générateur de Contrat</p>
-                  <p className="mt-1 text-xs text-[var(--ink-soft)]">Accédez à votre historique legal et créez de nouveaux contrats.</p>
-                </Link>
-                <div className="panel-strong rounded-2xl p-3">
-                  <p className="font-semibold">Verification emploi</p>
-                  <p className="mt-1 text-xs text-[var(--ink-soft)]">
-                    {verifications.filter((item) => item.status === "pending").length} verification(s) en attente.
-                  </p>
-                  <Link href="/compte/verifications" className="mt-2 inline-flex text-xs font-semibold text-[var(--accent)]">
-                    Ouvrir la boite de verification
-                  </Link>
+          {/* Expertise Domains */}
+          <div className="px-6 py-5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#8a5022] mb-3">
+              Expertise Domains
+            </p>
+            <div className="space-y-2">
+              {EXPERTISE_DOMAINS.map((d) => (
+                <div key={d.label} className="flex items-center gap-3 py-1">
+                  <span className="text-lg">{d.icon}</span>
+                  <p className="text-[13px] font-semibold text-[#1a1a1a]">{d.label}</p>
                 </div>
-                <Link href="/compte/protection" className="panel-strong block rounded-2xl p-3">
-                  <p className="font-semibold">{t("accountPage.shortcutProtection")}</p>
-                  <p className="mt-1 text-xs text-[var(--ink-soft)]">{t("accountPage.shortcutProtectionDesc")}</p>
-                </Link>
-                <Link href="/journal/violations" className="panel-strong block rounded-2xl p-3">
-                  <p className="font-semibold">{t("accountPage.shortcutViolations")}</p>
-                  <p className="mt-1 text-xs text-[var(--ink-soft)]">{t("accountPage.shortcutViolationsDesc")}</p>
-                </Link>
-              </div>
-            </section>
-
-            <section>
-              <p className="section-kicker pl-1">{t("common.partner")}</p>
-              <div className="soft-card mt-2 rounded-3xl p-3">
-                <AdSlot slot="9999999999" format="auto" />
-              </div>
-            </section>
-          </aside>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-    </main>
+
+      {/* ── STATS ROW ────────────────────────────────────────────── */}
+      <div className="px-5 mt-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {[
+            { label: t("common.simulationsLabel"), value: simulations.length },
+            { label: t("common.documentsLabel"), value: documents.length },
+            { label: "Contrats", value: contracts.length },
+            { label: "Dossiers", value: cases.length },
+          ].map((s) => (
+            <div key={s.label} className="bg-white rounded-2xl p-3 text-center">
+              <p className="text-[22px] font-extrabold text-[#8a5022]">{loading ? "·" : s.value}</p>
+              <p className="text-[9px] font-semibold text-[#6b5e55] mt-0.5 leading-tight">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── COMPLIANCE STATUS ────────────────────────────────────── */}
+      <div className="px-5 mt-4">
+        <div className="bg-white rounded-3xl p-5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#8a5022] mb-3">
+            Compliance Status Update
+          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[13px] font-bold text-[#1a1a1a] mb-0.5">Statut SMIG</p>
+              <p className="text-[11px] text-[#6b5e55]">Dernière vérification</p>
+            </div>
+            <span className={`px-3 py-1.5 rounded-full text-[11px] font-black ${smigStatus.includes("Non") || smigStatus.includes("غير") ? "bg-[#FEE2E2] text-[#991B1B]" : "bg-[#D1FAE5] text-[#065F46]"}`}>
+              {smigStatus}
+            </span>
+          </div>
+
+          {/* Verifications pending */}
+          {verifications.filter((v) => v.status === "pending").length > 0 && (
+            <div className="mt-4 pt-4 border-t border-[#F0EAE4] flex items-center justify-between">
+              <p className="text-[12px] text-[#6b5e55] font-semibold">
+                {verifications.filter((v) => v.status === "pending").length} vérification(s) en attente
+              </p>
+              <Link href="/compte/verifications" className="text-[11px] font-bold text-[#8a5022]">
+                Voir →
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── CONTRACTS ────────────────────────────────────────────── */}
+      <div className="px-5 mt-4">
+        <div className="bg-white rounded-3xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[13px] font-extrabold text-[#1a1a1a]">Mes Contrats</p>
+            <Link href="/compte/contrats" className="text-[11px] font-bold text-[#8a5022]">Voir tout →</Link>
+          </div>
+
+          {loading ? (
+            <div className="py-4 flex justify-center">
+              <div className="w-5 h-5 border-2 border-[#8a5022] border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : contracts.length === 0 ? (
+            <Link href="/contrat" className="block border-2 border-dashed border-[#F0EAE4] rounded-2xl p-5 text-center">
+              <p className="text-[13px] font-bold text-[#8a5022]">Générer mon premier contrat →</p>
+            </Link>
+          ) : (
+            <div className="space-y-2">
+              {contracts.slice(0, 3).map((item) => (
+                <Link key={item.id} href="/compte/contrats" className="flex items-center justify-between py-2.5 border-b border-[#F8F5F2] last:border-0">
+                  <div>
+                    <p className="text-[13px] font-bold text-[#1a1a1a] line-clamp-1">{item.templateTitle}</p>
+                    <p className="text-[10px] text-[#6b5e55] mt-0.5">{formatDate(item.createdAt, locale)}</p>
+                  </div>
+                  <span className="bg-[#F0EAE4] text-[#8a5022] text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full flex-shrink-0 ml-3">
+                    {item.contractType}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── ACCOUNT INTEGRITY / DOSSIERS ─────────────────────────── */}
+      <div className="px-5 mt-4">
+        <div className="bg-white rounded-3xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[13px] font-extrabold text-[#1a1a1a]">Account Integrity</p>
+            <span className="bg-[#D1FAE5] text-[#065F46] text-[10px] font-bold px-2.5 py-1 rounded-full">Actif</span>
+          </div>
+          <div className="space-y-3">
+            {[
+              { label: "Dossiers Juridiques", value: cases.length, href: "/compte/dossiers" },
+              { label: "Pièces à conviction", value: evidenceArtifacts.length, href: "/compte" },
+              { label: "Infractions journalisées", value: violations.length, href: "/journal/violations" },
+              { label: "Heures supp. enregistrées", value: overtimeLogs.length, href: "/journal/overtime" },
+            ].map((row) => (
+              <Link key={row.label} href={row.href} className="flex items-center justify-between py-2 border-b border-[#F8F5F2] last:border-0">
+                <p className="text-[12px] font-semibold text-[#1a1a1a]">{row.label}</p>
+                <span className="text-[13px] font-extrabold text-[#8a5022]">{loading ? "·" : row.value}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── RECENT ACTIVITY TIMELINE ─────────────────────────────── */}
+      {activity.length > 0 && (
+        <div className="px-5 mt-4">
+          <div className="bg-white rounded-3xl p-5">
+            <p className="text-[13px] font-extrabold text-[#1a1a1a] mb-4">{t("accountPage.recentHistory")}</p>
+            <div className="space-y-3">
+              {activity.slice(0, 8).map((item) => {
+                const Wrapper = item.href ? Link : "div";
+                const wrapperProps = item.href ? { href: item.href } : {};
+                return (
+                  <Wrapper key={item.id} {...(wrapperProps as any)} className="flex items-start gap-3">
+                    <span className={`mt-0.5 w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-black ${STATUS_COLORS[item.kind] ?? STATUS_COLORS.tool}`}>
+                      {item.kind[0].toUpperCase()}
+                    </span>
+                    <div className="flex-1 min-w-0 border-b border-[#F8F5F2] pb-3">
+                      <p className="text-[12px] font-bold text-[#1a1a1a] line-clamp-1">{item.title}</p>
+                      <p className="text-[10px] text-[#6b5e55] mt-0.5">{formatDate(item.date, locale)}</p>
+                    </div>
+                  </Wrapper>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── QUICK SHORTCUTS ──────────────────────────────────────── */}
+      <div className="px-5 mt-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#8a5022] mb-3 px-1">
+          {t("common.explore")}
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: "Protection Droits", href: "/compte/protection" },
+            { label: "Infractions", href: "/journal/violations" },
+            { label: "Vérification emploi", href: "/compte/verifications" },
+            { label: "Générer Contrat", href: "/contrat" },
+          ].map((s) => (
+            <Link key={s.href} href={s.href}>
+              <div className="bg-white rounded-2xl p-4">
+                <p className="text-[12px] font-bold text-[#1a1a1a]">{s.label}</p>
+                <p className="text-[10px] text-[#8a5022] mt-1 font-semibold">Accéder →</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ── PARTNER AD ───────────────────────────────────────────── */}
+      <div className="px-5 mt-4">
+        <div className="bg-white rounded-3xl p-3 overflow-hidden">
+          <AdSlot slot="9999999999" format="auto" />
+        </div>
+      </div>
+    </div>
   );
 }

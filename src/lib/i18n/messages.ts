@@ -157,7 +157,7 @@ export const MESSAGES = {
       kicker: "Tableau de protection",
       title: "Instantane des droits en temps reel",
       description:
-        "Version locale sans Supabase: vos indicateurs se basent sur les derniers calculs/outils executes sur cet environnement.",
+        "Version locale sans Supabase: vos indicateurs se basent sur les derniers calculs/tools executes sur cet environnement.",
       payslipTool: "Detecteur de fiche de paie",
       salaryDelayTool: "Alerte retard de salaire",
       complianceTool: "Score de conformite",

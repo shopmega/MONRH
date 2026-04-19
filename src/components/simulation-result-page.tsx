@@ -17,7 +17,7 @@ import {
   localizeCalculatorDescription,
   localizeCalculatorTitle,
 } from "@/lib/i18n/simulator-localization";
-import { calculatorTypeToPath, savedSimulationPathMatches } from "@/lib/simulations/calculator-path";
+import { calculatorTypeToPath, pathToCalculatorType, savedSimulationPathMatches } from "@/lib/simulations/calculator-path";
 import { AvisinePromoCard } from "@/components/avisine-promo-card";
 import { type SimulationResultSnapshot } from "@/lib/simulations/result-snapshot";
 import { buildSimulationResultDocumentLink } from "@/lib/tools/result-document-links";
@@ -36,6 +36,13 @@ const TimelineBarChart = dynamic(
 
 type DocumentCTA = { href: string; label: string };
 type EmployerCompanyContext = { id: string; name: string };
+type StoredSimulationItem = {
+  id: string;
+  createdAt: string;
+  calculatorType: string;
+  input: Record<string, unknown>;
+  result: Record<string, unknown>;
+};
 
 const DOCUMENT_CTA_LABELS: Record<string, string> = {
   "labor-inspector-complaint": "Générer la plainte à l'inspection du travail",
@@ -238,10 +245,56 @@ function extractEmployerCompanyHint(inputPayload?: Record<string, unknown>): Emp
   };
 }
 
+function buildSnapshotFromStoredItem(
+  item: StoredSimulationItem,
+  expectedPath: string,
+  locale: string,
+): SimulationResultSnapshot {
+  const breakdown = ((item.result as { breakdown?: Record<string, string | number | boolean> }).breakdown ??
+    {}) as Record<string, string | number | boolean>;
+  const labels = Object.fromEntries(Object.keys(breakdown).map((key) => [key, key]));
+  const resultPayload = item.result as {
+    versionCode?: string;
+    breakdown?: Record<string, string | number | boolean>;
+    explanation?: {
+      summary: string;
+      assumptions: string[];
+      formulas: string[];
+      warnings: string[];
+      nextSteps: string[];
+      confidence?: {
+        level: "low" | "medium" | "high";
+        label?: string;
+        note: string;
+      };
+      sources?: string[];
+      missingInformation?: string[];
+    };
+  };
+
+  return {
+    calculatorPath: expectedPath,
+    calculatorType: item.calculatorType,
+    title: item.calculatorType,
+    description: item.calculatorType,
+    generatedAt: item.createdAt,
+    breakdownLabels: labels,
+    units: {},
+    locale,
+    inputPayload: item.input,
+    result: {
+      versionCode: resultPayload.versionCode ?? "ma_2026",
+      breakdown,
+      explanation: resultPayload.explanation,
+    },
+  };
+}
+
 export function SimulationResultPage({ slug, expectedPath: providedExpectedPath }: { slug: string; expectedPath?: string }) {
   const { language, t, locale } = useLanguage();
   const searchParams = useSearchParams();
-  const expectedPath = providedExpectedPath ?? calculatorTypeToPath(slug) ?? `/simulateurs/${slug}`;
+  const expectedPath = providedExpectedPath ?? calculatorTypeToPath(slug) ?? `/simulate/${slug}`;
+  const expectedCalculatorType = useMemo(() => pathToCalculatorType(expectedPath), [expectedPath]);
   const simulationId = searchParams.get("simulationId");
   const [mappedRelatedItems, setMappedRelatedItems] = useState<
     Array<{ title: string; description: string; href: string }>
@@ -296,6 +349,17 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
   const resolvedSnapshot = historySnapshot ?? snapshot;
   const prefilledDocumentCTA = resolvedSnapshot ? buildPrefilledDocumentLink(resolvedSnapshot) : null;
   const keyMetrics = useMemo(() => (resolvedSnapshot ? pickKeyMetrics(resolvedSnapshot) : []), [resolvedSnapshot]);
+  const flattenedBreakdown = useMemo(
+    () => (resolvedSnapshot ? getEffectiveBreakdown(resolvedSnapshot.result) : {}),
+    [resolvedSnapshot],
+  );
+  const breakdownEntries = useMemo(
+    () =>
+      resolvedSnapshot
+        ? Object.entries(flattenedBreakdown).filter(([key]) => (resolvedSnapshot.breakdownLabels ?? {})[key])
+        : [],
+    [flattenedBreakdown, resolvedSnapshot],
+  );
   const employerHint = useMemo(
     () => extractEmployerCompanyHint(resolvedSnapshot?.inputPayload),
     [resolvedSnapshot],
@@ -305,8 +369,8 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
   const showBarChart = resolvedSnapshot ? BAR_CHART_TYPES.has(resolvedSnapshot.calculatorType) : false;
 
   const pieData = useMemo<PieSlice[]>(
-    () => (resolvedSnapshot && showPieChart ? buildPieData(getEffectiveBreakdown(resolvedSnapshot.result)) : []),
-    [resolvedSnapshot, showPieChart],
+    () => (resolvedSnapshot && showPieChart ? buildPieData(flattenedBreakdown) : []),
+    [flattenedBreakdown, resolvedSnapshot, showPieChart],
   );
   const barData = useMemo<BarEntry[]>(
     () =>
@@ -322,17 +386,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
     let active = true;
     fetch(`/api/simulations/${encodeURIComponent(simulationId)}`, { cache: "no-store" })
       .then((response) => response.json().then((data) => ({ response, data })))
-      .then(({ response, data }: {
-        response: Response; data: {
-          ok?: boolean; item?: {
-            id: string;
-            createdAt: string;
-            calculatorType: string;
-            input: Record<string, unknown>;
-            result: Record<string, unknown>;
-          }
-        }
-      }) => {
+      .then(({ response, data }: { response: Response; data: { ok?: boolean; item?: StoredSimulationItem } }) => {
         if (!active || !response.ok || !data.ok || !data.item) {
           if (active) setHistorySnapshot(null);
           return;
@@ -343,45 +397,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
           setHistorySnapshot(null);
           return;
         }
-
-        const breakdown = ((data.item.result as { breakdown?: Record<string, string | number | boolean> }).breakdown ??
-          {}) as Record<string, string | number | boolean>;
-        const labels = Object.fromEntries(Object.keys(breakdown).map((key) => [key, key]));
-        const resultPayload = data.item.result as {
-          versionCode?: string;
-          breakdown?: Record<string, string | number | boolean>;
-          explanation?: {
-            summary: string;
-            assumptions: string[];
-            formulas: string[];
-            warnings: string[];
-            nextSteps: string[];
-            confidence?: {
-              level: "low" | "medium" | "high";
-              label?: string;
-              note: string;
-            };
-            sources?: string[];
-            missingInformation?: string[];
-          };
-        };
-
-        setHistorySnapshot({
-          calculatorPath: expectedPath,
-          calculatorType: data.item.calculatorType,
-          title: data.item.calculatorType,
-          description: data.item.calculatorType,
-          generatedAt: data.item.createdAt,
-          breakdownLabels: labels,
-          units: {},
-          locale,
-          inputPayload: data.item.input,
-          result: {
-            versionCode: resultPayload.versionCode ?? "ma_2026",
-            breakdown,
-            explanation: resultPayload.explanation,
-          },
-        });
+        setHistorySnapshot(buildSnapshotFromStoredItem(data.item, expectedPath, locale));
       })
       .catch(() => {
         if (active) setHistorySnapshot(null);
@@ -391,6 +407,37 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
       active = false;
     };
   }, [expectedPath, locale, simulationId, snapshot]);
+
+  useEffect(() => {
+    if (simulationId || snapshot) return;
+
+    let active = true;
+    fetch("/api/simulations", { cache: "no-store" })
+      .then((response) => response.json().then((data) => ({ response, data })))
+      .then(
+        ({ response, data }: { response: Response; data: { ok?: boolean; items?: StoredSimulationItem[] } }) => {
+          if (!active || !response.ok || !data.ok || !Array.isArray(data.items)) return;
+
+          const matchedItem = data.items.find((item) => {
+            if (expectedCalculatorType) {
+              return item.calculatorType === expectedCalculatorType;
+            }
+            const canonical = calculatorTypeToPath(item.calculatorType);
+            return savedSimulationPathMatches(expectedPath, item.calculatorType, canonical);
+          });
+
+          if (!matchedItem) return;
+          setHistorySnapshot(buildSnapshotFromStoredItem(matchedItem, expectedPath, locale));
+        },
+      )
+      .catch(() => {
+        // Best-effort fallback for direct result URL access.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [expectedCalculatorType, expectedPath, locale, simulationId, snapshot]);
 
   useEffect(() => {
     const currentSnapshot = resolvedSnapshot;
@@ -481,19 +528,19 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
       setSalaryBenchmarks(null);
       return;
     }
-
     let active = true;
-    async function loadBenchmarks() {
+    void (async () => {
       try {
-        const data = await getCompanySalaryBenchmarks(employerCompany!.id);
+        const data = await getCompanySalaryBenchmarks(employerCompany.id);
         if (active) setSalaryBenchmarks(data);
       } catch (err) {
         console.error("Failed to load salary benchmarks", err);
       }
-    }
-    void loadBenchmarks();
-    return () => { active = false; };
-  }, [employerCompany, resolvedSnapshot]);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [employerCompany?.id, resolvedSnapshot?.calculatorType]);
 
   if (simulationId && !snapshot && historySnapshot === undefined) {
     return (
@@ -547,6 +594,55 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
     }
   }
 
+  const explanation = resolvedSnapshot.result.explanation;
+  const explanationWarnings = explanation?.warnings?.slice(0, 3) ?? [];
+  const explanationNextSteps = explanation?.nextSteps?.slice(0, 3) ?? [];
+  const explanationText =
+    language === "ar"
+      ? {
+          title: "Ø®Ù„Ø§ØµØ© Ø§Ù„Ù†ØªÙŠØ¬Ø©",
+          warnings: "Ù†Ù‚Ø§Ø· Ø§Ù†ØªØ¨Ø§Ù‡",
+          nextSteps: "Ø§Ù„Ø®Ø·ÙˆØ§Øª Ø§Ù„ØªØ§Ù„ÙŠØ©",
+          noWarnings: "Ù„Ø§ ØªÙˆØ¬Ø¯ ØªØ­Ø°ÙŠØ±Ø§Øª Ù…Ø¶Ø§ÙÙŠØ©.",
+          noNextSteps: "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø®Ø·ÙˆØ§Øª Ù…Ù‚ØªØ±Ø­Ø©.",
+        }
+      : {
+          title: "Synthese du Resultat",
+          warnings: "Points d'Attention",
+          nextSteps: "Prochaines Etapes",
+          noWarnings: "Aucune alerte supplementaire.",
+          noNextSteps: "Aucune etape recommandee.",
+        };
+  const resultState: "success" | "warning" | "empty" =
+    breakdownEntries.length === 0 ? "empty" : explanationWarnings.length > 0 ? "warning" : "success";
+  const resultStateMeta =
+    resultState === "success"
+      ? {
+          badgeClass: "status-success",
+          title: language === "ar" ? "Etat: Valide" : "Etat: Resultat complet",
+          description:
+            language === "ar"
+              ? "Le calcul est disponible avec donnees exploitables."
+              : "Le calcul est disponible avec des donnees exploitables.",
+        }
+      : resultState === "warning"
+        ? {
+            badgeClass: "status-warning",
+            title: language === "ar" ? "Etat: Attention" : "Etat: Points d'attention",
+            description:
+              language === "ar"
+                ? "Certaines hypotheses demandent verification avant decision."
+                : "Certaines hypotheses demandent verification avant decision.",
+          }
+        : {
+            badgeClass: "status-info",
+            title: language === "ar" ? "Etat: Donnees insuffisantes" : "Etat: Donnees insuffisantes",
+            description:
+              language === "ar"
+                ? "Le calcul ne contient pas encore assez de details a exploiter."
+                : "Le calcul ne contient pas encore assez de details a exploiter.",
+          };
+
   return (
     <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
@@ -580,13 +676,50 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
               3. {t("simulator.stepResult")}
             </span>
           </div>
+          <div className={`${resultStateMeta.badgeClass} mt-4 rounded-2xl px-3 py-2 text-sm`}>
+            <p className="font-semibold">{resultStateMeta.title}</p>
+            <p className="mt-1 text-xs">{resultStateMeta.description}</p>
+          </div>
           <Link href={expectedPath} className="mt-3 inline-block text-sm font-semibold text-[var(--accent)] print:hidden">
             {t("resultPage.backToForm")}
           </Link>
         </section>
 
+        {explanation ? (
+          <section className="soft-card mt-4 rounded-3xl p-5">
+            <p className="section-kicker">{explanationText.title}</p>
+            <p className="mt-2 text-sm text-[var(--foreground)]">{explanation.summary}</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <article className="panel-strong rounded-xl p-3">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">{explanationText.warnings}</p>
+                {explanationWarnings.length > 0 ? (
+                  <ul className="mt-2 space-y-1 text-sm text-[var(--foreground)]">
+                    {explanationWarnings.map((warning, index) => (
+                      <li key={`${warning}-${index}`}>- {warning}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-sm text-[var(--ink-soft)]">{explanationText.noWarnings}</p>
+                )}
+              </article>
+              <article className="panel-strong rounded-xl p-3">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">{explanationText.nextSteps}</p>
+                {explanationNextSteps.length > 0 ? (
+                  <ul className="mt-2 space-y-1 text-sm text-[var(--foreground)]">
+                    {explanationNextSteps.map((step, index) => (
+                      <li key={`${step}-${index}`}>{index + 1}. {step}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-sm text-[var(--ink-soft)]">{explanationText.noNextSteps}</p>
+                )}
+              </article>
+            </div>
+          </section>
+        ) : null}
+
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(290px,1fr)] lg:items-start print:grid-cols-1">
-          <section className="space-y-4">
+          <section className="min-w-0 space-y-4">
             {keyMetrics.length > 0 ? (
               <div className="grid gap-2 sm:grid-cols-3">
                 {keyMetrics.map(([key, value]) => (
@@ -622,10 +755,9 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
 
             <section className="soft-card min-w-0 rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.breakdownTitle")}</p>
-              <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
-                {Object.entries(getEffectiveBreakdown(resolvedSnapshot.result))
-                  .filter(([key]) => (resolvedSnapshot.breakdownLabels ?? {})[key])
-                  .map(([key, value]) => (
+              {breakdownEntries.length > 0 ? (
+                <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+                  {breakdownEntries.map(([key, value]) => (
                     <div key={key} className="panel-strong min-w-0 rounded-xl p-3">
                       <p className="break-words text-[11px] uppercase tracking-wide text-[var(--ink-soft)]">
                         {localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language)}
@@ -635,14 +767,19 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
                       </p>
                     </div>
                   ))}
-              </div>
+                </div>
+              ) : (
+                <div className="status-info mt-3 rounded-xl px-3 py-2 text-sm">
+                  Les donnees de detail ne sont pas encore disponibles pour cette execution.
+                </div>
+              )}
             </section>
           </section>
 
-          <aside className="space-y-4 lg:sticky lg:top-20 print:hidden">
+          <aside className="min-w-0 space-y-4 lg:sticky lg:top-20 print:hidden">
             <section className="soft-card min-w-0 rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.actionsTitle")}</p>
-              <div className="mt-3 flex flex-col gap-2 text-sm">
+              <div className="mt-3 flex flex-col gap-2 text-sm break-words">
                 <Link href={expectedPath} className="btn-muted px-4 py-2 text-center">
                   {t("resultPage.editParams")}
                 </Link>
@@ -652,7 +789,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
                 <button type="button" onClick={() => window.print()} className="btn-muted px-4 py-2 text-center">
                   {t("resultPage.print")}
                 </button>
-                <Link href="/salaire" className="btn-primary px-4 py-2 text-center">
+                <Link href="/simulate" className="btn-primary px-4 py-2 text-center">
                   {t("resultPage.runAnother")}
                 </Link>
                 {prefilledDocumentCTA ? (

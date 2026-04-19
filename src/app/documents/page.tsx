@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AdSlot } from "@/components/ad-slot";
 import { useLanguage } from "@/components/language-provider";
@@ -120,6 +120,14 @@ function templatesById(templateIds: string[], allTemplates: DocumentTemplate[]) 
 export default function DocumentsPage() {
   const { t, language } = useLanguage();
   const [allTemplates, setAllTemplates] = useState<DocumentTemplate[]>([]);
+  const availableGroupCount = useMemo(
+    () => generatorGroups.filter((group) => templatesById(group.templateIds, allTemplates).length > 0).length,
+    [allTemplates],
+  );
+  const totalTemplateCount = useMemo(
+    () => generatorGroups.reduce((count, group) => count + templatesById(group.templateIds, allTemplates).length, 0),
+    [allTemplates],
+  );
 
   useEffect(() => {
     let active = true;
@@ -136,7 +144,7 @@ export default function DocumentsPage() {
   }, []);
 
   return (
-    <main className="paper-bg min-h-screen">
+    <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
         <section className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">{t("documentsPage.kicker")}</p>
@@ -146,14 +154,34 @@ export default function DocumentsPage() {
           <p className="mt-3 max-w-2xl break-words text-sm leading-relaxed text-[var(--ink-soft)]">
             {t("documentsPage.description")}
           </p>
+          <div className="mt-5 grid gap-2 sm:grid-cols-3">
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "Ø£Ù‚Ø³Ø§Ù… Ø§Ù„Ù…ÙƒØªØ¨Ø©" : "Familles actives"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">{availableGroupCount}</p>
+            </article>
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù†Ù…Ø§Ø°Ø¬" : "Modeles"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">{totalTemplateCount}</p>
+            </article>
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "Ø§Ù„ØªÙƒØ§Ù…Ù„" : "Parcours lies"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">Depart + Litiges</p>
+            </article>
+          </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <Link href="/modeles" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
+            <Link href="/modeles" className="panel-tonal rounded-2xl px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
               {language === "ar" ? "كل النماذج" : "Tous les modeles"}
             </Link>
-            <Link href="/contrat-depart" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
+            <Link href="/contrat-depart" className="panel-tonal rounded-2xl px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
               {language === "ar" ? "رسائل المغادرة" : "Documents de depart"}
             </Link>
-            <Link href="/litiges" className="rounded-2xl border border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
+            <Link href="/litiges" className="panel-tonal rounded-2xl px-4 py-3 text-sm font-semibold text-[var(--foreground)]">
               {language === "ar" ? "وثائق النزاعات" : "Documents de litige"}
             </Link>
           </div>
@@ -178,7 +206,7 @@ export default function DocumentsPage() {
             return (
               <section
                 key={group.titleKey}
-                className={`min-w-0 rounded-3xl p-5 ${groupIndex % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
+                className={`min-w-0 rounded-3xl p-5 ${groupIndex % 2 === 0 ? "soft-card" : "panel-tonal"}`}
               >
                 <div className="mb-4">
                   <p className="section-kicker">{t(group.titleKey)}</p>
@@ -190,7 +218,7 @@ export default function DocumentsPage() {
                   {templates.map((template, index) => (
                     <article
                       key={template.id}
-                      className={`min-w-0 rounded-2xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
+                      className={`min-w-0 rounded-2xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-tonal"}`}
                     >
                       <h2 className="display-font break-words text-xl font-semibold leading-tight">
                         {language === "ar" ? templateArabicLabels[template.id]?.title ?? template.title : template.title}
