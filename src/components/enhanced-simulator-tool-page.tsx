@@ -7,11 +7,11 @@ import { useUserJourney } from '@/lib/context/user-journey-context';
 import { detectUserScenario, getRecommendedDocuments, getNextSteps } from '@/lib/context/scenario-detection';
 import { addSimulationToJourney } from '@/lib/context/user-journey-context';
 import { Button } from '@/components/ui/button';
-import { 
-  SmartDate, 
-  SmartAmount, 
-  SmartToggle, 
-  SmartRadioCards, 
+import {
+  SmartDate,
+  SmartAmount,
+  SmartToggle,
+  SmartRadioCards,
   SmartStepper,
   SmartLookup,
   SmartTagInput
@@ -27,32 +27,88 @@ interface Field {
   step?: number;
   options?: Array<{ value: string; label: string; description?: string; icon?: React.ReactNode }>;
   subtitle?: string;
-  visibleIf?: (values: Record<string, any>) => boolean;
+  visibleIf?: (values: Record<string, unknown>) => boolean;
+}
+
+const CALCULATION_DATE_KEY = "calculationDate";
+type SearchParamsLike = Pick<URLSearchParams, "get">;
+
+function getCurrentDateISO() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function emptyValueForField(field: Field) {
+  if (field.type === "checkbox") return false;
+  if (field.type === "tags") return [];
+  return "";
+}
+
+function parseFieldValue(field: Field, value: string) {
+  if (field.type === "number" || field.type === "amount" || field.type === "stepper") return value;
+  if (field.type === "checkbox") return value === "true";
+  if (field.type === "tags") return value.split(",").map((item) => item.trim()).filter(Boolean);
+  return value;
+}
+
+function isSameValue(left: unknown, right: unknown) {
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right) && left.join("\u0000") === right.join("\u0000");
+  }
+  return left === right;
+}
+
+function createInitialValues(fields: Field[], searchParams: SearchParamsLike) {
+  const initialValues: Record<string, unknown> = {};
+  fields.forEach((field) => {
+    const paramValue = searchParams.get(field.key);
+    initialValues[field.key] = paramValue !== null ? parseFieldValue(field, paramValue) : emptyValueForField(field);
+  });
+  return initialValues;
+}
+
+function withCalculationDate(values: Record<string, unknown>) {
+  return {
+    ...values,
+    [CALCULATION_DATE_KEY]: String(values[CALCULATION_DATE_KEY] || getCurrentDateISO()),
+  };
+}
+
+function toSearchParams(values: Record<string, unknown>) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(values)) {
+    if (value === undefined || value === null || value === "") continue;
+    params.set(key, Array.isArray(value) ? value.join(",") : String(value));
+  }
+  return params;
 }
 
 // Simple field renderer based on the existing pattern
-function SimpleFieldRenderer({ 
-  field, 
-  value, 
-  onChange 
-}: { 
-  field: Field; 
-  value: any; 
-  onChange: (value: any) => void;
+function SimpleFieldRenderer({
+  field,
+  value,
+  onChange
+}: {
+  field: Field;
+  value: unknown;
+  onChange: (value: unknown) => void;
 }) {
   const { t } = useLanguage();
 
   // Heuristics for smarter component selection
   let effectiveType = field.type;
   if (effectiveType === 'number') {
-    if (field.key.toLowerCase().includes('salaire') || 
-        field.key.toLowerCase().includes('montant') || 
+    if (field.key.toLowerCase().includes('salaire') ||
+        field.key.toLowerCase().includes('montant') ||
         field.key.toLowerCase().includes('brut') ||
         field.key.toLowerCase().includes('indemnite') ||
         field.key.toLowerCase().includes('plafond')) {
       effectiveType = 'amount';
-    } else if (field.key.toLowerCase().includes('anciennete') || 
-               field.key.toLowerCase().includes('mois') || 
+    } else if (field.key.toLowerCase().includes('anciennete') ||
+               field.key.toLowerCase().includes('mois') ||
                field.key.toLowerCase().includes('jours') ||
                field.key.toLowerCase().includes('enfants')) {
       effectiveType = 'stepper';
@@ -160,7 +216,7 @@ function SimpleFieldRenderer({
           <label className="sim-label sim-field-required">{field.label}</label>
           <div className="sim-input-wrapper">
             <input
-              type={effectiveType as any}
+              type={effectiveType as React.HTMLInputTypeAttribute}
               value={String(value || '')}
               onChange={(e) => onChange(e.target.value)}
               className="sim-input"
@@ -196,17 +252,9 @@ export function EnhancedSimulatorToolPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { context, updateLegalContext, addJourneyEvent } = useUserJourney();
-  
-  const [values, setValues] = useState<Record<string, any>>(() => {
-    const initialValues: Record<string, any> = {};
-    fields.forEach(field => {
-      if (field.defaultValue !== undefined) {
-        initialValues[field.key] = field.defaultValue;
-      }
-    });
-    return initialValues;
-  });
-  
+
+  const [values, setValues] = useState<Record<string, unknown>>(() => createInitialValues(fields, searchParams));
+
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -214,18 +262,26 @@ export function EnhancedSimulatorToolPage({
 
   // Load pre-filled values from URL params
   useEffect(() => {
-    const prefilled: Record<string, any> = {};
+    const prefilled: Record<string, unknown> = {};
     fields.forEach(field => {
       const paramValue = searchParams.get(field.key);
-      if (paramValue) {
-        prefilled[field.key] = field.type === 'number' ? parseFloat(paramValue) :
-                           field.type === 'checkbox' ? paramValue === 'true' :
-                           paramValue;
+      if (paramValue !== null) {
+        prefilled[field.key] = parseFieldValue(field, paramValue);
       }
     });
-    
+
     if (Object.keys(prefilled).length > 0) {
-      setValues(prev => ({ ...prev, ...prefilled }));
+      setValues(prev => {
+        const next = { ...prev };
+        let changed = false;
+        for (const [key, value] of Object.entries(prefilled)) {
+          if (!isSameValue(next[key], value)) {
+            next[key] = value;
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
     }
   }, [searchParams, fields]);
 
@@ -234,7 +290,7 @@ export function EnhancedSimulatorToolPage({
     if (context.journey.length > 0) {
       const lastSimulations = context.journey.filter(event => event.type === 'simulation');
       const currentSimulation = { type: calculatorType, result: values };
-      
+
       const scenario = detectUserScenario(lastSimulations, currentSimulation);
       updateLegalContext({
         currentScenario: scenario.type === 'salary_dispute' ? 'dispute' :
@@ -244,7 +300,7 @@ export function EnhancedSimulatorToolPage({
                        'information',
         urgencyLevel: scenario.urgencyLevel,
       });
-      
+
       setSuggestions(getRecommendedDocuments(scenario));
     }
   }, [calculatorType, context.journey]);
@@ -259,17 +315,19 @@ export function EnhancedSimulatorToolPage({
         type: 'navigation',
         data: {
           calculatorType,
-          input: values,
+          input: withCalculationDate(values),
         },
         context: 'simulation_started'
       });
+
+      const payload = withCalculationDate(values);
 
       const response = await fetch(apiPath, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -277,12 +335,12 @@ export function EnhancedSimulatorToolPage({
       }
 
       const simulationResult = await response.json();
-      
-      addSimulationToJourney(calculatorType, simulationResult, values);
+
+      addSimulationToJourney(calculatorType, simulationResult, payload);
       setResult(simulationResult);
-      
+
       router.push(`${window.location.pathname}/result`);
-      
+
     } catch (err) {
       console.error('Simulation error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -293,7 +351,7 @@ export function EnhancedSimulatorToolPage({
 
   const handleValueChange = (key: string, value: unknown) => {
     setValues(prev => ({ ...prev, [key]: value }));
-    
+
     addJourneyEvent({
       type: 'navigation',
       data: {
@@ -306,7 +364,7 @@ export function EnhancedSimulatorToolPage({
   };
 
   const handleDocumentSuggestion = (documentId: string) => {
-    router.push(`/documents/${documentId}?${new URLSearchParams(values).toString()}`);
+    router.push(`/documents/${documentId}?${toSearchParams(values).toString()}`);
   };
 
   const getScenarioColor = (scenario: string) => {
@@ -323,7 +381,7 @@ export function EnhancedSimulatorToolPage({
       <div className="text-center space-y-4">
         <h1 className="text-3xl font-bold">{title}</h1>
         <p className="text-muted-foreground">{description}</p>
-        
+
         {context.legal.currentScenario && context.legal.currentScenario !== 'information' && (
           <div className={`p-4 rounded-lg border ${getScenarioColor(context.legal.currentScenario)}`}>
             <div className="flex items-center justify-between">
@@ -346,10 +404,11 @@ export function EnhancedSimulatorToolPage({
         <h2 className="text-xl font-semibold mb-4">Parameters</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           {fields.map((field) => {
+            if (field.key === CALCULATION_DATE_KEY) return null;
             const isVisible = field.visibleIf ? field.visibleIf(values) : true;
             return (
-              <div 
-                key={field.key} 
+              <div
+                key={field.key}
                 className={`conditional-container ${isVisible ? "conditional-visible" : "conditional-hidden"}`}
               >
                 <div className="space-y-2">
@@ -369,8 +428,8 @@ export function EnhancedSimulatorToolPage({
             </div>
           )}
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isLoading}
             className="w-full"
           >

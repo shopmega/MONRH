@@ -30,18 +30,25 @@ type Result = {
   }>;
 };
 
+function getCurrentDateISO() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export default function FinalSettlementAuditPage() {
   const { t, locale } = useLanguage();
   const [form, setForm] = useState({
-    calculationDate: "2026-02-12",
-    monthlySalary: "9000",
-    contractType: "CDI",
-    workerCategory: "employe",
-    yearsOfService: "4",
-    monthsOfService: "0",
-    unusedLeaveDays: "10",
-    unpaidSalaryMonths: "0",
-    overtimeDueMad: "0",
+    monthlySalary: "",
+    contractType: "",
+    workerCategory: "",
+    yearsOfService: "",
+    monthsOfService: "",
+    unusedLeaveDays: "",
+    unpaidSalaryMonths: "",
+    overtimeDueMad: "",
     noticeAlreadyPaid: false,
     abusiveDismissal: false,
   });
@@ -92,7 +99,7 @@ export default function FinalSettlementAuditPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          calculationDate: form.calculationDate,
+          calculationDate: getCurrentDateISO(),
           monthlySalary: Number(form.monthlySalary),
           contractType: form.contractType,
           workerCategory: form.workerCategory,
@@ -157,19 +164,9 @@ export default function FinalSettlementAuditPage() {
               type="number"
               className="input-shell mt-1"
               value={form.monthlySalary}
+              required
               onChange={(event) =>
                 setForm((current) => ({ ...current, monthlySalary: event.target.value }))
-              }
-            />
-          </label>
-          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
-            {t("finalSettlementTool.calculationDate")}
-            <input
-              type="date"
-              className="input-shell mt-1"
-              value={form.calculationDate}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, calculationDate: event.target.value }))
               }
             />
           </label>
@@ -178,10 +175,12 @@ export default function FinalSettlementAuditPage() {
             <select
               className="input-shell mt-1"
               value={form.contractType}
+              required
               onChange={(event) =>
                 setForm((current) => ({ ...current, contractType: event.target.value }))
               }
             >
+              <option value="" disabled>Selectionner</option>
               <option value="CDI">CDI</option>
               <option value="CDD">CDD</option>
             </select>
@@ -191,10 +190,12 @@ export default function FinalSettlementAuditPage() {
             <select
               className="input-shell mt-1"
               value={form.workerCategory}
+              required
               onChange={(event) =>
                 setForm((current) => ({ ...current, workerCategory: event.target.value }))
               }
             >
+              <option value="" disabled>Selectionner</option>
               <option value="cadre">{t("finalSettlementTool.categoryCadre")}</option>
               <option value="employe">{t("finalSettlementTool.categoryEmploye")}</option>
               <option value="ouvrier">{t("finalSettlementTool.categoryOuvrier")}</option>
@@ -206,6 +207,7 @@ export default function FinalSettlementAuditPage() {
               type="number"
               className="input-shell mt-1"
               value={form.yearsOfService}
+              required
               onChange={(event) =>
                 setForm((current) => ({ ...current, yearsOfService: event.target.value }))
               }
@@ -217,6 +219,7 @@ export default function FinalSettlementAuditPage() {
               type="number"
               className="input-shell mt-1"
               value={form.monthsOfService}
+              required
               onChange={(event) =>
                 setForm((current) => ({ ...current, monthsOfService: event.target.value }))
               }
@@ -228,6 +231,7 @@ export default function FinalSettlementAuditPage() {
               type="number"
               className="input-shell mt-1"
               value={form.unusedLeaveDays}
+              required
               onChange={(event) =>
                 setForm((current) => ({ ...current, unusedLeaveDays: event.target.value }))
               }
@@ -239,6 +243,7 @@ export default function FinalSettlementAuditPage() {
               type="number"
               className="input-shell mt-1"
               value={form.unpaidSalaryMonths}
+              required
               onChange={(event) =>
                 setForm((current) => ({ ...current, unpaidSalaryMonths: event.target.value }))
               }
@@ -250,6 +255,7 @@ export default function FinalSettlementAuditPage() {
               type="number"
               className="input-shell mt-1"
               value={form.overtimeDueMad}
+              required
               onChange={(event) =>
                 setForm((current) => ({ ...current, overtimeDueMad: event.target.value }))
               }

@@ -23,16 +23,23 @@ type Result = {
   }>;
 };
 
+function getCurrentDateISO() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export default function PayslipDetectorPage() {
   const { t, locale } = useLanguage();
   const [form, setForm] = useState({
-    grossSalary: "9000",
-    netSalaryReported: "7600",
-    cnssEmployeeReported: "270",
-    incomeTaxReported: "500",
-    overtimePaidReported: "0",
-    overtimeExpected: "0",
-    calculationDate: "2026-02-12",
+    grossSalary: "",
+    netSalaryReported: "",
+    cnssEmployeeReported: "",
+    incomeTaxReported: "",
+    overtimePaidReported: "",
+    overtimeExpected: "",
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
@@ -79,7 +86,7 @@ export default function PayslipDetectorPage() {
           incomeTaxReported: Number(form.incomeTaxReported),
           overtimePaidReported: Number(form.overtimePaidReported),
           overtimeExpected: Number(form.overtimeExpected),
-          calculationDate: form.calculationDate,
+          calculationDate: getCurrentDateISO(),
         }),
       });
       const data = (await response.json()) as { ok: boolean; result?: Result; error?: string };
@@ -128,31 +135,27 @@ export default function PayslipDetectorPage() {
           </div>
           <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.grossSalary")}
-            <input type="number" value={form.grossSalary} onChange={(event) => setForm((current) => ({ ...current, grossSalary: event.target.value }))} className="input-shell mt-1" />
+            <input type="number" value={form.grossSalary} required onChange={(event) => setForm((current) => ({ ...current, grossSalary: event.target.value }))} className="input-shell mt-1" />
           </label>
           <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.netReported")}
-            <input type="number" value={form.netSalaryReported} onChange={(event) => setForm((current) => ({ ...current, netSalaryReported: event.target.value }))} className="input-shell mt-1" />
+            <input type="number" value={form.netSalaryReported} required onChange={(event) => setForm((current) => ({ ...current, netSalaryReported: event.target.value }))} className="input-shell mt-1" />
           </label>
           <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.cnssReported")}
-            <input type="number" value={form.cnssEmployeeReported} onChange={(event) => setForm((current) => ({ ...current, cnssEmployeeReported: event.target.value }))} className="input-shell mt-1" />
+            <input type="number" value={form.cnssEmployeeReported} required onChange={(event) => setForm((current) => ({ ...current, cnssEmployeeReported: event.target.value }))} className="input-shell mt-1" />
           </label>
           <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.taxReported")}
-            <input type="number" value={form.incomeTaxReported} onChange={(event) => setForm((current) => ({ ...current, incomeTaxReported: event.target.value }))} className="input-shell mt-1" />
+            <input type="number" value={form.incomeTaxReported} required onChange={(event) => setForm((current) => ({ ...current, incomeTaxReported: event.target.value }))} className="input-shell mt-1" />
           </label>
           <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.overtimePaid")}
-            <input type="number" value={form.overtimePaidReported} onChange={(event) => setForm((current) => ({ ...current, overtimePaidReported: event.target.value }))} className="input-shell mt-1" />
+            <input type="number" value={form.overtimePaidReported} required onChange={(event) => setForm((current) => ({ ...current, overtimePaidReported: event.target.value }))} className="input-shell mt-1" />
           </label>
           <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold">
             {t("payslipTool.overtimeExpected")}
-            <input type="number" value={form.overtimeExpected} onChange={(event) => setForm((current) => ({ ...current, overtimeExpected: event.target.value }))} className="input-shell mt-1" />
-          </label>
-          <label className="block rounded-2xl bg-[var(--surface-elevated)] p-3 text-sm font-semibold sm:col-span-2">
-            {t("payslipTool.calculationDate")}
-            <input type="date" value={form.calculationDate} onChange={(event) => setForm((current) => ({ ...current, calculationDate: event.target.value }))} className="input-shell mt-1" />
+            <input type="number" value={form.overtimeExpected} required onChange={(event) => setForm((current) => ({ ...current, overtimeExpected: event.target.value }))} className="input-shell mt-1" />
           </label>
           <div className="sticky bottom-2 z-10 rounded-2xl border border-[var(--line)] bg-[var(--surface)]/95 p-2 backdrop-blur sm:col-span-2">
             <button type="submit" className="btn-primary w-full px-4 py-2.5 text-sm" disabled={loading}>

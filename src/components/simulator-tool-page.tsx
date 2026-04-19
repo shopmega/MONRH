@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PartnerAdSection } from "@/components/partner-ad-section";
 import { useLanguage } from "@/components/language-provider";
@@ -43,13 +43,13 @@ export type SimulatorField = {
   key: string;
   label: string;
   type: FieldType;
-  defaultValue: string | boolean | number | string[];
+  defaultValue?: string | boolean | number | string[];
   min?: number;
   max?: number;
   step?: number;
   options?: FieldOption[];
   subtitle?: string;
-  visibleIf?: (values: Record<string, any>) => boolean;
+  visibleIf?: (values: Record<string, unknown>) => boolean;
 };
 
 type GenericSimulationResult = {
@@ -75,7 +75,9 @@ type SimulatorToolPageProps = {
 };
 
 type ValuesState = Record<string, string | boolean | number | string[]>;
+type FormValue = ValuesState[string];
 type FormStatusTone = "success" | "warning" | "error" | "info";
+type SearchParamsLike = Pick<URLSearchParams, "get">;
 
 type SimulationHistoryEntry = {
   id: string;
@@ -87,11 +89,41 @@ type SimulationHistoryEntry = {
 };
 
 const HISTORY_STORAGE_KEY = "salarie_simulation_history";
+const CALCULATION_DATE_KEY = "calculationDate";
 
-function createInitialState(fields: SimulatorField[]): ValuesState {
+function getCurrentDateISO() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function emptyValueForField(field: SimulatorField): ValuesState[string] {
+  if (field.type === "checkbox") return false;
+  if (field.type === "tags") return [];
+  return "";
+}
+
+function parseFieldValue(field: SimulatorField, value: string): ValuesState[string] {
+  if (field.type === "checkbox") return value === "true";
+  if (field.type === "number" || field.type === "amount" || field.type === "stepper") return value;
+  if (field.type === "tags") return value.split(",").map((item) => item.trim()).filter(Boolean);
+  return value;
+}
+
+function isSameFormValue(left: ValuesState[string], right: ValuesState[string]) {
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right) && left.join("\u0000") === right.join("\u0000");
+  }
+  return left === right;
+}
+
+function createInitialState(fields: SimulatorField[], params?: SearchParamsLike): ValuesState {
   const state: ValuesState = {};
   for (const field of fields) {
-    state[field.key] = field.defaultValue;
+    const passedValue = params?.get(field.key);
+    state[field.key] = typeof passedValue === "string" ? parseFieldValue(field, passedValue) : emptyValueForField(field);
   }
   return state;
 }
@@ -99,6 +131,10 @@ function createInitialState(fields: SimulatorField[]): ValuesState {
 function toPayload(values: ValuesState, fields: SimulatorField[]) {
   const payload: Record<string, unknown> = {};
   for (const field of fields) {
+    if (field.key === CALCULATION_DATE_KEY) {
+      payload[field.key] = String(values[field.key] || getCurrentDateISO());
+      continue;
+    }
     const value = values[field.key];
     if (field.type === "checkbox") {
       payload[field.key] = Boolean(value);
@@ -112,7 +148,7 @@ function toPayload(values: ValuesState, fields: SimulatorField[]) {
 }
 
 function getVisibleFields(fields: SimulatorField[], values: ValuesState): SimulatorField[] {
-  return fields.filter((field) => (field.visibleIf ? field.visibleIf(values) : true));
+  return fields.filter((field) => field.key !== CALCULATION_DATE_KEY && (field.visibleIf ? field.visibleIf(values) : true));
 }
 
 function parseHistoryEntries(raw: string | null): SimulationHistoryEntry[] {
@@ -226,7 +262,7 @@ function pickPrimaryMetric(
 }
 
 function formatPreviewValue(
-  value: any,
+  value: unknown,
   field: SimulatorField,
   locale: string,
   yesLabel: string,
@@ -259,7 +295,8 @@ export function SimulatorToolPage({
   const { t, locale, language } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
-  const [values, setValues] = useState<ValuesState>(createInitialState(fields));
+  const searchParams = useSearchParams();
+  const [values, setValues] = useState<ValuesState>(() => createInitialState(fields, searchParams));
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string>();
   const [messageTone, setMessageTone] = useState<FormStatusTone>("info");
@@ -292,6 +329,27 @@ export function SimulatorToolPage({
     setHistoryEntries(allEntries.filter((entry) => entry.calculatorType === calculatorType).slice(0, 5));
   }, [calculatorType]);
 
+  useEffect(() => {
+    setValues((current) => {
+      const next = { ...current };
+      let changed = false;
+      for (const field of fields) {
+        const passedValue = searchParams.get(field.key);
+        if (passedValue !== null) {
+          const parsedValue = parseFieldValue(field, passedValue);
+          if (!isSameFormValue(next[field.key], parsedValue)) {
+            next[field.key] = parsedValue;
+            changed = true;
+          }
+        } else if (!(field.key in next)) {
+          next[field.key] = emptyValueForField(field);
+          changed = true;
+        }
+      }
+      return changed ? next : current;
+    });
+  }, [fields, searchParams]);
+
   function updateHistoryEntries(entry: SimulationHistoryEntry) {
     if (typeof window === "undefined") return;
     const allEntries = parseHistoryEntries(window.localStorage.getItem(HISTORY_STORAGE_KEY));
@@ -301,7 +359,7 @@ export function SimulatorToolPage({
   }
 
   function resetForm() {
-    setValues(createInitialState(fields));
+    setValues(createInitialState(fields, searchParams));
     setFieldErrors({});
     setMessage(undefined);
     setMessageTone("info");
@@ -718,9 +776,9 @@ function FieldRenderer({
 }: {
   field: SimulatorField;
   language: "fr" | "ar";
-  value: any;
+  value: unknown;
   error?: string;
-  onChange: (value: any) => void;
+  onChange: (value: FormValue) => void;
 }) {
   const label = localizeFieldLabel(field.key, field.label, language);
 
