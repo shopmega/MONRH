@@ -173,8 +173,12 @@ export function buildSimulationResultDocumentLink(
       typeof breakdown.leavePayout === "number" ? breakdown.leavePayout : undefined;
     const noticeComp =
       typeof breakdown.noticeCompensationDue === "number" ? breakdown.noticeCompensationDue : undefined;
+    const recommendedDepartureDate =
+      typeof breakdown.recommendedDepartureDate === "string" ? breakdown.recommendedDepartureDate : "";
 
-    if (calculationDate) params.set("effective_date", calculationDate);
+    if (recommendedDepartureDate || calculationDate) {
+      params.set("effective_date", recommendedDepartureDate || calculationDate);
+    }
     if (leavePayout !== undefined) params.set("amount_due", String(leavePayout + (noticeComp ?? 0)));
     params.set("position", workerCategory);
     const docId = "resignation-letter";

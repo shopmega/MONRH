@@ -107,11 +107,6 @@ function SimpleFieldRenderer({
         field.key.toLowerCase().includes('indemnite') ||
         field.key.toLowerCase().includes('plafond')) {
       effectiveType = 'amount';
-    } else if (field.key.toLowerCase().includes('anciennete') ||
-               field.key.toLowerCase().includes('mois') ||
-               field.key.toLowerCase().includes('jours') ||
-               field.key.toLowerCase().includes('enfants')) {
-      effectiveType = 'stepper';
     }
   }
 

@@ -129,7 +129,9 @@ function createInitialState(fields: SimulatorField[], params?: SearchParamsLike)
 }
 
 function toPayload(values: ValuesState, fields: SimulatorField[]) {
-  const payload: Record<string, unknown> = {};
+  const payload: Record<string, unknown> = {
+    [CALCULATION_DATE_KEY]: getCurrentDateISO(),
+  };
   for (const field of fields) {
     if (field.key === CALCULATION_DATE_KEY) {
       payload[field.key] = String(values[field.key] || getCurrentDateISO());
@@ -791,11 +793,6 @@ function FieldRenderer({
         field.key.toLowerCase().includes("indemnite") ||
         field.key.toLowerCase().includes("plafond")) {
       effectiveType = "amount";
-    } else if (field.key.toLowerCase().includes("anciennete") || 
-               field.key.toLowerCase().includes("mois") || 
-               field.key.toLowerCase().includes("jours") ||
-               field.key.toLowerCase().includes("enfants")) {
-      effectiveType = "stepper";
     }
   }
 
