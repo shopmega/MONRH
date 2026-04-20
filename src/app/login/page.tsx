@@ -7,7 +7,6 @@ import { useLanguage } from "@/components/language-provider";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 
 function sanitizeNextPath(value: string | null): string {
   if (!value || !value.startsWith("/")) return "/compte";
@@ -150,15 +149,38 @@ export default function LoginPage() {
     }
   }
 
+  async function signInWithGoogle() {
+    setLoading(true);
+    setError(undefined);
+    try {
+      const supabase = createSupabaseClient();
+      const callback = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+      const { error: signInError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: callback,
+        },
+      });
+
+      if (signInError) {
+        setError("Connexion Google impossible pour le moment.");
+      }
+    } catch {
+      setError("Connexion Google impossible pour le moment.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-[var(--juris-surface)] flex items-center justify-center p-6 selection:bg-[var(--juris-primary-container)] selection:text-white">
+    <main className="relative flex min-h-screen items-center justify-center bg-[var(--background)] p-6 text-[var(--foreground)] selection:bg-[var(--juris-primary-container)] selection:text-[var(--juris-on-primary)]">
       {/* Ambient Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-atmos pointer-events-none opacity-30" />
       
       <div className="mx-auto w-full max-w-6xl relative z-10">
         <section className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] items-center">
           {/* Editorial Welcome Card */}
-          <article className="hidden lg:flex flex-col p-16 rounded-[3rem] bg-white shadow-2xl shadow-juris-primary/5 relative overflow-hidden">
+          <article className="relative hidden overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-16 shadow-2xl shadow-black/5 lg:flex lg:flex-col">
             <div className="absolute top-0 right-0 w-64 h-64 bg-atmos opacity-10 pointer-events-none" />
             <span className="inline-flex items-center rounded-full bg-[var(--juris-surface-container)] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--juris-primary)] mb-10 w-fit">
               {t("accountPage.kicker")}
@@ -189,7 +211,7 @@ export default function LoginPage() {
           </article>
 
           {/* Login Control Card */}
-          <article className="bg-white/70 backdrop-blur-xl rounded-[3rem] p-10 sm:p-12 shadow-2xl shadow-juris-primary/10 border border-white">
+          <article className="rounded-2xl border border-[var(--line)] bg-[var(--surface)]/90 p-10 shadow-2xl shadow-black/10 backdrop-blur-xl sm:p-12">
             <div className="mb-10">
               <h2 className="text-3xl font-extrabold text-[var(--juris-on-surface)] font-display mb-2">{t("accountPage.sessionLogin")}</h2>
               <p className="text-sm text-[var(--juris-on-surface-variant)] font-medium opacity-60">
@@ -197,17 +219,34 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={signInWithLinkedIn}
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-3 bg-[#0077b5] hover:bg-[#005a8d] text-white py-4 rounded-2xl font-bold transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
-            >
-              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-              </svg>
-              {loading ? t("common.loading") : "Continuer avec LinkedIn"}
-            </button>
+            <div className="grid gap-3">
+              <button
+                type="button"
+                onClick={signInWithGoogle}
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-3 rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] py-4 font-bold text-[var(--heading)] transition-all hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] active:scale-[0.99] disabled:opacity-50"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M21.6 12.23c0-.73-.07-1.43-.19-2.11H12v3.99h5.38a4.6 4.6 0 0 1-1.99 3.02v2.51h3.23c1.89-1.74 2.98-4.3 2.98-7.41Z" />
+                  <path fill="#34A853" d="M12 22c2.7 0 4.96-.89 6.62-2.36l-3.23-2.51c-.9.6-2.04.95-3.39.95-2.6 0-4.81-1.76-5.6-4.12H3.06v2.59A10 10 0 0 0 12 22Z" />
+                  <path fill="#FBBC05" d="M6.4 13.96a6 6 0 0 1 0-3.92V7.45H3.06a10 10 0 0 0 0 9.1l3.34-2.59Z" />
+                  <path fill="#EA4335" d="M12 5.92c1.47 0 2.79.51 3.83 1.5l2.86-2.86A9.62 9.62 0 0 0 12 2a10 10 0 0 0-8.94 5.45l3.34 2.59C7.19 7.68 9.4 5.92 12 5.92Z" />
+                </svg>
+                {loading ? t("common.loading") : "Continuer avec Google"}
+              </button>
+
+              <button
+                type="button"
+                onClick={signInWithLinkedIn}
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-3 rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] py-4 font-bold text-[var(--heading)] transition-all hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] active:scale-[0.99] disabled:opacity-50"
+              >
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+                {loading ? t("common.loading") : "Continuer avec LinkedIn"}
+              </button>
+            </div>
 
             <div className="my-10 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--juris-on-surface-variant)] opacity-30">
               <div className="h-px bg-current flex-grow" />
@@ -215,18 +254,18 @@ export default function LoginPage() {
               <div className="h-px bg-current flex-grow" />
             </div>
 
-            <div className="grid grid-cols-2 gap-2 bg-[var(--juris-surface-low)] p-1.5 rounded-2xl mb-10">
+            <div className="mb-10 grid grid-cols-2 gap-2 rounded-lg bg-[var(--surface-muted)] p-1.5">
               <button
                 type="button"
                 onClick={() => setMode("signin")}
-                className={`py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${mode === "signin" ? "bg-white text-[var(--juris-primary)] shadow-sm" : "text-[var(--juris-on-surface-variant)] opacity-60"}`}
+                className={`rounded-lg py-3 text-xs font-bold uppercase tracking-widest transition-all ${mode === "signin" ? "bg-[var(--surface)] text-[var(--juris-primary)] shadow-sm" : "text-[var(--juris-on-surface-variant)] opacity-70"}`}
               >
                 Connexion
               </button>
               <button
                 type="button"
                 onClick={() => setMode("signup")}
-                className={`py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${mode === "signup" ? "bg-white text-[var(--juris-primary)] shadow-sm" : "text-[var(--juris-on-surface-variant)] opacity-60"}`}
+                className={`rounded-lg py-3 text-xs font-bold uppercase tracking-widest transition-all ${mode === "signup" ? "bg-[var(--surface)] text-[var(--juris-primary)] shadow-sm" : "text-[var(--juris-on-surface-variant)] opacity-70"}`}
               >
                 Créer
               </button>
@@ -248,7 +287,7 @@ export default function LoginPage() {
                     autoComplete="username"
                     placeholder="votre@email.com"
                     required
-                    className="bg-[var(--juris-surface-low)] border-none h-14 rounded-2xl px-6 focus:ring-2 focus:ring-[var(--juris-primary)]"
+                    className="h-14 rounded-lg border border-[var(--line)] bg-[var(--input-bg)] px-6 text-[var(--foreground)] focus:ring-2 focus:ring-[var(--juris-primary)]"
                   />
                 </div>
                 <div className="space-y-2">
@@ -265,7 +304,7 @@ export default function LoginPage() {
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="current-password"
                     required
-                    className="bg-[var(--juris-surface-low)] border-none h-14 rounded-2xl px-6 focus:ring-2 focus:ring-[var(--juris-primary)]"
+                    className="h-14 rounded-lg border border-[var(--line)] bg-[var(--input-bg)] px-6 text-[var(--foreground)] focus:ring-2 focus:ring-[var(--juris-primary)]"
                   />
                 </div>
                 <button 
@@ -282,9 +321,9 @@ export default function LoginPage() {
               </form>
             )}
 
-            {error ? <p className="mt-6 p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-bold border border-red-100">{error}</p> : null}
+            {error ? <p className="mt-6 rounded-lg border border-[var(--err)] bg-[var(--err-bg)] p-4 text-sm font-bold text-[var(--err)]">{error}</p> : null}
             {oauthError ? (
-              <p className="mt-6 p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-bold border border-red-100">
+              <p className="mt-6 rounded-lg border border-[var(--err)] bg-[var(--err-bg)] p-4 text-sm font-bold text-[var(--err)]">
                 Échec LinkedIn: {oauthError}
               </p>
             ) : null}
