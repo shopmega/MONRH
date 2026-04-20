@@ -18,6 +18,16 @@ function isAdminPath(pathname: string): boolean {
   return pathname === "/admin" || pathname.startsWith("/admin/");
 }
 
+function oauthCallbackUrl(nextPath: string) {
+  return `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+}
+
+function oauthErrorMessage(provider: "Google" | "LinkedIn", message?: string) {
+  return message
+    ? `Connexion ${provider} impossible: ${message}`
+    : `Connexion ${provider} impossible pour le moment.`;
+}
+
 export default function LoginPage() {
   const { t } = useLanguage();
   const router = useRouter();
@@ -131,19 +141,18 @@ export default function LoginPage() {
     setError(undefined);
     try {
       const supabase = createSupabaseClient();
-      const callback = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: "linkedin_oidc",
         options: {
-          redirectTo: callback,
+          redirectTo: oauthCallbackUrl(nextPath),
         },
       });
 
       if (signInError) {
-        setError("Connexion LinkedIn impossible pour le moment.");
+        setError(oauthErrorMessage("LinkedIn", signInError.message));
       }
     } catch {
-      setError("Connexion LinkedIn impossible pour le moment.");
+      setError(oauthErrorMessage("LinkedIn"));
     } finally {
       setLoading(false);
     }
@@ -154,19 +163,18 @@ export default function LoginPage() {
     setError(undefined);
     try {
       const supabase = createSupabaseClient();
-      const callback = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: callback,
+          redirectTo: oauthCallbackUrl(nextPath),
         },
       });
 
       if (signInError) {
-        setError("Connexion Google impossible pour le moment.");
+        setError(oauthErrorMessage("Google", signInError.message));
       }
     } catch {
-      setError("Connexion Google impossible pour le moment.");
+      setError(oauthErrorMessage("Google"));
     } finally {
       setLoading(false);
     }
