@@ -130,7 +130,7 @@ export function ArticleClient({ article, coverImage, articleJsonLd }: ArticleCli
         </header>
 
         <div className="mt-8 soft-card rounded-[2rem] p-5 sm:p-7">
-          <div className="prose prose-headings:display-font prose-p:text-[var(--foreground)] prose-li:text-[var(--foreground)] max-w-none">
+          <div className="prose prose-headings:display-font prose-p:text-[var(--foreground)] prose-li:text-[var(--foreground)] max-w-none space-y-3">
             {renderArticleContentBlocks(article.content, `block-${article.slug}`)}
           </div>
         </div>
