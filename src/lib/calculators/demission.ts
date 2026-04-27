@@ -34,7 +34,8 @@ export type DemissionResult = {
     requiredNoticeMonths: number;
     recommendedDepartureDate: string;
     leavePayout: number;
-    noticeCompensationDue: number;
+    noticeComplianceStatus: string;
+    potentialNoticeValue: number;
     netFinancialOutcome: number;
     cddNote?: string;
   };
@@ -83,8 +84,9 @@ export function simulateDemission(rawInput: DemissionInput): DemissionResult {
 
   const leavePayout = roundMAD((input.monthlySalary / 26) * input.unusedLeaveDays);
 
-  // If notice not served by employee: employer may deduct notice indemnity
-  const noticeCompensationDue = input.noticeServed
+  // Notice period compliance information - no financial penalties for resignation
+  const noticeComplianceStatus = input.noticeServed ? "served" : "not_served";
+  const potentialNoticeValue = input.noticeServed
     ? 0
     : input.contractType === "CDI"
       ? roundMAD(input.monthlySalary * requiredNoticeMonths)
@@ -96,12 +98,35 @@ export function simulateDemission(rawInput: DemissionInput): DemissionResult {
       : addDays(input.calculationDate, cddNoticeDays)
     : input.calculationDate;
 
-  const netFinancialOutcome = roundMAD(leavePayout - noticeCompensationDue);
+  // Employee always receives leave payout - no deductions for resignation
+  const netFinancialOutcome = roundMAD(leavePayout);
 
   const cddNote =
     input.contractType === "CDD"
       ? `Preavis CDD pour ${input.workerCategory}: ${cddNoticeDays} jours.`
       : undefined;
+
+  // Build dynamic explanation based on outcome
+  const hasLeavePayout = netFinancialOutcome > 0;
+  const summaryText = hasLeavePayout 
+    ? `Resultat net de demission estime: ${netFinancialOutcome} MAD (paiement conges restants).`
+    : `Aucun paiement dû: ${netFinancialOutcome} MAD (pas de conges restants).`;
+
+  const dynamicWarnings = [
+    "La demission ne donne pas droit a l'indemnite de licenciement.",
+    "Certaines conventions collectives preevoient des preavis differents — verifier.",
+    input.contractType === "CDD"
+      ? "La rupture anticipee d'un CDD par le salarie peut engager sa responsabilite civile."
+      : "",
+  ];
+
+  if (!input.noticeServed) {
+    dynamicWarnings.push(
+      `Preavis non servi: ${potentialNoticeValue} MAD de salaire potentiellement concerné.`,
+      "L'employeur peut engager une action en dommages et intérêts mais ne peut pas retenir le solde de tout compte.",
+      "Il est recommandé de servir le préavis ou de négocier un accord amiable."
+    );
+  }
 
   return {
     versionId: rules.versionId,
@@ -114,39 +139,34 @@ export function simulateDemission(rawInput: DemissionInput): DemissionResult {
       requiredNoticeMonths: input.contractType === "CDI" ? requiredNoticeMonths : 0,
       recommendedDepartureDate,
       leavePayout,
-      noticeCompensationDue,
+      noticeComplianceStatus,
+      potentialNoticeValue,
       netFinancialOutcome,
       ...(cddNote ? { cddNote } : {}),
     },
     explanation: {
-      summary: `Resultat net de demission estime: ${netFinancialOutcome} MAD.`,
+      summary: summaryText,
       assumptions: [
         `Categorie: ${input.workerCategory} — preavis selon Art. 43 Code du Travail.`,
         `Type de contrat: ${input.contractType}.`,
         input.contractType === "CDI"
           ? `Anciennete: ${roundMAD(totalServiceYears)} ans → preavis requis: ${requiredNoticeMonths} mois.`
           : `Preavis CDD: ${cddNoticeDays} jours pour ${input.workerCategory}.`,
-        input.noticeServed ? "Preavis execute: aucune retenue." : "Preavis non execute: indemnite preavis retenue.",
+        input.noticeServed ? "Preavis execute: situation régulière." : "Preavis non execute: risque d'action en dommages.",
         "Conges restants valorises en salaire journalier (salaire / 26).",
+        "Aucune retenue sur solde de tout compte pour demission (Code du Travail).",
       ],
       formulas: [
         "Indemnite conges = (salaire / 26) x jours restants.",
-        "Compensation preavis (CDI) = salaire mensuel x mois preavis requis (si non execute).",
-        "Compensation preavis (CDD) = (salaire / 26) x jours preavis (si non execute).",
-        "Resultat net = conges payes - compensation preavis.",
+        "Resultat net = conges payes (aucune deduction pour demission).",
       ],
-      warnings: [
-        "La demission ne donne pas droit a l'indemnite de licenciement.",
-        "Certaines conventions collectives preevoient des preavis differents — verifier.",
-        input.contractType === "CDD"
-          ? "La rupture anticipee d'un CDD par le salarie peut engager sa responsabilite civile."
-          : "",
-      ].filter(Boolean),
+      warnings: dynamicWarnings.filter(Boolean),
       nextSteps: [
         "Verifier les jours de conges officiels avant remise de la demission.",
         "Formaliser la demission par lettre recommandee avec accusé.",
         "Obtenir le certificat de travail et le solde de tout compte signe.",
-      ],
+        !input.noticeServed ? "Servir le préavis ou négocier un accord pour éviter les litiges." : "",
+      ].filter(Boolean),
     },
   };
 }
