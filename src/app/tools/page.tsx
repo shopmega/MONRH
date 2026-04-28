@@ -106,7 +106,7 @@ export default function ToolsPage() {
 
   return (
     <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
-      <div className="mx-auto w-full max-w-6xl px-4 pb-12 pt-6 sm:px-6">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-12 pt-24 sm:px-6">
         <section className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">Jurisconsult</p>
           <h1 className="display-font mt-2 text-4xl font-semibold leading-tight sm:text-5xl">

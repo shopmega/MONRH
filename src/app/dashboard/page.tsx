@@ -19,7 +19,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="paper-bg min-h-screen">
-      <div className="mx-auto w-full max-w-6xl px-4 pb-12 pt-6 sm:px-6">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-12 pt-24 sm:px-6">
         <header className="mb-8">
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-pulse" />

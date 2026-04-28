@@ -142,6 +142,34 @@ html,
 body {
   min-height: 100%;
   width: 100%;
+  overflow-x: hidden;
+}
+
+/* Prevent text overflow */
+* {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Prevent image overflow */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent grid overflow */
+.grid {
+  min-width: 0;
+}
+
+/* Prevent flex overflow */
+.flex {
+  min-width: 0;
+}
+
+/* Ensure containers don't overflow */
+.container, .max-w-7xl {
+  overflow-x: hidden;
 }
 
 body {

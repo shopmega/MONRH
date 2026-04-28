@@ -158,7 +158,7 @@ export default function ComptePage() {
     <div className="min-h-screen bg-[#F8F5F2] font-sans pb-16">
 
       {/* ── PROFILE HEADER ─────────────────────────────────────────── */}
-      <div className="bg-white px-5 pt-16 pb-6">
+      <div className="bg-white px-5 pt-24 pb-6">
         {/* Avatar row */}
         <div className="flex items-center gap-4 mb-5">
           <div className="w-14 h-14 rounded-full bg-[#F0EAE4] flex items-center justify-center text-2xl font-black text-[#8a5022]">

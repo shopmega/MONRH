@@ -145,7 +145,7 @@ export default function DocumentsPage() {
 
   return (
     <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-24 sm:px-6">
         <section className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">{t("documentsPage.kicker")}</p>
           <h1 className="display-font mt-2 break-words text-4xl font-semibold leading-tight sm:text-5xl">

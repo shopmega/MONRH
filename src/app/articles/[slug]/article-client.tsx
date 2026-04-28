@@ -102,7 +102,7 @@ export function ArticleClient({ article, coverImage, articleJsonLd }: ArticleCli
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
-      <article className="mx-auto w-full max-w-3xl px-4 pb-10 pt-6 sm:px-6">
+      <article className="mx-auto w-full max-w-3xl px-4 pb-10 pt-24 sm:px-6">
         <header className="soft-card rounded-[2rem] p-5 sm:p-7">
           <div className="mb-4 h-56 w-full">
             {coverImage ? (

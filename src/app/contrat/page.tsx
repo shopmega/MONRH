@@ -320,7 +320,7 @@ export default function ContratPage() {
   // ─── Main Wizard View ────────────────────────────────────────────────────────
   return (
     <main className="paper-bg min-h-screen max-w-full overflow-x-hidden pb-24" dir={language === "ar" ? "rtl" : "ltr"}>
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-24 pb-8 sm:px-6">
 
         {/* Page Header */}
         <section className="soft-card mb-6 rounded-[2rem] p-6 sm:p-8">

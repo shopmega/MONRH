@@ -645,7 +645,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
 
   return (
     <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-24 sm:px-6">
         <section className="soft-card rounded-[2rem] p-5 sm:p-7">
           <p className="section-kicker">{t("resultPage.kicker")}</p>
           <h1 className="display-font mt-2 break-words text-3xl font-semibold sm:text-4xl">
