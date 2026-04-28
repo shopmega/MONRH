@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const SITE_NAME = "MON RH";
+export const SITE_NAME = "TON RH";
 export const SITE_DESCRIPTION =
   "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc.";
 export const DEFAULT_SITE_URL = "https://monrh.vercel.app";
@@ -9,7 +9,7 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
   (VERCEL_URL ? `https://${VERCEL_URL}` : DEFAULT_SITE_URL);
 export const DEFAULT_OG_IMAGE_PATH = "/opengraph-image";
-export const DEFAULT_OG_IMAGE_ALT = "MON RH - Salaire, CNSS, litiges et modeles RH au Maroc";
+export const DEFAULT_OG_IMAGE_ALT = "TON RH - Salaire, CNSS, litiges et modeles RH au Maroc";
 
 export function absoluteUrl(path: string) {
   if (/^https?:\/\//i.test(path)) {
