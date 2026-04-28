@@ -43,6 +43,7 @@ function getCurrentDateISO() {
 }
 
 function emptyValueForField(field: Field) {
+  if (field.defaultValue !== undefined) return field.defaultValue;
   if (field.type === "checkbox") return false;
   if (field.type === "tags") return [];
   return "";
@@ -78,6 +79,25 @@ function withCalculationDate(values: Record<string, unknown>) {
   };
 }
 
+function toPayload(values: Record<string, unknown>, fields: Field[]) {
+  const payload: Record<string, unknown> = {
+    [CALCULATION_DATE_KEY]: String(values[CALCULATION_DATE_KEY] || getCurrentDateISO()),
+  };
+  for (const field of fields) {
+    if (field.key === CALCULATION_DATE_KEY) continue;
+    const value = values[field.key];
+    if (value === "" || value === undefined || value === null) continue;
+    if (field.type === "checkbox") {
+      payload[field.key] = Boolean(value);
+    } else if (field.type === "number" || field.type === "amount" || field.type === "stepper") {
+      payload[field.key] = Number(value);
+    } else {
+      payload[field.key] = value;
+    }
+  }
+  return payload;
+}
+
 function toSearchParams(values: Record<string, unknown>) {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(values)) {
@@ -97,6 +117,7 @@ function SimpleFieldRenderer({
   value: unknown; 
   onChange: (value: unknown) => void;
 }) {
+  const fieldId = `sim-${field.key}`;
   // Heuristics for smarter component selection
   let effectiveType = field.type;
   if (effectiveType === 'number') {
@@ -113,6 +134,8 @@ function SimpleFieldRenderer({
     case 'date':
       return (
         <SmartDate
+          id={fieldId}
+          name={field.key}
           label={field.label}
           value={String(value || '')}
           onChange={onChange}
@@ -123,6 +146,8 @@ function SimpleFieldRenderer({
     case 'amount':
       return (
         <SmartAmount
+          id={fieldId}
+          name={field.key}
           label={field.label}
           value={String(value || '')}
           onChange={onChange}
@@ -139,6 +164,8 @@ function SimpleFieldRenderer({
       }
       return (
         <SmartToggle
+          id={fieldId}
+          name={field.key}
           label={field.label}
           value={Boolean(value)}
           onChange={onChange}
@@ -149,6 +176,8 @@ function SimpleFieldRenderer({
     case 'stepper':
       return (
         <SmartStepper
+          id={fieldId}
+          name={field.key}
           label={field.label}
           value={Number(value || 0)}
           onChange={onChange}
@@ -161,6 +190,8 @@ function SimpleFieldRenderer({
       if (field.options && field.options.length <= 4) {
         return (
           <SmartRadioCards
+            id={fieldId}
+            name={field.key}
             label={field.label}
             value={String(value || '')}
             onChange={onChange}
@@ -170,6 +201,8 @@ function SimpleFieldRenderer({
       }
       return (
         <SmartLookup
+          id={fieldId}
+          name={field.key}
           label={field.label}
           value={String(value || '')}
           onChange={onChange}
@@ -181,6 +214,8 @@ function SimpleFieldRenderer({
     case 'tags':
       return (
         <SmartTagInput
+          id={fieldId}
+          name={field.key}
           label={field.label}
           value={Array.isArray(value) ? value : []}
           onChange={onChange}
@@ -190,9 +225,11 @@ function SimpleFieldRenderer({
     case 'text':
       return (
         <div className="sim-input-container">
-          <label className="sim-label sim-field-required">{field.label}</label>
+          <label htmlFor={fieldId} className="sim-label sim-field-required">{field.label}</label>
           <div className="sim-input-wrapper">
             <input
+              id={fieldId}
+              name={field.key}
               type="text"
               value={String(value || '')}
               onChange={(e) => onChange(e.target.value)}
@@ -207,9 +244,11 @@ function SimpleFieldRenderer({
     default:
       return (
         <div className="sim-input-container">
-          <label className="sim-label sim-field-required">{field.label}</label>
+          <label htmlFor={fieldId} className="sim-label sim-field-required">{field.label}</label>
           <div className="sim-input-wrapper">
             <input
+              id={fieldId}
+              name={field.key}
               type={effectiveType as React.HTMLInputTypeAttribute}
               value={String(value || '')}
               onChange={(e) => onChange(e.target.value)}
@@ -313,7 +352,7 @@ export function EnhancedSimulatorToolPage({
         context: 'simulation_started'
       });
 
-      const payload = withCalculationDate(values);
+      const payload = toPayload(values, fields);
 
       const response = await fetch(apiPath, {
         method: 'POST',

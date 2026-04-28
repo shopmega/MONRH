@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const SITE_NAME = "TON RH";
 export const SITE_DESCRIPTION =
   "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc.";
-export const DEFAULT_SITE_URL = "https://monrh.vercel.app";
+export const DEFAULT_SITE_URL = "https://tonrh.vercel.app";
 const VERCEL_URL = process.env.VERCEL_URL?.trim();
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||

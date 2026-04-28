@@ -40,7 +40,7 @@ const DEFAULT_ADMIN_CONFIG: AdminConfig = {
   documentAdStepEnabled: true,
   maintenanceMessage: "",
   websiteSettings: {
-    siteName: "MON RH",
+    siteName: "TON RH",
     siteDescription:
       "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc.",
     siteSubtitle: "Labour Clarity Platform",

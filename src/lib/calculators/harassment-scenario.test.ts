@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { simulateHarassmentScenario, harassmentScenarioInputSchema } from "@/lib/calculators/harassment-scenario";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 
 describe("harassmentScenarioInputSchema", () => {
   it("validates correct input", () => {
@@ -24,7 +25,7 @@ describe("harassmentScenarioInputSchema", () => {
     };
 
     const parsed = harassmentScenarioInputSchema.parse(minimalInput);
-    expect(parsed.calculationDate).toBe("2026-02-12");
+    expect(parsed.calculationDate).toBe(getCurrentDateISO());
     expect(parsed.harassmentType).toBe("moral");
     expect(parsed.perpetratorRelationship).toBe("supervisor");
     expect(parsed.witnessesCount).toBe(0);

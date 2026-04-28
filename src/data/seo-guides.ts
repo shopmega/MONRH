@@ -46,7 +46,7 @@ Pour obtenir une estimation précise personnalisée à votre salaire et votre an
       },
       {
         question: "Comment calculer l'indemnité de licenciement sans avocat ?",
-        answer: "Il suffit de prendre votre salaire de base, vos primes régulières, et de les multiplier par le barème horaire correspondant à votre ancienneté. Vous pouvez utiliser le simulateur gratuit de Salarie.ma pour obtenir le résultat exact en quelques secondes."
+        answer: "Il suffit de prendre votre salaire de base, vos primes régulières, et de les multiplier par le barème horaire correspondant à votre ancienneté. Vous pouvez utiliser le simulateur gratuit de TON RH pour obtenir le résultat exact en quelques secondes."
       }
     ],
     simulatorType: "licenciement",
@@ -105,7 +105,7 @@ Utilisez le simulateur pour comparer rapidement un salaire brut annonce dans une
       },
       {
         question: "Puis-je calculer un net vers brut ?",
-        answer: "Oui. Le simulateur MON RH permet de partir du net souhaite pour estimer le brut necessaire.",
+        answer: "Oui. Le simulateur TON RH permet de partir du net souhaite pour estimer le brut necessaire.",
       },
     ],
     simulatorType: "net_gross",
@@ -204,7 +204,7 @@ Apres une demission, les principaux points a verifier sont le preavis, les conge
 3. Controler le solde de tout compte.
 4. Generer les documents utiles.
 
-Cette page relie les outils MON RH pour couvrir toute la sortie.`,
+Cette page relie les outils TON RH pour couvrir toute la sortie.`,
     faqs: [
       {
         question: "Quels montants verifier apres demission ?",
@@ -259,14 +259,14 @@ Certaines clauses peuvent creer un desequilibre ou limiter excessivement les dro
 - Periode d'essai.
 - Rupture ou sanction disciplinaire.
 
-MON RH ne remplace pas un conseil juridique, mais aide a preparer les questions et documents utiles avant d'agir.`,
+TON RH ne remplace pas un conseil juridique, mais aide a preparer les questions et documents utiles avant d'agir.`,
     faqs: [
       {
         question: "Une clause abusive est-elle automatiquement nulle ?",
         answer: "La qualification depend du contexte, du contrat et des textes applicables. Il faut analyser la clause precise.",
       },
       {
-        question: "Quel outil MON RH utiliser ?",
+        question: "Quel outil TON RH utiliser ?",
         answer: "Commencez par les outils de controle de procedure, de contrat et de pre-contentieux selon le probleme rencontre.",
       },
     ],
@@ -287,14 +287,14 @@ Les droits du salarie couvrent le salaire, le contrat, les conges, la CNSS, la r
 - Conges et protection sociale.
 - Solde de tout compte.
 
-Utilisez cette page comme point d'entree vers les simulateurs et modeles MON RH.`,
+Utilisez cette page comme point d'entree vers les simulateurs et modeles TON RH.`,
     faqs: [
       {
         question: "Quels droits verifier en priorite ?",
         answer: "Commencez par le salaire, le contrat, les conges, le preavis et les montants dus en cas de depart.",
       },
       {
-        question: "MON RH couvre-t-il les litiges ?",
+        question: "TON RH couvre-t-il les litiges ?",
         answer: "Oui. Des outils aident a structurer les reclamations, preuves et etapes avant escalade.",
       },
     ],

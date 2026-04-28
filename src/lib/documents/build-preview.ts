@@ -14,6 +14,20 @@ type PreviewData = {
   completion: number;
 };
 
+function formatDate(dateString: string): string {
+  if (!dateString) return "";
+  
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+  
+  const months = [
+    'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+  ];
+  
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
 const FIELD_ALIASES = {
   employee_name: ["employee_name", "employeeName", "full_name", "fullName"],
   company_name: ["company_name", "companyName", "employer_name", "employerName"],
@@ -93,7 +107,7 @@ export function buildDocumentPreview(
         ...defaultData,
         subject: "Lettre de Demission",
         context: `Je vous informe de ma decision de demissionner de mon poste${position ? ` de ${position}` : ""}.`,
-        request: `Je sollicite la prise d'acte de ma demission${effectiveDate ? ` avec un depart effectif au ${effectiveDate}` : ""}, sous reserve du preavis applicable.`,
+        request: `Je sollicite la prise d'acte de ma demission${effectiveDate ? ` avec un depart effectif au ${formatDate(effectiveDate)}` : ""}, sous reserve du preavis applicable.`,
         legalBasis:
           "Cette demission est formulee conformement aux dispositions contractuelles et au Code du travail.",
         deadline: "Merci de confirmer par ecrit la date de fin et les modalites du solde de tout compte.",
@@ -105,7 +119,7 @@ export function buildDocumentPreview(
         ...defaultData,
         subject: "Notification de Preavis",
         context: `Je notifie l'execution du preavis lie a mon poste${position ? ` de ${position}` : ""}.`,
-        request: `Date de fin souhaitee${effectiveDate ? `: ${effectiveDate}` : ""}. Merci de confirmer le solde de tout compte.`,
+        request: `Date de fin souhaitee${effectiveDate ? `: ${formatDate(effectiveDate)}` : ""}. Merci de confirmer le solde de tout compte.`,
         legalBasis:
           "Cette notification est communiquee conformement au preavis applicable a ma situation contractuelle.",
         deadline: "Merci de confirmer les dates retenues et les obligations reciproques par ecrit.",
@@ -174,7 +188,7 @@ export function buildDocumentPreview(
       return {
         ...defaultData,
         subject: "Demande de Conge Maternite",
-        context: `Je sollicite mon conge maternite${effectiveDate ? ` a compter du ${effectiveDate}` : ""}.`,
+        context: `Je sollicite mon conge maternite${effectiveDate ? ` a compter du ${formatDate(effectiveDate)}` : ""}.`,
         request: `Merci de traiter ma demande et de confirmer les demarches CNSS.`,
         legalBasis:
           "Cette demande est formulee au titre du droit au conge maternite et des garanties de protection applicables.",
@@ -274,7 +288,8 @@ export function buildDocumentPreview(
 }
 
 export function toPreviewText(data: PreviewData, values: Values): string {
-  const dateValue = pickFromAliases(values, FIELD_ALIASES.effective_date, new Date().toISOString().slice(0, 10));
+  const rawDateValue = pickFromAliases(values, FIELD_ALIASES.effective_date, new Date().toISOString().slice(0, 10));
+  const dateValue = formatDate(rawDateValue);
   const location = pickFromAliases(values, FIELD_ALIASES.city, "Casablanca");
   const employeeName = pickFromAliases(values, FIELD_ALIASES.employee_name, "Le salarie");
   const companyName = pickFromAliases(values, FIELD_ALIASES.company_name, "L'entreprise");

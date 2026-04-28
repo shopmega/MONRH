@@ -16,6 +16,7 @@ import {
 
 // --- Base Wrapper ---
 interface InputWrapperProps {
+  id?: string;
   label: string;
   required?: boolean;
   error?: string;
@@ -23,9 +24,9 @@ interface InputWrapperProps {
   children: React.ReactNode;
 }
 
-const InputWrapper = ({ label, required, error, hint, children }: InputWrapperProps) => (
+const InputWrapper = ({ id, label, required, error, hint, children }: InputWrapperProps) => (
   <div className="sim-input-container">
-    <label className={`sim-label ${required ? "sim-field-required" : ""}`}>
+    <label htmlFor={id} className={`sim-label ${required ? "sim-field-required" : ""}`}>
       {label}
     </label>
     <div className="sim-input-wrapper">
@@ -54,6 +55,8 @@ export const SmartDate = ({
   value: string; 
   onChange: (val: string) => void;
   label: string;
+  id?: string;
+  name?: string;
   required?: boolean;
   error?: string;
 }) => {
@@ -61,6 +64,8 @@ export const SmartDate = ({
   return (
     <InputWrapper {...props}>
       <input
+        id={props.id}
+        name={props.name}
         type="date"
         max={today}
         value={value}
@@ -83,6 +88,8 @@ export const SmartAmount = ({
   value: string | number; 
   onChange: (val: string) => void;
   label: string;
+  id?: string;
+  name?: string;
   suffix?: string;
   required?: boolean;
   error?: string;
@@ -92,6 +99,8 @@ export const SmartAmount = ({
     <InputWrapper {...props} hint={hint}>
       <Coins size={18} className="sim-icon-left" />
       <input
+        id={props.id}
+        name={props.name}
         type="number"
         min="0"
         step="100"
@@ -115,6 +124,8 @@ export const SmartToggle = ({
   value: boolean; 
   onChange: (val: boolean) => void;
   label: string;
+  id?: string;
+  name?: string;
   subtitle?: string;
   error?: string;
 }) => {
@@ -126,6 +137,8 @@ export const SmartToggle = ({
       </div>
       <label className="relative inline-flex items-center cursor-pointer">
         <input 
+          id={props.id}
+          name={props.name}
           type="checkbox" 
           className="sr-only" 
           checked={value}
@@ -150,15 +163,19 @@ export const SmartRadioCards = ({
   onChange: (val: string) => void;
   options: Array<{ value: string; label: string; description?: string; icon?: React.ReactNode }>;
   label: string;
+  id?: string;
+  name?: string;
 }) => {
   return (
     <div className="sim-input-container">
       <label className="sim-label">{props.label}</label>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {options.map((opt) => (
-          <div
+          <button
+            type="button"
             key={opt.value}
             onClick={() => onChange(opt.value)}
+            aria-pressed={value === opt.value}
             className={`cursor-pointer p-4 rounded-xl border-2 transition-all flex items-start gap-3 ${
               value === opt.value
                 ? "border-[var(--sim-accent)] bg-[var(--sim-accent-soft)]"
@@ -174,9 +191,10 @@ export const SmartRadioCards = ({
               </span>
               {opt.description && <span className="text-xs text-[var(--sim-ink-soft)] leading-tight">{opt.description}</span>}
             </div>
-          </div>
+          </button>
         ))}
       </div>
+      <input type="hidden" id={props.id} name={props.name} value={value} />
     </div>
   );
 };
@@ -194,13 +212,15 @@ export const SmartStepper = ({
   min?: number;
   max?: number;
   label: string;
+  id?: string;
+  name?: string;
 }) => {
   const increment = () => value < max && onChange(value + 1);
   const decrement = () => value > min && onChange(value - 1);
 
   return (
     <div className="flex items-center justify-between p-4 rounded-xl border border-[var(--sim-border)] bg-[var(--sim-card)]">
-      <span className="text-sm font-semibold text-[var(--sim-text)]">{props.label}</span>
+      <label htmlFor={props.id} className="text-sm font-semibold text-[var(--sim-text)]">{props.label}</label>
       <div className="flex items-center gap-4 bg-[var(--sim-bg)] rounded-lg p-1 border border-[var(--sim-border)]">
         <button
           type="button"
@@ -210,6 +230,7 @@ export const SmartStepper = ({
         >
           <Minus size={18} />
         </button>
+        <input id={props.id} name={props.name} type="hidden" value={value} readOnly />
         <span className="w-8 text-center font-bold text-[var(--sim-text)] text-lg">{value}</span>
         <button
           type="button"
@@ -235,6 +256,8 @@ export const SmartTagInput = ({
   onChange: (val: string[]) => void;
   suggestions?: string[];
   label: string;
+  id?: string;
+  name?: string;
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -258,7 +281,7 @@ export const SmartTagInput = ({
 
   return (
     <div className="sim-input-container">
-      <label className="sim-label">{props.label}</label>
+      <label htmlFor={props.id} className="sim-label">{props.label}</label>
       <div className="flex flex-wrap gap-2 p-2 min-h-[48px] rounded-lg border-1.5 border-[var(--sim-border)] bg-[var(--sim-card)] focus-within:border-[var(--sim-accent)]">
         {value.map((tag) => (
           <span key={tag} className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--sim-accent)] text-white text-xs font-bold rounded-full">
@@ -267,6 +290,8 @@ export const SmartTagInput = ({
           </span>
         ))}
         <input
+          id={props.id}
+          name={props.name}
           type="text"
           value={inputValue}
           onChange={(e) => {
@@ -312,6 +337,8 @@ export const SmartLookup = ({
   onChange: (val: string) => void;
   options: Array<{ value: string; label: string }>;
   label: string;
+  id?: string;
+  name?: string;
   required?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -336,9 +363,12 @@ export const SmartLookup = ({
 
   return (
     <div className="sim-input-container" ref={containerRef}>
-      <label className={`sim-label ${props.required ? "sim-field-required" : ""}`}>{props.label}</label>
+      <label htmlFor={props.id} className={`sim-label ${props.required ? "sim-field-required" : ""}`}>{props.label}</label>
       <div className="relative">
-        <div
+        <button
+          id={props.id}
+          name={props.name}
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={`sim-input flex items-center justify-between cursor-pointer ${isOpen ? "border-[var(--sim-accent)]" : ""}`}
         >
@@ -346,7 +376,7 @@ export const SmartLookup = ({
             {selectedOption ? selectedOption.label : "Select..."}
           </span>
           <Search size={16} className="text-[var(--sim-ink-soft)]" />
-        </div>
+        </button>
 
         {isOpen && (
           <div className="absolute top-full left-0 w-full mt-1 bg-[var(--sim-card)] border border-[var(--sim-border)] rounded-lg shadow-2xl z-30 overflow-hidden">

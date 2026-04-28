@@ -30,4 +30,27 @@ describe("simulateNetGross", () => {
     expect(result.breakdown.net).toBeGreaterThanOrEqual(8000);
     expect(result.breakdown.gross).toBeGreaterThan(8000);
   });
+
+  it("applies capped family charge reduction after tax calculation", () => {
+    const noDependents = simulateNetGross({
+      direction: "gross_to_net",
+      amount: 10000,
+      calculationDate: "2026-02-12",
+      includeCimr: false,
+      cimrRate: 0.06,
+      familyDependentsCount: 0,
+    });
+    const cappedDependents = simulateNetGross({
+      direction: "gross_to_net",
+      amount: 10000,
+      calculationDate: "2026-02-12",
+      includeCimr: false,
+      cimrRate: 0.06,
+      familyDependentsCount: 6,
+    });
+
+    expect(cappedDependents.breakdown.familyTaxReduction).toBe(300);
+    expect(noDependents.breakdown.incomeTax - cappedDependents.breakdown.incomeTax).toBeCloseTo(300, 2);
+    expect(cappedDependents.breakdown.net - noDependents.breakdown.net).toBeCloseTo(300, 2);
+  });
 });

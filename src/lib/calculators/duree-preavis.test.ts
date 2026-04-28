@@ -23,6 +23,7 @@ describe("simulateDureePreavis", () => {
     expect(cadreResult.breakdown.requiredNoticeMonths).toBe(2);
     expect(cadreResult.breakdown.requiredNoticeDays).toBe(60);
     expect(employeResult.breakdown.requiredNoticeMonths).toBe(1);
+    expect(cadreResult.breakdown.serviceInputMode).toBe("manual");
   });
 
   it("computes CDD notice in days", () => {
@@ -36,5 +37,20 @@ describe("simulateDureePreavis", () => {
 
     expect(result.breakdown.requiredNoticeMonths).toBe(0);
     expect(result.breakdown.requiredNoticeDays).toBe(15);
+  });
+
+  it("uses hire date when both hire date and manual seniority are present", () => {
+    const result = simulateDureePreavis({
+      calculationDate: "2026-02-12",
+      contractType: "CDI",
+      workerCategory: "employe",
+      hireDate: "2020-02-12",
+      yearsOfService: 1,
+      monthsOfService: 0,
+    });
+
+    expect(result.breakdown.serviceInputMode).toBe("hire_date");
+    expect(result.breakdown.totalServiceYears).toBe(6);
+    expect(result.breakdown.requiredNoticeMonths).toBe(2);
   });
 });

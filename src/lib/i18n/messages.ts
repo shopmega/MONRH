@@ -45,6 +45,8 @@ export const MESSAGES = {
       planifierDesc: "17 outils de decision (Augmentation, Freelance, Retraite...)",
       toolsDesc: "7 outils de protection et detection de fraude.",
       documentsDesc: "Modèles de lettres et documents juridiques.",
+      yes: "Oui",
+      no: "Non",
     },
     home: {
       kicker: "Moroccan Employee Rights Platform",
@@ -669,6 +671,8 @@ export const MESSAGES = {
       planifierDesc: "17 أداة لاتخاذ القرار (الزيادة، العمل الحر، التقاعد...)",
       toolsDesc: "7 أدوات للحماية وكشف الاحتيال.",
       documentsDesc: "نماذج الرسائل والوثائق القانونية.",
+      yes: "نعم",
+      no: "لا",
     },
     home: {
       kicker: "منصة حقوق الأجراء بالمغرب",

@@ -128,7 +128,7 @@ const nextConfig: NextConfig = {
         source: "/simulateurs/recouvrement-heures-supplementaires",
         destination: "/simulate/unpaid-overtime-recovery",
       },
-      { source: "/simulateurs/:slug/result", destination: "/result/simulateurs/:slug" },
+      { source: "/simulateurs/:slug/result", destination: "/result/simulate/:slug" },
       { source: "/outils", destination: "/tools" },
       { source: "/outils/detecteur-fiche-paie", destination: "/tools/payslip-detector" },
       { source: "/outils/alerte-retard-salaire", destination: "/tools/salary-delay-alert" },

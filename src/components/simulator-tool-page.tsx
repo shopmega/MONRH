@@ -49,6 +49,7 @@ export type SimulatorField = {
   step?: number;
   options?: FieldOption[];
   subtitle?: string;
+  required?: boolean;
   visibleIf?: (values: Record<string, unknown>) => boolean;
 };
 
@@ -100,6 +101,7 @@ function getCurrentDateISO() {
 }
 
 function emptyValueForField(field: SimulatorField): ValuesState[string] {
+  if (field.defaultValue !== undefined) return field.defaultValue;
   if (field.type === "checkbox") return false;
   if (field.type === "tags") return [];
   return "";
@@ -143,7 +145,7 @@ function toPayload(values: ValuesState, fields: SimulatorField[]) {
     }
     if (field.type === "checkbox") {
       payload[field.key] = Boolean(value);
-    } else if (field.type === "number") {
+    } else if (field.type === "number" || field.type === "amount" || field.type === "stepper") {
       payload[field.key] = Number(value);
     } else {
       payload[field.key] = value;
@@ -185,10 +187,11 @@ function buildFieldErrors(fields: SimulatorField[], values: ValuesState): Record
     if (field.type === "checkbox") continue;
 
     const value = values[field.key];
+    const required = field.required !== false;
 
     if (field.type === "tags") {
       const tags = Array.isArray(value) ? value : [];
-      if (tags.length === 0) {
+      if (required && tags.length === 0) {
         errors[field.key] = "Champ requis";
       }
       continue;
@@ -196,7 +199,9 @@ function buildFieldErrors(fields: SimulatorField[], values: ValuesState): Record
 
     const rawValue = String(value ?? "").trim();
     if (!rawValue) {
-      errors[field.key] = "Champ requis";
+      if (required) {
+        errors[field.key] = "Champ requis";
+      }
       continue;
     }
 
@@ -333,6 +338,13 @@ export function SimulatorToolPage({
     const allEntries = parseHistoryEntries(window.localStorage.getItem(HISTORY_STORAGE_KEY));
     setHistoryEntries(allEntries.filter((entry) => entry.calculatorType === calculatorType).slice(0, 5));
   }, [calculatorType]);
+
+  useEffect(() => {
+    setValues(createInitialState(fields, searchParams));
+    setFieldErrors({});
+    setMessage(undefined);
+    setMessageTone("info");
+  }, [calculatorType, fields, searchParams]);
 
   useEffect(() => {
     setValues((current) => {
@@ -480,9 +492,11 @@ export function SimulatorToolPage({
       const data = (await response.json()) as {
         ok: boolean;
         result?: GenericSimulationResult;
+        message?: string;
+        error?: string;
       };
       if (!data.ok || !data.result) {
-        throw new Error("simulation-failed");
+        throw new Error(data.message || data.error || "simulation-failed");
       }
 
       writeSimulationResultSnapshot({
@@ -546,9 +560,10 @@ export function SimulatorToolPage({
 
       setMessageTone("success");
       setMessage(t("simulator.success"));
-    } catch {
+    } catch (err) {
       setMessageTone("error");
-      setMessage(t("simulator.failed"));
+      const detail = err instanceof Error && err.message !== "simulation-failed" ? ` ${err.message}` : "";
+      setMessage(`${t("simulator.failed")}${detail}`);
     } finally {
       setLoading(false);
     }
@@ -764,7 +779,7 @@ export function SimulatorToolPage({
           },
           publisher: {
             "@type": "Organization",
-            name: "MON RH",
+            name: "TON RH",
           },
         }}
       />
@@ -786,6 +801,7 @@ function FieldRenderer({
   onChange: (value: FormValue) => void;
 }) {
   const label = localizeFieldLabel(field.key, field.label, language);
+  const fieldId = `sim-${field.key}`;
 
   // Heuristics for smarter component selection if types are generic
   let effectiveType = field.type;
@@ -803,22 +819,26 @@ function FieldRenderer({
     case "date":
       return (
         <SmartDate
+          id={fieldId}
+          name={field.key}
           label={label}
           value={String(value || "")}
           onChange={onChange}
           error={error}
-          required
+          required={field.required !== false}
         />
       );
 
     case "amount":
       return (
         <SmartAmount
+          id={fieldId}
+          name={field.key}
           label={label}
           value={String(value || "")}
           onChange={onChange}
           error={error}
-          required
+          required={field.required !== false}
           hint={field.key.toLowerCase().includes("salaire") ? "SMIG 2025: 4 000 DH" : undefined}
         />
       );
@@ -832,6 +852,8 @@ function FieldRenderer({
       }
       return (
         <SmartToggle
+          id={fieldId}
+          name={field.key}
           label={label}
           value={Boolean(value)}
           onChange={onChange}
@@ -843,7 +865,9 @@ function FieldRenderer({
     case "stepper":
       return (
         <div className="sim-input-container">
-          <SmartStepper
+            <SmartStepper
+            id={fieldId}
+            name={field.key}
             label={label}
             value={Number(value || 0)}
             onChange={onChange}
@@ -859,6 +883,8 @@ function FieldRenderer({
         return (
           <div className="sim-input-container">
             <SmartRadioCards
+              id={fieldId}
+              name={field.key}
               label={label}
               value={String(value || "")}
               onChange={onChange}
@@ -874,6 +900,8 @@ function FieldRenderer({
       return (
         <div className="sim-input-container">
           <SmartLookup
+            id={fieldId}
+            name={field.key}
             label={label}
             value={String(value || "")}
             onChange={onChange}
@@ -890,6 +918,8 @@ function FieldRenderer({
     case "tags":
       return (
         <SmartTagInput
+          id={fieldId}
+          name={field.key}
           label={label}
           value={Array.isArray(value) ? value : []}
           onChange={onChange}
@@ -899,14 +929,16 @@ function FieldRenderer({
     case "text":
       return (
         <div className="sim-input-container">
-          <label className="sim-label sim-field-required">{label}</label>
+          <label htmlFor={fieldId} className="sim-label sim-field-required">{label}</label>
           <div className="sim-input-wrapper">
             <input
+              id={fieldId}
+              name={field.key}
               type="text"
               value={String(value || "")}
               onChange={(e) => onChange(e.target.value)}
               className={`sim-input ${error ? "sim-input-error" : ""}`}
-              required
+              required={field.required !== false}
               placeholder={label}
             />
           </div>
@@ -917,14 +949,16 @@ function FieldRenderer({
     default:
       return (
         <div className="sim-input-container">
-          <label className="sim-label sim-field-required">{label}</label>
+          <label htmlFor={fieldId} className="sim-label sim-field-required">{label}</label>
           <div className="sim-input-wrapper">
             <input
+              id={fieldId}
+              name={field.key}
               type={effectiveType}
               value={String(value || "")}
               onChange={(e) => onChange(e.target.value)}
               className={`sim-input ${error ? "sim-input-error" : ""}`}
-              required
+              required={field.required !== false}
               placeholder={label}
             />
           </div>

@@ -21,6 +21,7 @@ export default function EmployerTotalCostPage() {
           key: "companySize",
           label: "Taille entreprise",
           type: "select",
+          defaultValue: "large",
           options: [
             { label: "<= 20 salaries", value: "small" },
             { label: "> 20 salaries", value: "large" },
@@ -30,6 +31,7 @@ export default function EmployerTotalCostPage() {
           key: "sectorRisk",
           label: "Risque secteur (AT/MP)",
           type: "select",
+          defaultValue: "medium",
           options: [
             { label: "Faible", value: "low" },
             { label: "Moyen", value: "medium" },
@@ -37,9 +39,9 @@ export default function EmployerTotalCostPage() {
             { label: "Tres eleve", value: "very_high" },
           ],
         },
-        { key: "additionalBenefitsMad", label: "Avantages complementaires (MAD)", type: "number", min: 0, step: 0.01 },
-        { key: "months", label: "Nombre de mois", type: "number", min: 1, max: 14, step: 1 },
-        { key: "include13thMonth", label: "Inclure 13e mois", type: "checkbox" },
+        { key: "additionalBenefitsMad", label: "Avantages complementaires (MAD)", type: "number", min: 0, step: 0.01, defaultValue: 0 },
+        { key: "months", label: "Nombre de mois", type: "number", min: 1, max: 14, step: 1, defaultValue: 12 },
+        { key: "include13thMonth", label: "Inclure 13e mois", type: "checkbox", defaultValue: false },
       ]}
       breakdownLabels={{
         grossSalary: "Brut",

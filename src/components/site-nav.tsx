@@ -176,8 +176,8 @@ export function SiteNav() {
 
   return (
     <>
-      <div className="fixed top-0 z-50 w-full border-b border-[var(--line)] bg-[var(--background)]/80 backdrop-blur-xl transition-all duration-300">
-        <div className="mx-auto w-full max-w-7xl px-6">
+      <div className="fixed top-0 z-50 w-full border-b border-[var(--line)] bg-[var(--background)]/80 backdrop-blur-xl transition-all duration-300 overflow-x-hidden">
+        <div className="mx-auto w-full max-w-7xl px-6 overflow-x-hidden">
           <div className="flex h-20 items-center justify-between">
             <Link href="/" className="flex items-center space-x-3 group transition-all">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--juris-primary)] shadow-lg shadow-juris-primary/20 transition-transform group-hover:rotate-6">
@@ -185,7 +185,7 @@ export function SiteNav() {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-black text-[var(--juris-on-surface)] font-display tracking-tight leading-none group-hover:text-[var(--juris-primary)] transition-colors">
-                  MONRH
+                  TON RH
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--juris-on-surface-variant)] opacity-50">
                   Jurisconsult
@@ -265,7 +265,7 @@ function DesktopNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden lg:flex items-center space-x-1">
+    <nav className="hidden lg:flex items-center space-x-1 overflow-x-hidden">
       {NAV_ITEMS.map((item) => (
         <Link
           key={item.key}

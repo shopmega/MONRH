@@ -19,6 +19,8 @@ export type SalaryRules = {
   amoEmployerRate: number;
   professionalExpenseRate: number;
   professionalExpenseCap: number;
+  familyChargeReductionAnnual: number;
+  familyChargeReductionCapAnnual: number;
   taxBracketsMonthly: TaxBracket[];
   /** Formation professionnelle rate for employers with ≤ 20 employees (1%) */
   formationProRateSmall: number;
@@ -98,6 +100,8 @@ export type SocialProtectionRules = {
   /** Minimum CNSS paid months in last 10 months to be eligible for maternity compensation */
   maternityMinCnssMonths: number;
   pensionMinContributionDays: number;
+  pensionOpeningContributionDays: number;
+  pensionFullContributionDays: number;
   pensionAccrualStepDays: number;
   pensionBaseReplacementRate: number;
   pensionIncrementPerStep: number;
@@ -133,6 +137,8 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     amoEmployerRate: 0.0411,
     professionalExpenseRate: 0.2,
     professionalExpenseCap: 2500,
+    familyChargeReductionAnnual: 500,
+    familyChargeReductionCapAnnual: 3000,
     formationProRateSmall: 0.01,
     formationProRateLarge: 0.016,
     taxBracketsMonthly: [
@@ -156,6 +162,8 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     amoEmployerRate: 0.0411,
     professionalExpenseRate: 0.2,
     professionalExpenseCap: 3333.33,
+    familyChargeReductionAnnual: 600,
+    familyChargeReductionCapAnnual: 3600,
     formationProRateSmall: 0.01,
     formationProRateLarge: 0.016,
     taxBracketsMonthly: [
@@ -311,6 +319,8 @@ export const DEFAULT_SOCIAL_PROTECTION_RULES: SocialProtectionRules[] = [
     maternityLegalLeaveWeeks: 14,
     maternityMinCnssMonths: 3,
     pensionMinContributionDays: 1320,
+    pensionOpeningContributionDays: 1320,
+    pensionFullContributionDays: 3240,
     pensionAccrualStepDays: 216,
     pensionBaseReplacementRate: 0.5,
     pensionIncrementPerStep: 0.01,
@@ -335,6 +345,8 @@ export const DEFAULT_SOCIAL_PROTECTION_RULES: SocialProtectionRules[] = [
     maternityLegalLeaveWeeks: 14,
     maternityMinCnssMonths: 3,
     pensionMinContributionDays: 1320,
+    pensionOpeningContributionDays: 1320,
+    pensionFullContributionDays: 3240,
     pensionAccrualStepDays: 216,
     pensionBaseReplacementRate: 0.5,
     pensionIncrementPerStep: 0.01,

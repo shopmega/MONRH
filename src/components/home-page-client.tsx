@@ -115,9 +115,9 @@ export function HomePageClient({
       : "Votre autorité en droit social et gestion RH.";
 
   return (
-    <main className="min-h-screen bg-[var(--background)] pt-20 text-[var(--foreground)]">
+    <main className="min-h-screen bg-[var(--background)] pt-20 text-[var(--foreground)] overflow-x-hidden">
       <section className="border-b border-[var(--line)] bg-[var(--surface)]">
-        <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8 lg:py-16 xl:gap-16">
+        <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8 lg:py-16 xl:gap-16 overflow-x-hidden">
           <div className="flex min-w-0 flex-col justify-center">
             <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">{t("home.kicker")}</p>
             <h1 className="max-w-4xl text-4xl font-black leading-[1.05] tracking-normal text-[var(--heading)] sm:text-5xl lg:text-6xl">
@@ -125,7 +125,7 @@ export function HomePageClient({
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--ink-soft)] lg:text-lg">{t("home.description")}</p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row flex-wrap">
               <Link href="/simulate" className="inline-flex min-h-12 items-center justify-center rounded-lg bg-[var(--accent)] px-6 text-sm font-bold text-[var(--juris-on-primary)] shadow-sm transition hover:bg-[var(--accent-dark)]">
                 {language === "ar" ? "محاكاة حقوقي" : t("home.ctaSimulate")}
               </Link>
@@ -134,7 +134,7 @@ export function HomePageClient({
               </Link>
             </div>
 
-            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-4">
               {[
                 { count: "20+", label: t("home.statsSimulations") },
                 { count: "17", label: t("home.statsPlanifier") },
@@ -176,7 +176,7 @@ export function HomePageClient({
         </div>
       </section>
 
-      <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8 lg:py-12">
+      <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8 lg:py-12 overflow-x-hidden">
         <div className="min-w-0 space-y-8">
           {spotlight ? (
             <section>
@@ -210,7 +210,7 @@ export function HomePageClient({
           {categories.length > 0 ? (
             <section>
               <SectionHeader title={t("home.categoriesTitle")} href="/articles" action={t("common.all")} />
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
                 {categories.slice(0, 8).map((category) => (
                   <Link key={category.slug} href={`/articles?category=${category.slug}`} className="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:border-[var(--accent)] hover:shadow-sm">
                     <p className="text-base font-extrabold leading-snug text-[var(--heading)]">
@@ -226,7 +226,7 @@ export function HomePageClient({
           {spotlight ? (
             <section>
               <SectionHeader title={language === "ar" ? "أحدث المقالات" : "Actualités et guides"} href="/articles" action={t("common.all")} />
-              <Link href={spotlight.href} className="group grid overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-sm md:grid-cols-[280px_minmax(0,1fr)]">
+              <Link href={spotlight.href} className="group grid overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-sm sm:grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] lg:grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)]">
                 <div className="relative aspect-[16/10] bg-[var(--surface-muted)] md:aspect-auto">
                   <SafeImage src={spotlight.coverImageUrl || spotlight.thumbnailUrl} alt={spotlight.title} fill className="object-cover" unoptimized />
                   <div className="absolute bottom-3 left-3">
@@ -248,7 +248,7 @@ export function HomePageClient({
           ) : null}
         </div>
 
-        <aside className="space-y-8 lg:sticky lg:top-28 lg:self-start">
+        <aside className="space-y-8 lg:sticky lg:top-28 lg:self-start w-full">
           {latestArticles.length > 0 ? (
             <section>
               <SectionHeader title={language === "ar" ? "À lire ensuite" : "À lire ensuite"} />

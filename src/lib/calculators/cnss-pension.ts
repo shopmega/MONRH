@@ -7,6 +7,7 @@ export const cnssPensionInputSchema = z.object({
   /** Average salary for the last 5 years (reference base) */
   averageSalary: z.number().positive(),
   contributionDays: z.number().min(1).max(20000),
+  birthDate: z.string().date().optional(),
   retirementAge: z.number().min(50).max(70).default(60),
   /** Optional annual salary growth rate to project future pension basis */
   salaryGrowthRatePercent: z.number().min(0).max(20).default(0),
@@ -18,7 +19,7 @@ export const cnssPensionInputSchema = z.object({
   cimrMonthlyEstimate: z.number().min(0).default(0),
 });
 
-export type CnssPensionInput = z.infer<typeof cnssPensionInputSchema>;
+export type CnssPensionInput = z.input<typeof cnssPensionInputSchema>;
 
 export type CnssPensionResult = {
   versionId: string;
@@ -26,6 +27,9 @@ export type CnssPensionResult = {
   breakdown: {
     cnssEligible: boolean;
     projectedContributionDays: number;
+    openingContributionDaysRequired: number;
+    fullFormulaContributionDaysRequired: number;
+    projectedRetirementAge: number;
     projectedAverageSalary: number;
     replacementRatePercent: number;
     estimatedMonthlyPensionCnss: number;
@@ -40,36 +44,44 @@ export type CnssPensionResult = {
 export function simulateCnssPension(rawInput: CnssPensionInput): CnssPensionResult {
   const input = cnssPensionInputSchema.parse(rawInput);
   const rules = getSocialProtectionRulesByDate(input.calculationDate);
+  const openingContributionDays = rules.pensionOpeningContributionDays ?? rules.pensionMinContributionDays;
+  const fullFormulaContributionDays = rules.pensionFullContributionDays ?? rules.pensionMinContributionDays;
 
-  // Project salary forward with growth rate
   const yearsGrowth = input.additionalContributionYears;
   const projectedAverageSalary =
     yearsGrowth > 0 && input.salaryGrowthRatePercent > 0
       ? roundMAD(input.averageSalary * Math.pow(1 + input.salaryGrowthRatePercent / 100, yearsGrowth))
       : input.averageSalary;
 
-  // Project contribution days with additional working years (260 working days/year)
   const projectedContributionDays = Math.min(
     input.contributionDays + input.additionalContributionYears * 260,
     20000,
   );
 
-  const cnssEligible = projectedContributionDays >= rules.pensionMinContributionDays;
+  const birthDateAge = input.birthDate
+    ? new Date(input.calculationDate).getFullYear() - new Date(input.birthDate).getFullYear()
+    : null;
+  const projectedRetirementAge = birthDateAge !== null
+    ? Math.max(0, birthDateAge + input.additionalContributionYears)
+    : input.retirementAge;
+
+  const cnssEligible = projectedContributionDays >= openingContributionDays;
   const steps = cnssEligible
-    ? Math.floor((projectedContributionDays - rules.pensionMinContributionDays) / rules.pensionAccrualStepDays)
+    ? Math.floor(Math.max(projectedContributionDays - fullFormulaContributionDays, 0) / rules.pensionAccrualStepDays)
     : 0;
 
-  const replacementRate = cnssEligible
-    ? Math.min(
-      rules.pensionBaseReplacementRate + steps * rules.pensionIncrementPerStep,
-      rules.pensionMaxReplacementRate,
-    )
-    : 0;
+  const replacementRate = !cnssEligible
+    ? 0
+    : projectedContributionDays < fullFormulaContributionDays
+      ? rules.pensionBaseReplacementRate * (projectedContributionDays / fullFormulaContributionDays)
+      : Math.min(
+        rules.pensionBaseReplacementRate + steps * rules.pensionIncrementPerStep,
+        rules.pensionMaxReplacementRate,
+      );
 
   const referenceSalary = Math.min(projectedAverageSalary, rules.pensionReferenceSalaryCeiling);
-
   const ageFactor =
-    input.retirementAge >= rules.pensionNormalRetirementAge
+    projectedRetirementAge >= rules.pensionNormalRetirementAge
       ? 1
       : rules.pensionEarlyRetirementFactor;
 
@@ -88,6 +100,9 @@ export function simulateCnssPension(rawInput: CnssPensionInput): CnssPensionResu
     breakdown: {
       cnssEligible,
       projectedContributionDays,
+      openingContributionDaysRequired: openingContributionDays,
+      fullFormulaContributionDaysRequired: fullFormulaContributionDays,
+      projectedRetirementAge,
       projectedAverageSalary,
       replacementRatePercent: roundMAD(replacementRate * 100),
       estimatedMonthlyPensionCnss,
@@ -99,28 +114,30 @@ export function simulateCnssPension(rawInput: CnssPensionInput): CnssPensionResu
     explanation: {
       summary: cnssEligible
         ? `Pension CNSS mensuelle estimee: ${estimatedMonthlyPensionCnss} MAD${input.hasCimr ? ` + CIMR: ${roundMAD(input.cimrMonthlyEstimate)} MAD = ${combinedMonthlyEstimate} MAD combinee.` : "."}`
-        : `Droits CNSS non ouverts: ${projectedContributionDays} jours cotises sur ${rules.pensionMinContributionDays} requis.`,
+        : `Droits CNSS non ouverts: ${projectedContributionDays} jours cotises sur ${openingContributionDays} requis.`,
       assumptions: [
-        `Seuil minimum: ${rules.pensionMinContributionDays} jours cotises (acquis: ${projectedContributionDays}).`,
+        `Seuil d'ouverture: ${openingContributionDays} jours cotises (acquis: ${projectedContributionDays}).`,
+        `Base formule pleine: ${fullFormulaContributionDays} jours cotises.`,
+        `Age projete retenu: ${projectedRetirementAge} ans (age normal CNSS: ${rules.pensionNormalRetirementAge} ans).`,
         `Plafond salaire de reference: ${rules.pensionReferenceSalaryCeiling} MAD/mois.`,
         `Taux de remplacement: base ${roundMAD(rules.pensionBaseReplacementRate * 100)}% + ${roundMAD(rules.pensionIncrementPerStep * 100)}% par tranche de ${rules.pensionAccrualStepDays} jours (max ${roundMAD(rules.pensionMaxReplacementRate * 100)}%).`,
         input.additionalContributionYears > 0
           ? `Projection sur ${input.additionalContributionYears} annees supplementaires a ${input.salaryGrowthRatePercent}%/an.`
           : "Simulation sur la base de cotisations actuelles.",
-        input.retirementAge < rules.pensionNormalRetirementAge
-          ? `Depart anticipe (${input.retirementAge} ans < ${rules.pensionNormalRetirementAge} ans): coefficient reduction ${rules.pensionEarlyRetirementFactor}.`
+        projectedRetirementAge < rules.pensionNormalRetirementAge
+          ? `Depart anticipe (${projectedRetirementAge} ans < ${rules.pensionNormalRetirementAge} ans): coefficient reduction ${rules.pensionEarlyRetirementFactor}.`
           : "Depart a l'age normal: aucune reduction appliquee.",
       ],
       formulas: [
-        "Taux remplacement = base + increments par tranche (plafonne).",
+        "Taux remplacement = prorata avant la base pleine, puis base + increments par tranche (plafonne).",
         "Pension CNSS = min(salaire, plafond) x taux remplacement x facteur age.",
         "Pension combinee = CNSS + CIMR (si applicable).",
         "Taux remplacement global = pension combinee / salaire projete.",
       ],
       warnings: [
         !cnssEligible
-          ? `Jours insuffisants: ${projectedContributionDays}/${rules.pensionMinContributionDays} — aucun droit ouvert.`
-          : `Pour atteindre le taux maximum (${roundMAD(rules.pensionMaxReplacementRate * 100)}%), il faut: ${rules.pensionMinContributionDays + Math.ceil((rules.pensionMaxReplacementRate - rules.pensionBaseReplacementRate) / rules.pensionIncrementPerStep) * rules.pensionAccrualStepDays} jours cotises.`,
+          ? `Jours insuffisants: ${projectedContributionDays}/${openingContributionDays} - aucun droit ouvert.`
+          : `Pour atteindre le taux maximum (${roundMAD(rules.pensionMaxReplacementRate * 100)}%), il faut: ${fullFormulaContributionDays + Math.ceil((rules.pensionMaxReplacementRate - rules.pensionBaseReplacementRate) / rules.pensionIncrementPerStep) * rules.pensionAccrualStepDays} jours cotises.`,
         "Le montant reel depend du releve de carriere CNSS certifie.",
         "Ce simulateur reste indicatif et ne remplace pas un releve officiel CNSS.",
       ],

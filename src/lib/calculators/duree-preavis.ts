@@ -25,6 +25,7 @@ export type DureePreavisResult = {
     contractType: "CDI" | "CDD";
     workerCategory: "cadre" | "employe" | "ouvrier";
     hireDate?: string;
+    serviceInputMode: "hire_date" | "manual";
     totalServiceYears: number;
     requiredNoticeMonths: number;
     requiredNoticeDays: number;
@@ -48,6 +49,7 @@ export function simulateDureePreavis(rawInput: DureePreavisInput): DureePreavisR
   const rules = getTerminationRulesByDate(input.calculationDate);
 
   const totalServiceYears = serviceYearsFromPeriod(input);
+  const serviceInputMode = input.hireDate ? "hire_date" : "manual";
   const requiredNoticeMonths =
     input.contractType === "CDI"
       ? cdiNoticeMonths(totalServiceYears, rules, input.workerCategory)
@@ -64,6 +66,7 @@ export function simulateDureePreavis(rawInput: DureePreavisInput): DureePreavisR
       contractType: input.contractType,
       workerCategory: input.workerCategory,
       ...(input.hireDate ? { hireDate: input.hireDate } : {}),
+      serviceInputMode,
       totalServiceYears: roundMAD(totalServiceYears),
       requiredNoticeMonths,
       requiredNoticeDays,
@@ -79,6 +82,9 @@ export function simulateDureePreavis(rawInput: DureePreavisInput): DureePreavisR
         input.contractType === "CDI"
           ? `Anciennete retenue: ${roundMAD(totalServiceYears)} ans.`
           : "Preavis CDD applique en jours selon categorie.",
+        serviceInputMode === "hire_date"
+          ? "Anciennete calculee depuis la date d'embauche."
+          : "Anciennete saisie manuellement en annees et mois.",
       ],
       formulas: [
         "CDI: preavis par tranche d'anciennete et categorie (lt1, 1-5, 5+ ans).",
