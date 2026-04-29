@@ -140,7 +140,15 @@ function splitBulletTrail(text: string): { lead: string; items: string[] } {
   };
 }
 
-export function renderArticleContentBlocks(blocks: string[], keyPrefix: string): ReactNode[] {
+type RenderArticleContentOptions = {
+  headingId?: (heading: string, blockIndex: number) => string;
+};
+
+export function renderArticleContentBlocks(
+  blocks: string[],
+  keyPrefix: string,
+  options: RenderArticleContentOptions = {},
+): ReactNode[] {
   const rendered: ReactNode[] = [];
 
   blocks.forEach((rawBlock, blockIndex) => {
@@ -160,15 +168,16 @@ export function renderArticleContentBlocks(blocks: string[], keyPrefix: string):
       const headingLevel = headingMatch[1].length;
       const headingContent = headingMatch[2].trim();
       const { lead, items } = splitBulletTrail(headingContent);
+      const id = options.headingId?.(lead, blockIndex);
       if (headingLevel >= 3) {
         rendered.push(
-          <h3 key={`${keyPrefix}-h3-${blockIndex}`} className="text-lg font-semibold leading-tight">
+          <h3 key={`${keyPrefix}-h3-${blockIndex}`} id={id} className="scroll-mt-28 text-lg font-semibold leading-tight">
             {renderInline(lead, `${keyPrefix}-h3-inline-${blockIndex}`)}
           </h3>,
         );
       } else {
         rendered.push(
-          <h2 key={`${keyPrefix}-h2-${blockIndex}`} className="text-xl font-semibold leading-tight">
+          <h2 key={`${keyPrefix}-h2-${blockIndex}`} id={id} className="scroll-mt-28 text-xl font-semibold leading-tight">
             {renderInline(lead, `${keyPrefix}-h2-inline-${blockIndex}`)}
           </h2>,
         );

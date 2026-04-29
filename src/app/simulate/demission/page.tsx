@@ -24,7 +24,7 @@ export default function DemissionPage() {
           options: [
             { label: "Ouvrier", value: "ouvrier" },
             { label: "Employe", value: "employe" },
-            { label: "Cadre / Technicien", value: "cadre" },
+            { label: "Cadre", value: "cadre" },
           ],
         },
         {

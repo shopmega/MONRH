@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { PartnerAdSection } from "@/components/partner-ad-section";
 import { CompanyContextCard } from "@/components/company-context-card";
 import { CompanyTrustSummary } from "@/components/company-trust-summary";
@@ -290,7 +290,20 @@ function buildSnapshotFromStoredItem(
   };
 }
 
-export function SimulationResultPage({ slug, expectedPath: providedExpectedPath }: { slug: string; expectedPath?: string }) {
+type SimulationResultPageProps = {
+  slug: string;
+  expectedPath?: string;
+};
+
+export function SimulationResultPage(props: SimulationResultPageProps) {
+  return (
+    <Suspense fallback={null}>
+      <SimulationResultPageContent {...props} />
+    </Suspense>
+  );
+}
+
+function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath }: SimulationResultPageProps) {
   const { language, t, locale } = useLanguage();
   const searchParams = useSearchParams();
   const expectedPath = providedExpectedPath ?? calculatorTypeToPath(slug) ?? `/simulate/${slug}`;

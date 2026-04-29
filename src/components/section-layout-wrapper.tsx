@@ -36,15 +36,17 @@ export function SectionLayoutWrapper({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Check if we're on the index page (no sidebar needed)
-  const isIndexPage = pathname === indexPath || pathname === indexPath + "/";
+  function normalizeSectionPath(path: string) {
+    return path
+      .replace(/^\/simulateurs(?=\/|$)/, "/simulate")
+      .replace(/^\/outils(?=\/|$)/, "/tools");
+  }
 
-  // Handle /simulateurs -> /simulate rewrites for comparison
-  const normalizedIndexPath = indexPath.replace(/^\/simulateurs\//, "/simulate/");
-  const normalizedPathname = pathname.replace(/^\/simulateurs\//, "/simulate/");
+  const normalizedIndexPath = normalizeSectionPath(indexPath);
+  const normalizedPathname = normalizeSectionPath(pathname);
   const isIndexPageNormalized = normalizedPathname === normalizedIndexPath || normalizedPathname === normalizedIndexPath + "/";
 
-  const shouldShowSidebar = !isIndexPage && !isIndexPageNormalized;
+  const shouldShowSidebar = !isIndexPageNormalized;
 
   return (
     <div className="relative">
@@ -52,10 +54,10 @@ export function SectionLayoutWrapper({
       {shouldShowSidebar && (
         <div className="lg:hidden sticky top-0 z-20 bg-gradient-to-r from-[var(--surface-strong)] to-[var(--surface-strong)]/95 backdrop-blur-md border-b border-[var(--line)] px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-[var(--heading)] flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-[var(--heading)] flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-[var(--accent)]"></div>
               {sidebarProps.title.fr}
-            </h1>
+            </h2>
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="rounded-lg p-2 text-[var(--ink-soft)] hover:bg-[var(--surface-strong)] hover:text-[var(--foreground)] transition-all duration-200 hover:scale-105"
@@ -97,9 +99,9 @@ export function SectionLayoutWrapper({
         )}
 
         {/* Main content */}
-        <main className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0">
           {children}
-        </main>
+        </div>
       </div>
     </div>
   );

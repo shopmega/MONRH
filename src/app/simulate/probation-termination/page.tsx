@@ -21,7 +21,7 @@ export default function ProbationTerminationPage() {
           key: "workerCategory", label: "Categorie professionnelle", type: "select", options: [
             { value: "ouvrier", label: "Ouvrier" },
             { value: "employe", label: "Employe" },
-            { value: "cadre", label: "Cadre / Technicien" },
+            { value: "cadre", label: "Cadre" },
           ]
         },
         { key: "workedDays", label: "Jours travailles pendant l'essai", type: "number", min: 1, step: 1 },

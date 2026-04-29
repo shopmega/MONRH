@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useLanguage } from '@/components/language-provider';
 import { useUserJourney } from '@/lib/context/user-journey-context';
 import { detectUserScenario, getRecommendedDocuments, getNextSteps } from '@/lib/context/scenario-detection';
@@ -272,7 +272,15 @@ interface EnhancedSimulatorToolPageProps {
   units?: Record<string, string>;
 }
 
-export function EnhancedSimulatorToolPage({
+export function EnhancedSimulatorToolPage(props: EnhancedSimulatorToolPageProps) {
+  return (
+    <Suspense fallback={null}>
+      <EnhancedSimulatorToolPageContent {...props} />
+    </Suspense>
+  );
+}
+
+function EnhancedSimulatorToolPageContent({
   title,
   description,
   apiPath,

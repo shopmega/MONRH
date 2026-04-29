@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { useTheme } from "@/components/theme-provider";
+import { simulatorSidebarGroups } from "@/lib/content/simulators-sidebar";
+import { protectionToolsSidebarItems } from "@/lib/content/tools-sidebar";
 
 type NavKey = "home" | "salaire" | "carriere" | "depart" | "bibliotheque" | "modeles" | "account";
 
@@ -70,9 +72,35 @@ const ARABIC_NAV_LABELS: Record<NavKey, string> = {
   account: "Mon Compte",
 };
 
+const MOBILE_NAV_SECTIONS = [
+  {
+    key: "simulateurs",
+    href: "/simulateurs",
+    icon: "calculator",
+    label: { fr: "Simulateurs", ar: "Simulateurs" },
+    groups: simulatorSidebarGroups,
+  },
+  {
+    key: "outils",
+    href: "/outils",
+    icon: "shield",
+    label: { fr: "Outils", ar: "Outils" },
+    groups: [{ title: { fr: "Protection", ar: "Protection" }, items: protectionToolsSidebarItems }],
+  },
+] as const;
+
+function normalizePublicPath(path: string): string {
+  return path
+    .replace(/^\/simulateurs(?=\/|$)/, "/simulate")
+    .replace(/^\/outils(?=\/|$)/, "/tools");
+}
+
 function isActive(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
-  return pathname.startsWith(href);
+  const normalizedPathname = normalizePublicPath(pathname);
+  const normalizedHref = normalizePublicPath(href);
+
+  if (normalizedHref === "/") return normalizedPathname === "/";
+  return normalizedPathname === normalizedHref || normalizedPathname.startsWith(`${normalizedHref}/`);
 }
 
 function BrandMark() {
@@ -142,6 +170,24 @@ const CustomIcon = ({ icon, className }: { icon: string; className: string }) =>
       <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
+      </svg>
+    ),
+    calculator: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <rect x="4" y="3" width="16" height="18" rx="2" />
+        <line x1="8" y1="7" x2="16" y2="7" />
+        <line x1="8" y1="11" x2="9" y2="11" />
+        <line x1="12" y1="11" x2="13" y2="11" />
+        <line x1="16" y1="11" x2="17" y2="11" />
+        <line x1="8" y1="15" x2="9" y2="15" />
+        <line x1="12" y1="15" x2="13" y2="15" />
+        <line x1="16" y1="15" x2="17" y2="15" />
+      </svg>
+    ),
+    shield: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <path d="M9 12l2 2 4-4" />
       </svg>
     ),
   };
@@ -251,6 +297,66 @@ export function SiteNav() {
                     {language === "ar" ? ARABIC_NAV_LABELS[item.key] : item.label.fr}
                   </span>
                 </Link>
+              ))}
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {MOBILE_NAV_SECTIONS.map((section) => (
+                <details
+                  key={section.key}
+                  className="rounded-[1.5rem] bg-[var(--juris-surface-low)] text-[var(--juris-on-surface-variant)]"
+                  open={isActive(pathname, section.href)}
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4">
+                    <span className="flex min-w-0 items-center gap-3">
+                      <CustomIcon icon={section.icon} className="h-5 w-5 shrink-0" />
+                      <span className="text-xs font-bold uppercase tracking-widest">
+                        {section.label[language as "fr" | "ar"]}
+                      </span>
+                    </span>
+                    <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
+                    </svg>
+                  </summary>
+                  <div className="border-t border-[var(--line)] px-4 pb-4">
+                    <Link
+                      href={section.href}
+                      onClick={closeMenu}
+                      className={`mt-3 block rounded-xl px-3 py-2 text-sm font-semibold ${
+                        isActive(pathname, section.href)
+                          ? "bg-[var(--juris-primary)] text-white"
+                          : "bg-[var(--surface)] text-[var(--foreground)]"
+                      }`}
+                    >
+                      {language === "ar" ? "Tout voir" : "Tout voir"}
+                    </Link>
+                    <div className="mt-4 space-y-4">
+                      {section.groups.map((group) => (
+                        <div key={group.title.fr} className="space-y-2">
+                          <p className="px-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">
+                            {group.title[language as "fr" | "ar"]}
+                          </p>
+                          <div className="grid gap-1">
+                            {group.items.map((item) => (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={closeMenu}
+                                className={`rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
+                                  isActive(pathname, item.href)
+                                    ? "bg-[var(--juris-primary)] text-white"
+                                    : "text-[var(--foreground)] hover:bg-[var(--surface)]"
+                                }`}
+                              >
+                                {item.title[language as "fr" | "ar"]}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </details>
               ))}
             </div>
           </div>

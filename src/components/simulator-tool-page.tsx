@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { PartnerAdSection } from "@/components/partner-ad-section";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
@@ -128,6 +128,16 @@ function createInitialState(fields: SimulatorField[], params?: SearchParamsLike)
     state[field.key] = typeof passedValue === "string" ? parseFieldValue(field, passedValue) : emptyValueForField(field);
   }
   return state;
+}
+
+function createTouchedState(fields: SimulatorField[], params?: SearchParamsLike): Set<string> {
+  const touched = new Set<string>();
+  for (const field of fields) {
+    if (typeof params?.get(field.key) === "string") {
+      touched.add(field.key);
+    }
+  }
+  return touched;
 }
 
 function toPayload(values: ValuesState, fields: SimulatorField[]) {
@@ -293,7 +303,25 @@ function formatPreviewValue(
   return String(value ?? "");
 }
 
-export function SimulatorToolPage({
+function isFieldMeaningfullyFilled(field: SimulatorField, value: ValuesState[string], touched: boolean) {
+  const initialValue = emptyValueForField(field);
+  const differsFromInitial = !isSameFormValue(value, initialValue);
+  if (!touched && !differsFromInitial) return false;
+
+  if (field.type === "checkbox") return touched || differsFromInitial;
+  if (field.type === "tags") return Array.isArray(value) && value.length > 0;
+  return String(value ?? "").trim().length > 0;
+}
+
+export function SimulatorToolPage(props: SimulatorToolPageProps) {
+  return (
+    <Suspense fallback={null}>
+      <SimulatorToolPageContent {...props} />
+    </Suspense>
+  );
+}
+
+function SimulatorToolPageContent({
   title,
   description,
   apiPath,
@@ -307,6 +335,7 @@ export function SimulatorToolPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [values, setValues] = useState<ValuesState>(() => createInitialState(fields, searchParams));
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(() => createTouchedState(fields, searchParams));
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string>();
   const [messageTone, setMessageTone] = useState<FormStatusTone>("info");
@@ -316,12 +345,10 @@ export function SimulatorToolPage({
   const toolPolicy = resolveToolPolicy(config.toolPolicies, calculatorType);
   const userAuthenticated = config.userAuthenticated;
   const visibleFields = getVisibleFields(fields, values);
-  const completedFields = visibleFields.filter((field) => {
-    const value = values[field.key];
-    if (field.type === "checkbox") return true;
-    if (field.type === "tags") return Array.isArray(value) && value.length > 0;
-    return String(value ?? "").trim().length > 0;
-  }).length;
+  const completedFields = visibleFields.filter((field) =>
+    isFieldMeaningfullyFilled(field, values[field.key], touchedFields.has(field.key)),
+  ).length;
+  const requiredFieldsReady = Object.keys(buildFieldErrors(visibleFields, values)).length === 0;
   const completionRate = Math.round((completedFields / Math.max(visibleFields.length, 1)) * 100);
   const localizedTitle = localizeCalculatorTitle(calculatorType, title, language);
   const localizedDescription = localizeCalculatorDescription(calculatorType, description, language);
@@ -341,6 +368,7 @@ export function SimulatorToolPage({
 
   useEffect(() => {
     setValues(createInitialState(fields, searchParams));
+    setTouchedFields(createTouchedState(fields, searchParams));
     setFieldErrors({});
     setMessage(undefined);
     setMessageTone("info");
@@ -365,6 +393,17 @@ export function SimulatorToolPage({
       }
       return changed ? next : current;
     });
+    setTouchedFields((current) => {
+      const next = new Set(current);
+      let changed = false;
+      for (const field of fields) {
+        if (searchParams.get(field.key) !== null && !next.has(field.key)) {
+          next.add(field.key);
+          changed = true;
+        }
+      }
+      return changed ? next : current;
+    });
   }, [fields, searchParams]);
 
   function updateHistoryEntries(entry: SimulationHistoryEntry) {
@@ -377,6 +416,7 @@ export function SimulatorToolPage({
 
   function resetForm() {
     setValues(createInitialState(fields, searchParams));
+    setTouchedFields(createTouchedState(fields, searchParams));
     setFieldErrors({});
     setMessage(undefined);
     setMessageTone("info");
@@ -576,20 +616,6 @@ export function SimulatorToolPage({
           <p className="section-kicker">{t("simulator.title")}</p>
           <h1 className="display-font mt-2 break-words text-3xl font-semibold sm:text-4xl">{localizedTitle}</h1>
           <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">{localizedDescription}</p>
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            <article className="panel-strong rounded-xl p-3">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">{t("simulator.parametersTitle")}</p>
-              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">{visibleFields.length}</p>
-            </article>
-            <article className="panel-strong rounded-xl p-3">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">{t("simulator.completedFields", { count: completedFields, total: visibleFields.length })}</p>
-              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">{completedFields}</p>
-            </article>
-            <article className="panel-strong rounded-xl p-3">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">{t("simulator.completionRate", { rate: completionRate })}</p>
-              <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">{completionRate}%</p>
-            </article>
-          </div>
           <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
             <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-[var(--accent)]">1. {t("simulator.stepInput")}</span>
             <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-[var(--ink-soft)]">2. {t("simulator.stepCompute")}</span>
@@ -603,9 +629,35 @@ export function SimulatorToolPage({
         <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(290px,1fr)] lg:items-start">
           <form onSubmit={onSubmit} className="soft-card min-w-0 w-full rounded-3xl p-5 sm:p-7">
             <h2 className="display-font break-words text-xl font-semibold">{uiText.formTitle}</h2>
-            <p className="mt-2 break-words text-sm font-medium text-[var(--ink-soft)]">
-              {t("simulator.completionRate", { rate: completionRate })}
-            </p>
+
+            <section className="panel-tonal mt-4 rounded-2xl p-4" aria-label="Progression du formulaire">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+                    {t("simulator.parametersTitle")}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{visibleFields.length}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+                    {t("simulator.completedFields", { count: completedFields, total: visibleFields.length })}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{completedFields}</p>
+                </div>
+                <div className="min-w-[120px]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+                    {t("simulator.completionRate", { rate: completionRate })}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{completionRate}%</p>
+                </div>
+              </div>
+              <div className="mt-3 h-2 rounded-full bg-[var(--surface-muted)]">
+                <div
+                  className="h-full rounded-full bg-[var(--accent)] transition-all"
+                  style={{ width: `${completionRate}%` }}
+                />
+              </div>
+            </section>
 
             <div className="panel-strong mt-5 rounded-2xl p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
@@ -648,6 +700,11 @@ export function SimulatorToolPage({
                     error={fieldErrors[field.key]}
                     onChange={(val) => {
                       setValues((prev) => ({ ...prev, [field.key]: val }));
+                      setTouchedFields((prev) => {
+                        const next = new Set(prev);
+                        next.add(field.key);
+                        return next;
+                      });
                       setMessage(undefined);
                       setFieldErrors((prev) => {
                         if (!prev[field.key]) return prev;
@@ -665,7 +722,7 @@ export function SimulatorToolPage({
               <Button
                 type="submit"
                 variant="primary"
-                disabled={loading || !toolUsable}
+                disabled={loading || !toolUsable || !requiredFieldsReady}
                 className="btn-primary h-12 w-full text-base font-semibold transition-all hover:scale-[1.01] active:scale-[0.99]"
               >
                 {loading ? t("simulator.running") : t("simulator.run")}

@@ -52,13 +52,23 @@ export function LanguageProvider({
   initialLanguage?: AppLanguage;
 }) {
   const [language, setLanguage] = useState<AppLanguage>(initialLanguage);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    const storedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (storedLanguage === "ar" || storedLanguage === "fr") {
+      setLanguage(storedLanguage);
+    }
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
     window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     document.cookie = `${LANGUAGE_STORAGE_KEY}=${language}; path=/; max-age=31536000; samesite=lax`;
     document.documentElement.lang = language;
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-  }, [language]);
+  }, [language, ready]);
 
   const contextValue = useMemo(
     () => ({

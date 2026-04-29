@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { AdsenseScript } from "@/components/adsense-script";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { LanguageProvider } from "@/components/language-provider";
@@ -7,6 +6,7 @@ import { MaintenanceBanner } from "@/components/maintenance-banner";
 import { PublicConfigProvider } from "@/components/public-config-provider";
 import { PwaRegistration } from "@/components/pwa-registration";
 import { SiteNav } from "@/components/site-nav";
+import { SiteFooter } from "@/components/site-footer";
 import { CommandCenter } from "@/components/command-center";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
@@ -17,7 +17,6 @@ import {
   SITE_URL,
   absoluteUrl,
 } from "@/lib/seo";
-import { readAdminConfig } from "@/lib/server/admin-config";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 
@@ -33,146 +32,129 @@ const manrope = Manrope({
   variable: "--font-manrope",
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const config = await readAdminConfig();
-  const siteName = config.websiteSettings.siteName.trim() || SITE_NAME;
-  const siteDescription =
-    config.websiteSettings.siteDescription.trim() ||
-    SITE_DESCRIPTION;
-  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() ?? "";
-
-  return {
-    metadataBase: new URL(SITE_URL),
-    title: {
-      default: siteName,
-      template: `%s | ${siteName}`,
+const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() ?? "";
+const organizationId = absoluteUrl("/#organization");
+const websiteId = absoluteUrl("/#website");
+const rootJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": organizationId,
+      name: SITE_NAME,
+      url: SITE_URL,
     },
-    description: siteDescription,
-    keywords: [
-      "droit du travail maroc",
-      "simulateur salaire maroc",
-      "indemnite licenciement maroc",
-      "modele lettre employe",
-      "cnss maroc",
-    ],
-    alternates: {
-      canonical: "/",
-      languages: {
-        "fr-MA": "/",
-        "ar-MA": "/",
-        "x-default": "/",
+    {
+      "@type": "WebSite",
+      "@id": websiteId,
+      name: SITE_NAME,
+      url: SITE_URL,
+      inLanguage: ["fr-MA", "ar-MA"],
+      description: SITE_DESCRIPTION,
+      publisher: {
+        "@id": organizationId,
+      },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/articles?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
       },
     },
-    robots: {
+  ],
+};
+
+const preferenceBootstrapScript = `
+(() => {
+  try {
+    const language = localStorage.getItem("salarie_language") === "ar" ? "ar" : "fr";
+    const theme = localStorage.getItem("salarie_theme") === "dark" ? "dark" : "light";
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    document.documentElement.dataset.theme = theme;
+  } catch {}
+})();
+`;
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "droit du travail maroc",
+    "simulateur salaire maroc",
+    "indemnite licenciement maroc",
+    "modele lettre employe",
+    "cnss maroc",
+  ],
+  alternates: {
+    canonical: "/",
+    languages: {
+      "fr-MA": "/",
+      "ar-MA": "/",
+      "x-default": "/",
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
       index: true,
       follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    locale: "fr_MA",
+    alternateLocale: ["ar_MA"],
+    images: [
+      {
+        url: absoluteUrl(DEFAULT_OG_IMAGE_PATH),
+        width: 1200,
+        height: 630,
+        alt: DEFAULT_OG_IMAGE_ALT,
       },
-    },
-    openGraph: {
-      type: "website",
-      url: "/",
-      siteName,
-      title: siteName,
-      description: siteDescription,
-      locale: "fr_MA",
-      alternateLocale: ["ar_MA"],
-      images: [
-        {
-          url: absoluteUrl(DEFAULT_OG_IMAGE_PATH),
-          width: 1200,
-          height: 630,
-          alt: DEFAULT_OG_IMAGE_ALT,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: siteName,
-      description: siteDescription,
-      images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
-    },
-    manifest: "/manifest.webmanifest",
-    icons: {
-      icon: [
-        { url: "/favicon.ico", sizes: "64x64" },
-        { url: "/logo.svg", type: "image/svg+xml" },
-      ],
-      apple: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
-    },
-    other: {
-      "theme-color": "#0f172a",
-      ...(adsenseClient ? { "google-adsense-account": adsenseClient } : {}),
-    },
-    category: "legal",
-  };
-}
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+  },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "64x64" },
+      { url: "/logo.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+  },
+  other: {
+    "theme-color": "#0f172a",
+    ...(adsenseClient ? { "google-adsense-account": adsenseClient } : {}),
+  },
+  category: "legal",
+};
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const config = await readAdminConfig();
-  const languageCookie = cookieStore.get("salarie_language")?.value;
-  const themeCookie = cookieStore.get("salarie_theme")?.value;
-  const initialLanguage = languageCookie === "ar" ? "ar" : "fr";
-  const initialTheme = themeCookie === "dark" ? "dark" : "light";
-  const siteName = config.websiteSettings.siteName.trim() || SITE_NAME;
-  const siteDescription =
-    config.websiteSettings.siteDescription.trim() ||
-    SITE_DESCRIPTION;
-  const sameAs = [
-    config.websiteSettings.socialLinks.facebook.trim(),
-    config.websiteSettings.socialLinks.instagram.trim(),
-    config.websiteSettings.socialLinks.linkedin.trim(),
-    config.websiteSettings.socialLinks.x.trim(),
-  ].filter((item) => item.length > 0);
-  const supportEmail = config.websiteSettings.supportEmail.trim();
-  const logoUrl = config.websiteSettings.logoUrl.trim();
-  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() ?? "";
-  const organizationId = absoluteUrl("/#organization");
-  const websiteId = absoluteUrl("/#website");
-  const rootJsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": organizationId,
-        name: siteName,
-        url: SITE_URL,
-        ...(logoUrl ? { logo: absoluteUrl(logoUrl) } : {}),
-        ...(supportEmail ? { email: supportEmail } : {}),
-        ...(sameAs.length > 0 ? { sameAs } : {}),
-      },
-      {
-        "@type": "WebSite",
-        "@id": websiteId,
-        name: siteName,
-        url: SITE_URL,
-        inLanguage: ["fr-MA", "ar-MA"],
-        description: siteDescription,
-        publisher: {
-          "@id": organizationId,
-        },
-        potentialAction: {
-          "@type": "SearchAction",
-          target: `${SITE_URL}/articles?q={search_term_string}`,
-          "query-input": "required name=search_term_string",
-        },
-      },
-    ],
-  };
-
   return (
-    <html lang={initialLanguage} dir={initialLanguage === "ar" ? "rtl" : "ltr"} data-theme={initialTheme}>
+    <html lang="fr" dir="ltr" data-theme="light" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: preferenceBootstrapScript }} />
         {adsenseClient ? <meta name="google-adsense-account" content={adsenseClient} /> : null}
       </head>
       <body className={`${inter.variable} ${manrope.variable} antialiased bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--juris-primary-container)] selection:text-white`}>
@@ -182,8 +164,8 @@ export default async function RootLayout({
             __html: JSON.stringify(rootJsonLd),
           }}
         />
-        <LanguageProvider initialLanguage={initialLanguage}>
-          <ThemeProvider initialTheme={initialTheme}>
+        <LanguageProvider initialLanguage="fr">
+          <ThemeProvider initialTheme="light">
             <PublicConfigProvider>
               <GoogleAnalytics />
               <PwaRegistration />
@@ -192,6 +174,7 @@ export default async function RootLayout({
               <SiteNav />
               <CommandCenter />
               <div className="pb-24 md:pb-8">{children}</div>
+              <SiteFooter />
             </PublicConfigProvider>
           </ThemeProvider>
         </LanguageProvider>

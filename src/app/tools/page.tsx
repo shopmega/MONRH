@@ -130,7 +130,7 @@ export default function ToolsPage() {
             <button
               key={f.id}
               onClick={() => setActiveFilter(f.id)}
-              className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
+              className={`min-h-11 rounded-full px-5 py-3 text-sm font-semibold transition-all ${
                 activeFilter === f.id
                   ? "bg-[var(--accent)] text-white"
                   : "bg-[var(--surface-muted)] text-[var(--ink-soft)] hover:bg-[var(--accent-soft)]"

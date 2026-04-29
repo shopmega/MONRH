@@ -32,7 +32,7 @@ export default function DureePreavisPage() {
           type: "select",
           defaultValue: "employe",
           options: [
-            { value: "cadre", label: "Cadre / Technicien" },
+            { value: "cadre", label: "Cadre" },
             { value: "employe", label: "Employe" },
             { value: "ouvrier", label: "Ouvrier" },
           ],
