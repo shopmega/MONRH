@@ -6,6 +6,10 @@ const footerLinks = [
   { href: "/articles", label: "Articles" },
   { href: "/modeles", label: "Modeles" },
   { href: "/documents", label: "Documents" },
+  { href: "/about", label: "A propos" },
+  { href: "/contact", label: "Contact" },
+  { href: "/privacy", label: "Confidentialite" },
+  { href: "/terms", label: "Conditions" },
 ];
 
 export function SiteFooter() {

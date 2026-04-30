@@ -11,6 +11,7 @@
     "generate-pwa-icons": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.51.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
     "lucide-react": "^1.7.0",
