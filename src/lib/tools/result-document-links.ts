@@ -169,18 +169,31 @@ export function buildSimulationResultDocumentLink(
   if (snapshot.calculatorType === "duree_preavis" || snapshot.calculatorType === "demission") {
     const workerCategory =
       typeof breakdown.workerCategory === "string" ? breakdown.workerCategory : "employe";
+    const contractType =
+      typeof breakdown.contractType === "string" ? breakdown.contractType : undefined;
+    const hireDate =
+      typeof breakdown.hireDate === "string" ? breakdown.hireDate : undefined;
     const leavePayout =
       typeof breakdown.leavePayout === "number" ? breakdown.leavePayout : undefined;
     const noticeComp =
-      typeof breakdown.noticeCompensationDue === "number" ? breakdown.noticeCompensationDue : undefined;
+      typeof breakdown.potentialNoticeValue === "number" ? breakdown.potentialNoticeValue : undefined;
     const recommendedDepartureDate =
       typeof breakdown.recommendedDepartureDate === "string" ? breakdown.recommendedDepartureDate : "";
+    const noticeStartDate =
+      typeof breakdown.resignationNotificationDate === "string"
+        ? breakdown.resignationNotificationDate
+        : typeof breakdown.notificationDate === "string"
+          ? breakdown.notificationDate
+          : calculationDate;
 
     if (recommendedDepartureDate || calculationDate) {
-      params.set("effective_date", recommendedDepartureDate || calculationDate);
+      params.set("effectiveDepartureDate", recommendedDepartureDate || calculationDate);
     }
-    if (leavePayout !== undefined) params.set("amount_due", String(leavePayout + (noticeComp ?? 0)));
-    params.set("position", workerCategory);
+    if (noticeStartDate) params.set("noticeStartDate", noticeStartDate);
+    if (contractType) params.set("contractType", contractType);
+    if (hireDate) params.set("hireDate", hireDate);
+    if (leavePayout !== undefined) params.set("amountDue", String(leavePayout + (noticeComp ?? 0)));
+    params.set("workerCategory", workerCategory);
     const docId = "resignation-letter";
     return {
       templateId: docId,

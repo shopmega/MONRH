@@ -4,6 +4,8 @@ import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/c
 
 export const workAccidentInputSchema = z.object({
   calculationDate: z.string().date().default(getCurrentDateISO),
+  accidentDate: z.string().date().optional(),
+  declarationDate: z.string().date().optional(),
   monthlySalary: z.number().positive(),
   temporaryIncapacityDays: z.number().min(0).max(730).default(0),
   /** IPP% as certified by medical board — 0 means no permanent incapacity */
@@ -14,9 +16,11 @@ export const workAccidentInputSchema = z.object({
   fauteInexcusable: z.boolean().default(false),
   /** Was the employee's employment contract terminated during the accident leave? */
   contractTerminatedDuringAT: z.boolean().default(false),
+  hasMedicalCertificate: z.boolean().default(false),
+  hasWitnessReport: z.boolean().default(false),
 });
 
-export type WorkAccidentInput = z.infer<typeof workAccidentInputSchema>;
+export type WorkAccidentInput = z.input<typeof workAccidentInputSchema>;
 
 export type WorkAccidentResult = {
   versionId: string;
@@ -38,6 +42,7 @@ export type WorkAccidentResult = {
 export function simulateWorkAccident(rawInput: WorkAccidentInput): WorkAccidentResult {
   const input = workAccidentInputSchema.parse(rawInput);
   const rules = getSocialProtectionRulesByDate(input.calculationDate);
+  const declaredWithin48h = resolveDeclaredWithin48h(input.accidentDate, input.declarationDate, input.accidentDeclared);
 
   const dailySalary = input.monthlySalary / 26;
 
@@ -76,7 +81,9 @@ export function simulateWorkAccident(rawInput: WorkAccidentInput): WorkAccidentR
 
   const declarationWarning = !input.accidentDeclared
     ? "Accident non declare par l'employeur dans les 48h: l'employeur peut etre tenu responsable des frais medicaux. Le salarie peut declarer lui-meme a la CNSS."
-    : undefined;
+    : !declaredWithin48h
+      ? "Declaration declaree hors delai de 48h: verifier les justificatifs de retard et la preuve de depot."
+      : undefined;
 
   return {
     versionId: rules.versionId,
@@ -87,7 +94,7 @@ export function simulateWorkAccident(rawInput: WorkAccidentInput): WorkAccidentR
       annualPermanentRente,
       fauteInexcusableBonus,
       totalFirstYearEstimate,
-      accidentDeclared: input.accidentDeclared,
+      accidentDeclared: declaredWithin48h,
       terminationIllegal,
       ...(terminationNote ? { terminationNote } : {}),
       ...(declarationWarning ? { declarationWarning } : {}),
@@ -114,7 +121,11 @@ export function simulateWorkAccident(rawInput: WorkAccidentInput): WorkAccidentR
       warnings: [
         !input.accidentDeclared
           ? "Accident non declare: risque de perte de droits CNSS AT — agir dans les 48h."
+          : !declaredWithin48h
+            ? "Declaration hors delai: conserver la preuve de depot et tout motif justifiant le retard."
           : "",
+        !input.hasMedicalCertificate ? "Certificat medical initial non declare: piece essentielle du dossier AT." : "",
+        !input.hasWitnessReport ? "Temoignage ou rapport accident non declare: la preuve des circonstances peut etre fragile." : "",
         terminationIllegal
           ? "URGENT: licenciement pendant AT est illicite (Art. 274 CT) — saisir l'inspection du travail immediatement."
           : "",
@@ -134,4 +145,13 @@ export function simulateWorkAccident(rawInput: WorkAccidentInput): WorkAccidentR
       ].filter(Boolean),
     },
   };
+}
+
+function resolveDeclaredWithin48h(accidentDate?: string, declarationDate?: string, fallback = true): boolean {
+  if (!accidentDate || !declarationDate) {
+    return fallback;
+  }
+  const accident = new Date(accidentDate).getTime();
+  const declaration = new Date(declarationDate).getTime();
+  return declaration - accident <= 48 * 60 * 60 * 1000;
 }

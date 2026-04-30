@@ -4,17 +4,29 @@ import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/c
 
 export const sickLeaveInputSchema = z.object({
   calculationDate: z.string().date().default(getCurrentDateISO),
+  leaveStartDate: z.string().date().optional(),
+  leaveEndDate: z.string().date().optional(),
   monthlySalary: z.number().positive(),
-  sickDays: z.number().min(1).max(730),
+  sickDays: z.number().min(1).max(730).optional(),
   /** Number of paid CNSS days in the last 54 days to check eligibility */
   cnssEligibilityDays: z.number().min(0).max(200).default(54),
   /** Whether the employer pays a top-up to bring indemnity to 100% of salary */
   employerTopUp: z.boolean().default(false),
   /** Employer top-up rate as a fraction of the gap (e.g. 1.0 = full top-up) */
   employerTopUpRate: z.number().min(0).max(1).default(1),
+  medicalCertificateSubmitted: z.boolean().default(false),
+}).superRefine((input, ctx) => {
+  const hasDates = Boolean(input.leaveStartDate && input.leaveEndDate);
+  if (!hasDates && input.sickDays === undefined) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Provide leaveStartDate/leaveEndDate or legacy sickDays.",
+      path: ["leaveStartDate"],
+    });
+  }
 });
 
-export type SickLeaveInput = z.infer<typeof sickLeaveInputSchema>;
+export type SickLeaveInput = z.input<typeof sickLeaveInputSchema>;
 
 export type SickLeaveResult = {
   versionId: string;
@@ -36,12 +48,13 @@ export type SickLeaveResult = {
 export function simulateSickLeave(rawInput: SickLeaveInput): SickLeaveResult {
   const input = sickLeaveInputSchema.parse(rawInput);
   const rules = getSocialProtectionRulesByDate(input.calculationDate);
+  const sickDays = resolveCalendarDays(input.leaveStartDate, input.leaveEndDate, input.sickDays);
 
   const cnssEligible = input.cnssEligibilityDays >= rules.sickLeaveMinCnssEligibilityDays;
   const dailySalary = input.monthlySalary / 26;
-  const grossIncomeEquivalent = roundMAD(dailySalary * input.sickDays);
+  const grossIncomeEquivalent = roundMAD(dailySalary * sickDays);
 
-  const effectiveDays = Math.min(input.sickDays, rules.sickLeaveMaxCompensatedDays);
+  const effectiveDays = Math.min(sickDays, rules.sickLeaveMaxCompensatedDays);
   const waitingDays = cnssEligible ? rules.sickLeaveWaitingDays : 0;
   const paidDaysByCnss = cnssEligible ? Math.max(0, effectiveDays - waitingDays) : 0;
 
@@ -56,7 +69,7 @@ export function simulateSickLeave(rawInput: SickLeaveInput): SickLeaveResult {
 
   const totalCompensation = roundMAD(cnssCompensation + employerTopUpAmount);
   const estimatedIncomeLoss = roundMAD(grossIncomeEquivalent - totalCompensation);
-  const longTermIllnessFlag = input.sickDays > 180;
+  const longTermIllnessFlag = sickDays > 180;
 
   return {
     versionId: rules.versionId,
@@ -74,7 +87,7 @@ export function simulateSickLeave(rawInput: SickLeaveInput): SickLeaveResult {
     },
     explanation: {
       summary: cnssEligible
-        ? `Compensation totale estimee: ${totalCompensation} MAD pour ${input.sickDays} jour(s) d'arret.`
+        ? `Compensation totale estimee: ${totalCompensation} MAD pour ${sickDays} jour(s) d'arret.`
         : `Droits CNSS non ouverts: ${input.cnssEligibilityDays} jours cotises sur les ${rules.sickLeaveMinCnssEligibilityDays} requis dans les 6 derniers mois.`,
       assumptions: [
         `Eligibilite CNSS: ${input.cnssEligibilityDays} jours cotises (seuil: ${rules.sickLeaveMinCnssEligibilityDays} jours sur 6 mois).`,
@@ -100,6 +113,9 @@ export function simulateSickLeave(rawInput: SickLeaveInput): SickLeaveResult {
         longTermIllnessFlag
           ? "Au-dela de 180 jours, contacter la CNSS pour procedure ALD et renouvellement de prise en charge."
           : "Transmettre l'arret maladie dans les 48h au medecin-conseil CNSS.",
+        !input.medicalCertificateSubmitted
+          ? "Certificat medical non declare: le dossier CNSS peut etre rejete sans justificatif."
+          : "Certificat medical declare transmis.",
         "Le versement effectif depend de la validation administrative de la CNSS.",
       ],
       nextSteps: [
@@ -109,4 +125,14 @@ export function simulateSickLeave(rawInput: SickLeaveInput): SickLeaveResult {
       ],
     },
   };
+}
+
+function resolveCalendarDays(startDate?: string, endDate?: string, fallbackDays?: number): number {
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const days = Math.floor((end.getTime() - start.getTime()) / 86_400_000) + 1;
+    return Math.max(1, Math.min(730, days));
+  }
+  return fallbackDays ?? 1;
 }

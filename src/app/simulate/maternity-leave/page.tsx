@@ -16,8 +16,11 @@ export default function MaternityLeavePage() {
       apiPath="/api/simulate/maternity-leave"
       calculatorType="maternity_leave"
       fields={[
+        { key: "calculationDate", label: "Date de calcul", type: "date" },
         { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 1, step: 0.01 },
-        { key: "leaveWeeks", label: "Duree du conge (semaines)", type: "number", min: 1, step: 1 },
+        { key: "expectedDeliveryDate", label: "Date prevue d'accouchement", type: "date" },
+        { key: "leaveStartDate", label: "Debut conge maternite", type: "date" },
+        { key: "leaveEndDate", label: "Fin conge maternite", type: "date" },
         { key: "cnssContributedMonths", label: "Mois cotises CNSS (10 derniers mois)", type: "number", min: 0, max: 10, step: 1 },
         { key: "employerTopUp", label: "Complement employeur", type: "checkbox" },
         { key: "multipleChildBirth", label: "Naissance multiple", type: "checkbox" },

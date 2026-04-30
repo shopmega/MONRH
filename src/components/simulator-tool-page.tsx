@@ -50,7 +50,11 @@ export type SimulatorField = {
   options?: FieldOption[];
   subtitle?: string;
   required?: boolean;
-  visibleIf?: (values: Record<string, unknown>) => boolean;
+  visibleIf?: {
+    field: string;
+    equals?: string | number | boolean;
+    notEquals?: string | number | boolean;
+  };
 };
 
 type GenericSimulationResult = {
@@ -165,7 +169,18 @@ function toPayload(values: ValuesState, fields: SimulatorField[]) {
 }
 
 function getVisibleFields(fields: SimulatorField[], values: ValuesState): SimulatorField[] {
-  return fields.filter((field) => field.key !== CALCULATION_DATE_KEY && (field.visibleIf ? field.visibleIf(values) : true));
+  return fields.filter((field) => {
+    if (field.key === CALCULATION_DATE_KEY) return false;
+    if (!field.visibleIf) return true;
+    const sourceValue = values[field.visibleIf.field];
+    if ("equals" in field.visibleIf) {
+      return sourceValue === field.visibleIf.equals;
+    }
+    if ("notEquals" in field.visibleIf) {
+      return sourceValue !== field.visibleIf.notEquals;
+    }
+    return true;
+  });
 }
 
 function parseHistoryEntries(raw: string | null): SimulationHistoryEntry[] {

@@ -13,7 +13,8 @@ export const probationTerminationInputSchema = z.object({
   noticeDaysGiven: z.number().min(0).max(60).default(0),
 });
 
-export type ProbationTerminationInput = z.infer<typeof probationTerminationInputSchema>;
+export type ProbationTerminationInput = z.input<typeof probationTerminationInputSchema>;
+type ParsedProbationTerminationInput = z.output<typeof probationTerminationInputSchema>;
 
 export type ProbationTerminationResult = {
   versionId: string;
@@ -39,7 +40,7 @@ export type ProbationTerminationResult = {
  */
 function requiredNoticeDays(
   workedDays: number,
-  category: ProbationTerminationInput["workerCategory"],
+  category: ParsedProbationTerminationInput["workerCategory"],
   probationMonths: number,
 ): number {
   if (category === "ouvrier") {
@@ -55,7 +56,7 @@ function requiredNoticeDays(
 }
 
 /** Max legal probation duration by category (Art. 13 CT) */
-function maxProbationMonths(category: ProbationTerminationInput["workerCategory"]): number {
+function maxProbationMonths(category: ParsedProbationTerminationInput["workerCategory"]): number {
   if (category === "ouvrier") return 2;   // Art. 13: 1 mois répétable une fois = max 2 mois
   if (category === "employe") return 3;   // Art. 13: 1.5 mois répétable une fois = max 3 mois
   return 6; // cadres/techniciens: 3 mois répétables une fois = max 6 mois

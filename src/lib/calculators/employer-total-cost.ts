@@ -28,7 +28,7 @@ export const employerTotalCostInputSchema = z.object({
   include13thMonth: z.boolean().default(false),
 });
 
-export type EmployerTotalCostInput = z.infer<typeof employerTotalCostInputSchema>;
+export type EmployerTotalCostInput = z.input<typeof employerTotalCostInputSchema>;
 
 export type EmployerTotalCostResult = {
   versionId: string;

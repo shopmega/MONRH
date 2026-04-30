@@ -1,24 +1,73 @@
 import { z } from "zod";
 import { getLeaveRulesByDate } from "@/lib/rules/default-rules";
-import { getCurrentDateISO, serviceYearsFromPeriod } from "@/lib/calculators/shared";
+import { getCurrentDateISO, serviceYearsFromHireDate } from "@/lib/calculators/shared";
 
-export const leaveAccrualInputSchema = z.object({
-  calculationDate: z.string().date().default(getCurrentDateISO),
-  monthsWorked: z.number().min(0).max(720),
-  hireDate: z.string().date().optional(),
-  seniorityYears: z.number().min(0).max(60).default(0),
-  usedLeaveDays: z.number().min(0).max(365).default(0),
-  carriedDays: z.number().min(0).max(365).default(0),
-});
+function normalizeLegacyLeaveInput(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
+  const input = raw as Record<string, unknown>;
+  if (
+    input.leavePeriodInputMode === undefined &&
+    input.hireDate === undefined &&
+    input.monthsWorked !== undefined
+  ) {
+    return {
+      ...input,
+      leavePeriodInputMode: "manual_unknown_hire_date",
+    };
+  }
+  return raw;
+}
 
-export type LeaveAccrualInput = z.infer<typeof leaveAccrualInputSchema>;
+const leaveAccrualBaseInputSchema = z
+  .object({
+    calculationDate: z.string().date().default(getCurrentDateISO),
+    leavePeriodInputMode: z.enum(["hire_date", "manual_unknown_hire_date"]).default("hire_date"),
+    hireDate: z.string().date().optional(),
+    monthsWorked: z.number().min(0).max(720).optional(),
+    seniorityYears: z.number().min(0).max(60).optional(),
+    usedLeaveDays: z.number().min(0).max(365).default(0),
+    carriedDays: z.number().min(0).max(365).default(0),
+  })
+  .superRefine((input, ctx) => {
+    const hasManualPeriod = input.monthsWorked !== undefined || input.seniorityYears !== undefined;
+    if (input.hireDate && hasManualPeriod) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["hireDate"],
+        message: "Conflicting inputs: use either hireDate or manual leave period, never both.",
+      });
+    }
+    if (input.leavePeriodInputMode === "hire_date" && !input.hireDate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["hireDate"],
+        message: "hireDate is required when leavePeriodInputMode is hire_date.",
+      });
+    }
+    if (input.leavePeriodInputMode === "manual_unknown_hire_date" && input.hireDate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["leavePeriodInputMode"],
+        message: "manual_unknown_hire_date cannot be combined with hireDate.",
+      });
+    }
+  });
+
+export const leaveAccrualInputSchema = z.preprocess(
+  normalizeLegacyLeaveInput,
+  leaveAccrualBaseInputSchema,
+);
+
+export type LeaveAccrualInput = z.input<typeof leaveAccrualInputSchema>;
 
 export type LeaveAccrualResult = {
   versionId: string;
   versionCode: string;
+  inputMode: "hire_date" | "manual_unknown_hire_date";
   breakdown: {
     accrualDays: number;
     hireDate?: string;
+    monthsWorked: number;
     seniorityYears: number;
     seniorityBonusDays: number;
     totalAvailableDays: number;
@@ -32,6 +81,7 @@ export type LeaveAccrualResult = {
     formulas: string[];
     warnings: string[];
     nextSteps: string[];
+    missingInformation?: string[];
   };
 };
 
@@ -39,19 +89,34 @@ function round(value: number) {
   return Math.round(value * 100) / 100;
 }
 
+function monthsBetween(hireDateISO: string, calculationDateISO: string) {
+  const hireDate = new Date(hireDateISO);
+  const calculationDate = new Date(calculationDateISO);
+  let totalMonths =
+    (calculationDate.getFullYear() - hireDate.getFullYear()) * 12 +
+    (calculationDate.getMonth() - hireDate.getMonth());
+  if (calculationDate.getDate() < hireDate.getDate()) {
+    totalMonths -= 1;
+  }
+  return Math.max(0, totalMonths);
+}
+
 export function simulateLeaveAccrual(rawInput: LeaveAccrualInput): LeaveAccrualResult {
   const input = leaveAccrualInputSchema.parse(rawInput);
   const rules = getLeaveRulesByDate(input.calculationDate);
-  const seniorityYears = serviceYearsFromPeriod({
-    hireDate: input.hireDate,
-    calculationDate: input.calculationDate,
-    yearsOfService: input.seniorityYears,
-  });
+  const seniorityYears =
+    input.leavePeriodInputMode === "hire_date"
+      ? serviceYearsFromHireDate(input.hireDate as string, input.calculationDate)
+      : input.seniorityYears ?? 0;
+  const monthsWorked =
+    input.leavePeriodInputMode === "hire_date"
+      ? monthsBetween(input.hireDate as string, input.calculationDate)
+      : input.monthsWorked ?? 0;
 
-  const accrualDays = input.monthsWorked * rules.accrualDaysPerMonth;
+  const accrualDays = monthsWorked * rules.accrualDaysPerMonth;
   const seniorityBonusDays =
     seniorityYears >= 5
-      ? input.monthsWorked * rules.seniorityBonusDaysPerMonthAfter5Years
+      ? monthsWorked * rules.seniorityBonusDaysPerMonthAfter5Years
       : 0;
   const totalAvailableDays = accrualDays + seniorityBonusDays + input.carriedDays;
   const remainingDays = Math.max(0, totalAvailableDays - input.usedLeaveDays);
@@ -60,9 +125,11 @@ export function simulateLeaveAccrual(rawInput: LeaveAccrualInput): LeaveAccrualR
   return {
     versionId: rules.versionId,
     versionCode: rules.versionCode,
+    inputMode: input.leavePeriodInputMode,
     breakdown: {
       accrualDays: round(accrualDays),
       ...(input.hireDate ? { hireDate: input.hireDate } : {}),
+      monthsWorked: round(monthsWorked),
       seniorityYears: round(seniorityYears),
       seniorityBonusDays: round(seniorityBonusDays),
       totalAvailableDays: round(totalAvailableDays),
@@ -71,9 +138,12 @@ export function simulateLeaveAccrual(rawInput: LeaveAccrualInput): LeaveAccrualR
       carryoverAfterLimit: round(carryoverAfterLimit),
     },
     explanation: {
-      summary: `Vous disposez d'environ ${round(remainingDays)} jours de conges restants sur la periode saisie.`,
+      summary: `Vous disposez d'environ ${round(remainingDays)} jours de conges restants sur la periode calculee.`,
       assumptions: [
         "Acquisition de base calculee sur 1.5 jour par mois.",
+        input.leavePeriodInputMode === "hire_date"
+          ? "Mois travailles et anciennete derives de la date d'embauche."
+          : "Mois travailles et anciennete saisis manuellement car la date d'embauche est inconnue.",
         seniorityYears >= 5
           ? "Bonus anciennete applique (anciennete >= 5 ans)."
           : "Pas de bonus anciennete applique (anciennete < 5 ans).",
@@ -88,6 +158,8 @@ export function simulateLeaveAccrual(rawInput: LeaveAccrualInput): LeaveAccrualR
         "Certaines entreprises appliquent des politiques internes de report differentes.",
         "Le reliquat reportable est plafonne selon la regle legale active.",
       ],
+      missingInformation:
+        input.leavePeriodInputMode === "manual_unknown_hire_date" ? ["Date d'embauche"] : [],
       nextSteps: [
         "Comparer ce calcul avec le compteur conges sur bulletin ou portail RH.",
         "Conserver une trace mensuelle pour anticiper les demandes de conge.",

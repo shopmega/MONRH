@@ -24,9 +24,6 @@ export default function LicenciementPage() {
           options: [
             { value: "CDI", label: "CDI" },
             { value: "CDD", label: "CDD" },
-            { value: "apprentissage", label: "Apprentissage" },
-            { value: "interim", label: "Intérim" },
-            { value: "temps_partiel", label: "Temps partiel" },
           ],
         },
         {
@@ -34,12 +31,11 @@ export default function LicenciementPage() {
           label: "Motif de rupture",
           type: "select",
           options: [
-            { value: "licenciement", label: "Licenciement" },
-            { value: "demission", label: "Démission" },
-            { value: "faute_grave", label: "Faute grave" },
+            { value: "personal", label: "Motif personnel" },
+            { value: "economic", label: "Motif economique" },
+            { value: "serious_misconduct", label: "Faute grave" },
             { value: "force_majeure", label: "Force majeure" },
-            { value: "retraite", label: "Départ retraite" },
-            { value: "abandon", label: "Abandon de poste" },
+            { value: "unknown", label: "Motif non determine" },
           ],
         },
         {
@@ -53,13 +49,17 @@ export default function LicenciementPage() {
           ],
         },
         { key: "hireDate", label: "Date d'embauche", type: "date" },
+        { key: "dismissalNotificationDate", label: "Date de notification du licenciement", type: "date", required: false },
         { key: "unusedLeaveDays", label: "Jours de conges restants", type: "number", min: 0, step: 0.5 },
-        { key: "abusive", label: "Licenciement abusif (estimation dommages)", type: "checkbox" },
+        { key: "procedureCompliant", label: "Procedure de licenciement respectee", type: "checkbox", defaultValue: true },
       ]}
       breakdownLabels={{
         contractType: "Type de contrat",
         workerCategory: "Categorie",
         hireDate: "Date d'embauche",
+        dismissalNotificationDate: "Date de notification",
+        dismissalReason: "Motif de rupture",
+        procedureCompliant: "Procedure conforme",
         totalServiceYears: "Anciennete",
         indemnityLegale: "Indemnite legale",
         indemnitePreavis: "Indemnite preavis",

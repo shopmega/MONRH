@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
-import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation } from "@/lib/calculators/shared";
+import {
+  annualizeMonthlyBrackets,
+  computeFamilyTaxReductionMonthly,
+  computeProgressiveTax,
+  payrollFamilySituationSchema,
+  roundMAD,
+} from "@/lib/calculators/payroll-core";
 
 export const annualIncomeTaxInputSchema = z.object({
   calculationDate: z.string().date().default(getCurrentDateISO),
@@ -8,7 +15,7 @@ export const annualIncomeTaxInputSchema = z.object({
   paidMonths: z.number().min(1).max(14).default(12),
   bonusAmount: z.number().min(0).default(0),
   include13thSalary: z.boolean().default(false),
-  familySituation: z.enum(["single", "married", "divorced", "widowed"]).default("single"),
+  familySituation: payrollFamilySituationSchema.default("single"),
   familyDependentsCount: z.number().min(0).max(6).default(0),
   additionalDeductionsAnnual: z.number().min(0).default(0),
 });
@@ -32,30 +39,12 @@ export type AnnualIncomeTaxResult = {
   explanation: CalculatorExplanation;
 };
 
-function computeProgressiveTax(
-  taxableIncome: number,
-  annualBrackets: Array<{ min: number; max: number | null; rate: number }>,
-) {
-  let tax = 0;
-  for (const bracket of annualBrackets) {
-    const start = bracket.min;
-    const end = bracket.max ?? Number.POSITIVE_INFINITY;
-    const slice = Math.max(Math.min(taxableIncome, end) - start, 0);
-    tax += slice * bracket.rate;
-  }
-  return Math.max(0, tax);
-}
-
 export function simulateAnnualIncomeTax(
   rawInput: AnnualIncomeTaxInput,
 ): AnnualIncomeTaxResult {
   const input = annualIncomeTaxInputSchema.parse(rawInput);
   const rules = getSalaryRulesByDate(input.calculationDate);
-  const annualBrackets = rules.taxBracketsMonthly.map((item) => ({
-    min: item.min * 12,
-    max: item.max ? item.max * 12 : null,
-    rate: item.rate,
-  }));
+  const annualBrackets = annualizeMonthlyBrackets(rules);
 
   const annualGrossIncome =
     input.monthlySalary * input.paidMonths +
@@ -76,10 +65,7 @@ export function simulateAnnualIncomeTax(
     0,
     annualGrossIncome - annualProfessionalDeduction - annualSocialContributions - input.additionalDeductionsAnnual,
   );
-  const familyTaxReduction = Math.min(
-    input.familyDependentsCount * (rules.familyChargeReductionAnnual ?? 0),
-    rules.familyChargeReductionCapAnnual ?? 0,
-  );
+  const familyTaxReduction = computeFamilyTaxReductionMonthly(input, rules) * 12;
   const annualIncomeTax = Math.max(0, computeProgressiveTax(annualTaxableIncome, annualBrackets) - familyTaxReduction);
   const monthlyAverageTax = annualIncomeTax / 12;
   const effectiveTaxRatePercent =
@@ -118,7 +104,13 @@ export function simulateAnnualIncomeTax(
       ],
       warnings: [
         "Des exemptions ou regimes specifiques peuvent modifier le resultat reel.",
-      ],
+        input.include13thSalary && input.paidMonths >= 13
+          ? "Attention: paidMonths inclut peut-etre deja le 13e mois. Verifiez pour eviter un double comptage."
+          : "",
+        input.familySituation === "married"
+          ? "Le statut marie est traite comme une charge de famille fiscale dans cette simulation."
+          : "",
+      ].filter(Boolean),
       nextSteps: [
         "Comparer ce resultat avec vos declarations annuelles reelles.",
         "Tester scenarios avec/sans bonus pour anticipation fiscale.",

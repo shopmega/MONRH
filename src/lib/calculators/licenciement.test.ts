@@ -64,4 +64,32 @@ describe("simulateLicenciement", () => {
       employeResult.breakdown.indemnitePreavis,
     );
   });
+
+  it("does not apply CDI notice logic to CDD", () => {
+    const result = simulateLicenciement({
+      calculationDate: "2026-02-12",
+      monthlySalary: 9000,
+      contractType: "CDD",
+      workerCategory: "cadre",
+      yearsOfService: 2,
+      monthsOfService: 0,
+      unusedLeaveDays: 0,
+    });
+
+    expect(result.breakdown.indemnityLegale).toBe(0);
+    expect(result.breakdown.indemnitePreavis).toBe(0);
+  });
+
+  it("rejects hire date with manual seniority", () => {
+    expect(() =>
+      simulateLicenciement({
+        calculationDate: "2026-02-12",
+        monthlySalary: 9000,
+        contractType: "CDI",
+        workerCategory: "employe",
+        hireDate: "2020-02-12",
+        yearsOfService: 2,
+      }),
+    ).toThrow(/Conflicting inputs/);
+  });
 });

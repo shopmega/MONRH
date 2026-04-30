@@ -15,7 +15,7 @@ export const smigComplianceInputSchema = z.object({
   includeAllowancesInCheck: z.boolean().default(false),
 });
 
-export type SmigComplianceInput = z.infer<typeof smigComplianceInputSchema>;
+export type SmigComplianceInput = z.input<typeof smigComplianceInputSchema>;
 
 export type SmigComplianceResult = {
   versionId: string;

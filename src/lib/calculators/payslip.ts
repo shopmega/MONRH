@@ -1,40 +1,30 @@
 import { z } from "zod";
-import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
+import {
+  computeMonthlyPayrollFromBases,
+  computeMonthlyPayrollFromGross,
+  payrollCoreInputSchema,
+  payrollPayElementSchema,
+  roundMAD,
+} from "@/lib/calculators/payroll-core";
 
-function roundMAD(v: number) {
-  return Math.round(v * 100) / 100;
-}
+const payslipPayElementSchema = payrollPayElementSchema.extend({
+  category: z.enum(["overtime", "bonus", "allowance", "benefit", "other"]).default("other"),
+});
 
-function computeTax(taxableIncome: number, brackets: Array<{ min: number; max: number | null; rate: number }>): number {
-  let tax = 0;
-  for (const b of brackets) {
-    const end = b.max ?? Infinity;
-    const slice = Math.max(Math.min(taxableIncome, end) - b.min, 0);
-    tax += slice * b.rate;
-  }
-  return Math.max(0, tax);
-}
-
-// ─── Schema ───────────────────────────────────────────────────────────────────
-
-export const payslipInputSchema = z.object({
+export const payslipInputSchema = payrollCoreInputSchema.extend({
   employeeName: z.string().max(100),
   employerId: z.string().max(100).default(""),
-  period: z.string().max(20), // e.g. "Mars 2026"
+  period: z.string().max(20),
   grossSalary: z.number().positive(),
-  calculationDate: z.string().date().default(getCurrentDateISO),
-  includeCimr: z.boolean().default(false),
-  cimrRate: z.number().min(0).max(0.12).default(0.06),
-  // Additional pay elements
   overtimePay: z.number().min(0).default(0),
   bonus: z.number().min(0).default(0),
   allowances: z.number().min(0).default(0),
-  // Employer formation pro (small or large company)
+  payElements: z.array(payslipPayElementSchema).default([]),
   companySize: z.enum(["small", "large"]).default("small"),
 });
 
-export type PayslipInput = z.infer<typeof payslipInputSchema>;
+export type PayslipInput = z.input<typeof payslipInputSchema>;
 
 export type PayslipResult = {
   period: string;
@@ -67,34 +57,35 @@ export type PayslipResult = {
   explanation: {
     summary: string;
     versionCode: string;
+    warnings: string[];
   };
 };
-
-// ─── Main function ────────────────────────────────────────────────────────────
 
 export function generatePayslip(raw: PayslipInput): PayslipResult {
   const input = payslipInputSchema.parse(raw);
   const rules = getSalaryRulesByDate(input.calculationDate);
-
-  const totalGross = roundMAD(input.grossSalary + input.overtimePay + input.bonus + input.allowances);
-
-  const contributableBase = Math.min(totalGross, rules.cnssCeiling);
-  const cnssEmployee = roundMAD(contributableBase * rules.cnssEmployeeRate);
-  const cnssEmployer = roundMAD(contributableBase * rules.cnssEmployerRate);
-  const amoEmployee = roundMAD(totalGross * rules.amoEmployeeRate);
-  const amoEmployer = roundMAD(totalGross * rules.amoEmployerRate);
-  const cimrEmployee = input.includeCimr ? roundMAD(totalGross * input.cimrRate) : 0;
-  const professionalExpenseDeduction = roundMAD(
-    Math.min(totalGross * rules.professionalExpenseRate, rules.professionalExpenseCap),
-  );
-  const taxableIncome = roundMAD(Math.max(0, totalGross - cnssEmployee - amoEmployee - professionalExpenseDeduction));
-  const incomeTax = roundMAD(computeTax(taxableIncome, rules.taxBracketsMonthly));
-  const totalDeductions = roundMAD(cnssEmployee + amoEmployee + cimrEmployee + incomeTax);
-  const netToPay = roundMAD(totalGross - totalDeductions);
-
+  const structuredGross = input.payElements.reduce((sum, item) => sum + item.amount, 0);
+  const legacyVariableGross = input.overtimePay + input.bonus + input.allowances;
+  const variableGross = structuredGross > 0 ? structuredGross : legacyVariableGross;
+  const totalGross = roundMAD(input.grossSalary + variableGross);
+  const payroll =
+    structuredGross > 0
+      ? computeMonthlyPayrollFromBases(
+          {
+            gross: totalGross,
+            taxableGross: input.grossSalary + sumPayElementBase(input.payElements, "taxable"),
+            cnssGross: input.grossSalary + sumPayElementBase(input.payElements, "cnssSubject"),
+            amoGross: input.grossSalary + sumPayElementBase(input.payElements, "amoSubject"),
+          },
+          input,
+        )
+      : computeMonthlyPayrollFromGross(totalGross, input);
   const formationProRate = input.companySize === "small" ? rules.formationProRateSmall : rules.formationProRateLarge;
   const formationPro = roundMAD(totalGross * formationProRate);
-  const totalEmployerCost = roundMAD(totalGross + cnssEmployer + amoEmployer + formationPro);
+  const totalEmployerCost = roundMAD(payroll.employerTotalCost + formationPro);
+  const totalDeductions = roundMAD(
+    payroll.cnssEmployee + payroll.amoEmployee + payroll.cimrEmployee + payroll.incomeTax,
+  );
 
   return {
     period: input.period,
@@ -103,30 +94,49 @@ export function generatePayslip(raw: PayslipInput): PayslipResult {
     calculationDate: input.calculationDate,
     earnings: {
       baseSalary: roundMAD(input.grossSalary),
-      overtimePay: roundMAD(input.overtimePay),
-      bonus: roundMAD(input.bonus),
-      allowances: roundMAD(input.allowances),
+      overtimePay: structuredGross > 0 ? roundMAD(sumCategory(input.payElements, "overtime")) : roundMAD(input.overtimePay),
+      bonus: structuredGross > 0 ? roundMAD(sumCategory(input.payElements, "bonus")) : roundMAD(input.bonus),
+      allowances: structuredGross > 0 ? roundMAD(sumCategory(input.payElements, "allowance") + sumCategory(input.payElements, "benefit")) : roundMAD(input.allowances),
       totalGross,
     },
     deductions: {
-      cnssEmployee,
-      amoEmployee,
-      cimrEmployee,
-      professionalExpenseDeduction,
-      taxableIncome,
-      incomeTax,
+      cnssEmployee: payroll.cnssEmployee,
+      amoEmployee: payroll.amoEmployee,
+      cimrEmployee: payroll.cimrEmployee,
+      professionalExpenseDeduction: payroll.professionalExpenseDeduction,
+      taxableIncome: payroll.taxableIncome,
+      incomeTax: payroll.incomeTax,
       totalDeductions,
     },
-    netToPay,
+    netToPay: payroll.net,
     employerContributions: {
-      cnssEmployer,
-      amoEmployer,
+      cnssEmployer: payroll.cnssEmployer,
+      amoEmployer: payroll.amoEmployer,
       formationPro,
       totalEmployerCost,
     },
     explanation: {
-      summary: `Bulletin de paie ${input.period} — Brut: ${totalGross} MAD | Net a payer: ${netToPay} MAD`,
+      summary: `Bulletin de paie ${input.period} - Brut: ${totalGross} MAD | Net a payer: ${payroll.net} MAD`,
       versionCode: rules.versionCode,
+      warnings: [
+        structuredGross > 0
+          ? "Les elements de paie structures remplacent les champs historiques prime/heures supplementaires/indemnites."
+          : "Les champs historiques sont conserves; preferer payElements pour tracer chaque element de paie.",
+      ],
     },
   };
+}
+
+function sumCategory(
+  payElements: Array<z.infer<typeof payslipPayElementSchema>>,
+  category: z.infer<typeof payslipPayElementSchema>["category"],
+): number {
+  return payElements.filter((item) => item.category === category).reduce((sum, item) => sum + item.amount, 0);
+}
+
+function sumPayElementBase(
+  payElements: Array<z.infer<typeof payslipPayElementSchema>>,
+  baseFlag: "taxable" | "cnssSubject" | "amoSubject",
+): number {
+  return payElements.filter((item) => item[baseFlag]).reduce((sum, item) => sum + item.amount, 0);
 }

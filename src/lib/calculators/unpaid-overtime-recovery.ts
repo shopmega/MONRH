@@ -4,16 +4,21 @@ import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/c
 
 export const unpaidOvertimeRecoveryInputSchema = z.object({
   calculationDate: z.string().date().default(getCurrentDateISO),
+  periodStartDate: z.string().date().optional(),
+  periodEndDate: z.string().date().optional(),
   monthlySalary: z.number().positive(),
   unpaidDayHours: z.number().min(0).max(500).default(0),
   unpaidNightHours: z.number().min(0).max(500).default(0),
   unpaidWeekendHours: z.number().min(0).max(500).default(0),
   unpaidHolidayHours: z.number().min(0).max(500).default(0),
   delayMonths: z.number().min(0).max(60).default(0),
-  penaltyRatePerMonth: z.number().min(0).max(0.05).default(0.01),
+  penaltyRatePerMonth: z.number().min(0).max(0.05).optional(),
+  contractualPenaltyRatePerMonth: z.number().min(0).max(0.05).default(0),
+  hasTimesheets: z.boolean().default(false),
+  hasManagerApproval: z.boolean().default(false),
 });
 
-export type UnpaidOvertimeRecoveryInput = z.infer<
+export type UnpaidOvertimeRecoveryInput = z.input<
   typeof unpaidOvertimeRecoveryInputSchema
 >;
 
@@ -39,8 +44,9 @@ export function simulateUnpaidOvertimeRecovery(
     input.unpaidNightHours * hourly * rules.nightMultiplier +
     input.unpaidWeekendHours * hourly * rules.weekendMultiplier +
     input.unpaidHolidayHours * hourly * rules.holidayMultiplier;
+  const explicitPenaltyRate = input.contractualPenaltyRatePerMonth || input.penaltyRatePerMonth || 0;
   const delayPenalties =
-    overtimePrincipal * input.penaltyRatePerMonth * input.delayMonths;
+    overtimePrincipal * explicitPenaltyRate * input.delayMonths;
   const totalClaimAmount = overtimePrincipal + delayPenalties;
 
   return {
@@ -55,14 +61,24 @@ export function simulateUnpaidOvertimeRecovery(
       summary: `Montant estime de recuperation heures sup: ${roundMAD(totalClaimAmount)} MAD.`,
       assumptions: [
         "Chaque type d'heure applique son coefficient legal de majoration.",
-        "Penalite de retard appliquee sur le principal estime.",
+        explicitPenaltyRate > 0
+          ? "Penalite de retard appliquee uniquement parce qu'un taux contractuel/judiciaire explicite est fourni."
+          : "Aucune penalite de retard ajoutee faute de taux contractuel ou judiciaire explicite.",
+        input.periodStartDate && input.periodEndDate
+          ? `Periode documentee: ${input.periodStartDate} au ${input.periodEndDate}.`
+          : "Periode detaillee non fournie: utiliser des dates de debut/fin pour rendre le calcul auditables.",
       ],
       formulas: [
         "Principal = somme(heures impayees x taux horaire x coefficient).",
-        "Penalites = principal x taux mensuel x mois de retard.",
+        "Penalites = principal x taux mensuel x mois de retard, uniquement si un taux explicite est fourni.",
       ],
       warnings: [
-        "Les heures declarees doivent etre documentees (pointage/planning).",
+        !input.hasTimesheets
+          ? "Pointages absents: les heures declarees doivent etre documentees par planning, badgeage ou tableau detaille."
+          : "Pointages declares disponibles.",
+        !input.hasManagerApproval
+          ? "Validation manager non declaree: le risque probatoire augmente si les heures n'ont pas ete autorisees ou connues par l'employeur."
+          : "Validation manager declaree disponible.",
       ],
       nextSteps: [
         "Constituer tableau detaille par jour et type d'heures.",

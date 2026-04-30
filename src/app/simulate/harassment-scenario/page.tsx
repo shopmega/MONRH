@@ -16,6 +16,9 @@ export default function HarassmentScenarioPage() {
       apiPath="/api/simulate/harassment-scenario"
       calculatorType="harassment_scenario"
       fields={[
+        { key: "calculationDate", label: "Date de calcul", type: "date" },
+        { key: "firstIncidentDate", label: "Premier incident", type: "date" },
+        { key: "lastIncidentDate", label: "Dernier incident", type: "date" },
         {
           key: "harassmentType", label: "Type de harcelement", type: "select", defaultValue: "moral", options: [
             { value: "moral", label: "Harcelement moral (Art. 40 CT)" },
@@ -31,6 +34,7 @@ export default function HarassmentScenarioPage() {
         },
         { key: "incidentsCount", label: "Incidents documentes", type: "number", min: 1, step: 1, defaultValue: 1 },
         { key: "witnessesCount", label: "Temoins disponibles", type: "number", min: 0, step: 1 },
+        { key: "hasIncidentLog", label: "Journal date des incidents", type: "checkbox" },
         { key: "hasWrittenProof", label: "Preuves ecrites (emails, SMS...)", type: "checkbox" },
         { key: "hasMedicalProof", label: "Certificat medical", type: "checkbox" },
         { key: "hrNotified", label: "RH / DRH notifie par ecrit", type: "checkbox" },

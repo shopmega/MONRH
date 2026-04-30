@@ -216,16 +216,24 @@ describe("buildSimulationResultDocumentLink", () => {
       result: {
         versionCode: "ma_2026",
         breakdown: {
+          contractType: "CDI",
           workerCategory: "cadre",
+          hireDate: "2020-01-01",
+          resignationNotificationDate: "2024-01-01",
+          recommendedDepartureDate: "2024-04-01",
           leavePayout: 3000,
-          noticeCompensationDue: 2000,
+          potentialNoticeValue: 2000,
         },
       },
     });
 
     expect(link?.templateId).toBe("resignation-letter");
-    expect(link?.href).toContain("amount_due=5000");
-    expect(link?.href).toContain("position=cadre");
+    expect(link?.href).toContain("amountDue=5000");
+    expect(link?.href).toContain("workerCategory=cadre");
+    expect(link?.href).toContain("noticeStartDate=2024-01-01");
+    expect(link?.href).toContain("effectiveDepartureDate=2024-04-01");
+    expect(link?.href).toContain("contractType=CDI");
+    expect(link?.href).toContain("hireDate=2020-01-01");
   });
 
   it("builds link for harassment scenario", () => {

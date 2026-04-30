@@ -13,6 +13,58 @@ export type ToolDefinition = {
   href: string;
 };
 
+export type ToolLegalDomain = "code_du_travail" | "payroll_tax" | "social_protection" | "career_finance" | "business_planning";
+
+export const NON_LABOR_LAW_TOOL_IDS = new Set([
+  "auto_entrepreneur",
+  "freelance_pricing",
+  "freelance_vs_salary",
+  "hiring_cost",
+  "loan_capacity",
+  "profit_expense",
+]);
+
+export const PAYROLL_TAX_TOOL_IDS = new Set([
+  "net_gross",
+  "net_gross_enhanced",
+  "annual_income_tax",
+  "igr_detail",
+  "payslip",
+  "payslip_detector",
+  "bonus_simulator",
+  "salary_increase",
+  "promotion_scenario",
+  "payroll_mass",
+  "compensation_optimization",
+  "employer_total_cost",
+]);
+
+export const SOCIAL_PROTECTION_TOOL_IDS = new Set([
+  "cnss_pension",
+  "retirement_advanced",
+  "maternity_leave",
+  "sick_leave",
+  "work_accident",
+  "unemployment",
+]);
+
+export function getToolLegalDomain(toolId: string): ToolLegalDomain {
+  if (NON_LABOR_LAW_TOOL_IDS.has(toolId)) {
+    return toolId === "hiring_cost" || toolId === "profit_expense" ? "business_planning" : "career_finance";
+  }
+  if (PAYROLL_TAX_TOOL_IDS.has(toolId)) {
+    return "payroll_tax";
+  }
+  if (SOCIAL_PROTECTION_TOOL_IDS.has(toolId)) {
+    return "social_protection";
+  }
+  return "code_du_travail";
+}
+
+export function isCodeDuTravailTool(toolId: string): boolean {
+  return getToolLegalDomain(toolId) === "code_du_travail";
+}
+
 export const TOOL_CATALOG: ToolDefinition[] = [
   { id: "net_gross", label: "Net <-> Brut", kind: "simulator", href: "/simulateurs/brut-net" },
   { id: "employer_total_cost", label: "Cout total employeur", kind: "simulator", href: "/simulateurs/cout-employeur-total" },

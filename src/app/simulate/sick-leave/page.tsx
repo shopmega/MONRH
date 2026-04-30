@@ -16,11 +16,14 @@ export default function SickLeavePage() {
       apiPath="/api/simulate/sick-leave"
       calculatorType="sick_leave"
       fields={[
+        { key: "calculationDate", label: "Date de calcul", type: "date" },
         { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 1, step: 0.01 },
-        { key: "sickDays", label: "Jours d'arret maladie", type: "number", min: 1, step: 1 },
+        { key: "leaveStartDate", label: "Debut arret maladie", type: "date" },
+        { key: "leaveEndDate", label: "Fin arret maladie", type: "date" },
         { key: "cnssEligibilityDays", label: "Jours CNSS cotises (6 derniers mois)", type: "number", min: 0, step: 1 },
         { key: "employerTopUp", label: "Complement employeur (100% convention)", type: "checkbox" },
         { key: "employerTopUpRate", label: "Taux complement employeur (0 a 1)", type: "number", min: 0, max: 1, step: 0.1 },
+        { key: "medicalCertificateSubmitted", label: "Certificat medical transmis", type: "checkbox" },
       ]}
       breakdownLabels={{
         cnssEligible: "Eligible CNSS",
