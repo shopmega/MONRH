@@ -170,11 +170,14 @@ export default function RootLayout({
               <GoogleAnalytics />
               <PwaRegistration />
               <AdsenseScript />
-              <MaintenanceBanner />
-              <SiteNav />
-              <CommandCenter />
-              <div className="pb-24 md:pb-8">{children}</div>
-              <SiteFooter />
+              <div className="no-print">
+                <SiteNav />
+                <CommandCenter />
+              </div>
+              <div className="pb-24 md:pb-8 print:pb-0">{children}</div>
+              <div className="no-print">
+                <SiteFooter />
+              </div>
             </PublicConfigProvider>
           </ThemeProvider>
         </LanguageProvider>

@@ -480,37 +480,115 @@ input:checked + .sim-toggle-track .sim-toggle-thumb {
     display: none !important;
   }
 
+  .print-only {
+    display: block !important;
+  }
+
   body {
     background: white !important;
     color: black !important;
-    font-size: 12pt;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Force light theme for printing */
+  :root {
+    --juris-surface: #ffffff !important;
+    --juris-on-surface: #000000 !important;
+    --juris-surface-low: #ffffff !important;
+    --juris-surface-container: #ffffff !important;
+    --juris-surface-highest: #ffffff !important;
+    --juris-on-surface-variant: #333333 !important;
+    --juris-outline-variant: #eeeeee !important;
+    --background: #ffffff !important;
+    --foreground: #000000 !important;
+    --accent: #8a5022 !important;
+    --card: #ffffff !important;
+    --border: #eeeeee !important;
+    --surface: #ffffff !important;
+    --surface-muted: #f9f9f9 !important;
+    --surface-elevated: #ffffff !important;
+    --ink: #000000 !important;
+    --ink-soft: #333333 !important;
+    --heading: #000000 !important;
+    --line: #eeeeee !important;
+    --sim-bg: #ffffff !important;
+    --sim-card: #ffffff !important;
   }
 
   .paper-bg {
     background: white !important;
   }
 
-  .soft-card {
-    border: none !important;
+  .soft-card, .panel-tonal, .panel-strong {
+    border: 1px solid #eeeeee !important;
     box-shadow: none !important;
-    padding: 0 !important;
     background: transparent !important;
+    border-radius: 0 !important;
   }
 
   main {
     padding: 0 !important;
     margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
   }
 
-  /* Ensure text is black and readable */
-  h1, h2, h3, h4, h5, h6, p, span, div {
+  .mx-auto {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: none !important;
+  }
+
+  /* Professional Document Typography */
+  h1, h2, h3, h4 {
     color: black !important;
+    font-family: serif !important;
+    page-break-after: avoid;
+  }
+
+  p, span, div, li, td, th {
+    color: black !important;
+  }
+
+  /* Links */
+  a {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
   }
 
   /* Hide scrollbars and other UI artifacts */
   ::-webkit-scrollbar {
     display: none;
   }
+
+  /* Tables */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    border: 1px solid #eeeeee !important;
+    padding: 8px !important;
+    text-align: left !important;
+  }
+
+  /* Charts - usually don't print well as SVGs sometimes, so we give them some help */
+  canvas, svg {
+    max-width: 100% !important;
+  }
+}
+
+.print-only {
+  display: none;
 }
 
 /* ===== LIGHT THEME COMPONENT STYLES ===== */

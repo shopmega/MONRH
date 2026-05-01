@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
 import { SmartToggle } from "@/components/ui/smart-inputs";
+import { PrintHeader, PrintFooter } from "@/components/print-layout";
 
 type Result = {
   riskScore: number;
@@ -74,8 +75,9 @@ export default function ComplianceRiskScorePage() {
 
   return (
     <main className="paper-bg min-h-screen">
-      <div className="mx-auto w-full max-w-4xl px-4 pb-10 pt-6 sm:px-6">
-        <section className="soft-card rounded-[2rem] p-6">
+      <div className="mx-auto w-full max-w-4xl px-4 pb-10 pt-24 sm:px-6 print:pt-0">
+        <PrintHeader title={t("complianceTool.title")} />
+        <section className="soft-card rounded-[2rem] p-6 print:hidden">
           <p className="section-kicker">{t("complianceTool.kicker")}</p>
           <h1 className="display-font mt-2 break-words text-4xl font-semibold">{t("complianceTool.title")}</h1>
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
@@ -94,7 +96,7 @@ export default function ComplianceRiskScorePage() {
           </div>
         </section>
 
-        <form onSubmit={onSubmit} className="soft-card mt-5 space-y-6 rounded-3xl p-5 sm:p-7">
+        <form onSubmit={onSubmit} className="soft-card mt-5 space-y-6 rounded-3xl p-5 sm:p-7 print:hidden">
           <div className="panel-strong rounded-2xl p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">Checklist avant score</p>
             <ul className="mt-2 space-y-1 text-sm text-[var(--ink-soft)]">
@@ -150,7 +152,18 @@ export default function ComplianceRiskScorePage() {
           <section className="soft-card mt-4 min-w-0 rounded-3xl p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="display-font break-words text-3xl font-semibold">{t("complianceTool.risk", { score: result.riskScore })}</p>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskUi(result.level).badge}`}>
+              <div className="flex gap-2 print:hidden">
+                <button 
+                  onClick={() => window.print()}
+                  className="btn-muted px-4 py-1.5 text-xs font-semibold"
+                >
+                  Imprimer
+                </button>
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskUi(result.level).badge}`}>
+                  {getRiskUi(result.level).label}
+                </span>
+              </div>
+              <span className={`print-only rounded-full px-3 py-1 text-xs font-semibold ${getRiskUi(result.level).badge}`}>
                 {getRiskUi(result.level).label}
               </span>
             </div>
@@ -160,6 +173,7 @@ export default function ComplianceRiskScorePage() {
                 <li key={code} className="panel-strong rounded-xl p-3">{t(`complianceTool.reco_${code}`)}</li>
               ))}
             </ul>
+            <PrintFooter />
           </section>
         ) : null}
       </div>

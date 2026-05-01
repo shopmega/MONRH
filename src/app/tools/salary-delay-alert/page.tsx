@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
+import { PrintHeader, PrintFooter } from "@/components/print-layout";
 
 type Result = {
   riskScore: number;
@@ -75,8 +76,9 @@ export default function SalaryDelayAlertPage() {
 
   return (
     <main className="paper-bg min-h-screen">
-      <div className="mx-auto w-full max-w-4xl px-4 pb-10 pt-6 sm:px-6">
-        <section className="soft-card rounded-[2rem] p-6">
+      <div className="mx-auto w-full max-w-4xl px-4 pb-10 pt-24 sm:px-6 print:pt-0">
+        <PrintHeader title={t("salaryDelayTool.title")} />
+        <section className="soft-card rounded-[2rem] p-6 print:hidden">
           <p className="section-kicker">{t("salaryDelayTool.kicker")}</p>
           <h1 className="display-font mt-2 break-words text-4xl font-semibold">{t("salaryDelayTool.title")}</h1>
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
@@ -95,7 +97,7 @@ export default function SalaryDelayAlertPage() {
           </div>
         </section>
 
-        <form onSubmit={onSubmit} className="soft-card mt-5 grid gap-3 rounded-3xl p-5 sm:grid-cols-3">
+        <form onSubmit={onSubmit} className="soft-card mt-5 grid gap-3 rounded-3xl p-5 sm:grid-cols-3 print:hidden">
           <div className="panel-strong rounded-2xl p-4 sm:col-span-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">Checklist avant alerte</p>
             <ul className="mt-2 space-y-1 text-sm text-[var(--ink-soft)]">
@@ -138,7 +140,18 @@ export default function SalaryDelayAlertPage() {
           <section className="soft-card mt-4 min-w-0 rounded-3xl p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="display-font break-words text-3xl font-semibold">{t("salaryDelayTool.risk", { score: result.riskScore, level: t(`salaryDelayTool.${result.level}`) })}</p>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskUi(result.level).badge}`}>
+              <div className="flex gap-2 print:hidden">
+                <button 
+                  onClick={() => window.print()}
+                  className="btn-muted px-4 py-1.5 text-xs font-semibold"
+                >
+                  Imprimer
+                </button>
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskUi(result.level).badge}`}>
+                  {getRiskUi(result.level).label}
+                </span>
+              </div>
+              <span className={`print-only rounded-full px-3 py-1 text-xs font-semibold ${getRiskUi(result.level).badge}`}>
                 {getRiskUi(result.level).label}
               </span>
             </div>
@@ -169,6 +182,7 @@ export default function SalaryDelayAlertPage() {
                 </article>
               ))}
             </div>
+            <PrintFooter />
           </section>
         ) : null}
       </div>
