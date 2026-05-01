@@ -577,6 +577,32 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
     };
   }, [employerCompany?.id, resolvedSnapshot?.calculatorType]);
 
+  const copySummary = useCallback(async () => {
+    if (!resolvedSnapshot) return;
+
+    const breakdown = getEffectiveBreakdown(resolvedSnapshot.result);
+    const lines = Object.entries(breakdown)
+      .filter(([key]) => (resolvedSnapshot.breakdownLabels ?? {})[key])
+      .map(([key, value]) => {
+        const label = localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language);
+        return `${label}: ${formatValue(value, resolvedSnapshot.locale, t, (resolvedSnapshot.units ?? {})[key])}`;
+      });
+    const payload = [
+      localizeCalculatorTitle(resolvedSnapshot.calculatorType, resolvedSnapshot.title, language),
+      `${t("common.legalVersion")}: ${resolvedSnapshot.result.versionCode}`,
+      ...lines,
+    ].join("\n");
+
+    try {
+      await navigator.clipboard.writeText(payload);
+      setCopyStatus(t("resultPage.copySuccess"));
+      setTimeout(() => setCopyStatus(""), 3000);
+    } catch {
+      setCopyStatus(t("resultPage.copyError"));
+      setTimeout(() => setCopyStatus(""), 3000);
+    }
+  }, [resolvedSnapshot, language, t]);
+
   if (simulationId && !snapshot && historySnapshot === undefined) {
     return (
       <main className="paper-bg min-h-screen">
@@ -604,32 +630,6 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
       </main>
     );
   }
-
-  const safeSnapshot = resolvedSnapshot;
-
-  const copySummary = useCallback(async () => {
-    const breakdown = getEffectiveBreakdown(safeSnapshot.result);
-    const lines = Object.entries(breakdown)
-      .filter(([key]) => (safeSnapshot.breakdownLabels ?? {})[key])
-      .map(([key, value]) => {
-        const label = localizeBreakdownLabel(key, (safeSnapshot.breakdownLabels ?? {})[key] ?? key, language);
-        return `${label}: ${formatValue(value, safeSnapshot.locale, t, (safeSnapshot.units ?? {})[key])}`;
-      });
-    const payload = [
-      localizeCalculatorTitle(safeSnapshot.calculatorType, safeSnapshot.title, language),
-      `${t("common.legalVersion")}: ${safeSnapshot.result.versionCode}`,
-      ...lines,
-    ].join("\n");
-
-    try {
-      await navigator.clipboard.writeText(payload);
-      setCopyStatus(t("resultPage.copySuccess"));
-      setTimeout(() => setCopyStatus(""), 3000);
-    } catch {
-      setCopyStatus(t("resultPage.copyError"));
-      setTimeout(() => setCopyStatus(""), 3000);
-    }
-  }, [safeSnapshot, language, t]);
 
   const explanation = resolvedSnapshot.result.explanation;
   const explanationWarnings = explanation?.warnings?.slice(0, 3) ?? [];

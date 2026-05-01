@@ -1,8 +1,29 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
 import { vi } from "vitest";
 import { AccountDropdown } from "./account-dropdown";
 import { LanguageProvider } from "./language-provider";
+
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    onClick,
+    ...props
+  }: AnchorHTMLAttributes<HTMLAnchorElement> & { children: ReactNode; href: string }) => (
+    <a
+      href={href}
+      onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+        event.preventDefault();
+        onClick?.(event);
+      }}
+      {...props}
+    >
+      {children}
+    </a>
+  ),
+}));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard",

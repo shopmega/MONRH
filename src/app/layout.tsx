@@ -17,20 +17,7 @@ import {
   SITE_URL,
   absoluteUrl,
 } from "@/lib/seo";
-import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-manrope",
-});
 
 const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() ?? "";
 const organizationId = absoluteUrl("/#organization");
@@ -157,7 +144,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: preferenceBootstrapScript }} />
         {adsenseClient ? <meta name="google-adsense-account" content={adsenseClient} /> : null}
       </head>
-      <body className={`${inter.variable} ${manrope.variable} antialiased bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--juris-primary-container)] selection:text-white`}>
+      <body className="antialiased bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--juris-primary-container)] selection:text-white">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

@@ -73,3 +73,11 @@ export function savedSimulationPathMatches(
 
   return false;
 }
+
+export function resultRouteToExpectedPath(group: string, slug: string): string {
+  if (group === "simulate") {
+    return `/simulateurs/${slug}`;
+  }
+
+  return `/${group}/${slug}`;
+}

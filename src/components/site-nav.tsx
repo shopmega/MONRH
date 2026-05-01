@@ -5,8 +5,6 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { useTheme } from "@/components/theme-provider";
-import { simulatorSidebarGroups } from "@/lib/content/simulators-sidebar";
-import { protectionToolsSidebarItems } from "@/lib/content/tools-sidebar";
 
 type NavKey = "home" | "salaire" | "carriere" | "depart" | "bibliotheque" | "modeles" | "account";
 
@@ -78,14 +76,12 @@ const MOBILE_NAV_SECTIONS = [
     href: "/simulateurs",
     icon: "calculator",
     label: { fr: "Simulateurs", ar: "Simulateurs" },
-    groups: simulatorSidebarGroups,
   },
   {
     key: "outils",
     href: "/outils",
     icon: "shield",
     label: { fr: "Outils", ar: "Outils" },
-    groups: [{ title: { fr: "Protection", ar: "Protection" }, items: protectionToolsSidebarItems }],
   },
 ] as const;
 
@@ -313,63 +309,28 @@ export function SiteNav() {
               ))}
             </div>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {MOBILE_NAV_SECTIONS.map((section) => (
-                <details
+                <Link
                   key={section.key}
-                  className="rounded-[1.5rem] bg-[var(--juris-surface-low)] text-[var(--juris-on-surface-variant)]"
-                  open={isActive(pathname, section.href)}
+                  href={section.href}
+                  onClick={closeMenu}
+                  className={`flex items-center justify-between gap-3 rounded-[1.5rem] p-4 transition-all ${
+                    isActive(pathname, section.href)
+                      ? "bg-[var(--juris-primary)] text-white shadow-xl shadow-juris-primary/20"
+                      : "bg-[var(--juris-surface-low)] text-[var(--juris-on-surface-variant)]"
+                  }`}
                 >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4">
-                    <span className="flex min-w-0 items-center gap-3">
-                      <CustomIcon icon={section.icon} className="h-5 w-5 shrink-0" />
-                      <span className="text-xs font-bold uppercase tracking-widest">
-                        {section.label[language as "fr" | "ar"]}
-                      </span>
+                  <span className="flex min-w-0 items-center gap-3">
+                    <CustomIcon icon={section.icon} className="h-5 w-5 shrink-0" />
+                    <span className="text-xs font-bold uppercase tracking-widest">
+                      {section.label[language as "fr" | "ar"]}
                     </span>
-                    <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
-                    </svg>
-                  </summary>
-                  <div className="border-t border-[var(--line)] px-4 pb-4">
-                    <Link
-                      href={section.href}
-                      onClick={closeMenu}
-                      className={`mt-3 block rounded-xl px-3 py-2 text-sm font-semibold ${
-                        isActive(pathname, section.href)
-                          ? "bg-[var(--juris-primary)] text-white"
-                          : "bg-[var(--surface)] text-[var(--foreground)]"
-                      }`}
-                    >
-                      {language === "ar" ? "Tout voir" : "Tout voir"}
-                    </Link>
-                    <div className="mt-4 space-y-4">
-                      {section.groups.map((group) => (
-                        <div key={group.title.fr} className="space-y-2">
-                          <p className="px-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">
-                            {group.title[language as "fr" | "ar"]}
-                          </p>
-                          <div className="grid gap-1">
-                            {group.items.map((item) => (
-                              <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={closeMenu}
-                                className={`rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
-                                  isActive(pathname, item.href)
-                                    ? "bg-[var(--juris-primary)] text-white"
-                                    : "text-[var(--foreground)] hover:bg-[var(--surface)]"
-                                }`}
-                              >
-                                {item.title[language as "fr" | "ar"]}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </details>
+                  </span>
+                  <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 18l6-6-6-6" />
+                  </svg>
+                </Link>
               ))}
             </div>
           </div>
