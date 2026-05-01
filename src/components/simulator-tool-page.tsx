@@ -460,12 +460,12 @@ function SimulatorToolPageContent({
   const uiText =
     language === "ar"
       ? {
-          formTitle: "Ø§Ø¯Ø®Ù„ Ø§Ù„Ù…Ø¹Ø·ÙŠØ§Øª",
-          checklistTitle: "Ù‚Ø¨Ù„ Ø§Ù„Ø­Ø³Ø§Ø¨",
-          checklistLine1: "Ø±Ø§Ø¬Ø¹ Ø§Ù„ØªÙˆØ§Ø±ÙŠØ® ÙˆØ§Ù„ÙØªØ±Ø©",
-          checklistLine2: "Ø§Ø¯Ø®Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø¨Ø§Ù„Øº Ø¨Ù†ÙØ³ Ø§Ù„Ø¹Ù…Ù„Ø©",
-          checklistLine3: "Ø§Ù„Ø®ÙŠØ§Ø±Ø§Øª Ø§Ù„Ø§Ø¶Ø§ÙÙŠØ© Ù‚Ø¯ ØªØ¤Ø«Ø± Ø¹Ù„Ù‰ Ø§Ù„Ù†ØªÙŠØ¬Ø©",
-          previewTitle: "Ù…Ø¹Ø§ÙŠÙ†Ø© Ø³Ø±ÙŠØ¹Ø©",
+          formTitle: "إدخال المعطيات",
+          checklistTitle: "قبل الحساب",
+          checklistLine1: "راجع التواريخ والفترة",
+          checklistLine2: "أدخل جميع المبالغ بنفس العملة",
+          checklistLine3: "الخيارات الإضافية قد تؤثر على النتيجة",
+          previewTitle: "معاينة سريعة",
         }
       : {
           formTitle: "Saisie des Parametres",
@@ -475,10 +475,10 @@ function SimulatorToolPageContent({
           checklistLine3: "Revoyez les options actives avant execution",
           previewTitle: "Apercu Rapide",
         };
-  const historyTitle = language === "ar" ? "Historique" : "Historique Recent";
-  const historyEmpty = language === "ar" ? "Aucune donnee recente." : "Aucune simulation enregistree pour cet outil.";
-  const historyHint = language === "ar" ? "Les executions recentes apparaitront ici." : "Vos derniers calculs apparaitront ici.";
-  const resetLabel = language === "ar" ? "Reset" : "Reinitialiser";
+  const historyTitle = language === "ar" ? "السجل" : "Historique Recent";
+  const historyEmpty = language === "ar" ? "لا توجد بيانات حديثة." : "Aucune simulation enregistree pour cet outil.";
+  const historyHint = language === "ar" ? "سيظهر السجل هنا." : "Vos derniers calculs apparaitront ici.";
+  const resetLabel = language === "ar" ? "إعادة تعيين" : "Reinitialiser";
   const relatedItems = [
     {
       title: t("nav.simulate"),

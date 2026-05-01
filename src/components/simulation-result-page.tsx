@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { Suspense, useEffect, useMemo, useState, useSyncExternalStore, useCallback } from "react";
 import { PartnerAdSection } from "@/components/partner-ad-section";
 import { CompanyContextCard } from "@/components/company-context-card";
 import { CompanyTrustSummary } from "@/components/company-trust-summary";
@@ -23,6 +23,7 @@ import { type SimulationResultSnapshot } from "@/lib/simulations/result-snapshot
 import { buildSimulationResultDocumentLink } from "@/lib/tools/result-document-links";
 import type { PieSlice } from "@/components/charts/breakdown-pie-chart";
 import type { BarEntry } from "@/components/charts/timeline-bar-chart";
+import { getCompanySalaryBenchmarks, type AVisCompanySalaryBenchmarksResult } from "@/lib/avis-api";
 
 const BreakdownPieChart = dynamic(
   () => import("@/components/charts/breakdown-pie-chart").then((m) => ({ default: m.BreakdownPieChart })),
@@ -140,7 +141,7 @@ function pickKeyMetrics(snapshot: SimulationResultSnapshot): Array<[string, numb
     .slice(0, 3);
 }
 
-import { getCompanySalaryBenchmarks, type AVisCompanySalaryBenchmarksResult } from "@/lib/avis-api";
+
 
 /* ── Chart data helpers ──────────────────────────────────────────────── */
 
@@ -585,7 +586,7 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
 
   const safeSnapshot = resolvedSnapshot;
 
-  async function copySummary() {
+  const copySummary = useCallback(async () => {
     const breakdown = getEffectiveBreakdown(safeSnapshot.result);
     const lines = Object.entries(breakdown)
       .filter(([key]) => (safeSnapshot.breakdownLabels ?? {})[key])
@@ -602,10 +603,12 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
     try {
       await navigator.clipboard.writeText(payload);
       setCopyStatus(t("resultPage.copySuccess"));
+      setTimeout(() => setCopyStatus(""), 3000);
     } catch {
       setCopyStatus(t("resultPage.copyError"));
+      setTimeout(() => setCopyStatus(""), 3000);
     }
-  }
+  }, [safeSnapshot, language, t]);
 
   const explanation = resolvedSnapshot.result.explanation;
   const explanationWarnings = explanation?.warnings?.slice(0, 3) ?? [];
@@ -613,11 +616,11 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
   const explanationText =
     language === "ar"
       ? {
-          title: "Ø®Ù„Ø§ØµØ© Ø§Ù„Ù†ØªÙŠØ¬Ø©",
-          warnings: "Ù†Ù‚Ø§Ø· Ø§Ù†ØªØ¨Ø§Ù‡",
-          nextSteps: "Ø§Ù„Ø®Ø·ÙˆØ§Øª Ø§Ù„ØªØ§Ù„ÙŠØ©",
-          noWarnings: "Ù„Ø§ ØªÙˆØ¬Ø¯ ØªØ­Ø°ÙŠØ±Ø§Øª Ù…Ø¶Ø§ÙÙŠØ©.",
-          noNextSteps: "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø®Ø·ÙˆØ§Øª Ù…Ù‚ØªØ±Ø­Ø©.",
+          title: "خلاصة النتيجة",
+          warnings: "نقاط انتباه",
+          nextSteps: "الخطوات التالية",
+          noWarnings: "لا توجد تحذيرات إضافية.",
+          noNextSteps: "لا توجد خطوات مقترحة.",
         }
       : {
           title: "Synthese du Resultat",
@@ -632,19 +635,19 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
     resultState === "success"
       ? {
           badgeClass: "status-success",
-          title: language === "ar" ? "Etat: Valide" : "Etat: Resultat complet",
+          title: language === "ar" ? "الحالة: نتيجة كاملة" : "Etat: Resultat complet",
           description:
             language === "ar"
-              ? "Le calcul est disponible avec donnees exploitables."
+              ? "الحساب متاح مع بيانات قابلة للاستغلال."
               : "Le calcul est disponible avec des donnees exploitables.",
         }
       : resultState === "warning"
         ? {
             badgeClass: "status-warning",
-            title: language === "ar" ? "Etat: Attention" : "Etat: Points d'attention",
+            title: language === "ar" ? "الحالة: نقاط انتباه" : "Etat: Points d'attention",
             description:
               language === "ar"
-                ? "Certaines hypotheses demandent verification avant decision."
+                ? "بعض الفرضيات تتطلب التحقق قبل اتخاذ القرار."
                 : "Certaines hypotheses demandent verification avant decision.",
           }
         : {
@@ -750,7 +753,7 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
 
             {showPieChart && pieData.length > 0 ? (
               <section className="soft-card overflow-hidden min-w-0 rounded-3xl p-5">
-                <p className="section-kicker">Répartition salariale</p>
+                  <p className="section-kicker">{t("resultPage.breakdownTitle")}</p>
                 <div className="mt-3">
                   <BreakdownPieChart data={pieData} />
                 </div>
@@ -759,7 +762,7 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
 
             {showBarChart && barData.length > 0 ? (
               <section className="soft-card overflow-hidden min-w-0 rounded-3xl p-5">
-                <p className="section-kicker">Projection</p>
+                  <p className="section-kicker">{t("resultPage.breakdownProjection")}</p>
                 <div className="mt-3">
                   <TimelineBarChart data={barData} />
                 </div>
@@ -783,7 +786,9 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
                 </div>
               ) : (
                 <div className="status-info mt-3 rounded-xl px-3 py-2 text-sm">
-                  Les donnees de detail ne sont pas encore disponibles pour cette execution.
+                  <p className="text-sm text-[var(--ink-soft)]">
+                      {t("resultPage.noDetailData")}
+                    </p>
                 </div>
               )}
             </section>
@@ -820,7 +825,7 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
             </section>
 
             <section className="soft-card rounded-3xl p-5">
-              <p className="section-kicker">Contexte employeur</p>
+              <p className="section-kicker">{t("resultPage.employerContext")}</p>
               <div className="mt-3 space-y-3">
                 {employerCompany?.id ? (
                   <CompanyTrustSummary companyId={employerCompany.id} />
@@ -828,13 +833,13 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
                 
                 {salaryBenchmarks?.salaryBenchmarks && (
                   <div className="rounded-2xl border border-[var(--accent-soft)] bg-gradient-to-br from-[var(--surface)] to-[var(--surface-muted)] p-4 shadow-sm">
-                    <p className="section-kicker text-[var(--accent)]">Insights Marché (Avisine)</p>
+                    <p className="section-kicker text-[var(--accent)]">{t("resultPage.marketInsights")}</p>
                     <p className="mt-1 text-sm font-semibold">
-                      Salaire médian : {salaryBenchmarks.salaryBenchmarks.medianMonthlySalary?.toLocaleString() ?? "N/A"} MAD
+                      {t("resultPage.medianSalary")} : {salaryBenchmarks.salaryBenchmarks.medianMonthlySalary?.toLocaleString() ?? "N/A"} MAD
                     </p>
                     <p className="mt-1 text-xs text-[var(--ink-soft)]">
-                      Basé sur {salaryBenchmarks.salaryBenchmarks.submissionCount} avis vérifiés.
-                      {salaryBenchmarks.salaryBenchmarks.pctAboveCityAvg ? ` (${salaryBenchmarks.salaryBenchmarks.pctAboveCityAvg}% au-dessus de la moyenne ville)` : ""}
+                      {t("resultPage.basedOnReviews", { count: salaryBenchmarks.salaryBenchmarks.submissionCount })}
+                      {salaryBenchmarks.salaryBenchmarks.pctAboveCityAvg ? ` (${salaryBenchmarks.salaryBenchmarks.pctAboveCityAvg}% ${t("resultPage.aboveCityAvg")})` : ""}
                     </p>
                   </div>
                 )}

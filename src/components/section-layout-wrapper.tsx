@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { SectionSidebar } from "./section-sidebar";
+import { useLanguage } from "./language-provider";
 import type { LocalizedText } from "@/lib/navigation/category-hubs";
 
 type SidebarItem = {
@@ -34,7 +35,19 @@ export function SectionLayoutWrapper({
   sidebarProps,
 }: SectionLayoutWrapperProps) {
   const pathname = usePathname();
+  const { language } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isMobileMenuOpen]);
 
   function normalizeSectionPath(path: string) {
     return path
@@ -56,7 +69,7 @@ export function SectionLayoutWrapper({
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-[var(--heading)] flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-[var(--accent)]"></div>
-              {sidebarProps.title.fr}
+              {language === "ar" ? sidebarProps.title.ar : sidebarProps.title.fr}
             </h2>
             <button
               onClick={() => setIsMobileMenuOpen(true)}

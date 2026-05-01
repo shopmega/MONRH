@@ -32,10 +32,10 @@ async function readJsonSafe<T>(response: Response): Promise<T | null> {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  simulation: "bg-[#FFF0E6] text-[#8a5022]",
-  contract: "bg-[#E6F4EF] text-[#1e6b4a]",
-  document: "bg-[#EEF0FF] text-[#4050c8]",
-  tool: "bg-[#F0EAE4] text-[#52443b]",
+  simulation: "bg-[var(--accent-soft)] text-[var(--accent)]",
+  contract: "bg-[var(--ok-bg)] text-[var(--ok)]",
+  document: "bg-[var(--info-bg)] text-[var(--info-ink)]",
+  tool: "bg-[var(--surface-muted)] text-[var(--ink-soft)]",
 };
 
 const EXPERTISE_DOMAINS = [
@@ -111,7 +111,7 @@ export default function ComptePage() {
       const data = (await response.json()) as { ok?: boolean };
       if (!response.ok || !data.ok) return;
       window.dispatchEvent(new Event("salarie-auth-changed"));
-      router.replace("/connexion?next=/compte");
+      router.replace("/login?next=/compte");
       router.refresh();
     } catch { /* no-op */ } finally {
       setLoggingOut(false);
@@ -155,42 +155,42 @@ export default function ComptePage() {
   const totalItems = simulations.length + documents.length + contracts.length + cases.length;
 
   return (
-    <div className="min-h-screen bg-[#F8F5F2] font-sans pb-16">
+    <div className="min-h-screen bg-[var(--background)] font-sans pb-16">
 
       {/* ── PROFILE HEADER ─────────────────────────────────────────── */}
-      <div className="bg-white px-5 pt-24 pb-6">
+      <div className="bg-[var(--surface)] px-5 pt-24 pb-6 border-b border-[var(--line)]">
         {/* Avatar row */}
         <div className="flex items-center gap-4 mb-5">
-          <div className="w-14 h-14 rounded-full bg-[#F0EAE4] flex items-center justify-center text-2xl font-black text-[#8a5022]">
+          <div className="w-14 h-14 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-2xl font-black text-[var(--accent)]">
             M
           </div>
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#8a5022]">jurisconsult</p>
-            <p className="text-[18px] font-extrabold text-[#1a1a1a]">{t("accountPage.title")}</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--accent)]">jurisconsult</p>
+            <p className="text-[18px] font-extrabold text-[var(--ink)]">{t("accountPage.title")}</p>
           </div>
           <button
             onClick={logoutUserSession}
             disabled={loggingOut}
-            className="ml-auto text-[11px] font-bold text-[#6b5e55] bg-[#F0EAE4] px-3 py-1.5 rounded-full"
+            className="ml-auto text-[11px] font-bold text-[var(--ink-soft)] bg-[var(--surface-muted)] px-3 py-1.5 rounded-full"
           >
-            {loggingOut ? "..." : "Déconnexion"}
+            {loggingOut ? "..." : (language === "ar" ? "تسجيل الخروج" : "Déconnexion")}
           </button>
         </div>
-        <p className="text-sm text-[#6b5e55] leading-relaxed mb-5">{t("accountPage.description")}</p>
+        <p className="text-sm text-[var(--ink-soft)] leading-relaxed mb-5">{t("accountPage.description")}</p>
 
         {/* Primary action */}
-        <Link href="/salaire" className="block w-full bg-[#8a5022] text-white font-bold text-sm text-center py-3.5 rounded-2xl">
+        <Link href="/salaire" className="block w-full bg-[var(--accent)] text-white font-bold text-sm text-center py-3.5 rounded-2xl">
           + {t("accountPage.newSimulation")}
         </Link>
       </div>
 
       {/* ── PROFESSIONAL PORTFOLIO ────────────────────────────────── */}
       <div className="px-5 mt-4">
-        <div className="bg-white rounded-3xl overflow-hidden">
-          <div className="bg-[#8a5022] p-6">
+        <div className="bg-[var(--surface)] border border-[var(--line)] rounded-3xl overflow-hidden">
+          <div className="bg-[var(--accent)] p-6">
             <p className="text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1">Portfolio</p>
             <h2 className="text-[22px] font-extrabold text-white leading-tight mb-1">
-              {language === "ar" ? "بورتفوليو مهني" : "Professional\nPortfolio"}
+              {language === "ar" ? "بورتفوليو مهني" : "Portfolio Professionnel"}
             </h2>
             <p className="text-sm text-white/70 mt-2 mb-4 leading-relaxed">
               {language === "ar" ? "سجلك القانوني والمهني الشامل" : "Un aperçu consolidé de votre activité juridique et RH."}
@@ -207,31 +207,31 @@ export default function ComptePage() {
           </div>
 
           {/* Big stat */}
-          <div className="px-6 py-5 border-b border-[#F0EAE4]">
+          <div className="px-6 py-5 border-b border-[var(--line)]">
             <div className="flex items-end gap-3">
-              <span className="text-[52px] font-black text-[#8a5022] leading-none">
+              <span className="text-[52px] font-black text-[var(--accent)] leading-none">
                 {loading ? "·" : totalItems}
               </span>
               <div className="pb-2">
-                <p className="text-[11px] font-bold text-[#1a1a1a]">Actions & Dossiers</p>
-                <p className="text-[11px] text-[#6b5e55]">Activité jurisconsult</p>
+                <p className="text-[11px] font-bold text-[var(--ink)]">{language === "ar" ? "الإجراءات والملفات" : "Actions & Dossiers"}</p>
+                <p className="text-[11px] text-[var(--ink-soft)]">Activité jurisconsult</p>
               </div>
             </div>
-            <p className="text-[11px] text-[#6b5e55] mt-1 font-semibold">
+            <p className="text-[11px] text-[var(--ink-soft)] mt-1 font-semibold">
               {language === "ar" ? "الأقدمية:" : "Ancienneté:"} {seniorityValue}
             </p>
           </div>
 
           {/* Expertise Domains */}
           <div className="px-6 py-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#8a5022] mb-3">
-              Expertise Domains
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] mb-3">
+              {language === "ar" ? "مجالات الخبرة" : "Domaines d'Expertise"}
             </p>
             <div className="space-y-2">
               {EXPERTISE_DOMAINS.map((d) => (
                 <div key={d.label} className="flex items-center gap-3 py-1">
                   <span className="text-lg">{d.icon}</span>
-                  <p className="text-[13px] font-semibold text-[#1a1a1a]">{d.label}</p>
+                  <p className="text-[13px] font-semibold text-[var(--ink)]">{d.label}</p>
                 </div>
               ))}
             </div>
@@ -245,12 +245,12 @@ export default function ComptePage() {
           {[
             { label: t("common.simulationsLabel"), value: simulations.length },
             { label: t("common.documentsLabel"), value: documents.length },
-            { label: "Contrats", value: contracts.length },
-            { label: "Dossiers", value: cases.length },
+            { label: language === "ar" ? "عقود" : "Contrats", value: contracts.length },
+            { label: language === "ar" ? "ملفات" : "Dossiers", value: cases.length },
           ].map((s) => (
-            <div key={s.label} className="bg-white rounded-2xl p-3 text-center">
-              <p className="text-[22px] font-extrabold text-[#8a5022]">{loading ? "·" : s.value}</p>
-              <p className="text-[9px] font-semibold text-[#6b5e55] mt-0.5 leading-tight">{s.label}</p>
+            <div key={s.label} className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-3 text-center">
+              <p className="text-[22px] font-extrabold text-[var(--accent)]">{loading ? "·" : s.value}</p>
+              <p className="text-[9px] font-semibold text-[var(--ink-soft)] mt-0.5 leading-tight">{s.label}</p>
             </div>
           ))}
         </div>
@@ -258,28 +258,28 @@ export default function ComptePage() {
 
       {/* ── COMPLIANCE STATUS ────────────────────────────────────── */}
       <div className="px-5 mt-4">
-        <div className="bg-white rounded-3xl p-5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[#8a5022] mb-3">
-            Compliance Status Update
+        <div className="bg-[var(--surface)] border border-[var(--line)] rounded-3xl p-5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] mb-3">
+            {language === "ar" ? "تحديث حالة التوافق" : "Mise à jour de Conformité"}
           </p>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-bold text-[#1a1a1a] mb-0.5">Statut SMIG</p>
-              <p className="text-[11px] text-[#6b5e55]">Dernière vérification</p>
+              <p className="text-[13px] font-bold text-[var(--ink)] mb-0.5">{language === "ar" ? "وضع SMIG" : "Statut SMIG"}</p>
+              <p className="text-[11px] text-[var(--ink-soft)]">{language === "ar" ? "آخر تحقق" : "Dernière vérification"}</p>
             </div>
-            <span className={`px-3 py-1.5 rounded-full text-[11px] font-black ${smigStatus.includes("Non") || smigStatus.includes("غير") ? "bg-[#FEE2E2] text-[#991B1B]" : "bg-[#D1FAE5] text-[#065F46]"}`}>
+            <span className={`px-3 py-1.5 rounded-full text-[11px] font-black ${smigStatus.includes("Non") || smigStatus.includes("غير") ? "bg-[var(--err-bg)] text-[var(--err)]" : "bg-[var(--ok-bg)] text-[var(--ok)]"}`}>
               {smigStatus}
             </span>
           </div>
 
           {/* Verifications pending */}
           {verifications.filter((v) => v.status === "pending").length > 0 && (
-            <div className="mt-4 pt-4 border-t border-[#F0EAE4] flex items-center justify-between">
-              <p className="text-[12px] text-[#6b5e55] font-semibold">
-                {verifications.filter((v) => v.status === "pending").length} vérification(s) en attente
+            <div className="mt-4 pt-4 border-t border-[var(--line)] flex items-center justify-between">
+              <p className="text-[12px] text-[var(--ink-soft)] font-semibold">
+                {verifications.filter((v) => v.status === "pending").length} {language === "ar" ? "تحقق(ات) في الانتظار" : "vérification(s) en attente"}
               </p>
-              <Link href="/compte/verifications" className="text-[11px] font-bold text-[#8a5022]">
-                Voir →
+              <Link href="/compte/verifications" className="text-[11px] font-bold text-[var(--accent)]">
+                {language === "ar" ? "عرض ←" : "Voir →"}
               </Link>
             </div>
           )}
@@ -288,29 +288,29 @@ export default function ComptePage() {
 
       {/* ── CONTRACTS ────────────────────────────────────────────── */}
       <div className="px-5 mt-4">
-        <div className="bg-white rounded-3xl p-5">
+        <div className="bg-[var(--surface)] border border-[var(--line)] rounded-3xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-[13px] font-extrabold text-[#1a1a1a]">Mes Contrats</p>
-            <Link href="/compte/contrats" className="text-[11px] font-bold text-[#8a5022]">Voir tout →</Link>
+            <p className="text-[13px] font-extrabold text-[var(--ink)]">{language === "ar" ? "عقودي" : "Mes Contrats"}</p>
+            <Link href="/compte/contrats" className="text-[11px] font-bold text-[var(--accent)]">{language === "ar" ? "عرض الكل ←" : "Voir tout →"}</Link>
           </div>
 
           {loading ? (
             <div className="py-4 flex justify-center">
-              <div className="w-5 h-5 border-2 border-[#8a5022] border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : contracts.length === 0 ? (
-            <Link href="/contrat" className="block border-2 border-dashed border-[#F0EAE4] rounded-2xl p-5 text-center">
-              <p className="text-[13px] font-bold text-[#8a5022]">Générer mon premier contrat →</p>
+            <Link href="/contrat" className="block border-2 border-dashed border-[var(--line)] rounded-2xl p-5 text-center">
+              <p className="text-[13px] font-bold text-[var(--accent)]">{language === "ar" ? "إنشاء عقدي الأول ←" : "Générer mon premier contrat →"}</p>
             </Link>
           ) : (
             <div className="space-y-2">
               {contracts.slice(0, 3).map((item) => (
-                <Link key={item.id} href="/compte/contrats" className="flex items-center justify-between py-2.5 border-b border-[#F8F5F2] last:border-0">
+                <Link key={item.id} href="/compte/contrats" className="flex items-center justify-between py-2.5 border-b border-[var(--background)] last:border-0">
                   <div>
-                    <p className="text-[13px] font-bold text-[#1a1a1a] line-clamp-1">{item.templateTitle}</p>
-                    <p className="text-[10px] text-[#6b5e55] mt-0.5">{formatDate(item.createdAt, locale)}</p>
+                    <p className="text-[13px] font-bold text-[var(--ink)] line-clamp-1">{item.templateTitle}</p>
+                    <p className="text-[10px] text-[var(--ink-soft)] mt-0.5">{formatDate(item.createdAt, locale)}</p>
                   </div>
-                  <span className="bg-[#F0EAE4] text-[#8a5022] text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full flex-shrink-0 ml-3">
+                  <span className="bg-[var(--surface-muted)] text-[var(--accent)] text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full flex-shrink-0 ml-3">
                     {item.contractType}
                   </span>
                 </Link>
@@ -322,21 +322,21 @@ export default function ComptePage() {
 
       {/* ── ACCOUNT INTEGRITY / DOSSIERS ─────────────────────────── */}
       <div className="px-5 mt-4">
-        <div className="bg-white rounded-3xl p-5">
+        <div className="bg-[var(--surface)] border border-[var(--line)] rounded-3xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-[13px] font-extrabold text-[#1a1a1a]">Account Integrity</p>
-            <span className="bg-[#D1FAE5] text-[#065F46] text-[10px] font-bold px-2.5 py-1 rounded-full">Actif</span>
+            <p className="text-[13px] font-extrabold text-[var(--ink)]">{language === "ar" ? "سلامة الحساب" : "Intégrité du Compte"}</p>
+            <span className="bg-[var(--ok-bg)] text-[var(--ok)] text-[10px] font-bold px-2.5 py-1 rounded-full">{language === "ar" ? "نشط" : "Actif"}</span>
           </div>
           <div className="space-y-3">
             {[
-              { label: "Dossiers Juridiques", value: cases.length, href: "/compte/dossiers" },
-              { label: "Pièces à conviction", value: evidenceArtifacts.length, href: "/compte" },
-              { label: "Infractions journalisées", value: violations.length, href: "/journal/violations" },
-              { label: "Heures supp. enregistrées", value: overtimeLogs.length, href: "/journal/overtime" },
+              { label: language === "ar" ? "الملفات القانونية" : "Dossiers Juridiques", value: cases.length, href: "/compte/dossiers" },
+              { label: language === "ar" ? "الأدلة الجنائية" : "Pièces à conviction", value: evidenceArtifacts.length, href: "/compte" },
+              { label: language === "ar" ? "المخالفات المسجلة" : "Infractions journalisées", value: violations.length, href: "/journal/violations" },
+              { label: language === "ar" ? "الساعات الإضافية المسجلة" : "Heures supp. enregistrées", value: overtimeLogs.length, href: "/journal/overtime" },
             ].map((row) => (
-              <Link key={row.label} href={row.href} className="flex items-center justify-between py-2 border-b border-[#F8F5F2] last:border-0">
-                <p className="text-[12px] font-semibold text-[#1a1a1a]">{row.label}</p>
-                <span className="text-[13px] font-extrabold text-[#8a5022]">{loading ? "·" : row.value}</span>
+              <Link key={row.label} href={row.href} className="flex items-center justify-between py-2 border-b border-[var(--background)] last:border-0">
+                <p className="text-[12px] font-semibold text-[var(--ink)]">{row.label}</p>
+                <span className="text-[13px] font-extrabold text-[var(--accent)]">{loading ? "·" : row.value}</span>
               </Link>
             ))}
           </div>
@@ -346,8 +346,8 @@ export default function ComptePage() {
       {/* ── RECENT ACTIVITY TIMELINE ─────────────────────────────── */}
       {activity.length > 0 && (
         <div className="px-5 mt-4">
-          <div className="bg-white rounded-3xl p-5">
-            <p className="text-[13px] font-extrabold text-[#1a1a1a] mb-4">{t("accountPage.recentHistory")}</p>
+          <div className="bg-[var(--surface)] border border-[var(--line)] rounded-3xl p-5">
+            <p className="text-[13px] font-extrabold text-[var(--ink)] mb-4">{t("accountPage.recentHistory")}</p>
             <div className="space-y-3">
               {activity.slice(0, 8).map((item) => {
                 const Wrapper = item.href ? Link : "div";
@@ -357,9 +357,9 @@ export default function ComptePage() {
                     <span className={`mt-0.5 w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-black ${STATUS_COLORS[item.kind] ?? STATUS_COLORS.tool}`}>
                       {item.kind[0].toUpperCase()}
                     </span>
-                    <div className="flex-1 min-w-0 border-b border-[#F8F5F2] pb-3">
-                      <p className="text-[12px] font-bold text-[#1a1a1a] line-clamp-1">{item.title}</p>
-                      <p className="text-[10px] text-[#6b5e55] mt-0.5">{formatDate(item.date, locale)}</p>
+                    <div className="flex-1 min-w-0 border-b border-[var(--background)] pb-3">
+                      <p className="text-[12px] font-bold text-[var(--ink)] line-clamp-1">{item.title}</p>
+                      <p className="text-[10px] text-[var(--ink-soft)] mt-0.5">{formatDate(item.date, locale)}</p>
                     </div>
                   </Wrapper>
                 );
@@ -371,20 +371,20 @@ export default function ComptePage() {
 
       {/* ── QUICK SHORTCUTS ──────────────────────────────────────── */}
       <div className="px-5 mt-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#8a5022] mb-3 px-1">
+        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--accent)] mb-3 px-1">
           {t("common.explore")}
         </p>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: "Protection Droits", href: "/compte/protection" },
-            { label: "Infractions", href: "/journal/violations" },
-            { label: "Vérification emploi", href: "/compte/verifications" },
-            { label: "Générer Contrat", href: "/contrat" },
+            { label: language === "ar" ? "حماية الحقوق" : "Protection Droits", href: "/compte/protection" },
+            { label: language === "ar" ? "المخالفات" : "Infractions", href: "/journal/violations" },
+            { label: language === "ar" ? "التحقق من التوظيف" : "Vérification emploi", href: "/compte/verifications" },
+            { label: language === "ar" ? "إنشاء عقد" : "Générer Contrat", href: "/contrat" },
           ].map((s) => (
             <Link key={s.href} href={s.href}>
-              <div className="bg-white rounded-2xl p-4">
-                <p className="text-[12px] font-bold text-[#1a1a1a]">{s.label}</p>
-                <p className="text-[10px] text-[#8a5022] mt-1 font-semibold">Accéder →</p>
+              <div className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-4">
+                <p className="text-[12px] font-bold text-[var(--ink)]">{s.label}</p>
+                <p className="text-[10px] text-[var(--accent)] mt-1 font-semibold">{language === "ar" ? "دخول ←" : "Accéder →"}</p>
               </div>
             </Link>
           ))}
@@ -393,7 +393,7 @@ export default function ComptePage() {
 
       {/* ── PARTNER AD ───────────────────────────────────────────── */}
       <div className="px-5 mt-4">
-        <div className="bg-white rounded-3xl p-3 overflow-hidden">
+        <div className="bg-[var(--surface)] border border-[var(--line)] rounded-3xl p-3 overflow-hidden">
           <AdSlot slot="9999999999" format="auto" />
         </div>
       </div>

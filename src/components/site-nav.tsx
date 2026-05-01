@@ -22,54 +22,54 @@ const NAV_ITEMS: NavItem[] = [
     key: "home", 
     href: "/", 
     icon: "home",
-    label: { fr: "Accueil", ar: "Accueil" },
+    label: { fr: "Accueil", ar: "الرئيسية" },
   },
   { 
     key: "salaire", 
     href: "/situation/mon-salaire", 
     icon: "wallet",
-    label: { fr: "Mon Salaire", ar: "Mon Salaire" },
+    label: { fr: "Mon Salaire", ar: "أجري" },
   },
   { 
     key: "carriere", 
     href: "/situation/ma-carriere", 
     icon: "trending-up",
-    label: { fr: "Ma Carrière", ar: "Ma Carrière" },
+    label: { fr: "Ma Carrière", ar: "مساري المهني" },
   },
   { 
     key: "depart", 
     href: "/situation/depart-rupture", 
     icon: "log-out",
-    label: { fr: "Départ", ar: "Départ" },
+    label: { fr: "Départ", ar: "المغادرة" },
   },
   { 
     key: "bibliotheque", 
     href: "/bibliotheque", 
     icon: "book-open",
-    label: { fr: "Bibliothèque", ar: "Bibliothèque" },
+    label: { fr: "Bibliothèque", ar: "المكتبة" },
   },
   { 
     key: "modeles", 
     href: "/modeles", 
     icon: "file-text",
-    label: { fr: "Modèles", ar: "Modèles" },
+    label: { fr: "Modèles", ar: "نماذج" },
   },
   { 
     key: "account", 
     href: "/compte", 
     icon: "user",
-    label: { fr: "Mon Compte", ar: "Mon Compte" },
+    label: { fr: "Mon Compte", ar: "حسابي" },
   },
 ];
 
 const ARABIC_NAV_LABELS: Record<NavKey, string> = {
-  home: "Accueil",
-  salaire: "Mon Salaire",
-  carriere: "Ma Carrière",
-  depart: "Départ",
-  bibliotheque: "Bibliothèque",
-  modeles: "Modèles",
-  account: "Mon Compte",
+  home: "الرئيسية",
+  salaire: "أجري",
+  carriere: "مساري المهني",
+  depart: "المغادرة",
+  bibliotheque: "المكتبة",
+  modeles: "نماذج",
+  account: "حسابي",
 };
 
 const MOBILE_NAV_SECTIONS = [
@@ -201,6 +201,17 @@ export function SiteNav() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
 
+  useEffect(() => {
+    if (openMenu) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [openMenu]);
+
   const toggleMenu = useCallback(() => {
     setOpenMenu(!openMenu);
   }, [openMenu]);
@@ -219,6 +230,8 @@ export function SiteNav() {
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [closeMenu]);
+
+
 
   return (
     <>
