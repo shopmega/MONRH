@@ -289,19 +289,19 @@ export default function SimulatePage() {
           <div className="mt-5 grid gap-2 sm:grid-cols-3">
             <article className="panel-tonal rounded-2xl px-4 py-3">
               <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
-                {language === "ar" ? "Ø§Ù„Ù…Ø³Ø§Ø±Ø§Øª Ø§Ù„Ù†Ø´Ø·Ø©" : "Parcours actifs"}
+                {language === "ar" ? "المسارات النشطة" : "Parcours actifs"}
               </p>
               <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">{visibleGroups.length}</p>
             </article>
             <article className="panel-tonal rounded-2xl px-4 py-3">
               <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
-                {language === "ar" ? "Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…Ø­Ø§ÙƒÙŠØ§Øª" : "Simulateurs"}
+                {language === "ar" ? "إجمالي المحاكيات" : "Simulateurs"}
               </p>
               <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">{totalVisibleSimulators}</p>
             </article>
             <article className="panel-tonal rounded-2xl px-4 py-3">
               <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
-                {language === "ar" ? "Ø§Ù„Ø§Ø±ØªØ¨Ø§Ø·Ø§Øª" : "Connexions"}
+                {language === "ar" ? "الارتباطات" : "Connexions"}
               </p>
               <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">Tools + Docs</p>
             </article>
@@ -314,7 +314,7 @@ export default function SimulatePage() {
               {t("nav.documents")}
             </Link>
             <Link href="/contrat" className="rounded-full bg-[var(--juris-surface-low)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]">
-              {language === "ar" ? "Ù…ÙˆÙ„Ø¯ Ø§Ù„Ø¹Ù‚ÙˆØ¯" : "Generateur de contrats"}
+              {language === "ar" ? "مولد العقود" : "Generateur de contrats"}
             </Link>
           </div>
           <div className="mt-6">

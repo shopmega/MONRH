@@ -25,21 +25,23 @@ export const LEGACY_CALCULATOR_PATHS: Partial<Record<string, readonly string[]>>
 };
 
 export function calculatorTypeToPath(calculatorType: string): string | null {
+  const normalizedId = (calculatorType || "").replace(/-/g, "_");
   const match = TOOL_CATALOG.find(
-    (tool) => tool.kind === "simulator" && tool.id === calculatorType,
+    (tool) => tool.kind === "simulator" && tool.id.replace(/-/g, "_") === normalizedId,
   );
   return match?.href ?? null;
 }
 
 /** Resolve simulator calculator type from canonical tool path or legacy hub path. */
 export function pathToCalculatorType(pathname: string): string | null {
+  const normalizedPath = (pathname || "").toLowerCase().replace(/\/$/, "");
   const canonical = TOOL_CATALOG.find(
-    (tool) => tool.kind === "simulator" && tool.href === pathname,
+    (tool) => tool.kind === "simulator" && tool.href.toLowerCase().replace(/\/$/, "") === normalizedPath,
   );
   if (canonical) return canonical.id;
 
   for (const [calculatorType, paths] of Object.entries(LEGACY_CALCULATOR_PATHS)) {
-    if (paths?.includes(pathname)) {
+    if (paths?.some(p => p.toLowerCase().replace(/\/$/, "") === normalizedPath)) {
       return calculatorType;
     }
   }
@@ -52,7 +54,22 @@ export function savedSimulationPathMatches(
   calculatorType: string,
   canonicalPath: string | null,
 ): boolean {
+  // If slug matches ID (after normalization), it's a match
+  const normalizedExpected = expectedPath.split("/").pop()?.replace(/-/g, "_");
+  const normalizedType = calculatorType.replace(/-/g, "_");
+  if (normalizedExpected === normalizedType) return true;
+
   if (canonicalPath == null) return true;
-  if (expectedPath === canonicalPath) return true;
-  return LEGACY_CALCULATOR_PATHS[calculatorType]?.includes(expectedPath) ?? false;
+  
+  const cleanExpected = expectedPath.toLowerCase().replace(/\/$/, "");
+  const cleanCanonical = canonicalPath.toLowerCase().replace(/\/$/, "");
+  
+  if (cleanExpected === cleanCanonical) return true;
+  
+  const legacyPaths = LEGACY_CALCULATOR_PATHS[calculatorType];
+  if (legacyPaths?.some(p => p.toLowerCase().replace(/\/$/, "") === cleanExpected)) {
+    return true;
+  }
+
+  return false;
 }

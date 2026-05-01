@@ -353,13 +353,22 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
     try {
       const parsed = JSON.parse(snapshotRaw) as SimulationResultSnapshot;
       if (!parsed?.calculatorType) return null;
+      
       const canonical = calculatorTypeToPath(parsed.calculatorType);
-      if (!savedSimulationPathMatches(expectedPath, parsed.calculatorType, canonical)) return null;
+      const isPathMatch = savedSimulationPathMatches(expectedPath, parsed.calculatorType, canonical);
+      
+      // Fallback: If path matching fails but the calculatorType matches the slug (e.g. net_gross vs net-gross)
+      const normalizedSlug = (slug || "").replace(/-/g, "_");
+      const normalizedType = parsed.calculatorType.replace(/-/g, "_");
+      const isTypeMatch = normalizedSlug === normalizedType;
+
+      if (!isPathMatch && !isTypeMatch) return null;
+      
       return parsed;
     } catch {
       return null;
     }
-  }, [expectedPath, snapshotRaw]);
+  }, [expectedPath, snapshotRaw, slug]);
   const resolvedSnapshot = historySnapshot ?? snapshot;
   const prefilledDocumentCTA = resolvedSnapshot ? buildPrefilledDocumentLink(resolvedSnapshot) : null;
   const keyMetrics = useMemo(() => (resolvedSnapshot ? pickKeyMetrics(resolvedSnapshot) : []), [resolvedSnapshot]);
@@ -407,7 +416,12 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
         }
 
         const canonical = calculatorTypeToPath(data.item.calculatorType);
-        if (!savedSimulationPathMatches(expectedPath, data.item.calculatorType, canonical)) {
+        const isPathMatch = savedSimulationPathMatches(expectedPath, data.item.calculatorType, canonical);
+        const normalizedSlug = (slug || "").replace(/-/g, "_");
+        const normalizedType = data.item.calculatorType.replace(/-/g, "_");
+        const isTypeMatch = normalizedSlug === normalizedType;
+
+        if (!isPathMatch && !isTypeMatch) {
           setHistorySnapshot(null);
           return;
         }
@@ -437,7 +451,12 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
               return item.calculatorType === expectedCalculatorType;
             }
             const canonical = calculatorTypeToPath(item.calculatorType);
-            return savedSimulationPathMatches(expectedPath, item.calculatorType, canonical);
+            const isPathMatch = savedSimulationPathMatches(expectedPath, item.calculatorType, canonical);
+            const normalizedSlug = (slug || "").replace(/-/g, "_");
+            const normalizedType = item.calculatorType.replace(/-/g, "_");
+            const isTypeMatch = normalizedSlug === normalizedType;
+
+            return isPathMatch || isTypeMatch;
           });
 
           if (!matchedItem) return;
