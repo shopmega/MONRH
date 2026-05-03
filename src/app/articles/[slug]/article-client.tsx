@@ -75,18 +75,23 @@ function headingIdForBlock(heading: string, blockIndex: number) {
 
 function extractHeadings(blocks: string[]) {
   return blocks.flatMap((rawBlock, blockIndex) => {
-    const block = rawBlock.trim();
-    const headingMatch = block.match(/^(#{1,3})\s+(.+)$/);
-    if (!headingMatch) return [];
+    return rawBlock
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .flatMap((line) => {
+        const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
+        if (!headingMatch) return [];
 
-    const title = headingMatch[2]
-      .split(/\s+-\s+/)[0]
-      .trim();
-    return [{
-      id: headingIdForBlock(title, blockIndex),
-      title,
-      level: headingMatch[1].length,
-    }];
+        const title = headingMatch[2]
+          .split(/\s+-\s+/)[0]
+          .trim();
+        return [{
+          id: headingIdForBlock(title, blockIndex),
+          title,
+          level: headingMatch[1].length,
+        }];
+      });
   });
 }
 
@@ -118,14 +123,14 @@ function getActionLinks(categorySlug: string) {
     return [
       { href: "/conges-cnss", label: "Explorer Conges & CNSS", description: "Retrouvez les calculateurs et demarches associes." },
       { href: "/documents/cnss-complaint-letter", label: "Modele reclamation CNSS", description: "Preparez un courrier structure pour votre dossier." },
-      { href: "/simulateurs/pension-cnss", label: "Simuler vos droits CNSS", description: "Estimez vos droits avec les donnees disponibles." },
+      { href: "/simulate/cnss-pension", label: "Simuler vos droits CNSS", description: "Estimez vos droits avec les donnees disponibles." },
     ];
   }
 
   if (lower.includes("licenciement") || lower.includes("contrat")) {
     return [
       { href: "/contrat-depart", label: "Parcours depart", description: "Comparez les droits lies a la rupture du contrat." },
-      { href: "/simulateurs/licenciement", label: "Simuler l'indemnite", description: "Estimez les montants avant de negocier." },
+      { href: "/simulate/licenciement", label: "Simuler l'indemnite", description: "Estimez les montants avant de negocier." },
       { href: "/modeles", label: "Voir les modeles", description: "Accedez aux lettres et documents utiles." },
     ];
   }
@@ -133,22 +138,22 @@ function getActionLinks(categorySlug: string) {
   if (lower.includes("salaire") || lower.includes("heures")) {
     return [
       { href: "/salaire", label: "Parcours salaire", description: "Calculez net, brut, IR et cotisations." },
-      { href: "/simulateurs/heures-supplementaires", label: "Heures supplementaires", description: "Estimez les majorations applicables." },
-      { href: "/outils/detecteur-fiche-paie", label: "Verifier une fiche de paie", description: "Controlez les anomalies visibles." },
+      { href: "/simulate/overtime", label: "Heures supplementaires", description: "Estimez les majorations applicables." },
+      { href: "/tools/payslip-detector", label: "Verifier une fiche de paie", description: "Controlez les anomalies visibles." },
     ];
   }
 
   if (lower.includes("litige") || lower.includes("harcelement")) {
     return [
       { href: "/litiges", label: "Parcours litiges", description: "Structurez les preuves et prochaines actions." },
-      { href: "/outils/feuille-route-pre-contentieux", label: "Feuille route", description: "Preparez les etapes avant contentieux." },
+      { href: "/tools/pre-litigation-timeline", label: "Feuille route", description: "Preparez les etapes avant contentieux." },
       { href: "/documents/formal-complaint-employer", label: "Reclamation employeur", description: "Generez un courrier de reclamation." },
     ];
   }
 
   return [
-    { href: "/simulateurs", label: "Tous les simulateurs", description: "Estimez vos droits en quelques minutes." },
-    { href: "/outils", label: "Outils de protection", description: "Controlez les risques et incoherences." },
+    { href: "/simulate", label: "Tous les simulateurs", description: "Estimez vos droits en quelques minutes." },
+    { href: "/tools", label: "Outils de protection", description: "Controlez les risques et incoherences." },
     { href: "/modeles", label: "Modeles utiles", description: "Preparez les documents associes." },
   ];
 }
