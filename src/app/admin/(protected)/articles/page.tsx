@@ -511,16 +511,25 @@ export default function AdminArticlesPage() {
 {`{
   "items": [
     {
-      "slug": "optionnel-slug",
-      "title": "Titre",
-      "excerpt": "Resume",
+      "slug": "smig-smag-maroc-2026",
+      "title": "SMIG et SMAG Maroc 2026 : montants officiels et impact salaire",
+      "excerpt": "Montants officiels du SMIG et du SMAG au Maroc en 2026, secteurs concernes, calcul mensuel et recours en cas de salaire non conforme.",
       "categorySlug": "salaire",
-      "readingTime": "5 min",
+      "readingTime": "8 min",
       "isActive": true,
       "access": "public",
-      "thumbnailUrl": "https://...",
-      "coverImageUrl": "https://...",
-      "content": ["Paragraphe 1", "Paragraphe 2"]
+      "thumbnailUrl": "",
+      "coverImageUrl": "",
+      "content": [
+        "## Montants officiels 2026",
+        "> Source : decret officiel applicable au salaire minimum.",
+        "| Type | Montant | Application |\\n| --- | --- | --- |\\n| SMIG | 17,92 MAD/h | Secteur non agricole |\\n| SMAG | 97,44 MAD/j | Secteur agricole |",
+        "Pour verifier votre situation, utilisez [le simulateur SMIG](/simulate/smig-compliance).",
+        "- Verifiez le secteur applicable.",
+        "- Comparez le salaire horaire brut.",
+        "- Consultez la convention collective applicable.",
+        "Le champ \`salaireBrut\` est **important** pour ce calcul."
+      ]
     }
   ]
 }`}

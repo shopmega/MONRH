@@ -45,4 +45,53 @@ describe("renderArticleContentBlocks", () => {
     expect(link.getAttribute("href")).toBe("https://example.com/test");
     expect(container.textContent).toBe("Consultez https://example.com/test.");
   });
+
+  it("renders markdown links with their labels", () => {
+    render(
+      <>
+        {renderArticleContentBlocks(["Utilisez [le simulateur SMIG](/simulate/smig-compliance)."], "article-test")}
+      </>,
+    );
+
+    const link = screen.getByRole("link", { name: "le simulateur SMIG" });
+    expect(link.getAttribute("href")).toBe("/simulate/smig-compliance");
+    expect(screen.queryByText("[le simulateur SMIG](/simulate/smig-compliance)")).toBeNull();
+  });
+
+  it("renders blockquote lines as a quote", () => {
+    render(
+      <>
+        {renderArticleContentBlocks(["> Source officielle: minimum legal applicable."], "article-test")}
+      </>,
+    );
+
+    const quote = screen.getByText("Source officielle: minimum legal applicable.").closest("blockquote");
+    expect(quote).toBeTruthy();
+  });
+
+  it("renders markdown tables", () => {
+    render(
+      <>
+        {renderArticleContentBlocks(
+          ["| Type | Montant |\n| --- | --- |\n| SMIG | 17,92 MAD/h |\n| SMAG | 97,44 MAD/j |"],
+          "article-test",
+        )}
+      </>,
+    );
+
+    expect(screen.getByRole("table")).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "Type" })).toBeTruthy();
+    expect(screen.getByRole("cell", { name: "17,92 MAD/h" })).toBeTruthy();
+  });
+
+  it("renders italic text and inline code", () => {
+    render(
+      <>
+        {renderArticleContentBlocks(["Ce point est *important* pour le champ `salaireBrut`."], "article-test")}
+      </>,
+    );
+
+    expect(screen.getByText("important").tagName).toBe("EM");
+    expect(screen.getByText("salaireBrut").tagName).toBe("CODE");
+  });
 });

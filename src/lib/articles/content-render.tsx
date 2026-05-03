@@ -66,9 +66,14 @@ function friendlyLabelForHref(href: string): string {
   return href;
 }
 
+function isSafeHref(href: string): boolean {
+  return href.startsWith("/") || href.startsWith("https://") || href.startsWith("http://");
+}
+
 function renderTextWithLinks(text: string, keyPrefix: string): ReactNode[] {
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
+  AUTO_LINK_REGEX.lastIndex = 0;
   let match: RegExpExecArray | null = AUTO_LINK_REGEX.exec(text);
   let i = 0;
 
@@ -108,7 +113,7 @@ function renderTextWithLinks(text: string, keyPrefix: string): ReactNode[] {
 
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
   const nodes: ReactNode[] = [];
-  const regex = /\*\*(.+?)\*\*/g;
+  const regex = /(`([^`]+)`)|\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)\s]+)\)|\*(.+?)\*/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null = regex.exec(text);
   let i = 0;
@@ -117,7 +122,35 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
     if (match.index > lastIndex) {
       nodes.push(...renderTextWithLinks(text.slice(lastIndex, match.index), `${keyPrefix}-text-${i}`));
     }
-    nodes.push(<strong key={`${keyPrefix}-strong-${i}`}>{match[1]}</strong>);
+
+    if (match[2]) {
+      nodes.push(
+        <code key={`${keyPrefix}-code-${i}`} className="rounded bg-[var(--surface-muted)] px-1 py-0.5 text-[0.92em]">
+          {match[2]}
+        </code>,
+      );
+    } else if (match[3]) {
+      nodes.push(<strong key={`${keyPrefix}-strong-${i}`}>{renderInline(match[3], `${keyPrefix}-strong-inline-${i}`)}</strong>);
+    } else if (match[4] && match[5] && isSafeHref(match[5])) {
+      const href = match[5];
+      const isExternal = href.startsWith("http://") || href.startsWith("https://");
+      nodes.push(
+        <a
+          key={`${keyPrefix}-markdown-link-${i}`}
+          href={href}
+          className="font-semibold text-[var(--accent)] underline underline-offset-2"
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
+        >
+          {renderInline(match[4], `${keyPrefix}-markdown-link-inline-${i}`)}
+        </a>,
+      );
+    } else if (match[6]) {
+      nodes.push(<em key={`${keyPrefix}-em-${i}`}>{renderInline(match[6], `${keyPrefix}-em-inline-${i}`)}</em>);
+    } else {
+      nodes.push(match[0]);
+    }
+
     lastIndex = match.index + match[0].length;
     i += 1;
     match = regex.exec(text);
@@ -142,6 +175,21 @@ function splitBulletTrail(text: string): { lead: string; items: string[] } {
     lead: parts[0],
     items: parts.slice(1),
   };
+}
+
+function isTableLine(line: string): boolean {
+  return /^\|.+\|$/.test(line);
+}
+
+function isTableSeparator(line: string): boolean {
+  return /^\|\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|$/.test(line);
+}
+
+function splitTableRow(line: string): string[] {
+  return line
+    .replace(/^\||\|$/g, "")
+    .split("|")
+    .map((cell) => cell.trim());
 }
 
 type RenderArticleContentOptions = {
@@ -208,6 +256,57 @@ export function renderArticleContentBlocks(
       const line = lines[lineIndex];
       const key = `${keyPrefix}-block-${blockIndex}-line-${lineIndex}`;
 
+      if (isTableLine(line) && lineIndex + 1 < lines.length && isTableSeparator(lines[lineIndex + 1])) {
+        const headers = splitTableRow(line);
+        const rows: string[][] = [];
+        lineIndex += 2;
+        while (lineIndex < lines.length && isTableLine(lines[lineIndex]) && !isTableSeparator(lines[lineIndex])) {
+          rows.push(splitTableRow(lines[lineIndex]));
+          lineIndex += 1;
+        }
+        rendered.push(
+          <div key={`${key}-table-wrap`} className="overflow-x-auto rounded-2xl border border-[var(--line)]">
+            <table className="min-w-full divide-y divide-[var(--line)] text-sm">
+              <thead className="bg-[var(--surface-muted)]">
+                <tr>
+                  {headers.map((header, headerIndex) => (
+                    <th key={`${key}-th-${headerIndex}`} scope="col" className="px-4 py-3 text-left font-semibold text-[var(--foreground)]">
+                      {renderInline(header, `${key}-th-inline-${headerIndex}`)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--line)]">
+                {rows.map((row, rowIndex) => (
+                  <tr key={`${key}-tr-${rowIndex}`}>
+                    {headers.map((_, cellIndex) => (
+                      <td key={`${key}-td-${rowIndex}-${cellIndex}`} className="px-4 py-3 align-top text-[var(--foreground)]">
+                        {renderInline(row[cellIndex] ?? "", `${key}-td-inline-${rowIndex}-${cellIndex}`)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>,
+        );
+        continue;
+      }
+
+      if (/^>\s?/.test(line)) {
+        const quoteLines: string[] = [];
+        while (lineIndex < lines.length && /^>\s?/.test(lines[lineIndex])) {
+          quoteLines.push(lines[lineIndex].replace(/^>\s?/, ""));
+          lineIndex += 1;
+        }
+        rendered.push(
+          <blockquote key={`${key}-blockquote`} className="border-l-4 border-[var(--accent)] bg-[var(--surface-muted)] px-4 py-3 italic text-[var(--ink-soft)]">
+            <p>{renderInline(quoteLines.join(" "), `${key}-blockquote-inline`)}</p>
+          </blockquote>,
+        );
+        continue;
+      }
+
       if (renderHeading(line, key, blockIndex)) {
         lineIndex += 1;
         continue;
@@ -252,6 +351,8 @@ export function renderArticleContentBlocks(
       const paragraphLines: string[] = [];
       while (
         lineIndex < lines.length &&
+        !(isTableLine(lines[lineIndex]) && lineIndex + 1 < lines.length && isTableSeparator(lines[lineIndex + 1])) &&
+        !/^>\s?/.test(lines[lineIndex]) &&
         !/^(#{1,3})\s+/.test(lines[lineIndex]) &&
         !/^[-*]\s+/.test(lines[lineIndex]) &&
         !/^\d+\.\s+/.test(lines[lineIndex])
