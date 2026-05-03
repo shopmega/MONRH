@@ -76,14 +76,6 @@ export const metadata: Metadata = {
     "modele lettre employe",
     "cnss maroc",
   ],
-  alternates: {
-    canonical: "/",
-    languages: {
-      "fr-MA": "/",
-      "ar-MA": "/",
-      "x-default": "/",
-    },
-  },
   robots: {
     index: true,
     follow: true,
@@ -142,7 +134,6 @@ export default function RootLayout({
     <html lang="fr" dir="ltr" data-theme="light" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: preferenceBootstrapScript }} />
-        {adsenseClient ? <meta name="google-adsense-account" content={adsenseClient} /> : null}
       </head>
       <body className="antialiased bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--juris-primary-container)] selection:text-white">
         <script

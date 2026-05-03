@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbJsonLd } from "@/components/breadcrumb-json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -18,6 +19,7 @@ const contactReasons = [
 export default function ContactPage() {
   return (
     <main className="paper-bg min-h-screen">
+      <BreadcrumbJsonLd items={[{ name: "Contact", href: "/contact" }]} />
       <section className="mx-auto grid w-full max-w-6xl gap-6 px-5 pb-16 pt-28 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
         <div className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">Contact</p>

@@ -29,6 +29,7 @@ export type HiringCostResult = {
   monthly: {
     baseEmployerCost: number;
     cnssEmployer: number;
+    familyAllowanceEmployer: number;
     amoEmployer: number;
     formationPro: number;
   };
@@ -55,10 +56,13 @@ export function simulateHiringCost(raw: HiringCostInput): HiringCostResult {
 
   const contributableBase = Math.min(input.offeredGross, rules.cnssCeiling);
   const cnssEmployer = roundMAD(contributableBase * rules.cnssEmployerRate);
+  const familyAllowanceEmployer = roundMAD(input.offeredGross * rules.familyAllowanceEmployerRate);
   const amoEmployer = roundMAD(input.offeredGross * rules.amoEmployerRate);
   const formationProRate = input.companySize === "small" ? rules.formationProRateSmall : rules.formationProRateLarge;
   const formationPro = roundMAD(input.offeredGross * formationProRate);
-  const baseEmployerCost = roundMAD(input.offeredGross + cnssEmployer + amoEmployer + formationPro);
+  const baseEmployerCost = roundMAD(
+    input.offeredGross + cnssEmployer + familyAllowanceEmployer + amoEmployer + formationPro,
+  );
 
   const totalSalaryCost = roundMAD(baseEmployerCost * 12);
   const recruitmentFee = roundMAD((input.offeredGross * 12) * input.recruitmentAgencyFeePercent);
@@ -71,7 +75,7 @@ export function simulateHiringCost(raw: HiringCostInput): HiringCostResult {
 
   return {
     offeredGross: roundMAD(input.offeredGross),
-    monthly: { baseEmployerCost, cnssEmployer, amoEmployer, formationPro },
+    monthly: { baseEmployerCost, cnssEmployer, familyAllowanceEmployer, amoEmployer, formationPro },
     annual: {
       totalSalaryCost,
       recruitmentFee,

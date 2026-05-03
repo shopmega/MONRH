@@ -9,12 +9,16 @@ interface PartnerAdSectionProps {
   children?: React.ReactNode;
 }
 
+function isPlaceholderSlot(slot: string) {
+  return /^(\d)\1{9,}$/.test(slot.trim()) || slot.trim() === "1212121212";
+}
+
 export function PartnerAdSection({ slot, className, children }: PartnerAdSectionProps) {
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
   const { t } = useLanguage();
 
   // Only show the partner section if ads are actually served
-  if (!adsenseClient) {
+  if (!adsenseClient || isPlaceholderSlot(slot)) {
     return null;
   }
 

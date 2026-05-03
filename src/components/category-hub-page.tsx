@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLanguage } from "@/components/language-provider";
+import { BreadcrumbJsonLd } from "@/components/breadcrumb-json-ld";
 import type { CategoryHub } from "@/lib/navigation/category-hubs";
 
 export function CategoryHubPage({ hub }: { hub: CategoryHub }) {
@@ -10,6 +11,7 @@ export function CategoryHubPage({ hub }: { hub: CategoryHub }) {
 
   return (
     <main className="paper-bg min-h-screen">
+      <BreadcrumbJsonLd items={[{ name: hub.title[copy], href: `/${hub.slug}` }]} />
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-24 sm:px-6">
         <section className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">{hub.kicker[copy]}</p>

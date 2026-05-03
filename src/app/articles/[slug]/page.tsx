@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SITE_NAME, absoluteUrl, buildOgImageUrl } from "@/lib/seo";
+import { buildBreadcrumbJsonLd } from "@/components/breadcrumb-json-ld";
 import { readAdminConfig } from "@/lib/server/admin-config";
 import { canAccessArticle, getArticleBySlugFromStore } from "@/lib/server/articles-store";
 import { isUserAuthenticated } from "@/lib/server/user-session";
@@ -86,43 +87,47 @@ export default async function ArticlePage({
     article.coverImageUrl || article.thumbnailUrl || config.websiteSettings.defaultArticleCoverUrl.trim();
   const siteName = config.websiteSettings.siteName.trim() || SITE_NAME;
   const logoUrl = config.websiteSettings.logoUrl.trim();
-  const articleJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "@id": absoluteUrl(`${article.href}#article`),
-    headline: article.title,
-    description: article.excerpt,
-    url: absoluteUrl(article.href),
-    inLanguage: "fr-MA",
-    isAccessibleForFree: (article.access ?? "public") === "public",
-    datePublished: article.lastUpdated,
-    dateModified: article.lastUpdated,
-    author: {
-      "@type": "Organization",
-      "@id": absoluteUrl("/#organization"),
-      name: siteName,
+  const articleJsonLd = [
+    buildBreadcrumbJsonLd([
+      { name: "Articles", href: "/articles" },
+      { name: article.title, href: article.href },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "@id": absoluteUrl(`${article.href}#article`),
+      headline: article.title,
+      description: article.excerpt,
+      url: absoluteUrl(article.href),
+      inLanguage: "fr-MA",
+      isAccessibleForFree: (article.access ?? "public") === "public",
+      datePublished: article.lastUpdated,
+      dateModified: article.lastUpdated,
+      author: {
+        "@type": "Organization",
+        "@id": absoluteUrl("/#organization"),
+        name: siteName,
+      },
+      publisher: {
+        "@type": "Organization",
+        "@id": absoluteUrl("/#organization"),
+        name: siteName,
+        ...(logoUrl
+          ? {
+              logo: {
+                "@type": "ImageObject",
+                url: absoluteUrl(logoUrl),
+              },
+            }
+          : {}),
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": absoluteUrl(article.href),
+      },
+      ...(coverImage ? { image: absoluteUrl(coverImage) } : {}),
     },
-    publisher: {
-      "@type": "Organization",
-      "@id": absoluteUrl("/#organization"),
-      name: siteName,
-      ...(logoUrl
-        ? {
-            logo: {
-              "@type": "ImageObject",
-              url: absoluteUrl(logoUrl),
-            },
-          }
-        : {}),
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": absoluteUrl(article.href),
-    },
-    ...(coverImage ? { image: absoluteUrl(coverImage) } : {}),
-  };
+  ];
 
-  return (
-    <ArticleClient article={article} coverImage={coverImage} articleJsonLd={articleJsonLd} />
-  );
+  return <ArticleClient article={article} coverImage={coverImage} articleJsonLd={articleJsonLd} />;
 }

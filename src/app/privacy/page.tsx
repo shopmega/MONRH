@@ -13,6 +13,7 @@ export default function PrivacyPage() {
     <LegalPage
       eyebrow="Confidentialite"
       title="Politique de Confidentialite"
+      path="/privacy"
       description="Cette page explique comment SIMPAIE traite les donnees personnelles, les cookies, les mesures d'audience et les services publicitaires."
       updatedAt="29 avril 2026"
       sections={[

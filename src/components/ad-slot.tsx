@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useLanguage } from "@/components/language-provider";
 
 declare global {
   interface Window {
@@ -16,6 +15,10 @@ type AdSlotProps = {
   responsive?: boolean;
 };
 
+function isPlaceholderSlot(slot: string) {
+  return /^(\d)\1{9,}$/.test(slot.trim()) || slot.trim() === "1212121212";
+}
+
 export function AdSlot({
   className,
   slot,
@@ -23,7 +26,6 @@ export function AdSlot({
   responsive = true,
 }: AdSlotProps) {
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-  const { t } = useLanguage();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const slotRef = useRef<HTMLModElement | null>(null);
   const observerRef = useRef<MutationObserver | null>(null);
@@ -47,7 +49,6 @@ export function AdSlot({
 
     const initializeAd = () => {
       if (adNode.dataset.adInitialized === "1") return true;
-      const rect = adNode.getBoundingClientRect();
       // Only push if there's space; otherwise AdSense might throw an error or not load
       // But for responsive, we just push and let it figure it out
       adNode.dataset.adInitialized = "1";
@@ -81,11 +82,11 @@ export function AdSlot({
 
     // 3. Fallback: Check after 5 seconds if anything actually loaded
     timeoutRef.current = setTimeout(() => {
-      const iframe = adNode.querySelector('iframe');
-      const hasContent = iframe && (iframe.offsetHeight > 0 || iframe.dataset.adStatus === 'filled');
-      const adStatus = adNode.getAttribute('data-ad-status');
-      
-      if (!hasContent && adStatus !== 'filled') {
+      const iframe = adNode.querySelector("iframe");
+      const hasContent = iframe && (iframe.offsetHeight > 0 || iframe.dataset.adStatus === "filled");
+      const adStatus = adNode.getAttribute("data-ad-status");
+
+      if (!hasContent && adStatus !== "filled") {
         // If it's not explicitly filled, and we don't see a visible iframe, collapse.
         adNode.style.display = "none";
         root.style.display = "none";
@@ -98,12 +99,12 @@ export function AdSlot({
     };
   }, [adsenseClient, slot]);
 
-  if (!adsenseClient) {
+  if (!adsenseClient || isPlaceholderSlot(slot)) {
     return null;
   }
 
   return (
-    <div ref={rootRef} className={className} style={{ display: 'block' }}>
+    <div ref={rootRef} className={className} style={{ display: "block" }}>
       <ins
         ref={slotRef}
         className="adsbygoogle block"
@@ -111,9 +112,8 @@ export function AdSlot({
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive={responsive ? "true" : "false"}
-        style={{ display: 'block', height: 'auto' }}
+        style={{ display: "block", height: "auto" }}
       />
     </div>
   );
 }
-

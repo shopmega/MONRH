@@ -13,6 +13,7 @@ export default function TermsPage() {
     <LegalPage
       eyebrow="Conditions"
       title="Conditions d'Utilisation"
+      path="/terms"
       description="Ces conditions encadrent l'utilisation de SIMPAIE, de ses simulateurs, guides, modeles, outils et services associes."
       updatedAt="29 avril 2026"
       sections={[

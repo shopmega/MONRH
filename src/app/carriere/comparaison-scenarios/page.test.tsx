@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 // Mock the SimulatorToolPage component
-vi.mock("@/components/simulator-tool-page", () => ({
+vi.mock("@/components/simulator-tool-page-wrapper", () => ({
   SimulatorToolPage: vi.fn(({ title, description, fields, breakdownLabels, units }) => (
     <div data-testid="simulator-tool-page">
       <h1>{title}</h1>

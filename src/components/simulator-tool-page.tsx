@@ -69,7 +69,7 @@ type GenericSimulationResult = {
   };
 };
 
-type SimulatorToolPageProps = {
+export type SimulatorToolPageProps = {
   title: string;
   description: string;
   apiPath: string;

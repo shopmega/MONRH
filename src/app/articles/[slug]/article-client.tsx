@@ -156,7 +156,7 @@ function getActionLinks(categorySlug: string) {
 interface ArticleClientProps {
   article: Article;
   coverImage: string;
-  articleJsonLd: Record<string, unknown>;
+  articleJsonLd: Record<string, unknown> | Record<string, unknown>[];
 }
 
 export function ArticleClient({ article, coverImage, articleJsonLd }: ArticleClientProps) {

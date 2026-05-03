@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbJsonLd } from "@/components/breadcrumb-json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -11,6 +12,7 @@ export const metadata: Metadata = buildPageMetadata({
 export default function AboutPage() {
   return (
     <main className="paper-bg min-h-screen">
+      <BreadcrumbJsonLd items={[{ name: "A Propos", href: "/about" }]} />
       <section className="mx-auto w-full max-w-5xl px-5 pb-16 pt-28 sm:px-6 lg:px-8">
         <div className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">A propos</p>

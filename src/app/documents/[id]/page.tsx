@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/ad-slot";
+import { BreadcrumbJsonLd } from "@/components/breadcrumb-json-ld";
 import { DocumentGeneratorFormClient } from "@/components/document-generator-form-client";
 import { RelatedContent } from "@/components/related-content";
 import { resolveRelatedItems } from "@/lib/linking/resolve-related";
@@ -120,6 +121,12 @@ export default async function DocumentGeneratorPage({
 
   return (
     <main className="paper-bg min-h-screen">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Modeles", href: "/modeles" },
+          { name: template.title, href: template.href },
+        ]}
+      />
       <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
         <section className="soft-card rounded-[2rem] p-5 sm:p-7">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink-soft)]">

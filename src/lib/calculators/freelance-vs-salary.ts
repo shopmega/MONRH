@@ -24,6 +24,7 @@ function calcSalaryNet(gross: number, calculationDate: string): { net: number; e
   const contributableBase = Math.min(gross, rules.cnssCeiling);
   const cnssEmployee = contributableBase * rules.cnssEmployeeRate;
   const cnssEmployer = contributableBase * rules.cnssEmployerRate;
+  const familyAllowanceEmployer = gross * rules.familyAllowanceEmployerRate;
   const amoEmployee = gross * rules.amoEmployeeRate;
   const amoEmployer = gross * rules.amoEmployerRate;
   const professionalExpenseDeduction = Math.min(
@@ -33,7 +34,7 @@ function calcSalaryNet(gross: number, calculationDate: string): { net: number; e
   const taxableIncome = Math.max(0, gross - cnssEmployee - amoEmployee - professionalExpenseDeduction);
   const incomeTax = computeTax(taxableIncome, rules.taxBracketsMonthly);
   const net = gross - cnssEmployee - amoEmployee - incomeTax;
-  const employerCost = gross + cnssEmployer + amoEmployer;
+  const employerCost = gross + cnssEmployer + familyAllowanceEmployer + amoEmployer;
   return { net: roundMAD(net), employerCost: roundMAD(employerCost) };
 }
 

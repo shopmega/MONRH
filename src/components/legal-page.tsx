@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BreadcrumbJsonLd } from "@/components/breadcrumb-json-ld";
 
 type LegalSection = {
   title: string;
@@ -11,6 +12,7 @@ type LegalPageProps = {
   description: string;
   updatedAt: string;
   sections: LegalSection[];
+  path?: string;
   contactHref?: string;
 };
 
@@ -20,10 +22,12 @@ export function LegalPage({
   description,
   updatedAt,
   sections,
+  path,
   contactHref = "/contact",
 }: LegalPageProps) {
   return (
     <main className="paper-bg min-h-screen">
+      <BreadcrumbJsonLd items={[{ name: title, href: path ?? contactHref }]} />
       <section className="mx-auto w-full max-w-4xl px-5 pb-16 pt-28 sm:px-6 lg:px-8">
         <div className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">{eyebrow}</p>
