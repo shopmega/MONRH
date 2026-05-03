@@ -69,7 +69,7 @@ interface UserJourneyStore {
   clearJourney: () => void;
 }
 
-const STORAGE_KEY = 'tonrh-user-journey';
+const STORAGE_KEY = 'simpaie-user-journey';
 
 const defaultContext: UserJourneyContext = {
   personal: {},

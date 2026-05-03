@@ -240,7 +240,7 @@ export function SiteNav() {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-black text-[var(--juris-on-surface)] font-display tracking-tight leading-none group-hover:text-[var(--juris-primary)] transition-colors">
-                  TON RH
+                  SIMPAIE
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--juris-on-surface-variant)] opacity-50">
                   Jurisconsult

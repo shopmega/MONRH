@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Générateur de Contrats de Travail | MONRH",
+  title: "Générateur de Contrats de Travail | SIMPAIE",
   description:
     "Créez des contrats de travail CDI et CDD conformes au Code du travail marocain. Générateur déterministe, 8 étapes guidées, clauses personnalisables.",
   keywords: [

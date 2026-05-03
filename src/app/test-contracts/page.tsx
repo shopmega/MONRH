@@ -273,7 +273,7 @@ export default function ContractTestPage() {
             🧪 Contract Generator Test Suite
           </h1>
           <p className="text-muted-foreground">
-            Comprehensive testing for the MONRH Contract Generator
+            Comprehensive testing for the SIMPAIE Contract Generator
           </p>
         </div>
 

@@ -61,7 +61,7 @@ export default function ContratsHistoryPage() {
               Mes Contrats
             </h1>
             <p className="mt-2 text-[var(--ink-soft)] max-w-2xl">
-              Retrouvez ici tous les contrats que vous avez générés sur MONRH. Vous pouvez les consulter à nouveau ou les télécharger.
+              Retrouvez ici tous les contrats que vous avez générés sur SIMPAIE. Vous pouvez les consulter à nouveau ou les télécharger.
             </p>
           </div>
         </header>

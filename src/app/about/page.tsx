@@ -4,7 +4,7 @@ import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "A Propos",
-  description: "A propos de TON RH, plateforme d'information pratique sur le travail, la paie, la CNSS et les demarches RH au Maroc.",
+  description: "A propos de SIMPAIE, plateforme d'information pratique sur le travail, la paie, la CNSS et les demarches RH au Maroc.",
   canonicalPath: "/about",
 });
 
@@ -15,7 +15,7 @@ export default function AboutPage() {
         <div className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">A propos</p>
           <h1 className="display-font mt-3 text-4xl font-semibold text-[var(--heading)] sm:text-5xl">
-            TON RH aide les salaries et professionnels RH au Maroc a comprendre leurs demarches.
+            SIMPAIE aide les salaries et professionnels RH au Maroc a comprendre leurs demarches.
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--ink-soft)]">
             La plateforme rassemble des simulateurs, guides, modeles et outils pratiques autour du salaire, des contrats, de la CNSS, des conges, des litiges et des situations de depart.
@@ -46,7 +46,7 @@ export default function AboutPage() {
 
         <div className="mt-6 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 text-sm leading-7 text-[var(--ink-soft)]">
           <p>
-            TON RH fournit des informations indicatives et ne remplace pas l'avis d'un avocat, expert-comptable, inspecteur du travail ou autre professionnel competent. Pour une question sur le site, consultez la{" "}
+            SIMPAIE fournit des informations indicatives et ne remplace pas l'avis d'un avocat, expert-comptable, inspecteur du travail ou autre professionnel competent. Pour une question sur le site, consultez la{" "}
             <Link href="/contact" className="font-semibold text-[var(--accent)] underline-offset-4 hover:underline">
               page contact
             </Link>

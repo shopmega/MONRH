@@ -159,7 +159,7 @@ export function DashboardClient() {
           </div>
         </section>
 
-        {/* Right Col: Calculations & Documents (MONRH) */}
+        {/* Right Col: Calculations & Documents */}
         <section className="space-y-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="display-font text-2xl font-bold flex items-center gap-2">
@@ -173,7 +173,7 @@ export function DashboardClient() {
             <div className="space-y-4">
               {monRHData?.simulations.length === 0 ? (
                 <div className="rounded-2xl bg-[var(--surface-muted)] p-8 text-center text-sm text-[var(--ink-soft)]">
-                  Aucune activité récente sur MONRH.
+                  Aucune activité récente sur SIMPAIE.
                 </div>
               ) : (
                 monRHData?.simulations.slice(0, 5).map((sim) => (

@@ -12,6 +12,7 @@ describe("simulateCnssPension", () => {
 
     expect(result.breakdown.replacementRatePercent).toBeGreaterThan(0);
     expect(result.breakdown.estimatedMonthlyPensionCnss).toBeGreaterThan(0);
+    expect(result.breakdown.estimatedMonthlyPensionCnss).toBe(3300);
     expect(result.breakdown.openingContributionDaysRequired).toBe(1320);
     expect(result.breakdown.fullFormulaContributionDaysRequired).toBe(3240);
   });

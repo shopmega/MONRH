@@ -29,6 +29,7 @@ const salaryRuleSchema = baseVersionSchema.extend({
   cnssEmployeeRate: z.number().min(0),
   cnssEmployerRate: z.number().min(0),
   cnssCeiling: z.number().min(0),
+  familyAllowanceEmployerRate: z.number().min(0).default(0.064),
   amoEmployeeRate: z.number().min(0),
   amoEmployerRate: z.number().min(0),
   professionalExpenseRate: z.number().min(0),

@@ -93,7 +93,7 @@ export default function ContratPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    const fileName = `contrat_monrh_${generatedContract.id.slice(0, 8)}.txt`;
+    const fileName = `contrat_simpaie_${generatedContract.id.slice(0, 8)}.txt`;
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
@@ -121,7 +121,7 @@ export default function ContratPage() {
       <html lang="fr">
       <head>
         <meta charset="UTF-8">
-        <title>Impression Contrat - MONRH</title>
+        <title>Impression Contrat - SIMPAIE</title>
         <style>
           @page { size: A4; margin: 2.5cm; }
           * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -172,13 +172,13 @@ export default function ContratPage() {
       </head>
       <body>
         <div class="header">
-          <div class="brand">MONRH</div>
+          <div class="brand">SIMPAIE</div>
           <div class="tagline">Solutions de Gestion des Ressources Humaines au Maroc</div>
         </div>
         <div class="title">${contractTitle}</div>
         <div class="content">${escapedContent}</div>
         <div class="footer">
-          <div>Document généré via la plateforme MONRH.ma</div>
+          <div>Document généré via la plateforme SIMPAIE</div>
           <div style="margin-top: 4px;">Conforme au Code du Travail Marocain (Loi 65-99)</div>
         </div>
         <script>

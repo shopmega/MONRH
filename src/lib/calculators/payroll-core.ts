@@ -33,6 +33,7 @@ export type PayrollMonthlyResult = {
   taxableIncome: number;
   cnssEmployee: number;
   cnssEmployer: number;
+  familyAllowanceEmployer: number;
   amoEmployee: number;
   amoEmployer: number;
   cimrEmployee: number;
@@ -108,6 +109,7 @@ export function computeMonthlyPayrollFromBases(
   const contributableBase = Math.min(cnssGross, rules.cnssCeiling);
   const cnssEmployee = contributableBase * rules.cnssEmployeeRate;
   const cnssEmployer = contributableBase * rules.cnssEmployerRate;
+  const familyAllowanceEmployer = bases.gross * rules.familyAllowanceEmployerRate;
   const amoEmployee = amoGross * rules.amoEmployeeRate;
   const amoEmployer = amoGross * rules.amoEmployerRate;
   const cimrEmployee = input.includeCimr ? bases.gross * input.cimrRate : 0;
@@ -123,7 +125,7 @@ export function computeMonthlyPayrollFromBases(
   const familyTaxReduction = computeFamilyTaxReductionMonthly(input, rules);
   const incomeTax = Math.max(0, computeProgressiveTax(taxableIncome, rules.taxBracketsMonthly) - familyTaxReduction);
   const net = bases.gross - cnssEmployee - amoEmployee - cimrEmployee - incomeTax;
-  const employerTotalCost = bases.gross + cnssEmployer + amoEmployer;
+  const employerTotalCost = bases.gross + cnssEmployer + familyAllowanceEmployer + amoEmployer;
   const marginalRate = rules.taxBracketsMonthly.findLast((bracket) => taxableIncome > bracket.min)?.rate ?? 0;
 
   return {
@@ -135,6 +137,7 @@ export function computeMonthlyPayrollFromBases(
     taxableIncome: roundMAD(taxableIncome),
     cnssEmployee: roundMAD(cnssEmployee),
     cnssEmployer: roundMAD(cnssEmployer),
+    familyAllowanceEmployer: roundMAD(familyAllowanceEmployer),
     amoEmployee: roundMAD(amoEmployee),
     amoEmployer: roundMAD(amoEmployer),
     cimrEmployee: roundMAD(cimrEmployee),

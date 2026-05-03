@@ -35,7 +35,7 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-7xl px-5 py-10 text-sm text-[var(--ink-soft)] sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)]">
           <div className="min-w-0">
-            <p className="display-font text-2xl font-semibold text-[var(--heading)]">TON RH</p>
+            <p className="display-font text-2xl font-semibold text-[var(--heading)]">SIMPAIE</p>
             <p className="mt-3 max-w-xl leading-7">
               Jurisconsult en droit du travail marocain: simulateurs, outils de controle, guides et modeles utiles.
             </p>
@@ -71,9 +71,9 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-8 flex flex-col gap-3 border-t border-[var(--line)] pt-5 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p>2026 TON RH. Tous droits reserves.</p>
+          <p>2026 SIMPAIE. Tous droits reserves.</p>
           <p>
-            TON RH ne remplace pas un conseil juridique, fiscal ou social personnalise.
+            SIMPAIE ne remplace pas un conseil juridique, fiscal ou social personnalise.
           </p>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Contact",
-  description: "Contactez TON RH pour une question, une correction, un partenariat ou une demande concernant le site.",
+  description: "Contactez SIMPAIE pour une question, une correction, un partenariat ou une demande concernant le site.",
   canonicalPath: "/contact",
 });
 
@@ -22,7 +22,7 @@ export default function ContactPage() {
         <div className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">Contact</p>
           <h1 className="display-font mt-3 text-4xl font-semibold text-[var(--heading)] sm:text-5xl">
-            Contacter TON RH
+            Contacter SIMPAIE
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--ink-soft)]">
             Pour une question sur le site, une correction, une demande liee aux donnees personnelles ou une proposition de partenariat, utilisez l'adresse de contact ci-dessous.
@@ -31,10 +31,10 @@ export default function ContactPage() {
           <div className="mt-6 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5">
             <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">Email</p>
             <a
-              href="mailto:contact@tonrh.com"
+              href="mailto:contact@simpaie.ma"
               className="mt-2 inline-flex text-lg font-semibold text-[var(--accent)] underline-offset-4 hover:underline"
             >
-              contact@tonrh.com
+              contact@simpaie.ma
             </a>
           </div>
         </div>

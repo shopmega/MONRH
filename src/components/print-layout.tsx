@@ -8,7 +8,7 @@ export function PrintHeader({ title, generatedAt }: { title: string; generatedAt
     <div className="print-only mb-8 border-b-2 border-black pb-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase tracking-tight">TON RH</h1>
+          <h1 className="text-2xl font-bold uppercase tracking-tight">SIMPAIE</h1>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
             {language === 'ar' ? 'الخبير القانوني الرقمي' : 'Le Jurisconsulte Digital'}
           </p>
@@ -18,7 +18,7 @@ export function PrintHeader({ title, generatedAt }: { title: string; generatedAt
           <p className="opacity-70">
             {language === 'ar' ? 'تاريخ الاستخراج' : 'Généré le'}: {generatedAt || new Date().toLocaleString()}
           </p>
-          <p className="opacity-70">Source: monrh.ma</p>
+          <p className="opacity-70">Source: SIMPAIE</p>
         </div>
       </div>
     </div>
@@ -51,8 +51,8 @@ export function PrintFooter() {
       </p>
       <p>
         {language === 'ar'
-          ? 'تم استخراج هذه الوثيقة عبر منصة monrh.ma. متوافقة مع مقتضيات مدونة الشغل (القانون 65-99).'
-          : 'Document généré par la plateforme monrh.ma. Conforme aux dispositions du Code du Travail (Loi 65-99).'
+          ? 'تم استخراج هذه الوثيقة عبر منصة SIMPAIE. متوافقة مع مقتضيات مدونة الشغل (القانون 65-99).'
+          : 'Document généré par la plateforme SIMPAIE. Conforme aux dispositions du Code du Travail (Loi 65-99).'
         }
       </p>
     </footer>

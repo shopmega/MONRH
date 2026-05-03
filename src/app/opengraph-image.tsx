@@ -39,11 +39,18 @@ export default function OpenGraphImage() {
               textTransform: "uppercase",
             }}
           >
-            TON RH
+            SIMPAIE
           </div>
-          <div style={{ fontSize: 66, fontWeight: 800, lineHeight: 1.05 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              fontSize: 66,
+              fontWeight: 800,
+              lineHeight: 1.05,
+            }}
+          >
             Droit du Travail
-            <br />
             Maroc
           </div>
           <div style={{ fontSize: 32, color: "#334155", maxWidth: "88%" }}>

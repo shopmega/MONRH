@@ -190,7 +190,7 @@ export default function ContractsPage() {
             <body>
               <div class="page">
                 <div class="header">
-                  <div class="brand">MONRH</div>
+                  <div class="brand">SIMPAIE</div>
                   <div class="tagline">Plateforme de Droit du Travail au Maroc</div>
                 </div>
                 
@@ -200,7 +200,7 @@ export default function ContractsPage() {
                 
                 <div class="footer">
                   <div>Conforme au Code du Travail Marocain (Loi 65-99)</div>
-                  <div>Document généré automatiquement par MONRH</div>
+                  <div>Document généré automatiquement par SIMPAIE</div>
                   <div>Date: ${new Date().toLocaleDateString('fr-FR')}</div>
                 </div>
               </div>

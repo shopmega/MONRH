@@ -36,7 +36,7 @@ const defaultConfig: PublicConfig = {
   documentAdStepEnabled: true,
   maintenanceMessage: "",
   websiteSettings: {
-    siteName: "TON RH",
+    siteName: "SIMPAIE",
     siteDescription:
       "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc, avec articles juridiques clairs.",
     siteSubtitle: "Labour Clarity Platform",

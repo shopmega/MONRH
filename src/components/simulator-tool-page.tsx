@@ -851,7 +851,7 @@ function SimulatorToolPageContent({
           },
           publisher: {
             "@type": "Organization",
-            name: "TON RH",
+            name: "SIMPAIE",
           },
         }}
       />

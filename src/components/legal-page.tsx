@@ -55,7 +55,7 @@ export function LegalPage({
 
         <div className="mt-6 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 text-sm text-[var(--ink-soft)]">
           <p>
-            Pour toute question concernant ces informations, contactez TON RH via{" "}
+            Pour toute question concernant ces informations, contactez SIMPAIE via{" "}
             <Link href={contactHref} className="font-semibold text-[var(--accent)] underline-offset-4 hover:underline">
               la page contact
             </Link>

@@ -3,7 +3,7 @@ import { SimulationResultPage } from "@/components/simulation-result-page";
 import { resultRouteToExpectedPath } from "@/lib/simulations/calculator-path";
 
 export const metadata: Metadata = {
-  title: "Resultat Simulation | MONRH",
+  title: "Resultat Simulation | SIMPAIE",
   robots: {
     index: false,
     follow: false,

@@ -146,7 +146,7 @@ export function AdminEvidenceModerationForm({
             type="email"
             value={assigneeEmail}
             onChange={(event) => setAssigneeEmail(event.target.value)}
-            placeholder="reviewer@monrh.ma"
+                    placeholder="reviewer@simpaie.ma"
             className="w-full rounded-xl border border-[var(--line)] bg-[var(--background)] px-3 py-2 text-sm"
           />
         </label>

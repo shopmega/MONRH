@@ -31,6 +31,7 @@ export type NetGrossEnhancedResult = {
     netSalary: number;
     cnssEmployee: number;
     cnssEmployer: number;
+    familyAllowanceEmployer: number;
     amoEmployee: number;
     amoEmployer: number;
     professionalDeduction: number;
@@ -83,6 +84,7 @@ export function simulateNetGrossEnhanced(rawInput: NetGrossEnhancedInput): NetGr
       netSalary,
       cnssEmployee: core.breakdown.cnssEmployee,
       cnssEmployer: core.breakdown.cnssEmployer,
+      familyAllowanceEmployer: core.breakdown.familyAllowanceEmployer,
       amoEmployee: core.breakdown.amoEmployee,
       amoEmployer: core.breakdown.amoEmployer,
       professionalDeduction: core.breakdown.professionalExpenseDeduction,

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
         url: absoluteUrl(DEFAULT_OG_IMAGE_PATH),
         width: 1200,
         height: 630,
-        alt: "Salaire et droits TON RH",
+        alt: "Salaire et droits SIMPAIE",
       },
     ],
   },

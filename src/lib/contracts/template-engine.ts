@@ -83,7 +83,7 @@ Date : _______________              Date : _______________
 Conformément au Code du Travail Marocain (Loi 65-99)
 Juridiction compétente : Tribunaux de ${formData.contract_location?.toUpperCase() || 'CASABLANCA'}
 
-Document généré par TON RH - Plateforme de Droit du Travail au Maroc
+Document généré par SIMPAIE - Plateforme de Droit du Travail au Maroc
 Date de génération : ${new Date().toLocaleDateString('fr-MA')}
 ─────────────────────────────────────────────────────────────────────────────────
 `;

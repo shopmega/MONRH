@@ -210,7 +210,7 @@ export default async function AdminModerationPage({
     <div className="space-y-4">
       <section className="soft-card rounded-3xl p-5">
         <p className="section-kicker">Shared Moderation</p>
-        <h2 className="display-font mt-1 text-3xl font-semibold">Queue MONRH</h2>
+        <h2 className="display-font mt-1 text-3xl font-semibold">Queue SIMPAIE</h2>
         <p className="mt-2 text-sm text-[var(--ink-soft)]">
           Vue consolidee des items evidence et verification dans la queue partagee.
         </p>

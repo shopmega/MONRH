@@ -19,6 +19,7 @@ type SalaryRules = VersionBase & {
   cnssEmployeeRate: number;
   cnssEmployerRate: number;
   cnssCeiling: number;
+  familyAllowanceEmployerRate: number;
   amoEmployeeRate: number;
   amoEmployerRate: number;
   professionalExpenseRate: number;
@@ -489,6 +490,7 @@ export default function AdminRulesPage() {
           <Field label="CNSS Employe" value={salary.cnssEmployeeRate} onChange={(v) => updateSalaryField("cnssEmployeeRate", v)} />
           <Field label="CNSS Employeur" value={salary.cnssEmployerRate} onChange={(v) => updateSalaryField("cnssEmployerRate", v)} />
           <Field label="Plafond CNSS" value={salary.cnssCeiling} onChange={(v) => updateSalaryField("cnssCeiling", v)} step="0.01" />
+          <Field label="Allocations familiales" value={salary.familyAllowanceEmployerRate} onChange={(v) => updateSalaryField("familyAllowanceEmployerRate", v)} />
           <Field label="AMO Employe" value={salary.amoEmployeeRate} onChange={(v) => updateSalaryField("amoEmployeeRate", v)} />
           <Field label="AMO Employeur" value={salary.amoEmployerRate} onChange={(v) => updateSalaryField("amoEmployerRate", v)} />
           <Field label="Frais Pro Rate" value={salary.professionalExpenseRate} onChange={(v) => updateSalaryField("professionalExpenseRate", v)} />

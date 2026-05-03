@@ -316,7 +316,7 @@ export default async function AdminEvidencePage({
 
       <section className="grid gap-3 lg:grid-cols-2">
         <article className="soft-card rounded-3xl p-5">
-          <h3 className="display-font text-2xl font-semibold">Shared queue MONRH</h3>
+          <h3 className="display-font text-2xl font-semibold">Shared queue SIMPAIE</h3>
           <div className="mt-3 space-y-2">
             {sharedQueueItems.length === 0 ? (
               <p className="text-sm text-[var(--ink-soft)]">Aucun item partage pour evidence / verification.</p>

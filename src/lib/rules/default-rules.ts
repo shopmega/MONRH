@@ -15,6 +15,7 @@ export type SalaryRules = {
   cnssEmployeeRate: number;
   cnssEmployerRate: number;
   cnssCeiling: number;
+  familyAllowanceEmployerRate: number;
   amoEmployeeRate: number;
   amoEmployerRate: number;
   professionalExpenseRate: number;
@@ -133,6 +134,7 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     cnssEmployeeRate: 0.0448,
     cnssEmployerRate: 0.0898,
     cnssCeiling: 6000,
+    familyAllowanceEmployerRate: 0.064,
     amoEmployeeRate: 0.0226,
     amoEmployerRate: 0.0411,
     professionalExpenseRate: 0.2,
@@ -158,6 +160,7 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     cnssEmployeeRate: 0.0448,
     cnssEmployerRate: 0.0898,
     cnssCeiling: 6000,
+    familyAllowanceEmployerRate: 0.064,
     amoEmployeeRate: 0.0226,
     amoEmployerRate: 0.0411,
     professionalExpenseRate: 0.2,
@@ -351,8 +354,7 @@ export const DEFAULT_SOCIAL_PROTECTION_RULES: SocialProtectionRules[] = [
     pensionBaseReplacementRate: 0.5,
     pensionIncrementPerStep: 0.01,
     pensionMaxReplacementRate: 0.7,
-    // Updated ceiling to 8000 MAD following CNSS revalorisation (applicable from 2024)
-    pensionReferenceSalaryCeiling: 8000,
+    pensionReferenceSalaryCeiling: 6000,
     pensionNormalRetirementAge: 60,
     pensionEarlyRetirementFactor: 0.9,
     workAccidentTemporaryCoverageRate: 2 / 3,

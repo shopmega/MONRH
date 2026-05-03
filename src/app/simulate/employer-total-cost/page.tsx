@@ -46,6 +46,7 @@ export default function EmployerTotalCostPage() {
       breakdownLabels={{
         grossSalary: "Brut",
         cnssEmployer: "CNSS employeur",
+        familyAllowanceEmployer: "Allocations familiales",
         amoEmployer: "AMO employeur",
         atMpInsurance: "AT/MP",
         formationPro: "Formation pro",
@@ -58,6 +59,7 @@ export default function EmployerTotalCostPage() {
       units={{
         grossSalary: "MAD",
         cnssEmployer: "MAD",
+        familyAllowanceEmployer: "MAD",
         amoEmployer: "MAD",
         atMpInsurance: "MAD",
         formationPro: "MAD",

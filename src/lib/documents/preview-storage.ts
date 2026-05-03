@@ -1,4 +1,4 @@
-const PREFIX = "tonrh-docgen-preview:";
+const PREFIX = "simpaie-docgen-preview:";
 
 export type DocgenPreviewPayload = {
   values: Record<string, string>;

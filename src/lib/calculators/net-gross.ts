@@ -72,7 +72,7 @@ export function simulateNetGross(rawInput: NetGrossInput): NetGrossResult {
           "Net = Brut - CNSS salarie - AMO salarie - CIMR - IR.",
           "IR calcule par tranches sur le revenu imposable mensuel.",
           "Reduction charges de famille deduite du montant d'IR apres calcul par tranches.",
-          "Cout employeur = Brut + CNSS employeur + AMO employeur.",
+          "Cout employeur = Brut + CNSS employeur + allocations familiales + AMO employeur.",
         ],
         warnings: [
           "Les retenues reelles peuvent varier selon convention interne ou avantages imposables.",

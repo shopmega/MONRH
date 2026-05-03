@@ -4,7 +4,7 @@ import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Politique de Confidentialite",
-  description: "Politique de confidentialite de TON RH: donnees collectees, usage, cookies, publicite et droits des utilisateurs.",
+  description: "Politique de confidentialite de SIMPAIE: donnees collectees, usage, cookies, publicite et droits des utilisateurs.",
   canonicalPath: "/privacy",
 });
 
@@ -13,13 +13,13 @@ export default function PrivacyPage() {
     <LegalPage
       eyebrow="Confidentialite"
       title="Politique de Confidentialite"
-      description="Cette page explique comment TON RH traite les donnees personnelles, les cookies, les mesures d'audience et les services publicitaires."
+      description="Cette page explique comment SIMPAIE traite les donnees personnelles, les cookies, les mesures d'audience et les services publicitaires."
       updatedAt="29 avril 2026"
       sections={[
         {
           title: "Donnees collectees",
           body: [
-            "TON RH peut collecter les informations que vous saisissez dans les formulaires, simulateurs, outils, documents generes, demandes de contact ou espaces de compte.",
+            "SIMPAIE peut collecter les informations que vous saisissez dans les formulaires, simulateurs, outils, documents generes, demandes de contact ou espaces de compte.",
             "Des donnees techniques peuvent aussi etre traitees, comme l'adresse IP, le type d'appareil, le navigateur, les pages consultees, les erreurs applicatives et les preferences de langue ou de theme.",
           ],
         },
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
           title: "Cookies, analytics et publicite",
           body: [
             "Le site peut utiliser des cookies ou technologies similaires pour conserver vos preferences, maintenir une session, mesurer l'audience et proteger le service.",
-            "TON RH peut afficher des annonces via des partenaires publicitaires, dont Google AdSense. Ces partenaires peuvent utiliser des cookies pour diffuser et mesurer des annonces personnalisees ou non personnalisees selon vos choix et la reglementation applicable.",
+            "SIMPAIE peut afficher des annonces via des partenaires publicitaires, dont Google AdSense. Ces partenaires peuvent utiliser des cookies pour diffuser et mesurer des annonces personnalisees ou non personnalisees selon vos choix et la reglementation applicable.",
           ],
         },
         {

@@ -4,7 +4,7 @@ import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Conditions d'Utilisation",
-  description: "Conditions d'utilisation de TON RH: usage du site, limites des informations juridiques, responsabilites et services.",
+  description: "Conditions d'utilisation de SIMPAIE: usage du site, limites des informations juridiques, responsabilites et services.",
   canonicalPath: "/terms",
 });
 
@@ -13,13 +13,13 @@ export default function TermsPage() {
     <LegalPage
       eyebrow="Conditions"
       title="Conditions d'Utilisation"
-      description="Ces conditions encadrent l'utilisation de TON RH, de ses simulateurs, guides, modeles, outils et services associes."
+      description="Ces conditions encadrent l'utilisation de SIMPAIE, de ses simulateurs, guides, modeles, outils et services associes."
       updatedAt="29 avril 2026"
       sections={[
         {
           title: "Objet du service",
           body: [
-            "TON RH propose des informations pratiques, simulateurs, outils de verification, articles et modeles lies au travail, a la paie, aux droits sociaux et aux demarches RH au Maroc.",
+            "SIMPAIE propose des informations pratiques, simulateurs, outils de verification, articles et modeles lies au travail, a la paie, aux droits sociaux et aux demarches RH au Maroc.",
             "Le service est destine a aider l'utilisateur a comprendre une situation et a preparer ses demarches, sans remplacer un conseil personnalise d'un professionnel qualifie.",
           ],
         },
@@ -27,7 +27,7 @@ export default function TermsPage() {
           title: "Informations indicatives",
           body: [
             "Les resultats fournis par les simulateurs dependent des donnees saisies par l'utilisateur et des regles integrees dans l'application.",
-            "Malgre les efforts de mise a jour, TON RH ne garantit pas que chaque information soit complete, exhaustive ou applicable a toutes les situations individuelles.",
+            "Malgre les efforts de mise a jour, SIMPAIE ne garantit pas que chaque information soit complete, exhaustive ou applicable a toutes les situations individuelles.",
           ],
         },
         {
@@ -41,13 +41,13 @@ export default function TermsPage() {
           title: "Comptes et securite",
           body: [
             "Certaines fonctionnalites peuvent necessiter un compte. L'utilisateur est responsable de la confidentialite de ses identifiants et des actions effectuees depuis son compte.",
-            "TON RH peut restreindre, suspendre ou supprimer l'acces en cas d'usage abusif, tentative de contournement, atteinte a la securite ou violation de ces conditions.",
+            "SIMPAIE peut restreindre, suspendre ou supprimer l'acces en cas d'usage abusif, tentative de contournement, atteinte a la securite ou violation de ces conditions.",
           ],
         },
         {
           title: "Modifications",
           body: [
-            "TON RH peut modifier le contenu, les fonctionnalites, les tarifs eventuels, les pages legales ou les presentes conditions afin d'ameliorer le service ou de respecter les obligations applicables.",
+            "SIMPAIE peut modifier le contenu, les fonctionnalites, les tarifs eventuels, les pages legales ou les presentes conditions afin d'ameliorer le service ou de respecter les obligations applicables.",
             "La poursuite de l'utilisation du site apres publication des modifications vaut acceptation des conditions mises a jour.",
           ],
         },

@@ -15,7 +15,9 @@ describe("simulateNetGross", () => {
     expect(result.breakdown.gross).toBe(10000);
     expect(result.breakdown.net).toBeGreaterThan(7000);
     expect(result.breakdown.net).toBeLessThan(10000);
-    expect(result.breakdown.employerTotalCost).toBeGreaterThan(10000);
+    expect(result.breakdown.cnssEmployer).toBe(538.8);
+    expect(result.breakdown.familyAllowanceEmployer).toBe(640);
+    expect(result.breakdown.employerTotalCost).toBe(11589.8);
   });
 
   it("estimates gross from target net", () => {
