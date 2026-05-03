@@ -95,17 +95,52 @@ function extractHeadings(blocks: string[]) {
   });
 }
 
+function isStructuralContentBlock(block: string) {
+  const lines = block
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0) return true;
+  return lines.every((line) =>
+    /^(#{1,3})\s+/.test(line) ||
+    /^[-*]\s+/.test(line) ||
+    /^\d+\.\s+/.test(line) ||
+    /^>\s?/.test(line) ||
+    /^\|.+\|$/.test(line),
+  );
+}
+
+function plainTextFromArticleBlock(block: string) {
+  return block
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) =>
+      line &&
+      !/^(#{1,3})\s+/.test(line) &&
+      !/^[-*]\s+/.test(line) &&
+      !/^\d+\.\s+/.test(line) &&
+      !/^>\s?/.test(line) &&
+      !/^\|.+\|$/.test(line),
+    )
+    .join(" ")
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function extractKeyPoints(article: Article) {
   const points = article.content
-    .filter((block) => {
-      const trimmed = block.trim();
-      return trimmed.length > 80 && !trimmed.startsWith("#") && !/^[-*]\s+/.test(trimmed);
-    })
-    .slice(0, 3)
     .map((block) => {
-      const normalized = block.replace(/\s+/g, " ").trim();
+      if (isStructuralContentBlock(block)) return "";
+      const normalized = plainTextFromArticleBlock(block);
       return normalized.length > 155 ? `${normalized.slice(0, 152).trim()}...` : normalized;
-    });
+    })
+    .filter((point) => point.length > 80)
+    .slice(0, 3);
 
   if (points.length > 0) return points;
 
