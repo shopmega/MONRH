@@ -78,6 +78,13 @@ function noticeMonths(
   rules: ReturnType<typeof getTerminationRulesByDate>,
   workerCategory: ParsedLicenciementInput["workerCategory"],
 ) {
+  const noticeRules = rules.cdiNoticeRulesByCategory?.[workerCategory];
+  const matchedNotice = noticeRules?.find(
+    (rule) => totalYears >= rule.minYears && (rule.maxYears === null || totalYears < rule.maxYears),
+  );
+  if (matchedNotice?.unit === "month") return matchedNotice.value;
+  if (matchedNotice?.unit === "day") return matchedNotice.value / 26;
+
   const categoryRules = rules.cdiNoticeMonthsByCategory[workerCategory];
   if (totalYears < 1) return categoryRules.lt1;
   if (totalYears < 5) return categoryRules.gte1lt5;
@@ -102,13 +109,19 @@ export function simulateLicenciement(rawInput: LicenciementInput): LicenciementR
   const input = licenciementInputSchema.parse(rawInput);
   const rules = getTerminationRulesByDate(input.calculationDate);
   const totalServiceYears = resolveServiceYears(input);
-  const hourlySalary = input.monthlySalary / 191;
-  const legalHours = indemnityHours(totalServiceYears, rules);
-  const legalIndemnityEligible = rules.legalIndemnityContractTypes.includes(input.contractType);
+  const forceMajeure = input.dismissalReason === "force_majeure";
+  const referenceHoursPerMonth = rules.referenceHoursPerMonth ?? 191;
+  const hourlySalary = input.monthlySalary / referenceHoursPerMonth;
+  const indemnityYears = rules.useFractionalYearsForIndemnity ? totalServiceYears : Math.floor(totalServiceYears);
+  const legalHours = indemnityHours(indemnityYears, rules);
+  const legalIndemnityEligible =
+    rules.legalIndemnityContractTypes.includes(input.contractType) &&
+    totalServiceYears * 12 >= (rules.minimumSeniorityMonthsForLegalIndemnity ?? 0) &&
+    (!forceMajeure || rules.forceMajeure?.legalIndemnityDue);
   const indemnityLegale = legalIndemnityEligible ? hourlySalary * legalHours : 0;
   const monthlyNotice = noticeMonths(totalServiceYears, rules, input.workerCategory);
   const indemnitePreavis =
-    input.contractType === "CDI"
+    input.contractType === "CDI" && (!forceMajeure || rules.forceMajeure?.preavisDue)
       ? input.monthlySalary * monthlyNotice
       : 0;
   const congesPayesRestants = (input.monthlySalary / 26) * input.unusedLeaveDays;
@@ -117,7 +130,9 @@ export function simulateLicenciement(rawInput: LicenciementInput): LicenciementR
     rules.abusiveCapMonths,
   );
   const dommagesAbusif =
-    (input.abusive || !input.procedureCompliant) && input.contractType === "CDI"
+    (input.abusive || !input.procedureCompliant) &&
+    input.contractType === "CDI" &&
+    (!forceMajeure || rules.forceMajeure?.damagesDue)
       ? abusiveMonths * input.monthlySalary
       : 0;
   const totalEstimated =
@@ -146,25 +161,31 @@ export function simulateLicenciement(rawInput: LicenciementInput): LicenciementR
       assumptions: [
         "Le salaire de reference utilise est le salaire mensuel saisi.",
         `Type de contrat: ${input.contractType}. Categorie: ${input.workerCategory}.`,
-        "Le taux horaire est calcule sur une base de 191 heures mensuelles.",
+        `Le taux horaire est calcule sur une base de ${referenceHoursPerMonth} heures mensuelles.`,
+        `Anciennete minimale indemnites legales: ${rules.minimumSeniorityMonthsForLegalIndemnity ?? 0} mois.`,
+        rules.useFractionalYearsForIndemnity
+          ? "Les fractions d'annee sont prises en compte pour l'indemnite legale."
+          : "Seules les annees completes sont prises en compte pour l'indemnite legale.",
+        forceMajeure ? "Force majeure: preavis et dommages abusifs appliques selon l'override admin." : "",
         input.contractType === "CDD"
-          ? "Le calcul CDD ne force pas de preavis CDI; la rupture du CDD doit etre qualifiee separement."
+          ? "Le calcul CDD ne force pas l'Article 53; une rupture anticipee abusive doit etre calculee sur la periode restante."
           : "Le calcul CDI applique la duree de preavis selon anciennete et categorie.",
         input.abusive || !input.procedureCompliant
           ? "Le scenario inclut une estimation des dommages pour licenciement abusif."
           : "Le scenario n'inclut pas de dommages pour licenciement abusif.",
-      ],
+      ].filter(Boolean),
       formulas: [
         "Indemnite legale = taux horaire x heures legalement dues selon anciennete.",
         input.contractType === "CDI"
           ? "Indemnite preavis (CDI) = salaire mensuel x duree de preavis estimee."
-          : "CDD: pas de preavis CDI calcule automatiquement.",
+          : "CDD: pas de preavis CDI calcule automatiquement; compensation potentielle = salaires restants si rupture anticipee abusive.",
         "Conges restants = (salaire mensuel / 26) x jours non pris.",
       ],
       warnings: [
         input.contractType === "CDD"
           ? "Pour la fin normale ou la rupture anticipee d'un CDD, utilisez le simulateur Fin de CDD et qualifiez le motif."
           : "Le calcul ne tient pas compte de clauses specifiques d'une convention collective.",
+        forceMajeure ? rules.forceMajeure?.warning ?? "" : "",
         !input.procedureCompliant
           ? "Procedure indiquee non conforme: le risque abusif est derive des faits saisis."
           : "",

@@ -40,10 +40,10 @@ export function simulateUnpaidOvertimeRecovery(
   const rules = getOvertimeRulesByDate(input.calculationDate);
   const hourly = input.monthlySalary / rules.monthlyReferenceHours;
   const overtimePrincipal =
-    input.unpaidDayHours * hourly * rules.dayMultiplier +
-    input.unpaidNightHours * hourly * rules.nightMultiplier +
-    input.unpaidWeekendHours * hourly * rules.weekendMultiplier +
-    input.unpaidHolidayHours * hourly * rules.holidayMultiplier;
+    input.unpaidDayHours * hourly * (rules.normalDayDaytimeMultiplier ?? rules.dayMultiplier) +
+    input.unpaidNightHours * hourly * (rules.normalDayNightMultiplier ?? rules.nightMultiplier) +
+    input.unpaidWeekendHours * hourly * (rules.restOrHolidayDaytimeMultiplier ?? rules.weekendMultiplier) +
+    input.unpaidHolidayHours * hourly * (rules.restOrHolidayNightMultiplier ?? rules.holidayMultiplier);
   const explicitPenaltyRate = input.contractualPenaltyRatePerMonth || input.penaltyRatePerMonth || 0;
   const delayPenalties =
     overtimePrincipal * explicitPenaltyRate * input.delayMonths;

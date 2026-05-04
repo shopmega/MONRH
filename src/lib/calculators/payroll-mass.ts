@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { getCurrentDateISO } from "@/lib/calculators/shared";
-import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 import { computeMonthlyPayrollFromGross, roundMAD } from "@/lib/calculators/payroll-core";
 
 export const payrollMassInputSchema = z.object({
@@ -49,8 +48,6 @@ export type PayrollMassResult = {
 
 export function simulatePayrollMass(raw: PayrollMassInput): PayrollMassResult {
   const input = payrollMassInputSchema.parse(raw);
-  const rules = getSalaryRulesByDate(input.calculationDate);
-  const formationProRate = input.companySize === "small" ? rules.formationProRateSmall : rules.formationProRateLarge;
 
   const rawEmployees = input.employees || Array.from({ length: input.employeeCount || 1 }, (_, i) => ({
     name: `Employe ${i + 1}`,
@@ -59,12 +56,11 @@ export function simulatePayrollMass(raw: PayrollMassInput): PayrollMassResult {
 
   const employeeLines: EmployeePayrollLine[] = rawEmployees.map((employee) => {
     const payroll = computeMonthlyPayrollFromGross(employee.grossSalary, input);
-    const formationPro = roundMAD(payroll.gross * formationProRate);
     return {
       name: employee.name,
       grossSalary: payroll.gross,
       netSalary: payroll.net,
-      employerCost: roundMAD(payroll.employerTotalCost + formationPro),
+      employerCost: payroll.employerTotalCost,
       cnssEmployee: payroll.cnssEmployee,
       incomeTax: payroll.incomeTax,
     };
@@ -73,7 +69,6 @@ export function simulatePayrollMass(raw: PayrollMassInput): PayrollMassResult {
   const totals = employeeLines.reduce(
     (acc, employee) => {
       const payroll = computeMonthlyPayrollFromGross(employee.grossSalary, input);
-      const formationPro = roundMAD(payroll.gross * formationProRate);
       return {
         totalGross: roundMAD(acc.totalGross + employee.grossSalary),
         totalNet: roundMAD(acc.totalNet + employee.netSalary),
@@ -81,7 +76,7 @@ export function simulatePayrollMass(raw: PayrollMassInput): PayrollMassResult {
         totalCnssEmployee: roundMAD(acc.totalCnssEmployee + employee.cnssEmployee),
         totalCnssEmployer: roundMAD(acc.totalCnssEmployer + payroll.cnssEmployer),
         totalIncomeTax: roundMAD(acc.totalIncomeTax + employee.incomeTax),
-        totalFormationPro: roundMAD(acc.totalFormationPro + formationPro),
+        totalFormationPro: roundMAD(acc.totalFormationPro + payroll.formationProEmployer),
       };
     },
     {

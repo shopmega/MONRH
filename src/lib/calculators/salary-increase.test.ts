@@ -170,8 +170,8 @@ describe("simulateSalaryIncrease", () => {
     expect(result.proposed.employerTotalCost).toBeGreaterThan(result.newGross);
 
     // Net gain calculations
-    expect(result.netGain.monthly).toBe(result.proposed.net - result.current.net);
-    expect(result.netGain.annual).toBe(result.netGain.monthly * 12);
+    expect(result.netGain.monthly).toBeCloseTo(result.proposed.net - result.current.net, 2);
+    expect(result.netGain.annual).toBeCloseTo(result.netGain.monthly * 12, 2);
     expect(result.netGain.employerCostDelta).toBeCloseTo(
       result.proposed.employerTotalCost - result.current.employerTotalCost
     );

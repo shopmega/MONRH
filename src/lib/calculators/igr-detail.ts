@@ -5,6 +5,7 @@ import {
   computeMonthlyPayrollFromGross,
   computeProgressiveTax,
   payrollCoreInputSchema,
+  resolveProfessionalExpenseRuleMonthly,
   roundMAD,
 } from "@/lib/calculators/payroll-core";
 
@@ -73,12 +74,13 @@ export function simulateIGRDetail(raw: IGRDetailInput): IGRDetailResult {
   });
 
   const annualGrossWithBonus = roundMAD(input.grossSalary * 12 + input.annualBonusGross);
+  const professionalExpenseRule = resolveProfessionalExpenseRuleMonthly(input.grossSalary, rules);
   const annualTaxableBase = Math.max(
     0,
     annualGrossWithBonus -
       monthly.cnssEmployee * 12 -
       monthly.amoEmployee * 12 -
-      Math.min(annualGrossWithBonus * rules.professionalExpenseRate, rules.professionalExpenseCap * 12) -
+      Math.min(annualGrossWithBonus * professionalExpenseRule.rate, professionalExpenseRule.cap * 12) -
       input.additionalDeductionsAnnual,
   );
   const annualFamilyTaxReduction = monthly.familyTaxReduction * 12;

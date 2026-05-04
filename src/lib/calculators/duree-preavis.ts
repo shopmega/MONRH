@@ -78,6 +78,13 @@ function cdiNoticeMonths(
   rules: ReturnType<typeof getTerminationRulesByDate>,
   workerCategory: ParsedDureePreavisInput["workerCategory"],
 ): number {
+  const noticeRules = rules.cdiNoticeRulesByCategory?.[workerCategory];
+  const matchedNotice = noticeRules?.find(
+    (rule) => totalYears >= rule.minYears && (rule.maxYears === null || totalYears < rule.maxYears),
+  );
+  if (matchedNotice?.unit === "month") return matchedNotice.value;
+  if (matchedNotice?.unit === "day") return matchedNotice.value / 26;
+
   const category = rules.cdiNoticeMonthsByCategory[workerCategory];
   if (totalYears < 1) return category.lt1;
   if (totalYears < 5) return category.gte1lt5;
@@ -96,9 +103,7 @@ export function simulateDureePreavis(rawInput: DureePreavisInput): DureePreavisR
       ? cdiNoticeMonths(totalServiceYears, rules, input.workerCategory)
       : 0;
   const requiredNoticeDays =
-    input.contractType === "CDD"
-      ? 0
-      : Math.round(requiredNoticeMonths * 30);
+    input.contractType === "CDD" ? 0 : Math.round(requiredNoticeMonths * 26);
   const cddStatus = cddRuptureSummary(input.cddRuptureReason);
   const cddMissing = input.contractType === "CDD" ? cddMissingInformation(input.cddRuptureReason) : [];
   const legalBasis =
@@ -157,12 +162,12 @@ export function simulateDureePreavis(rawInput: DureePreavisInput): DureePreavisR
           : "Anciennete saisie manuellement car la date d'embauche est inconnue.",
       ],
       formulas: [
-        "CDI: preavis par tranche d'anciennete et categorie (lt1, 1-5, 5+ ans).",
+        "CDI: preavis par tranche d'anciennete et categorie, avec unite jour/mois issue des regles actives.",
         "CDD: aucun preavis legal standard n'est calcule sans qualification de la rupture.",
       ],
       warnings: [
         "Certaines conventions collectives peuvent prevoir des preavis differents.",
-        "Les jours CDI sont affiches a titre indicatif (conversion 1 mois = 30 jours).",
+        "Les jours CDI sont affiches a titre indicatif (conversion paie 1 mois = 26 jours ouvrables).",
         ...(input.contractType === "CDD"
           ? [
               "Ne pas appliquer automatiquement le bareme CDI a un CDD.",

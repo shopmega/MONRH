@@ -48,12 +48,12 @@ export function simulateOvertime(rawInput: OvertimeInput): OvertimeResult {
     input.overtimeRestOrHolidayDayHours + (input.overtimeWeekendHours ?? 0);
   const restOrHolidayNightHours =
     input.overtimeRestOrHolidayNightHours + (input.overtimeHolidayHours ?? 0);
-  const dayAmount = input.overtimeDayHours * baseHourlyRate * rules.dayMultiplier;
-  const nightAmount = input.overtimeNightHours * baseHourlyRate * rules.nightMultiplier;
+  const dayAmount = input.overtimeDayHours * baseHourlyRate * (rules.normalDayDaytimeMultiplier ?? rules.dayMultiplier);
+  const nightAmount = input.overtimeNightHours * baseHourlyRate * (rules.normalDayNightMultiplier ?? rules.nightMultiplier);
   const restOrHolidayDayAmount =
-    restOrHolidayDayHours * baseHourlyRate * rules.weekendMultiplier;
+    restOrHolidayDayHours * baseHourlyRate * (rules.restOrHolidayDaytimeMultiplier ?? rules.weekendMultiplier);
   const restOrHolidayNightAmount =
-    restOrHolidayNightHours * baseHourlyRate * rules.holidayMultiplier;
+    restOrHolidayNightHours * baseHourlyRate * (rules.restOrHolidayNightMultiplier ?? rules.holidayMultiplier);
   const totalOvertimeAmount = dayAmount + nightAmount + restOrHolidayDayAmount + restOrHolidayNightAmount;
 
   return {

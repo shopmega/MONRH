@@ -30,7 +30,8 @@ export function simulatePublicHolidayCompensation(
   const input = publicHolidayCompensationInputSchema.parse(rawInput);
   const rules = getOvertimeRulesByDate(input.calculationDate);
   const baseHourlyRate = input.monthlySalary / rules.monthlyReferenceHours;
-  const multiplierApplied = input.alreadyPaidNormalDay ? rules.holidayMultiplier : 3;
+  const holidayDaytimeMultiplier = rules.restOrHolidayDaytimeMultiplier ?? rules.weekendMultiplier;
+  const multiplierApplied = input.alreadyPaidNormalDay ? holidayDaytimeMultiplier : 1 + holidayDaytimeMultiplier;
   const compensationAmount =
     input.holidayHoursWorked * baseHourlyRate * multiplierApplied;
 

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { requireToolAccessOrResponse } from "@/lib/server/tool-access-enforcement";
 import { simulateNetGrossEnhanced, netGrossEnhancedInputSchema } from "@/lib/calculators/net-gross-enhanced";
 
 export async function POST(request: NextRequest) {
+  const accessDenied = await requireToolAccessOrResponse("net_gross_enhanced");
+  if (accessDenied) return accessDenied;
+
   try {
     const body = await request.json();
     const input = netGrossEnhancedInputSchema.parse(body);

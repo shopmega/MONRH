@@ -61,6 +61,7 @@ export function simulateNetGross(rawInput: NetGrossInput): NetGrossResult {
         summary: `Pour un brut de ${roundMAD(input.amount)} MAD, le net estime est ${breakdown.net} MAD.`,
         assumptions: [
           "Calcul base sur les taux CNSS/AMO de la version legale selectionnee.",
+          `Frais professionnels: mode ${rules.professionalExpenseMode}.`,
           "Le plafonnement CNSS est applique sur la base contributive.",
           input.includeCimr ? `CIMR appliquee au taux ${roundMAD(input.cimrRate * 100)}%.` : "CIMR non incluse.",
           `Reduction IR charges de famille: ${roundMAD(breakdown.familyTaxReduction)} MAD/mois (${input.familyDependentsCount} personne(s) a charge${input.familySituation === "married" ? " + statut marital" : ""}).`,
@@ -72,7 +73,7 @@ export function simulateNetGross(rawInput: NetGrossInput): NetGrossResult {
           "Net = Brut - CNSS salarie - AMO salarie - CIMR - IR.",
           "IR calcule par tranches sur le revenu imposable mensuel.",
           "Reduction charges de famille deduite du montant d'IR apres calcul par tranches.",
-          "Cout employeur = Brut + CNSS employeur + allocations familiales + AMO employeur.",
+          "Cout employeur = Brut + CNSS employeur + allocations familiales + AMO employeur + TFP.",
         ],
         warnings: [
           "Les retenues reelles peuvent varier selon convention interne ou avantages imposables.",
@@ -97,7 +98,8 @@ export function simulateNetGross(rawInput: NetGrossInput): NetGrossResult {
     explanation: {
       summary: `Pour viser ${roundMAD(input.amount)} MAD net, le brut estime est ${breakdown.gross} MAD.`,
       assumptions: [
-        "Estimation calculee par recherche iterative a partir des taux en vigueur.",
+          "Estimation calculee par recherche iterative a partir des taux en vigueur.",
+          `Frais professionnels: mode ${rules.professionalExpenseMode}.`,
         input.includeCimr ? `CIMR appliquee au taux ${roundMAD(input.cimrRate * 100)}%.` : "CIMR non incluse.",
         `Reduction IR charges de famille: ${roundMAD(breakdown.familyTaxReduction)} MAD/mois (${input.familyDependentsCount} personne(s) a charge${input.familySituation === "married" ? " + statut marital" : ""}).`,
       ],

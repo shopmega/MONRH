@@ -19,6 +19,7 @@ export const payrollCoreInputSchema = z.object({
   additionalDeductionsAnnual: z.number().min(0).default(0),
   includeCimr: z.boolean().default(false),
   cimrRate: z.number().min(0).max(0.12).default(0.06),
+  companySize: z.enum(["small", "large"]).default("large"),
 });
 
 export type PayrollPayElement = z.input<typeof payrollPayElementSchema>;
@@ -36,6 +37,7 @@ export type PayrollMonthlyResult = {
   familyAllowanceEmployer: number;
   amoEmployee: number;
   amoEmployer: number;
+  formationProEmployer: number;
   cimrEmployee: number;
   familyTaxReduction: number;
   additionalDeductions: number;
@@ -90,6 +92,25 @@ export function computeFamilyTaxReductionMonthly(
   return Math.min(effectiveDependents * annualAmount, annualCap) / 12;
 }
 
+export function resolveProfessionalExpenseRuleMonthly(gross: number, rules: SalaryRules) {
+  const tier = rules.professionalExpenseTiers?.find(
+    (item) => item.maxGrossMonthly === null || gross <= item.maxGrossMonthly,
+  );
+  return {
+    rate: tier?.rate ?? rules.professionalExpenseRate,
+    cap: tier?.monthlyCap ?? rules.professionalExpenseCap,
+  };
+}
+
+export function computeProfessionalExpenseDeductionMonthly(
+  gross: number,
+  taxableGross: number,
+  rules: SalaryRules,
+): number {
+  const { rate, cap } = resolveProfessionalExpenseRuleMonthly(gross, rules);
+  return Math.min(taxableGross * rate, cap);
+}
+
 export function computeMonthlyPayrollFromGross(
   gross: number,
   rawCoreInput: PayrollCoreInput = {},
@@ -112,12 +133,11 @@ export function computeMonthlyPayrollFromBases(
   const familyAllowanceEmployer = bases.gross * rules.familyAllowanceEmployerRate;
   const amoEmployee = amoGross * rules.amoEmployeeRate;
   const amoEmployer = amoGross * rules.amoEmployerRate;
+  const formationProRate = input.companySize === "small" ? rules.formationProRateSmall : rules.formationProRateLarge;
+  const formationProEmployer = bases.gross * formationProRate;
   const cimrEmployee = input.includeCimr ? bases.gross * input.cimrRate : 0;
   const additionalDeductions = input.additionalDeductionsAnnual / 12;
-  const professionalExpenseDeduction = Math.min(
-    taxableGross * rules.professionalExpenseRate,
-    rules.professionalExpenseCap,
-  );
+  const professionalExpenseDeduction = computeProfessionalExpenseDeductionMonthly(bases.gross, taxableGross, rules);
   const taxableIncome = Math.max(
     0,
     taxableGross - cnssEmployee - amoEmployee - professionalExpenseDeduction - additionalDeductions,
@@ -125,7 +145,7 @@ export function computeMonthlyPayrollFromBases(
   const familyTaxReduction = computeFamilyTaxReductionMonthly(input, rules);
   const incomeTax = Math.max(0, computeProgressiveTax(taxableIncome, rules.taxBracketsMonthly) - familyTaxReduction);
   const net = bases.gross - cnssEmployee - amoEmployee - cimrEmployee - incomeTax;
-  const employerTotalCost = bases.gross + cnssEmployer + familyAllowanceEmployer + amoEmployer;
+  const employerTotalCost = bases.gross + cnssEmployer + familyAllowanceEmployer + amoEmployer + formationProEmployer;
   const marginalRate = rules.taxBracketsMonthly.findLast((bracket) => taxableIncome > bracket.min)?.rate ?? 0;
 
   return {
@@ -140,6 +160,7 @@ export function computeMonthlyPayrollFromBases(
     familyAllowanceEmployer: roundMAD(familyAllowanceEmployer),
     amoEmployee: roundMAD(amoEmployee),
     amoEmployer: roundMAD(amoEmployer),
+    formationProEmployer: roundMAD(formationProEmployer),
     cimrEmployee: roundMAD(cimrEmployee),
     familyTaxReduction: roundMAD(familyTaxReduction),
     additionalDeductions: roundMAD(additionalDeductions),

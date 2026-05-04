@@ -65,7 +65,7 @@ describe("simulateDemission", () => {
     ).toThrow(/Conflicting inputs/);
   });
 
-  it("does not create a negative solde when CDI notice is not served", () => {
+  it("shows a potential amount due to the employer when CDI notice is not served", () => {
     const result = simulateDemission({
       calculationDate: "2026-02-12",
       resignationNotificationDate: "2026-02-12",
@@ -79,11 +79,12 @@ describe("simulateDemission", () => {
 
     expect(result.breakdown.leavePayout).toBe(0);
     expect(result.breakdown.potentialNoticeValue).toBeGreaterThan(0);
-    expect(result.breakdown.netFinancialOutcome).toBe(0);
+    expect(result.breakdown.amountPotentiallyDueToEmployer).toBe(result.breakdown.potentialNoticeValue);
+    expect(result.breakdown.netFinancialOutcome).toBeLessThan(0);
     expect(result.explanation.warnings).toContain(
       "L'employeur peut engager une action en dommages et interets mais ne peut pas retenir le solde de tout compte.",
     );
-    expect(result.explanation.summary).toContain("Aucun paiement du");
+    expect(result.explanation.summary).toContain("Montant potentiellement du a l'employeur");
   });
 
   it("does not compute CDI-style notice for CDD resignation", () => {

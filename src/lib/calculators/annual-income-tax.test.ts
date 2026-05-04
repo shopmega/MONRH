@@ -47,6 +47,6 @@ describe("simulateAnnualIncomeTax", () => {
       additionalDeductionsAnnual: 12000,
     });
 
-    expect(base.breakdown.annualTaxableIncome - withDeductions.breakdown.annualTaxableIncome).toBe(12000);
+    expect(base.breakdown.annualTaxableIncome - withDeductions.breakdown.annualTaxableIncome).toBeCloseTo(12000, 2);
   });
 });

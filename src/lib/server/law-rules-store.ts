@@ -16,6 +16,13 @@ const taxBracketSchema = z.object({
   min: z.number(),
   max: z.number().nullable(),
   rate: z.number().min(0),
+  deduction: z.number().min(0).optional(),
+});
+
+const professionalExpenseTierSchema = z.object({
+  maxGrossMonthly: z.number().min(0).nullable(),
+  rate: z.number().min(0),
+  monthlyCap: z.number().min(0),
 });
 
 const baseVersionSchema = z.object({
@@ -32,8 +39,10 @@ const salaryRuleSchema = baseVersionSchema.extend({
   familyAllowanceEmployerRate: z.number().min(0).default(0.064),
   amoEmployeeRate: z.number().min(0),
   amoEmployerRate: z.number().min(0),
+  professionalExpenseMode: z.enum(["legacy_20_percent", "reform_35_25_percent"]).default("legacy_20_percent"),
   professionalExpenseRate: z.number().min(0),
   professionalExpenseCap: z.number().min(0),
+  professionalExpenseTiers: z.array(professionalExpenseTierSchema).optional(),
   familyChargeReductionAnnual: z.number().min(0),
   familyChargeReductionCapAnnual: z.number().min(0),
   formationProRateSmall: z.number().min(0),
@@ -41,14 +50,39 @@ const salaryRuleSchema = baseVersionSchema.extend({
   taxBracketsMonthly: z.array(taxBracketSchema).min(1),
 });
 
+const noticeDurationRuleSchema = z.object({
+  minYears: z.number().min(0),
+  maxYears: z.number().min(0).nullable(),
+  value: z.number().min(0),
+  unit: z.enum(["day", "month"]),
+});
+
+const forceMajeureSchema = z.object({
+  preavisDue: z.boolean(),
+  damagesDue: z.boolean(),
+  legalIndemnityDue: z.boolean(),
+  warning: z.string().min(1),
+});
+
 const terminationRuleSchema = baseVersionSchema.extend({
   tranche1HoursPerYear: z.number().min(0),
   tranche2HoursPerYear: z.number().min(0),
   tranche3HoursPerYear: z.number().min(0),
   tranche4HoursPerYear: z.number().min(0),
+  minimumSeniorityMonthsForLegalIndemnity: z.number().min(0).default(6),
+  useFractionalYearsForIndemnity: z.boolean().default(true),
+  referenceHoursPerMonth: z.number().min(1).default(191),
   abusiveBaseMonthsPerYear: z.number().min(0),
   abusiveCapMonths: z.number().min(0),
   legalIndemnityContractTypes: z.array(z.enum(["CDI", "CDD"])).min(1),
+  cddEarlyTerminationCompensation: z.literal("remaining_salary_until_contract_end").default("remaining_salary_until_contract_end"),
+  forceMajeure: forceMajeureSchema.default({
+    preavisDue: false,
+    damagesDue: false,
+    legalIndemnityDue: false,
+    warning:
+      "La force majeure est strictement appreciee. Si elle n'est pas reconnue, la rupture peut etre requalifiee.",
+  }),
   cddNoticeDaysByCategory: z.object({
     cadre: z.number().min(0),
     employe: z.number().min(0),
@@ -59,11 +93,37 @@ const terminationRuleSchema = baseVersionSchema.extend({
     employe: z.object({ lt1: z.number().min(0), gte1lt5: z.number().min(0), gte5: z.number().min(0) }),
     ouvrier: z.object({ lt1: z.number().min(0), gte1lt5: z.number().min(0), gte5: z.number().min(0) }),
   }),
+  cdiNoticeRulesByCategory: z
+    .object({
+      cadre: z.array(noticeDurationRuleSchema).min(1),
+      employe: z.array(noticeDurationRuleSchema).min(1),
+      ouvrier: z.array(noticeDurationRuleSchema).min(1),
+    })
+    .default({
+      cadre: [
+        { minYears: 0, maxYears: 1, value: 1, unit: "month" },
+        { minYears: 1, maxYears: 5, value: 2, unit: "month" },
+        { minYears: 5, maxYears: null, value: 3, unit: "month" },
+      ],
+      employe: [
+        { minYears: 0, maxYears: 1, value: 8, unit: "day" },
+        { minYears: 1, maxYears: 5, value: 1, unit: "month" },
+        { minYears: 5, maxYears: null, value: 2, unit: "month" },
+      ],
+      ouvrier: [
+        { minYears: 0, maxYears: 1, value: 8, unit: "day" },
+        { minYears: 1, maxYears: 5, value: 1, unit: "month" },
+        { minYears: 5, maxYears: null, value: 2, unit: "month" },
+      ],
+    }),
 });
 
 const leaveRuleSchema = baseVersionSchema.extend({
   accrualDaysPerMonth: z.number().min(0),
   seniorityBonusDaysPerMonthAfter5Years: z.number().min(0),
+  seniorityBonusDays: z.number().min(0).default(1.5),
+  seniorityBonusEveryYears: z.number().min(1).default(5),
+  maxAnnualDays: z.number().min(0).default(30),
   carryoverLimitDays: z.number().min(0),
 });
 
@@ -79,6 +139,10 @@ const overtimeRuleSchema = baseVersionSchema.extend({
   nightMultiplier: z.number().min(0),
   weekendMultiplier: z.number().min(0),
   holidayMultiplier: z.number().min(0),
+  normalDayDaytimeMultiplier: z.number().min(0).default(1.25),
+  normalDayNightMultiplier: z.number().min(0).default(1.5),
+  restOrHolidayDaytimeMultiplier: z.number().min(0).default(1.5),
+  restOrHolidayNightMultiplier: z.number().min(0).default(2),
   monthlyReferenceHours: z.number().min(0),
 });
 
@@ -190,12 +254,17 @@ export async function readLawRulesBundle(): Promise<LawRulesBundle> {
 export async function writeLawRulesBundle(payload: unknown): Promise<LawRulesBundle> {
   const parsed = lawRulesBundleSchema.parse(payload);
   const persisted = await writeRulesToSupabase(parsed);
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(RULES_PATH, JSON.stringify(parsed, null, 2), "utf8");
+  } catch (error) {
+    if (!persisted) {
+      throw error;
+    }
+  }
+  invalidateRulesCache();
   if (persisted) {
-    invalidateRulesCache();
     return parsed;
   }
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(RULES_PATH, JSON.stringify(parsed, null, 2), "utf8");
-  invalidateRulesCache();
   return parsed;
 }

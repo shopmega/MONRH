@@ -6,6 +6,7 @@ import {
   computeFamilyTaxReductionMonthly,
   computeProgressiveTax,
   payrollFamilySituationSchema,
+  resolveProfessionalExpenseRuleMonthly,
   roundMAD,
 } from "@/lib/calculators/payroll-core";
 
@@ -18,6 +19,8 @@ export const annualIncomeTaxInputSchema = z.object({
   familySituation: payrollFamilySituationSchema.default("single"),
   familyDependentsCount: z.number().min(0).max(6).default(0),
   additionalDeductionsAnnual: z.number().min(0).default(0),
+  includeCimr: z.boolean().default(false),
+  cimrRate: z.number().min(0).max(0.12).default(0.06),
 });
 
 export type AnnualIncomeTaxInput = z.input<typeof annualIncomeTaxInputSchema>;
@@ -51,15 +54,18 @@ export function simulateAnnualIncomeTax(
     input.bonusAmount +
     (input.include13thSalary ? input.monthlySalary : 0);
 
+  const professionalExpenseRule = resolveProfessionalExpenseRuleMonthly(input.monthlySalary, rules);
   const annualProfessionalDeduction = Math.min(
-    annualGrossIncome * rules.professionalExpenseRate,
-    rules.professionalExpenseCap * 12,
+    annualGrossIncome * professionalExpenseRule.rate,
+    professionalExpenseRule.cap * 12,
   );
 
   const contributableBaseMonthly = Math.min(input.monthlySalary, rules.cnssCeiling);
+  const annualCimrContribution = input.includeCimr ? input.monthlySalary * input.cimrRate * input.paidMonths : 0;
   const annualSocialContributions =
     contributableBaseMonthly * rules.cnssEmployeeRate * input.paidMonths +
-    input.monthlySalary * rules.amoEmployeeRate * input.paidMonths;
+    input.monthlySalary * rules.amoEmployeeRate * input.paidMonths +
+    annualCimrContribution;
 
   const annualTaxableIncome = Math.max(
     0,
@@ -90,6 +96,10 @@ export function simulateAnnualIncomeTax(
       assumptions: [
         "La grille IR mensuelle est annualisee par multiplication par 12.",
         "Les charges sociales salarie sont deduites avant calcul IR.",
+        `Frais professionnels: mode ${rules.professionalExpenseMode}.`,
+        input.includeCimr
+          ? `CIMR deductible incluse au taux ${roundMAD(input.cimrRate * 100)}%.`
+          : "CIMR non incluse.",
         "Le bonus et le 13e mois sont integres dans le revenu annuel brut.",
         `Reduction IR charges de famille: ${roundMAD(familyTaxReduction)} MAD/an pour ${input.familyDependentsCount} personne(s) a charge.`,
         input.additionalDeductionsAnnual > 0

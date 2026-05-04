@@ -87,6 +87,7 @@ export type DemissionResult = {
     leavePayout: number;
     noticeComplianceStatus: string;
     potentialNoticeValue: number;
+    amountPotentiallyDueToEmployer: number;
     netFinancialOutcome: number;
     cddNote?: string;
   };
@@ -98,6 +99,13 @@ function categoryNoticeMonths(
   rules: ReturnType<typeof getTerminationRulesByDate>,
   category: ParsedDemissionInput["workerCategory"],
 ): number {
+  const noticeRules = rules.cdiNoticeRulesByCategory?.[category];
+  const matchedNotice = noticeRules?.find(
+    (rule) => totalYears >= rule.minYears && (rule.maxYears === null || totalYears < rule.maxYears),
+  );
+  if (matchedNotice?.unit === "month") return matchedNotice.value;
+  if (matchedNotice?.unit === "day") return matchedNotice.value / 26;
+
   const map = rules.cdiNoticeMonthsByCategory[category];
   if (totalYears < 1) return map.lt1;
   if (totalYears < 5) return map.gte1lt5;
@@ -127,13 +135,14 @@ export function simulateDemission(rawInput: DemissionInput): DemissionResult {
       ? 0
       : categoryNoticeMonths(totalServiceYears, rules, input.workerCategory);
   const requiredNoticeDays =
-    input.contractType === "CDD" ? 0 : Math.round(requiredNoticeMonths * 30);
+    input.contractType === "CDD" ? 0 : Math.round(requiredNoticeMonths * 26);
   const leavePayout = roundMAD((input.monthlySalary / 26) * input.unusedLeaveDays);
 
   const potentialNoticeValue =
     input.contractType === "CDI" && input.noticeStatus === "not_served"
       ? roundMAD(input.monthlySalary * requiredNoticeMonths)
       : 0;
+  const amountPotentiallyDueToEmployer = potentialNoticeValue;
 
   const recommendedDepartureDate =
     input.noticeStatus === "served" && input.contractType === "CDI"
@@ -142,7 +151,7 @@ export function simulateDemission(rawInput: DemissionInput): DemissionResult {
         : addMonths(resignationNotificationDate, requiredNoticeMonths)
       : resignationNotificationDate;
 
-  const netFinancialOutcome = roundMAD(leavePayout);
+  const netFinancialOutcome = roundMAD(leavePayout - amountPotentiallyDueToEmployer);
   const missingInformation =
     input.contractType === "CDD" ? cddMissingInformation(input.cddRuptureReason) : [];
   const legalBasis =
@@ -159,7 +168,9 @@ export function simulateDemission(rawInput: DemissionInput): DemissionResult {
   const summaryText =
     netFinancialOutcome > 0
       ? `Resultat net de demission estime: ${netFinancialOutcome} MAD (paiement conges restants).`
-      : `Aucun paiement du: ${netFinancialOutcome} MAD (pas de conges restants).`;
+      : netFinancialOutcome < 0
+        ? `Montant potentiellement du a l'employeur: ${Math.abs(netFinancialOutcome)} MAD si le preavis non servi est retenu par decision ou accord.`
+        : "Aucun paiement net estime (pas de conges restants ni risque de preavis chiffre).";
 
   const dynamicWarnings = [
     "La demission ne donne pas droit a l'indemnite de licenciement.",
@@ -204,6 +215,7 @@ export function simulateDemission(rawInput: DemissionInput): DemissionResult {
       leavePayout,
       noticeComplianceStatus: input.noticeStatus,
       potentialNoticeValue,
+      amountPotentiallyDueToEmployer,
       netFinancialOutcome,
       ...(input.contractType === "CDD" ? { cddNote: cddRuptureSummary(input.cddRuptureReason) } : {}),
     },
@@ -223,7 +235,7 @@ export function simulateDemission(rawInput: DemissionInput): DemissionResult {
       ],
       formulas: [
         "Indemnite conges = (salaire / 26) x jours restants.",
-        "Resultat net = conges payes (aucune deduction automatique pour demission).",
+        "Resultat net indicatif = conges payes - montant potentiellement du a l'employeur si preavis non respecte.",
         "CDI: preavis par categorie et anciennete selon les regles actives.",
       ],
       warnings: dynamicWarnings.filter(Boolean),

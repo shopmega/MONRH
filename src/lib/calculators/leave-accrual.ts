@@ -114,11 +114,12 @@ export function simulateLeaveAccrual(rawInput: LeaveAccrualInput): LeaveAccrualR
       : input.monthsWorked ?? 0;
 
   const accrualDays = monthsWorked * rules.accrualDaysPerMonth;
-  const seniorityBonusDays =
-    seniorityYears >= 5
-      ? monthsWorked * rules.seniorityBonusDaysPerMonthAfter5Years
-      : 0;
-  const totalAvailableDays = accrualDays + seniorityBonusDays + input.carriedDays;
+  const bonusEveryYears = rules.seniorityBonusEveryYears ?? 5;
+  const completedBonusPeriods = bonusEveryYears > 0 ? Math.floor(seniorityYears / bonusEveryYears) : 0;
+  const seniorityBonusDays = (completedBonusPeriods * (rules.seniorityBonusDays ?? 1.5) * monthsWorked) / 12;
+  const maxAccruedDaysForPeriod = ((rules.maxAnnualDays ?? Number.POSITIVE_INFINITY) * monthsWorked) / 12;
+  const cappedAccruedDays = Math.min(accrualDays + seniorityBonusDays, maxAccruedDaysForPeriod);
+  const totalAvailableDays = cappedAccruedDays + input.carriedDays;
   const remainingDays = Math.max(0, totalAvailableDays - input.usedLeaveDays);
   const carryoverAfterLimit = Math.min(remainingDays, rules.carryoverLimitDays);
 
@@ -145,18 +146,19 @@ export function simulateLeaveAccrual(rawInput: LeaveAccrualInput): LeaveAccrualR
           ? "Mois travailles et anciennete derives de la date d'embauche."
           : "Mois travailles et anciennete saisis manuellement car la date d'embauche est inconnue.",
         seniorityYears >= 5
-          ? "Bonus anciennete applique (anciennete >= 5 ans)."
+          ? `Bonus anciennete applique: +${rules.seniorityBonusDays ?? 1.5} jour(s) par periode complete de ${bonusEveryYears} ans, prorate sur la periode.`
           : "Pas de bonus anciennete applique (anciennete < 5 ans).",
+        `Droits annuels plafonnes a ${rules.maxAnnualDays ?? "non configure"} jours avant report interne.`,
         "Le reliquat saisi est ajoute avant deduction des jours consommes.",
       ],
       formulas: [
         "Acquis = mois travailles x taux d'acquisition.",
-        "Disponible = acquis + bonus + reliquat.",
+        "Disponible = min(acquis + bonus anciennete, plafond annuel prorate) + reliquat.",
         "Restant = disponible - conges utilises.",
       ],
       warnings: [
         "Certaines entreprises appliquent des politiques internes de report differentes.",
-        "Le reliquat reportable est plafonne selon la regle legale active.",
+        "Le reliquat reportable est plafonne selon la politique interne/conventionnelle configuree.",
       ],
       missingInformation:
         input.leavePeriodInputMode === "manual_unknown_hire_date" ? ["Date d'embauche"] : [],

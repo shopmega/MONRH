@@ -80,9 +80,8 @@ export function generatePayslip(raw: PayslipInput): PayslipResult {
           input,
         )
       : computeMonthlyPayrollFromGross(totalGross, input);
-  const formationProRate = input.companySize === "small" ? rules.formationProRateSmall : rules.formationProRateLarge;
-  const formationPro = roundMAD(totalGross * formationProRate);
-  const totalEmployerCost = roundMAD(payroll.employerTotalCost + formationPro);
+  const formationPro = payroll.formationProEmployer;
+  const totalEmployerCost = payroll.employerTotalCost;
   const totalDeductions = roundMAD(
     payroll.cnssEmployee + payroll.amoEmployee + payroll.cimrEmployee + payroll.incomeTax,
   );
