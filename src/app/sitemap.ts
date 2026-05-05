@@ -3,6 +3,7 @@ import { SITE_URL } from "@/lib/seo";
 import { listArticles } from "@/lib/server/articles-store";
 import { listDocumentTemplates } from "@/lib/server/document-templates-store";
 import { seoGuides } from "@/data/seo-guides";
+import { readAdminConfig } from "@/lib/server/admin-config";
 
 const staticPages = [
   "",
@@ -93,15 +94,39 @@ const staticPages = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const [articles, documentTemplates] = await Promise.all([
+  const [articles, documentTemplates, adminConfig] = await Promise.all([
     listArticles(),
     listDocumentTemplates(),
+    readAdminConfig(),
   ]);
   const publicArticles = articles.filter(
     (article) => (article.isActive ?? true) && (article.access ?? "public") === "public",
   );
 
-  const staticEntries: MetadataRoute.Sitemap = staticPages.map((path) => ({
+  // Filter static pages to exclude sensitive routes
+  const filteredStaticPages = staticPages.filter(path => {
+    // Exclude admin, account, and internal routes
+    if (path.startsWith('/admin') || path.startsWith('/compte') || path.includes('/result')) {
+      return false;
+    }
+    
+    // For tool pages, check if they're public
+    const toolMap: { [key: string]: string } = {
+      "/outils/audit-solde-tout-compte": "final_settlement_audit",
+      "/outils/controle-procedure-disciplinaire": "disciplinary_procedure_check", 
+      "/outils/risque-requalification-cdd": "fixed_term_contract_risk",
+      "/outils/feuille-route-pre-contentieux": "pre_litigation_timeline"
+    };
+    
+    const toolKey = toolMap[path];
+    if (toolKey && adminConfig.toolPolicies[toolKey]) {
+      return adminConfig.toolPolicies[toolKey].audience === "public";
+    }
+    
+    return true;
+  });
+
+  const staticEntries: MetadataRoute.Sitemap = filteredStaticPages.map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: now,
     changeFrequency:
