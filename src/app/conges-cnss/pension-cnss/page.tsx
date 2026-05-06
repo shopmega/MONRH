@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IntentPage } from "@/components/intent-page";
+import { IntentPageStatic } from "@/components/intent-page-static";
 import { INTENT_PAGES } from "@/lib/navigation/intent-pages";
 
 export const metadata: Metadata = {
@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description: "Projetez votre pension CNSS et anticipez vos droits de retraite au Maroc.",
 };
 
-export default function CongesCnssPensionPage() {
-  return <IntentPage page={INTENT_PAGES["cnss-pension"]} />;
+export default function PensionCnssPage() {
+  // Server component - renders static HTML for SEO
+  return <IntentPageStatic page={INTENT_PAGES["cnss-pension"]} />;
 }

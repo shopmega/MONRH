@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IntentPage } from "@/components/intent-page";
+import { IntentPageStatic } from "@/components/intent-page-static";
 import { INTENT_PAGES } from "@/lib/navigation/intent-pages";
 import { buildPageMetadata } from "@/lib/seo";
 
@@ -9,6 +9,7 @@ export const metadata: Metadata = buildPageMetadata({
   canonicalPath: "/contrat-depart/duree-preavis",
 });
 
-export default function ContratDepartDureePreavisPage() {
-  return <IntentPage page={INTENT_PAGES["depart-preavis"]} />;
+export default function DureePreavisPage() {
+  // Server component - renders static HTML for SEO
+  return <IntentPageStatic page={INTENT_PAGES["depart-preavis"]} />;
 }

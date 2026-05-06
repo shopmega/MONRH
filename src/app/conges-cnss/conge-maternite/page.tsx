@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IntentPage } from "@/components/intent-page";
+import { IntentPageStatic } from "@/components/intent-page-static";
 import { INTENT_PAGES } from "@/lib/navigation/intent-pages";
 
 export const metadata: Metadata = {
@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description: "Estimez votre conge maternite, vos droits CNSS et les documents utiles au Maroc.",
 };
 
-export default function CongesCnssCongeMaternitePage() {
-  return <IntentPage page={INTENT_PAGES["conge-maternite"]} />;
+export default function CongeMaternitePage() {
+  // Server component - renders static HTML for SEO
+  return <IntentPageStatic page={INTENT_PAGES["conge-maternite"]} />;
 }

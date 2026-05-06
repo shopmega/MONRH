@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IntentPage } from "@/components/intent-page";
+import { IntentPageStatic } from "@/components/intent-page-static";
 import { INTENT_PAGES } from "@/lib/navigation/intent-pages";
 
 export const metadata: Metadata = {
@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description: "Calculez les heures supplementaires impayees et preparez votre reclamation au Maroc.",
 };
 
-export default function LitigesHeuresSupImpayeesPage() {
-  return <IntentPage page={INTENT_PAGES["litige-heures-sup"]} />;
+export default function HeuresSupImpayeesPage() {
+  // Server component - renders static HTML for SEO
+  return <IntentPageStatic page={INTENT_PAGES["litige-heures-sup"]} />;
 }
