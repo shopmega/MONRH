@@ -1,0 +1,78 @@
+# 🛡️ MONRH Platform Deep Audit Report
+
+**Auditor:** Antigravity (Senior Full-Stack Auditor & QA Architect)
+**Date:** 2026-04-02
+**Scope:** Tools, Simulators, Admin Settings, Data Flow, and Consistency.
+
+---
+
+## 1. Summary of Critical Issues
+
+| Component | Issue | Severity | Risk |
+| :--- | :--- | :--- | :--- |
+| **Logic Drift** | `Net-to-Gross` ignores AT/MP and Formation Pro taxes in Employer Cost calculation. | **High** | Financial underestimation for employers (~2-6%). |
+| **Admin Sync** | Admin-set `Formation Pro` rates are ignored in 90% of salary-related tools. | **Medium** | Legal inaccuracy if admin updates values. |
+| **Data Flow** | No direct link from Salary Simulation to Offer Letter / Contract execution. | **Low/Med** | User context loss; reduced conversion to document generator. |
+| **Edge Cases** | Some calculators (e.g. `overtime`) lack robust validation for negative/extreme hours. | **Medium** | Potential for "impossible" results in UI. |
+
+---
+
+## 2. Table of Inconsistencies
+
+| Issue | Affected Tools | Type | Severity | Fix |
+| :--- | :--- | :--- | :--- | :--- |
+| **Employer Cost Discrepancy** | `net-gross.ts` vs `employer-total-cost.ts` | Logic Drift | **High** | Centralize "Total Cost" formula into a shared utility using all `SalaryRules`. |
+| **Labeling Drift** | All Tools (Salaire de base vs Brut vs Brut Mensuel) | UI Label | **Low** | Standardize labels via `i18n` dictionary. |
+| **Calculation Base** | `licenciement` uses 191h base; `smig` uses 191h. | Hardcoded Logic | **Medium** | Use `referenceHoursPerMonth` from `SmigRules` instead of hardcoded `191`. |
+| **Missing Link** | `net-gross` -> No Document | Data Flow | **Medium** | Add `salary-offer-letter` mapping in `result-document-links.ts`. |
+
+---
+
+## 3. Admin Parameters Audit
+
+| Parameter | Used Where | Missing Where | Problem | Fix |
+| :--- | :--- | :--- | :--- | :--- |
+| **Formation Pro Rate** | `employer-total-cost.ts`, Admin UI | `net-gross.ts`, `payslip.ts` | Partial propagation. | Inject into all "Cost" calculation paths. |
+| **Professional Expense Cap** | `net-gross.ts`, `igr-detail.ts` | `annual-income-tax.ts` | Some tools might use old static 2500 cap. | Use `getSalaryRulesByDate` in all tax tools. |
+| **AT/MP Rates** | `employer-total-cost.ts` | `net-gross.ts` | Ignored in simplified salary simulations. | Add "Sector Risk" toggle to all salary simulators. |
+| **Plafond CNSS** | Most tools | `temp-verify.test.ts` (test drift) | Minor test inconsistency. | Update tests to use `getSalaryRulesByDate`. |
+
+---
+
+## 4. Root Cause Analysis
+
+### A. Siloed Logic Implementation
+*   **Why:** Calculators were built as independent modules. While they share a `rules` provider, they don't share high-level "Formula Blocks" (e.g., a standard `calculateEmployerAddons` function).
+*   **Risk:** High. Financial tools must be identical in logic.
+
+### B. "Draft" Simulator -> Generator Mapping
+*   **Why:** `result-document-links.ts` was implemented after many tools were already done. Mapping is currently manual and incomplete.
+*   **Risk:** Medium. Users feel the app is "disconnected".
+
+---
+
+## 5. Recommendations (VERY IMPORTANT)
+
+### A. Architecture Fix: "Formula Centralization"
+*   **Move** all shared logic (CNSS, AMO, Employer Addons) from individual calculators into `src/lib/calculators/shared-logic.ts`.
+*   **Mandate** that *every* tool use the shared `calculatePayrollContext` object to ensure 100% parity between a simple Net-to-Brut and a full Payslip.
+
+### B. Data Flow Fix: "Deep Prefill"
+*   **Upgrade** `SimulationResultSnapshot` to include the full `breakdown` object.
+*   **Extend** `result-document-links.ts` to map specific breakdown fields to Document Template IDs (e.g., `breakdown.gross` -> `offer_salary_gross`).
+
+### C. Standardization Layer
+*   **Implement** a `Terms.ts` shared constant file for all UI labels (e.g., `LABEL_GROSS_SALARY = "Salaire Brut"`). Standardize via `useI18n`. Refactor existing translations to ensure keyword consistency across French and Arabic (Salaire brut vs Base salariale).
+
+---
+
+## 6. Final Score
+
+*   **Consistency Score:** `6.5 / 10` (Centralized rules are great, but formula implementation drifts).
+*   **Reliability Score:** `7 / 10` (High for individual tools, but "Employer Cost" needs urgent fix).
+
+---
+
+## 💡 BONUS: "Single Source of Truth 2.0"
+Suggesting a **Rule-Driven Calculator Engine**:
+Instead of writing TypeScript functions for every tool, define the "Formula Chain" in JSON. This ensures that if a step is updated (e.g. adding a new tax), it reflects in ALL tools using that chain automatically.

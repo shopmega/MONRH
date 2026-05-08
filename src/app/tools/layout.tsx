@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { DEFAULT_OG_IMAGE_PATH, absoluteUrl } from "@/lib/seo";
+import { SectionLayoutWrapper } from "@/components/section-layout-wrapper";
+import { protectionToolsSidebarItems } from "@/lib/content/tools-sidebar";
 
 export const metadata: Metadata = {
   title: "Outils RH et Conformite",
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
         url: absoluteUrl(DEFAULT_OG_IMAGE_PATH),
         width: 1200,
         height: 630,
-        alt: "Outils RH MON RH",
+        alt: "Outils RH SIMPAIE",
       },
     ],
   },
@@ -36,5 +38,17 @@ export default function ToolsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return (
+    <SectionLayoutWrapper
+      indexPath="/outils"
+      sidebarProps={{
+        title: { fr: "Outils de protection", ar: "أدوات الحماية" },
+        items: [...protectionToolsSidebarItems],
+        backHref: "/outils",
+        backLabel: { fr: "Retour outils", ar: "الرجوع إلى الأدوات" },
+      }}
+    >
+      {children}
+    </SectionLayoutWrapper>
+  );
 }

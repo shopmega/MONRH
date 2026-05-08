@@ -9,6 +9,13 @@ type GenericSimulationResult = {
     formulas: string[];
     warnings: string[];
     nextSteps: string[];
+    confidence?: {
+      level: "low" | "medium" | "high";
+      label?: string;
+      note: string;
+    };
+    sources?: string[];
+    missingInformation?: string[];
   };
 };
 

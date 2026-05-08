@@ -21,3 +21,7 @@ export function getSupabaseUrl() {
 export function getSupabaseAnonKey() {
   return requiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 }
+
+export function getSupabaseSchema() {
+  return process.env.NEXT_PUBLIC_SUPABASE_SCHEMA || "public";
+}

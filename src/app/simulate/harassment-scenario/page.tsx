@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Scenario Harcelement",
@@ -16,6 +16,9 @@ export default function HarassmentScenarioPage() {
       apiPath="/api/simulate/harassment-scenario"
       calculatorType="harassment_scenario"
       fields={[
+        { key: "calculationDate", label: "Date de calcul", type: "date" },
+        { key: "firstIncidentDate", label: "Premier incident", type: "date" },
+        { key: "lastIncidentDate", label: "Dernier incident", type: "date" },
         {
           key: "harassmentType", label: "Type de harcelement", type: "select", defaultValue: "moral", options: [
             { value: "moral", label: "Harcelement moral (Art. 40 CT)" },
@@ -29,18 +32,18 @@ export default function HarassmentScenarioPage() {
             { value: "client", label: "Client / Tiers" },
           ]
         },
-        { key: "incidentsCount", label: "Incidents documentes", type: "number", defaultValue: "5", min: 1, step: 1 },
-        { key: "witnessesCount", label: "Temoins disponibles", type: "number", defaultValue: "1", min: 0, step: 1 },
-        { key: "hasWrittenProof", label: "Preuves ecrites (emails, SMS...)", type: "checkbox", defaultValue: false },
-        { key: "hasMedicalProof", label: "Certificat medical", type: "checkbox", defaultValue: false },
-        { key: "hrNotified", label: "RH / DRH notifie par ecrit", type: "checkbox", defaultValue: false },
+        { key: "incidentsCount", label: "Incidents documentes", type: "number", min: 1, step: 1, defaultValue: 1 },
+        { key: "witnessesCount", label: "Temoins disponibles", type: "number", min: 0, step: 1 },
+        { key: "hasIncidentLog", label: "Journal date des incidents", type: "checkbox" },
+        { key: "hasWrittenProof", label: "Preuves ecrites (emails, SMS...)", type: "checkbox" },
+        { key: "hasMedicalProof", label: "Certificat medical", type: "checkbox" },
+        { key: "hrNotified", label: "RH / DRH notifie par ecrit", type: "checkbox" },
         {
           key: "companySize", label: "Taille de l'entreprise", type: "select", defaultValue: "large", options: [
             { value: "small", label: "< 10 salaries" },
             { value: "large", label: ">= 10 salaries" },
           ]
         },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
       ]}
       breakdownLabels={{
         harassmentType: "Type",

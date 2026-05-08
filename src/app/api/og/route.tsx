@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   const title = clean(searchParams.get("title"), SITE_NAME, 90);
   const subtitle = clean(
     searchParams.get("subtitle"),
-    "Simulateurs et documents droit du travail au Maroc",
+    "Salaire, CNSS, litiges et modeles RH au Maroc",
     140,
   );
 
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <div
             style={{
-              display: "inline-flex",
+              display: "flex",
               alignItems: "center",
               border: "2px solid #1d4ed8",
               color: "#1d4ed8",

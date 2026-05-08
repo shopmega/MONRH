@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/ad-slot";
-import { DocumentGeneratorClient } from "@/components/document-generator-client";
+import { BreadcrumbJsonLd } from "@/components/breadcrumb-json-ld";
+import { DocumentGeneratorFormClient } from "@/components/document-generator-form-client";
 import { RelatedContent } from "@/components/related-content";
 import { resolveRelatedItems } from "@/lib/linking/resolve-related";
 import { SITE_NAME, buildOgImageUrl } from "@/lib/seo";
@@ -42,7 +43,7 @@ export async function generateMetadata({
     },
     openGraph: {
       type: "article",
-      title: `${template.title} | Generateur`,
+      title: `${template.title} | Modele`,
       description: template.description,
       url: template.href,
       siteName,
@@ -94,12 +95,12 @@ export default async function DocumentGeneratorPage({
           practicalArticlesDesc: "راجع المقالات القانونية لتقوية ملفك.",
         }
       : {
-          generator: "Generateur",
+          generator: "Modele",
           partner: "Partenaire",
-          moreGenerators: "Plus de generateurs",
+          moreGenerators: "Plus de modeles",
           moreGeneratorsDesc: "Explorez d'autres modeles de lettres professionnelles.",
-          simulators: "Simulateurs",
-          simulatorsDesc: "Estimez vos montants avant de rediger votre courrier.",
+          simulators: "Outils lies",
+          simulatorsDesc: "Verifiez vos montants ou vos droits avant de rediger votre courrier.",
           practicalArticles: "Articles pratiques",
           practicalArticlesDesc: "Consultez les articles pour mieux cadrer votre demande.",
         };
@@ -115,9 +116,17 @@ export default async function DocumentGeneratorPage({
       return [field.id, typeof value === "string" ? value : ""];
     }),
   );
+  const rawCaseId = query.caseId;
+  const caseId = Array.isArray(rawCaseId) ? rawCaseId[0] : rawCaseId;
 
   return (
     <main className="paper-bg min-h-screen">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Modeles", href: "/modeles" },
+          { name: template.title, href: template.href },
+        ]}
+      />
       <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
         <section className="soft-card rounded-[2rem] p-5 sm:p-7">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink-soft)]">
@@ -134,7 +143,11 @@ export default async function DocumentGeneratorPage({
             <AdSlot slot="1212121212" format="auto" />
           </div>
         </section>
-        <DocumentGeneratorClient template={template} initialValues={initialValues} />
+        <DocumentGeneratorFormClient
+          template={template}
+          initialValues={initialValues}
+          caseId={typeof caseId === "string" ? caseId : undefined}
+        />
         <RelatedContent
           items={
             mappedItems.length > 0
@@ -143,17 +156,17 @@ export default async function DocumentGeneratorPage({
                   {
                     title: labels.moreGenerators,
                     description: labels.moreGeneratorsDesc,
-                    href: "/documents",
+                    href: "/modeles",
                   },
                   {
                     title: labels.simulators,
                     description: labels.simulatorsDesc,
-                    href: "/simulateurs",
+                    href: "/salaire",
                   },
                   {
                     title: labels.practicalArticles,
                     description: labels.practicalArticlesDesc,
-                    href: "/bibliotheque",
+                    href: "/articles",
                   },
                 ]
           }

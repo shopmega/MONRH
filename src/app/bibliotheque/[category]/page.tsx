@@ -6,5 +6,5 @@ export default async function LegacyCategoryPage({
   params: Promise<{ category: string }>;
 }) {
   const { category } = await params;
-  redirect(`/bibliotheque?category=${encodeURIComponent(category)}`);
+  redirect(`/articles?category=${encodeURIComponent(category)}`);
 }

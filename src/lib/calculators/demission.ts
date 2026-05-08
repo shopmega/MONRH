@@ -1,125 +1,254 @@
 import { z } from "zod";
 import { getTerminationRulesByDate } from "@/lib/rules/default-rules";
 import {
+  formatDateOnly,
+  getCurrentDateISO,
+  parseDateOnly,
   type CalculatorExplanation,
   roundMAD,
 } from "@/lib/calculators/shared";
+import {
+  addSenioritySourceIssues,
+  cddMissingInformation,
+  cddRuptureReasonSchema,
+  cddRuptureSummary,
+  contractTypeSchema,
+  normalizeLegacySeniorityInput,
+  noticeStatusSchema,
+  resolveServiceYears,
+  seniorityInputModeSchema,
+  workerCategorySchema,
+} from "@/lib/calculators/legal-core";
 
-export const demissionInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
-  monthlySalary: z.number().positive(),
-  workerCategory: z.enum(["cadre", "employe", "ouvrier"]).default("employe"),
-  contractType: z.enum(["CDI", "CDD"]).default("CDI"),
-  yearsOfService: z.number().min(0).max(60),
-  monthsOfService: z.number().min(0).max(11).default(0),
-  unusedLeaveDays: z.number().min(0).max(365).default(0),
-  noticeServed: z.boolean().default(true),
-});
+function normalizeLegacyDemissionInput(raw: unknown): unknown {
+  const normalized = normalizeLegacySeniorityInput(raw);
+  if (!normalized || typeof normalized !== "object" || Array.isArray(normalized)) return normalized;
+  const input = normalized as Record<string, unknown>;
+  if (input.noticeStatus === undefined && typeof input.noticeServed === "boolean") {
+    return {
+      ...input,
+      noticeStatus: input.noticeServed ? "served" : "not_served",
+    };
+  }
+  return normalized;
+}
 
-export type DemissionInput = z.infer<typeof demissionInputSchema>;
+const demissionBaseInputSchema = z
+  .object({
+    calculationDate: z.string().date().default(getCurrentDateISO),
+    monthlySalary: z.number().positive(),
+    workerCategory: workerCategorySchema.default("employe"),
+    contractType: contractTypeSchema.default("CDI"),
+    seniorityInputMode: seniorityInputModeSchema.default("hire_date"),
+    hireDate: z.string().date().optional(),
+    yearsOfService: z.number().min(0).max(60).optional(),
+    monthsOfService: z.number().min(0).max(11).optional(),
+    resignationNotificationDate: z.string().date().optional(),
+    unusedLeaveDays: z.number().min(0).max(365).default(0),
+    noticeStatus: noticeStatusSchema.default("served"),
+    cddRuptureReason: cddRuptureReasonSchema.optional(),
+  })
+  .superRefine((input, ctx) => {
+    addSenioritySourceIssues(input, ctx);
+    if (input.contractType === "CDD" && !input.cddRuptureReason) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["cddRuptureReason"],
+        message: "cddRuptureReason is required for CDD resignation analysis.",
+      });
+    }
+  });
+
+export const demissionInputSchema = z.preprocess(
+  normalizeLegacyDemissionInput,
+  demissionBaseInputSchema,
+);
+
+export type DemissionInput = z.input<typeof demissionInputSchema>;
+type ParsedDemissionInput = z.output<typeof demissionInputSchema>;
 
 export type DemissionResult = {
   versionId: string;
   versionCode: string;
+  inputMode: "hire_date" | "manual_unknown_hire_date";
+  legalBasis: string[];
+  missingInformation: string[];
+  documentPrefill: Record<string, string | number | boolean | undefined>;
   breakdown: {
     contractType: string;
     workerCategory: string;
+    hireDate?: string;
+    resignationNotificationDate: string;
+    cddRuptureReason?: string;
     totalServiceYears: number;
     requiredNoticeMonths: number;
+    requiredNoticeDays: number;
+    recommendedDepartureDate: string;
     leavePayout: number;
-    noticeCompensationDue: number;
+    noticeComplianceStatus: string;
+    potentialNoticeValue: number;
+    amountPotentiallyDueToEmployer: number;
     netFinancialOutcome: number;
     cddNote?: string;
   };
   explanation: CalculatorExplanation;
 };
 
-/**
- * Notice months for resignation — per category and seniority (Code du Travail Art. 43)
- * Same structure as licenciement but applied symmetrically to employee-side notice.
- */
 function categoryNoticeMonths(
   totalYears: number,
   rules: ReturnType<typeof getTerminationRulesByDate>,
-  category: DemissionInput["workerCategory"],
+  category: ParsedDemissionInput["workerCategory"],
 ): number {
+  const noticeRules = rules.cdiNoticeRulesByCategory?.[category];
+  const matchedNotice = noticeRules?.find(
+    (rule) => totalYears >= rule.minYears && (rule.maxYears === null || totalYears < rule.maxYears),
+  );
+  if (matchedNotice?.unit === "month") return matchedNotice.value;
+  if (matchedNotice?.unit === "day") return matchedNotice.value / 26;
+
   const map = rules.cdiNoticeMonthsByCategory[category];
   if (totalYears < 1) return map.lt1;
   if (totalYears < 5) return map.gte1lt5;
   return map.gte5;
 }
 
+function addMonths(dateISO: string, months: number): string {
+  const date = parseDateOnly(dateISO);
+  date.setMonth(date.getMonth() + months);
+  return formatDateOnly(date);
+}
+
+function addDays(dateISO: string, days: number): string {
+  const date = parseDateOnly(dateISO);
+  date.setDate(date.getDate() + days);
+  return formatDateOnly(date);
+}
+
 export function simulateDemission(rawInput: DemissionInput): DemissionResult {
   const input = demissionInputSchema.parse(rawInput);
   const rules = getTerminationRulesByDate(input.calculationDate);
-  const totalServiceYears = input.yearsOfService + input.monthsOfService / 12;
+  const totalServiceYears = resolveServiceYears(input);
+  const resignationNotificationDate = input.resignationNotificationDate ?? input.calculationDate;
 
   const requiredNoticeMonths =
     input.contractType === "CDD"
-      ? 0 // CDD notice handled in days (simplified)
+      ? 0
       : categoryNoticeMonths(totalServiceYears, rules, input.workerCategory);
-
-  const cddNoticeDays =
-    input.contractType === "CDD" ? rules.cddNoticeDaysByCategory[input.workerCategory] : 0;
-
+  const requiredNoticeDays =
+    input.contractType === "CDD" ? 0 : Math.round(requiredNoticeMonths * 26);
   const leavePayout = roundMAD((input.monthlySalary / 26) * input.unusedLeaveDays);
 
-  // If notice not served by employee: employer may deduct notice indemnity
-  const noticeCompensationDue = input.noticeServed
-    ? 0
-    : input.contractType === "CDI"
+  const potentialNoticeValue =
+    input.contractType === "CDI" && input.noticeStatus === "not_served"
       ? roundMAD(input.monthlySalary * requiredNoticeMonths)
-      : roundMAD((input.monthlySalary / 26) * cddNoticeDays);
+      : 0;
+  const amountPotentiallyDueToEmployer = potentialNoticeValue;
 
-  const netFinancialOutcome = roundMAD(leavePayout - noticeCompensationDue);
+  const recommendedDepartureDate =
+    input.noticeStatus === "served" && input.contractType === "CDI"
+      ? requiredNoticeMonths < 1
+        ? addDays(resignationNotificationDate, requiredNoticeDays)
+        : addMonths(resignationNotificationDate, requiredNoticeMonths)
+      : resignationNotificationDate;
 
-  const cddNote =
+  const netFinancialOutcome = roundMAD(leavePayout - amountPotentiallyDueToEmployer);
+  const missingInformation =
+    input.contractType === "CDD" ? cddMissingInformation(input.cddRuptureReason) : [];
+  const legalBasis =
+    input.contractType === "CDI"
+      ? [
+          "Code du travail marocain, articles 43 a 51.",
+          "Decret n 2-04-469 relatif au delai de preavis pour la rupture unilaterale du CDI.",
+        ]
+      : [
+          "Le Decret n 2-04-469 vise la rupture unilaterale du CDI.",
+          "La rupture d'un CDD doit etre qualifiee selon son terme, un accord amiable, la faute grave, la force majeure ou une rupture anticipee.",
+        ];
+
+  const summaryText =
+    netFinancialOutcome > 0
+      ? `Resultat net de demission estime: ${netFinancialOutcome} MAD (paiement conges restants).`
+      : netFinancialOutcome < 0
+        ? `Montant potentiellement du a l'employeur: ${Math.abs(netFinancialOutcome)} MAD si le preavis non servi est retenu par decision ou accord.`
+        : "Aucun paiement net estime (pas de conges restants ni risque de preavis chiffre).";
+
+  const dynamicWarnings = [
+    "La demission ne donne pas droit a l'indemnite de licenciement.",
+    "Certaines conventions collectives prevoient des preavis differents - verifier.",
     input.contractType === "CDD"
-      ? `Preavis CDD pour ${input.workerCategory}: ${cddNoticeDays} jours.`
-      : undefined;
+      ? "La rupture anticipee d'un CDD par le salarie peut engager sa responsabilite civile; aucun preavis CDI ne doit etre applique automatiquement."
+      : "",
+  ];
+
+  if (input.contractType === "CDI" && input.noticeStatus === "not_served") {
+    dynamicWarnings.push(
+      `Preavis non servi: ${potentialNoticeValue} MAD de salaire potentiellement concerne.`,
+      "L'employeur peut engager une action en dommages et interets mais ne peut pas retenir le solde de tout compte.",
+      "Il est recommande de servir le preavis ou de negocier un accord amiable.",
+    );
+  }
 
   return {
     versionId: rules.versionId,
     versionCode: rules.versionCode,
+    inputMode: input.seniorityInputMode,
+    legalBasis,
+    missingInformation,
+    documentPrefill: {
+      contractType: input.contractType,
+      workerCategory: input.workerCategory,
+      hireDate: input.hireDate,
+      noticeStartDate: resignationNotificationDate,
+      effectiveDepartureDate: recommendedDepartureDate,
+      amountDue: leavePayout,
+    },
     breakdown: {
       contractType: input.contractType,
       workerCategory: input.workerCategory,
+      ...(input.hireDate ? { hireDate: input.hireDate } : {}),
+      resignationNotificationDate,
+      ...(input.cddRuptureReason ? { cddRuptureReason: input.cddRuptureReason } : {}),
       totalServiceYears: roundMAD(totalServiceYears),
-      requiredNoticeMonths: input.contractType === "CDI" ? requiredNoticeMonths : 0,
+      requiredNoticeMonths,
+      requiredNoticeDays,
+      recommendedDepartureDate,
       leavePayout,
-      noticeCompensationDue,
+      noticeComplianceStatus: input.noticeStatus,
+      potentialNoticeValue,
+      amountPotentiallyDueToEmployer,
       netFinancialOutcome,
-      ...(cddNote ? { cddNote } : {}),
+      ...(input.contractType === "CDD" ? { cddNote: cddRuptureSummary(input.cddRuptureReason) } : {}),
     },
     explanation: {
-      summary: `Resultat net de demission estime: ${netFinancialOutcome} MAD.`,
+      summary: summaryText,
       assumptions: [
-        `Categorie: ${input.workerCategory} — preavis selon Art. 43 Code du Travail.`,
+        `Categorie: ${input.workerCategory}.`,
         `Type de contrat: ${input.contractType}.`,
         input.contractType === "CDI"
-          ? `Anciennete: ${roundMAD(totalServiceYears)} ans → preavis requis: ${requiredNoticeMonths} mois.`
-          : `Preavis CDD: ${cddNoticeDays} jours pour ${input.workerCategory}.`,
-        input.noticeServed ? "Preavis execute: aucune retenue." : "Preavis non execute: indemnite preavis retenue.",
+          ? `Anciennete: ${roundMAD(totalServiceYears)} ans -> preavis requis: ${requiredNoticeMonths} mois.`
+          : cddRuptureSummary(input.cddRuptureReason),
+        input.noticeStatus === "served"
+          ? "Preavis execute: situation reguliere."
+          : `Statut du preavis: ${input.noticeStatus}.`,
         "Conges restants valorises en salaire journalier (salaire / 26).",
+        "Aucune retenue automatique sur solde de tout compte pour demission.",
       ],
       formulas: [
         "Indemnite conges = (salaire / 26) x jours restants.",
-        "Compensation preavis (CDI) = salaire mensuel x mois preavis requis (si non execute).",
-        "Compensation preavis (CDD) = (salaire / 26) x jours preavis (si non execute).",
-        "Resultat net = conges payes - compensation preavis.",
+        "Resultat net indicatif = conges payes - montant potentiellement du a l'employeur si preavis non respecte.",
+        "CDI: preavis par categorie et anciennete selon les regles actives.",
       ],
-      warnings: [
-        "La demission ne donne pas droit a l'indemnite de licenciement.",
-        "Certaines conventions collectives preevoient des preavis differents — verifier.",
-        input.contractType === "CDD"
-          ? "La rupture anticipee d'un CDD par le salarie peut engager sa responsabilite civile."
-          : "",
-      ].filter(Boolean),
+      warnings: dynamicWarnings.filter(Boolean),
+      missingInformation,
       nextSteps: [
         "Verifier les jours de conges officiels avant remise de la demission.",
-        "Formaliser la demission par lettre recommandee avec accusé.",
+        "Formaliser la demission par ecrit avec preuve de reception.",
         "Obtenir le certificat de travail et le solde de tout compte signe.",
-      ],
+        input.noticeStatus === "not_served"
+          ? "Servir le preavis ou negocier un accord pour eviter les litiges."
+          : "",
+        input.contractType === "CDD" ? "Qualifier le motif de rupture du CDD avant signature." : "",
+      ].filter(Boolean),
     },
   };
 }

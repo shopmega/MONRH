@@ -1,23 +1,34 @@
 import { z } from "zod";
 import { getSmigRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
-/** Moroccan salary claims prescribe after 2 years (Art. 399 CT) */
 const PRESCRIPTION_YEARS = 2;
 
 export const unpaidSalaryRecoveryInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
-  unpaidMonths: z.number().min(1).max(36),
-  /** Were any partial payments made? If so, enter the shortfall per month */
+  firstUnpaidDate: z.string().date().optional(),
+  lastUnpaidDate: z.string().date().optional(),
+  unpaidMonths: z.number().min(1).max(36).optional(),
   partialPaymentPerMonth: z.number().min(0).default(0),
-  /** Months elapsed since the first missed payment — for prescription check */
-  monthsSinceFirstDefault: z.number().min(1).max(120),
-  /** Legal late payment rate (annual percentage) */
-  penaltyRateAnnual: z.number().min(0).max(50).default(7),
+  monthsSinceFirstDefault: z.number().min(1).max(120).optional(),
+  penaltyRateAnnual: z.number().min(0).max(50).optional(),
+  contractualPenaltyRateAnnual: z.number().min(0).max(50).default(0),
+  hasPayslips: z.boolean().default(false),
+  hasBankStatements: z.boolean().default(false),
+}).superRefine((input, ctx) => {
+  const hasDates = Boolean(input.firstUnpaidDate && input.lastUnpaidDate);
+  const hasManualDuration = input.unpaidMonths !== undefined && input.monthsSinceFirstDefault !== undefined;
+  if (!hasDates && !hasManualDuration) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Provide firstUnpaidDate/lastUnpaidDate or legacy unpaidMonths/monthsSinceFirstDefault.",
+      path: ["firstUnpaidDate"],
+    });
+  }
 });
 
-export type UnpaidSalaryRecoveryInput = z.infer<typeof unpaidSalaryRecoveryInputSchema>;
+export type UnpaidSalaryRecoveryInput = z.input<typeof unpaidSalaryRecoveryInputSchema>;
 
 export type UnpaidSalaryRecoveryResult = {
   versionId: string;
@@ -39,13 +50,14 @@ export function simulateUnpaidSalaryRecovery(
 ): UnpaidSalaryRecoveryResult {
   const input = unpaidSalaryRecoveryInputSchema.parse(rawInput);
   const rules = getSmigRulesByDate(input.calculationDate);
-  const penaltyRatePerMonth = input.penaltyRateAnnual / 100 / 12;
+  const unpaidMonths = resolveUnpaidMonths(input);
+  const monthsSinceFirstDefault = resolveMonthsSinceFirstDefault(input);
+  const penaltyRateAnnual = input.contractualPenaltyRateAnnual || input.penaltyRateAnnual || 0;
+  const penaltyRatePerMonth = penaltyRateAnnual / 100 / 12;
 
   const prescriptionLimitMonths = PRESCRIPTION_YEARS * 12;
-  // Months that have passed the prescription limit
-  const prescribedMonths = Math.max(0, input.monthsSinceFirstDefault - prescriptionLimitMonths);
-  // Claimable = total unpaid months minus those prescribed
-  const claimableMonths = Math.max(0, input.unpaidMonths - prescribedMonths);
+  const prescribedMonths = Math.max(0, monthsSinceFirstDefault - prescriptionLimitMonths);
+  const claimableMonths = Math.max(0, unpaidMonths - prescribedMonths);
 
   const actualMonthlyShortfall =
     input.partialPaymentPerMonth > 0
@@ -54,11 +66,11 @@ export function simulateUnpaidSalaryRecovery(
 
   const principalAmount = roundMAD(actualMonthlyShortfall * claimableMonths);
   const delayPenalties = roundMAD(
-    principalAmount * penaltyRatePerMonth * input.monthsSinceFirstDefault,
+    principalAmount * penaltyRatePerMonth * monthsSinceFirstDefault,
   );
   const totalClaimAmount = roundMAD(principalAmount + delayPenalties);
 
-  const prescriptionDeadlineMonths = Math.max(0, prescriptionLimitMonths - input.monthsSinceFirstDefault);
+  const prescriptionDeadlineMonths = Math.max(0, prescriptionLimitMonths - monthsSinceFirstDefault);
   const prescriptionRisk: UnpaidSalaryRecoveryResult["breakdown"]["prescriptionRisk"] =
     prescribedMonths === 0
       ? "none"
@@ -81,26 +93,30 @@ export function simulateUnpaidSalaryRecovery(
     explanation: {
       summary:
         prescriptionRisk === "full"
-          ? `Claim entierement prescrit (delai de 2 ans depasse). Aucun montant recuperable sans interruption de prescription.`
-          : `Montant reclamable estime: ${totalClaimAmount} MAD (${claimableMonths} mois sur ${input.unpaidMonths}).`,
+          ? "Claim entierement prescrit (delai de 2 ans depasse). Aucun montant recuperable sans interruption de prescription."
+          : `Montant reclamable estime: ${totalClaimAmount} MAD (${claimableMonths} mois sur ${unpaidMonths}).`,
       assumptions: [
-        `Salaire mensuel du: ${input.monthlySalary} MAD${input.partialPaymentPerMonth > 0 ? ` — paiement partiel de ${input.partialPaymentPerMonth} MAD, manque mensuel: ${roundMAD(actualMonthlyShortfall)} MAD` : ""}.`,
-        `Prescription Art. 399 CT: 2 ans a compter de chaque mois impaye.`,
-        `Delai ecoule depuis le premier defaut: ${input.monthsSinceFirstDefault} mois.`,
-        `Taux de penalites: ${input.penaltyRateAnnual}%/an (~${roundMAD(penaltyRatePerMonth * 100)}%/mois).`,
+        `Salaire mensuel du: ${input.monthlySalary} MAD${input.partialPaymentPerMonth > 0 ? ` - paiement partiel de ${input.partialPaymentPerMonth} MAD, manque mensuel: ${roundMAD(actualMonthlyShortfall)} MAD` : ""}.`,
+        "Prescription Art. 399 CT: 2 ans a compter de chaque mois impaye.",
+        `Delai ecoule depuis le premier defaut: ${monthsSinceFirstDefault} mois.`,
+        penaltyRateAnnual > 0
+          ? `Taux contractuel/judiciaire de penalites: ${penaltyRateAnnual}%/an (~${roundMAD(penaltyRatePerMonth * 100)}%/mois).`
+          : "Aucune penalite ajoutee faute de taux contractuel ou judiciaire explicite.",
       ],
       formulas: [
-        "Mois prescrit = max(0, mois ecoules - 24).",
+        "Mois prescrits = max(0, mois ecoules - 24).",
         "Mois reclamables = mois impayes - mois prescrits.",
         "Principal = manque mensuel x mois reclamables.",
-        "Penalites = principal x taux mensuel x mois ecoules.",
+        "Penalites = principal x taux mensuel x mois ecoules, uniquement si un taux explicite est fourni.",
       ],
       warnings: [
         prescriptionRisk !== "none"
           ? `ATTENTION: ${prescribedMonths} mois prescrits. Il reste ${prescriptionDeadlineMonths} mois pour agir sur les mois encore reclamables.`
-          : `Encore ${prescriptionDeadlineMonths} mois avant prescription du 1er mois impaye — agissez rapidement.`,
-        "L'interruption de prescription peut etre obtenue via mise en demeure recommandee ou saisine prudh'omal.",
-        "Le taux de penalite exact depend du dossier et du juge. La reference DGI est indicative.",
+          : `Encore ${prescriptionDeadlineMonths} mois avant prescription du 1er mois impaye - agissez rapidement.`,
+        "L'interruption de prescription peut etre obtenue via mise en demeure recommandee ou saisine prud'homale.",
+        !input.hasPayslips || !input.hasBankStatements
+          ? "Preuves incompletes: bulletins de paie et releves bancaires renforcent le dossier."
+          : "Preuves de paie et releves bancaires declares disponibles.",
       ],
       nextSteps: [
         "Envoyer immediatement une mise en demeure recommandee pour interrompre la prescription.",
@@ -109,4 +125,25 @@ export function simulateUnpaidSalaryRecovery(
       ],
     },
   };
+}
+
+function resolveUnpaidMonths(input: z.infer<typeof unpaidSalaryRecoveryInputSchema>): number {
+  if (input.firstUnpaidDate && input.lastUnpaidDate) {
+    return Math.max(1, Math.min(36, monthsBetweenInclusive(input.firstUnpaidDate, input.lastUnpaidDate)));
+  }
+  return input.unpaidMonths ?? 1;
+}
+
+function resolveMonthsSinceFirstDefault(input: z.infer<typeof unpaidSalaryRecoveryInputSchema>): number {
+  if (input.firstUnpaidDate) {
+    return Math.max(1, Math.min(120, monthsBetweenInclusive(input.firstUnpaidDate, input.calculationDate)));
+  }
+  return input.monthsSinceFirstDefault ?? 1;
+}
+
+function monthsBetweenInclusive(startDate: string, endDate: string): number {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const months = (end.getUTCFullYear() - start.getUTCFullYear()) * 12 + end.getUTCMonth() - start.getUTCMonth() + 1;
+  return Math.max(1, months);
 }

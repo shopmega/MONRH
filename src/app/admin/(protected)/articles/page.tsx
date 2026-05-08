@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { Article } from "@/lib/content/home-content";
 import { renderArticleContentBlocks } from "@/lib/articles/content-render";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { adminFetch } from "@/lib/client/admin-fetch";
 
 type ArticleInput = {
   slug: string;
@@ -21,6 +23,14 @@ function formatContentText(content: string[]): string {
   return content.join("\n\n");
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 function parseContentBlocks(contentText: string): string[] {
   return contentText
     .split(/\r?\n\s*\r?\n/g)
@@ -81,22 +91,19 @@ export default function AdminArticlesPage() {
   const [mergingCategory, setMergingCategory] = useState(false);
   const [fromCategorySlug, setFromCategorySlug] = useState("");
   const [toCategorySlug, setToCategorySlug] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmMerge, setConfirmMerge] = useState<{ from: string; to: string } | null>(null);
   const categoryOptions = Array.from(new Set(items.map((item) => item.categorySlug))).sort();
   const contentBlocksPreview = parseContentBlocks(form.contentText);
 
   async function loadArticles() {
-    const articlesResponse = await fetch("/api/admin/articles");
-    const data = (await articlesResponse.json()) as { ok: boolean; items?: Article[] };
-    if (data.ok && data.items) setItems(data.items);
+    const result = await adminFetch<Article[]>("/api/admin/articles");
+    if (result.data) setItems(result.data);
   }
 
   async function loadCategories() {
-    const response = await fetch("/api/admin/categories");
-    const data = (await response.json()) as {
-      ok: boolean;
-      items?: Array<{ slug: string; count: number }>;
-    };
-    if (data.ok && data.items) setCategories(data.items);
+    const result = await adminFetch<Array<{ slug: string; count: number }>>("/api/admin/categories");
+    if (result.data) setCategories(result.data);
   }
 
   useEffect(() => {
@@ -115,9 +122,8 @@ export default function AdminArticlesPage() {
     event.preventDefault();
     setSaving(true);
     setStatus(undefined);
-    const response = await fetch("/api/admin/articles", {
+    const result = await adminFetch("/api/admin/articles", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         slug: form.slug || undefined,
         title: form.title,
@@ -133,29 +139,32 @@ export default function AdminArticlesPage() {
           : [],
       }),
     });
-    const data = (await response.json()) as { ok: boolean };
-    if (data.ok) {
-      setStatus("Article enregistre.");
+    if (result.data) {
+      setStatus("Article enregistré.");
       setForm(toInput());
       await Promise.all([loadArticles(), loadCategories()]);
     } else {
-      setStatus("Echec enregistrement.");
+      setStatus(result.error || "Échec de l'enregistrement.");
     }
     setSaving(false);
   }
 
   async function deleteArticle(slug: string) {
-    const response = await fetch("/api/admin/articles", {
+    if (!confirmDelete) {
+      setConfirmDelete(slug);
+      return;
+    }
+    
+    const result = await adminFetch("/api/admin/articles", {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ slug }),
     });
-    const data = (await response.json()) as { ok: boolean };
-    if (data.ok) {
-      setStatus("Article supprime.");
+    if (result.data) {
+      setStatus("Article supprimé.");
+      setConfirmDelete(null);
       await Promise.all([loadArticles(), loadCategories()]);
     } else {
-      setStatus("Suppression impossible.");
+      setStatus(result.error || "Suppression impossible.");
     }
   }
 
@@ -198,9 +207,9 @@ export default function AdminArticlesPage() {
 
       const firstError = data.errors?.[0];
       setImportStatus(
-        `Import termine: ${data.imported ?? 0}/${data.total ?? 0} article(s) importes.` +
+        `Import terminé : ${data.imported ?? 0}/${data.total ?? 0} article(s) importés.` +
           ((data.failed ?? 0) > 0
-            ? ` ${data.failed} echec(s). Premier: index ${firstError?.index ?? "?"}${firstError?.title ? ` (${firstError.title})` : ""} - ${firstError?.error ?? "unknown_error"}.`
+            ? ` ${data.failed} échec(s). Premier: index ${firstError?.index ?? "?"}${firstError?.title ? ` (${firstError.title})` : ""} - ${firstError?.error ?? "unknown_error"}.`
             : ""),
       );
       await Promise.all([loadArticles(), loadCategories()]);
@@ -211,28 +220,28 @@ export default function AdminArticlesPage() {
   }
 
   async function mergeCategories() {
+    if (!confirmMerge) {
+      setConfirmMerge({ from: fromCategorySlug, to: toCategorySlug });
+      return;
+    }
+    
     setMergingCategory(true);
     setCategoryActionStatus(undefined);
-    const response = await fetch("/api/admin/categories", {
+    const result = await adminFetch<{ updated?: number }>("/api/admin/categories", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        fromSlug: fromCategorySlug,
-        toSlug: toCategorySlug,
+        fromSlug: confirmMerge.from,
+        toSlug: confirmMerge.to,
       }),
     });
-    const data = (await response.json()) as {
-      ok: boolean;
-      updated?: number;
-      error?: string;
-    };
-    if (data.ok) {
-      setCategoryActionStatus(`Categories fusionnees: ${data.updated ?? 0} article(s) deplaces.`);
+    if (result.data) {
+      setCategoryActionStatus(`Catégories fusionnées : ${result.data.updated ?? 0} article(s) déplacés.`);
       setFromCategorySlug("");
       setToCategorySlug("");
+      setConfirmMerge(null);
       await Promise.all([loadArticles(), loadCategories()]);
     } else {
-      setCategoryActionStatus(`Echec fusion categories: ${data.error ?? "unknown_error"}`);
+      setCategoryActionStatus(result.error || `Échec de la fusion des catégories`);
     }
     setMergingCategory(false);
   }
@@ -260,7 +269,7 @@ export default function AdminArticlesPage() {
       };
 
       if (!data.ok || !data.publicUrl) {
-        setMediaStatus(`Upload echoue: ${data.error ?? "unknown_error"}`);
+        setMediaStatus(`Échec de l'envoi : ${data.error ?? "unknown_error"}`);
       } else {
         setForm((current) =>
           kind === "thumbnail"
@@ -269,12 +278,12 @@ export default function AdminArticlesPage() {
         );
         setMediaStatus(
           kind === "thumbnail"
-            ? "Thumbnail telecharge vers le bucket article-media."
-            : "Cover image telechargee vers le bucket article-media.",
+            ? "Vignette téléchargée vers le bucket article-media."
+            : "Image de couverture téléchargée vers le bucket article-media.",
         );
       }
     } catch {
-      setMediaStatus("Upload echoue: erreur reseau.");
+      setMediaStatus("Échec de l'envoi : erreur réseau.");
     } finally {
       if (kind === "thumbnail") setUploadingThumbnail(false);
       if (kind === "cover") setUploadingCover(false);
@@ -287,7 +296,7 @@ export default function AdminArticlesPage() {
         <p className="section-kicker">Content</p>
         <h2 className="display-font mt-1 text-3xl font-semibold">Articles Management</h2>
         <p className="mt-2 text-sm text-[var(--ink-soft)]">
-          Creez et modifiez les articles affiches sur le site.
+          Créez et modifiez les articles affichés sur le site.
         </p>
       </section>
 
@@ -298,7 +307,7 @@ export default function AdminArticlesPage() {
             <input className="input-shell mt-1" value={form.slug} onChange={(e) => setForm((c) => ({ ...c, slug: e.target.value }))} />
           </label>
           <label className="text-sm font-semibold">
-            Reading Time
+            Temps de lecture
             <input className="input-shell mt-1" value={form.readingTime} onChange={(e) => setForm((c) => ({ ...c, readingTime: e.target.value }))} />
           </label>
           <label className="text-sm font-semibold">
@@ -309,7 +318,7 @@ export default function AdminArticlesPage() {
               onChange={(e) => setForm((c) => ({ ...c, access: e.target.value as "public" | "logged" }))}
             >
               <option value="public">Public</option>
-              <option value="logged">Logged only</option>
+              <option value="logged">Réservé aux connectés</option>
             </select>
           </label>
           <label className="flex items-end gap-2 text-sm font-semibold">
@@ -318,19 +327,36 @@ export default function AdminArticlesPage() {
               checked={form.isActive}
               onChange={(e) => setForm((c) => ({ ...c, isActive: e.target.checked }))}
             />
-            Active
+            Actif
           </label>
           <label className="text-sm font-semibold sm:col-span-2">
-            Title
-            <input className="input-shell mt-1" value={form.title} onChange={(e) => setForm((c) => ({ ...c, title: e.target.value }))} required />
+            Titre
+            <input 
+              className="input-shell mt-1" 
+              value={form.title} 
+              onChange={(e) => {
+                setForm((c) => ({ ...c, title: e.target.value }));
+                if (!form.slug || form.slug === slugify(form.title)) {
+                  setForm((c) => ({ ...c, slug: slugify(e.target.value) }));
+                }
+              }} 
+              required 
+            />
           </label>
           <label className="text-sm font-semibold sm:col-span-2">
-            Excerpt
+            Résumé
             <input className="input-shell mt-1" value={form.excerpt} onChange={(e) => setForm((c) => ({ ...c, excerpt: e.target.value }))} required />
           </label>
           <label className="text-sm font-semibold sm:col-span-2">
-            Thumbnail URL (cartes/lists)
-            <input className="input-shell mt-1" value={form.thumbnailUrl} onChange={(e) => setForm((c) => ({ ...c, thumbnailUrl: e.target.value }))} placeholder="https://..." />
+            URL de la vignette (cartes/listes)
+            <input 
+              type="url"
+              pattern="https?://.+"
+              className="input-shell mt-1" 
+              value={form.thumbnailUrl} 
+              onChange={(e) => setForm((c) => ({ ...c, thumbnailUrl: e.target.value }))} 
+              placeholder="https://..." 
+            />
             <input
               type="file"
               accept="image/png,image/jpeg,image/webp,image/avif"
@@ -345,8 +371,15 @@ export default function AdminArticlesPage() {
             </p>
           </label>
           <label className="text-sm font-semibold sm:col-span-2">
-            Cover Image URL (optionnel)
-            <input className="input-shell mt-1" value={form.coverImageUrl} onChange={(e) => setForm((c) => ({ ...c, coverImageUrl: e.target.value }))} placeholder="https://..." />
+            URL de l'image de couverture (optionnel)
+            <input 
+              type="url"
+              pattern="https?://.+"
+              className="input-shell mt-1" 
+              value={form.coverImageUrl} 
+              onChange={(e) => setForm((c) => ({ ...c, coverImageUrl: e.target.value }))} 
+              placeholder="https://..." 
+            />
             <input
               type="file"
               accept="image/png,image/jpeg,image/webp,image/avif"
@@ -361,12 +394,13 @@ export default function AdminArticlesPage() {
             </p>
           </label>
           <label className="text-sm font-semibold">
-            Category Slug
+            Slug de catégorie
             <input
               className="input-shell mt-1"
               value={form.categorySlug}
               list="article-category-options"
               onChange={(e) => setForm((c) => ({ ...c, categorySlug: e.target.value }))}
+              required
             />
             <datalist id="article-category-options">
               {categoryOptions.map((slug) => (
@@ -375,7 +409,7 @@ export default function AdminArticlesPage() {
             </datalist>
           </label>
           <label className="text-sm font-semibold sm:col-span-2">
-            Content (one paragraph per block, separate blocks with an empty line)
+            Contenu (un paragraphe par bloc, séparez les blocs par une ligne vide)
             <textarea className="input-shell mt-1 min-h-48" value={form.contentText} onChange={(e) => setForm((c) => ({ ...c, contentText: e.target.value }))} required />
           </label>
         </div>
@@ -384,7 +418,7 @@ export default function AdminArticlesPage() {
             Apercu du rendu article
           </p>
           <p className="mt-1 text-xs text-[var(--ink-soft)]">
-            {contentBlocksPreview.length} paragraphe(s). Le rendu public utilise ce meme flux continu.
+            {contentBlocksPreview.length} paragraphe(s). Le rendu public utilise ce même flux continu.
           </p>
           <div className="mt-3 space-y-3 text-sm leading-relaxed text-[var(--foreground)]">
             {renderArticleContentBlocks(contentBlocksPreview, "admin-article-preview")}
@@ -398,15 +432,27 @@ export default function AdminArticlesPage() {
             Nouveau
           </button>
         </div>
-        {status ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{status}</p> : null}
-        {mediaStatus ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{mediaStatus}</p> : null}
+        {status ? (
+          <div aria-live="polite" role="status">
+            <p className={`${status.includes("Erreur") || status.includes("Échec") ? "status-error" : "status-success"} mt-3 rounded-xl px-3 py-2 text-sm`}>
+              {status}
+            </p>
+          </div>
+        ) : null}
+        {mediaStatus ? (
+          <div aria-live="polite" role="status">
+            <p className={`${mediaStatus.includes("Erreur") || mediaStatus.includes("Échec") ? "status-error" : "status-success"} mt-3 rounded-xl px-3 py-2 text-sm`}>
+              {mediaStatus}
+            </p>
+          </div>
+        ) : null}
         {uploadingThumbnail || uploadingCover ? (
           <p className="mt-2 text-xs text-[var(--ink-soft)]">Upload media en cours...</p>
         ) : null}
       </form>
 
       <section className="soft-card rounded-3xl p-5">
-        <h3 className="display-font text-2xl font-semibold">Articles publies</h3>
+        <h3 className="display-font text-2xl font-semibold">Articles publiés</h3>
         {loading ? <p className="mt-3 text-sm text-[var(--ink-soft)]">Chargement...</p> : null}
         <div className="mt-3 space-y-2">
           {items.map((article) => (
@@ -416,7 +462,7 @@ export default function AdminArticlesPage() {
                 {article.slug} | {article.categorySlug} | {article.lastUpdated}
               </p>
               <p className="mt-1 text-xs text-[var(--ink-soft)]">
-                {(article.isActive ?? true) ? "active" : "inactive"} | {article.access ?? "public"}
+                {(article.isActive ?? true) ? "actif" : "inactif"} | {article.access ?? "public"}
               </p>
               {article.thumbnailUrl ? <p className="mt-1 truncate text-xs text-[var(--ink-soft)]">thumb: {article.thumbnailUrl}</p> : null}
               {article.coverImageUrl ? <p className="mt-1 truncate text-xs text-[var(--ink-soft)]">cover: {article.coverImageUrl}</p> : null}
@@ -465,16 +511,25 @@ export default function AdminArticlesPage() {
 {`{
   "items": [
     {
-      "slug": "optionnel-slug",
-      "title": "Titre",
-      "excerpt": "Resume",
+      "slug": "smig-smag-maroc-2026",
+      "title": "SMIG et SMAG Maroc 2026 : montants officiels et impact salaire",
+      "excerpt": "Montants officiels du SMIG et du SMAG au Maroc en 2026, secteurs concernes, calcul mensuel et recours en cas de salaire non conforme.",
       "categorySlug": "salaire",
-      "readingTime": "5 min",
+      "readingTime": "8 min",
       "isActive": true,
       "access": "public",
-      "thumbnailUrl": "https://...",
-      "coverImageUrl": "https://...",
-      "content": ["Paragraphe 1", "Paragraphe 2"]
+      "thumbnailUrl": "",
+      "coverImageUrl": "",
+      "content": [
+        "## Montants officiels 2026",
+        "> Source : decret officiel applicable au salaire minimum.",
+        "| Type | Montant | Application |\\n| --- | --- | --- |\\n| SMIG | 17,92 MAD/h | Secteur non agricole |\\n| SMAG | 97,44 MAD/j | Secteur agricole |",
+        "Pour verifier votre situation, utilisez [le simulateur SMIG](/simulate/smig-compliance).",
+        "- Verifiez le secteur applicable.",
+        "- Comparez le salaire horaire brut.",
+        "- Consultez la convention collective applicable.",
+        "Le champ \`salaireBrut\` est **important** pour ce calcul."
+      ]
     }
   ]
 }`}
@@ -496,13 +551,19 @@ export default function AdminArticlesPage() {
             Vider
           </button>
         </div>
-        {importStatus ? <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{importStatus}</p> : null}
+        {importStatus ? (
+          <div aria-live="polite" role="status">
+            <p className={`${importStatus.includes("Erreur") || importStatus.includes("Échec") ? "status-error" : "status-success"} mt-3 rounded-xl px-3 py-2 text-sm`}>
+              {importStatus}
+            </p>
+          </div>
+        ) : null}
       </section>
 
       <section className="soft-card rounded-3xl p-5">
         <h3 className="display-font text-2xl font-semibold">Gestion des categories</h3>
         <p className="mt-2 text-sm text-[var(--ink-soft)]">
-          Les categories sont basees sur <code>categorySlug</code>. Vous pouvez renommer/fusionner une categorie vers une autre.
+          Les catégories sont basées sur <code>categorySlug</code>. Vous pouvez renommer/fusionner une catégorie vers une autre.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {categories.map((category) => (
@@ -516,7 +577,7 @@ export default function AdminArticlesPage() {
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="text-sm font-semibold">
-            Categorie source
+            Catégorie source
             <input
               className="input-shell mt-1"
               list="category-slug-options"
@@ -525,7 +586,7 @@ export default function AdminArticlesPage() {
             />
           </label>
           <label className="text-sm font-semibold">
-            Categorie cible
+            Catégorie cible
             <input
               className="input-shell mt-1"
               list="category-slug-options"
@@ -550,9 +611,41 @@ export default function AdminArticlesPage() {
           </button>
         </div>
         {categoryActionStatus ? (
-          <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{categoryActionStatus}</p>
+          <div aria-live="polite" role="status">
+            <p className={`${categoryActionStatus.includes("Erreur") || categoryActionStatus.includes("Échec") ? "status-error" : "status-success"} mt-3 rounded-xl px-3 py-2 text-sm`}>
+              {categoryActionStatus}
+            </p>
+          </div>
         ) : null}
       </section>
+
+      {/* Confirmation Dialogs */}
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title="Supprimer l'article"
+        message={`Êtes-vous sûr de vouloir supprimer l'article "${confirmDelete}" ? Cette action est irréversible.`}
+        confirmLabel="Supprimer"
+        variant="danger"
+        onConfirm={() => deleteArticle(confirmDelete!)}
+        onCancel={() => setConfirmDelete(null)}
+      />
+
+      <ConfirmDialog
+        open={!!confirmMerge}
+        title="Fusionner les catégories"
+        message={`Tous les articles de "${confirmMerge?.from}" seront déplacés vers "${confirmMerge?.to}". Continuer ?`}
+        confirmLabel="Fusionner"
+        variant="warning"
+        onConfirm={() => {
+          if (confirmMerge) {
+            setFromCategorySlug(confirmMerge.from);
+            setToCategorySlug(confirmMerge.to);
+            mergeCategories();
+          }
+          setConfirmMerge(null);
+        }}
+        onCancel={() => setConfirmMerge(null)}
+      />
     </div>
   );
 }

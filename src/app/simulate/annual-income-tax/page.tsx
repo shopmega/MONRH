@@ -1,32 +1,47 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "IR Annuel",
-  description: "Simulation annuelle de l'impot sur le revenu avec bonus et 13e mois.",
+  title: "Calcul IR Maroc et Cotisations CNSS",
+  description: "Simulez votre impot sur le revenu au Maroc avec salaire annuel, bonus, 13e mois et charges sociales.",
   canonicalPath: "/simulateurs/ir-annuel",
 });
 
 export default function AnnualIncomeTaxPage() {
   return (
     <SimulatorToolPage
-      title="IR Annuel"
-      description="Simulation annuelle de l'impot sur le revenu avec bonus et 13e mois."
+      title="Calcul IR Maroc"
+      description="Calculez l'impot sur le revenu au Maroc avec salaire annuel, bonus, 13e mois et charges sociales."
       apiPath="/api/simulate/annual-income-tax"
       calculatorType="annual_income_tax"
       fields={[
-        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "9000", min: 1, step: 0.01 },
-        { key: "paidMonths", label: "Mois remuneres", type: "number", defaultValue: "12", min: 1, max: 14, step: 1 },
-        { key: "bonusAmount", label: "Bonus annuel (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
+        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "paidMonths", label: "Mois remuneres", type: "number", min: 1, max: 14, step: 1, defaultValue: 12 },
+        { key: "bonusAmount", label: "Bonus annuel (MAD)", type: "number", min: 0, step: 0.01, defaultValue: 0 },
         { key: "include13thSalary", label: "Inclure 13e mois", type: "checkbox", defaultValue: false },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        {
+          key: "familySituation",
+          label: "Situation familiale",
+          type: "select",
+          defaultValue: "single",
+          options: [
+            { label: "Celibataire", value: "single" },
+            { label: "Marie(e)", value: "married" },
+            { label: "Divorce(e)", value: "divorced" },
+            { label: "Veuf(ve)", value: "widowed" },
+          ],
+        },
+        { key: "familyDependentsCount", label: "Personnes a charge", type: "stepper", min: 0, max: 6, defaultValue: 0 },
+        { key: "additionalDeductionsAnnual", label: "Deductions annuelles supplementaires (MAD)", type: "number", min: 0, step: 0.01, defaultValue: 0 },
       ]}
       breakdownLabels={{
         annualGrossIncome: "Brut annuel",
         annualProfessionalDeduction: "Deduction pro",
         annualSocialContributions: "Charges sociales",
+        additionalDeductionsAnnual: "Deductions supplementaires",
         annualTaxableIncome: "Revenu taxable",
+        familyTaxReduction: "Reduction charges de famille",
         annualIncomeTax: "IR annuel",
         monthlyAverageTax: "IR mensuel moyen",
         effectiveTaxRatePercent: "Taux effectif",
@@ -35,7 +50,9 @@ export default function AnnualIncomeTaxPage() {
         annualGrossIncome: "MAD",
         annualProfessionalDeduction: "MAD",
         annualSocialContributions: "MAD",
+        additionalDeductionsAnnual: "MAD",
         annualTaxableIncome: "MAD",
+        familyTaxReduction: "MAD",
         annualIncomeTax: "MAD",
         monthlyAverageTax: "MAD",
         effectiveTaxRatePercent: "%",

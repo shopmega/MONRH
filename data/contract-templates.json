@@ -1,0 +1,218 @@
+{
+  "templates": [
+    {
+      "id": "CDD_CUSTOM",
+      "title": "Modèle CDD détaillé",
+      "description": "Contrat de travail à durée déterminée adapté (CDD), avec motifs, durée, fonctions, rémunération, mobilité, etc.",
+      "contract_type": "CDD",
+      "sections": [
+        {
+          "id": "header",
+          "title": "En-tête",
+          "order": 1,
+          "content": "MODÈLE DE CONTRAT À DURÉE DÉTERMINÉE (CDD)\n(DE {{start_date}} À {{end_date}})\n\nEntre\n\nLa Société {{company_name}} dont le siège social est situé {{company_address}}, représentée par M. {{company_representative}} en sa qualité de {{company_representative_title}}..."
+        },
+        {
+          "id": "agreement_intro",
+          "title": "Préambule",
+          "order": 2,
+          "content": "Il a été convenu ce qui suit."
+        },
+        {
+          "id": "article1_motif",
+          "title": "Article 1 : Motif",
+          "order": 3,
+          "content": "Cet engagement est conclu (préciser) :\n1- {{reason_increment_activity}}\n2- {{reason_substitution_absence}}\n3- {{reason_season}}\n4- {{reason_opening_new}}\n5- {{reason_temporary_nature}}"
+        },
+        {
+          "id": "article2_duree",
+          "title": "Article 2 : Durée – Renouvellement",
+          "order": 4,
+          "content": "La Société engage {{employee_name}} en qualité de {{job_title}} à compter du {{start_date}}. ... période d'essai de {{trial_period_duration}} ... préavis {{trial_notice_period}}."
+        },
+        {
+          "id": "article3_fonctions",
+          "title": "Article 3 : Fonctions",
+          "order": 5,
+          "content": "M. {{employee_name}} exercera les fonctions de {{job_title}} avec la qualification {{job_qualification}}. À ce titre, ... {{functions_list}}"
+        },
+        {
+          "id": "article4_remuneration",
+          "title": "Article 4 : Rémunération",
+          "order": 6,
+          "content": "En contrepartie, {{employee_name}} percevra un salaire mensuel brut de {{salary_brut}} MAD correspondant à la durée collective du travail. Primes/indemnités: {{salary_bonuses}}. Toute modification des retenues sociales et fiscales à la charge de l'employé."
+        },
+        {
+          "id": "article4_lieu",
+          "title": "Article 4 bis : Lieu de travail",
+          "order": 7,
+          "content": "Lieu de travail : {{work_location}}. Toute modification dans un rayon de {{mobility_radius}} km ne constitue pas une modification du contrat."
+        },
+        {
+          "id": "article5_duree_contrat",
+          "title": "Article 5 : Durée du contrat",
+          "order": 8,
+          "content": "Le présent contrat est conclu pour une durée déterminée. Il prendra fin, hors faute grave ou force majeure, en respectant le préavis conventionnel. Renouvelable une fois : {{renewal_policy}}."
+        },
+        {
+          "id": "article6_frais",
+          "title": "Article 6 : Remboursement de frais",
+          "order": 9,
+          "content": "Les frais engagés sont remboursés sur justificatifs selon modalités internes."
+        },
+        {
+          "id": "article8_conges",
+          "title": "Article 8 : Congés payés",
+          "order": 10,
+          "content": "Le salarié bénéficie des congés payés. En l'absence d'accord ce sera décidé par la société."
+        },
+        {
+          "id": "article9_protection",
+          "title": "Article 9 : Protection sociale",
+          "order": 11,
+          "content": "Cotisation aux régimes retraite et prévoyance en vigueur."
+        },
+        {
+          "id": "article10_reglement",
+          "title": "Article 10 : Règlement intérieur et Charte informatique",
+          "order": 12,
+          "content": "Respect des dispositions légales et du règlement intérieur. Acceptation de la charte informatique."
+        },
+        {
+          "id": "article11_confidentialite",
+          "title": "Article 11 : Clause de confidentialité",
+          "order": 13,
+          "content": "Obligation de discrétion sur les informations et savoir-faire."
+        },
+        {
+          "id": "article12_fidelite",
+          "title": "Article 12 : Obligation de fidélité",
+          "order": 14,
+          "content": "Aucune activité concurrente pendant la durée du contrat."
+        },
+        {
+          "id": "article13_resiliation",
+          "title": "Article 13 : Résiliation",
+          "order": 15,
+          "content": "Rupture possible sous conditions code du travail et convention collective. Préavis défini par loi/convention."
+        },
+        {
+          "id": "article14_modifs",
+          "title": "Article 14 : Modifications des informations personnelles",
+          "order": 16,
+          "content": "L'employé informe la société de toute modification de situation personnelle."
+        },
+        {
+          "id": "signature",
+          "title": "Signatures",
+          "order": 17,
+          "content": "Fait à {{contract_location}}, le {{contract_date}}\n\nEmployeur : ...\nSalarié : ...\nMention \"lu et approuvé\""
+        }
+      ],
+      "is_active": true,
+      "created_at": "2026-04-01T00:00:00Z",
+      "updated_at": "2026-04-01T00:00:00Z"
+    },
+    {
+      "id": "CDI_CUSTOM",
+      "title": "Modèle CDI détaillé",
+      "description": "Contrat de travail à durée indéterminée (CDI) complet.",
+      "contract_type": "CDI",
+      "sections": [
+        {
+          "id": "header",
+          "title": "En-tête",
+          "order": 1,
+          "content": "CONTRAT DE TRAVAIL A DUREE INDETERMINEE\nENTRE LES SOUSSIGNES :\nSociété : {{company_name}}, siège : {{company_address}}, représentée par {{company_representative}}.\nEmployé : {{employee_name}}, CIN : {{employee_cin}}."
+        },
+        {
+          "id": "article1_engagement",
+          "title": "Article 1 : Engagement",
+          "order": 2,
+          "content": "La Société engage {{employee_name}} comme {{job_title}} à compter du {{start_date}} (sous réserve visite médicale). Contrat CDI."
+        },
+        {
+          "id": "article2_fonction",
+          "title": "Article 2 : Fonction",
+          "order": 3,
+          "content": "Fonctions : {{job_title}}, tâches : {{job_description}}. Le salarié peut exercer des tâches compatibles avec sa qualification."
+        },
+        {
+          "id": "article3_essai",
+          "title": "Article 3 : Période d'essai + Confirmation",
+          "order": 4,
+          "content": "Période d'essai : {{trial_period_duration}} (1 mois si non management), préavis 15 jours. Confirmation après évaluation."
+        },
+        {
+          "id": "article4_remuneration",
+          "title": "Article 4 : Rémunération et avantages",
+          "order": 5,
+          "content": "Salaire brut mensuel : {{salary_brut}} MAD. Paiement 13 mois possible. Prime annuelle : {{annual_bonus}}%. Régime CIMR et assurance groupe."
+        },
+        {
+          "id": "article5_lieu_mobilite",
+          "title": "Article 5 : Lieu de travail et mobilité",
+          "order": 6,
+          "content": "Lieu de travail : {{work_location}}. Changement possible sans modification de contrat."
+        },
+        {
+          "id": "article6_frais",
+          "title": "Article 6 : Frais de déplacements",
+          "order": 7,
+          "content": "Indemnités (kilométrique, voiture de fonction ou forfait). Montant : {{travel_compensation}}"
+        },
+        {
+          "id": "article7_conges",
+          "title": "Article 7 : Congés payés",
+          "order": 8,
+          "content": "Congé annuel : 21 jours. Date fixée d'un commun accord."
+        },
+        {
+          "id": "article8_fetes",
+          "title": "Article 8 : Jours fériés",
+          "order": 9,
+          "content": "Congés légaux pour fêtes nationales, religieuses et exceptionnelles."
+        },
+        {
+          "id": "article9_maladie",
+          "title": "Article 9 : Congé maladie",
+          "order": 10,
+          "content": "Arrêt maladie à signaler sans délai et certificat sous 48h. Contrôle médical possible."
+        },
+        {
+          "id": "article10_obligations",
+          "title": "Article 10 : Obligations professionnelles",
+          "order": 11,
+          "content": "Respect du code de conduite, règlement intérieur, confidentialité, exclusivité, attestations diplômes. Restitution des biens."
+        },
+        {
+          "id": "article11_rupture",
+          "title": "Article 11 : Modalités de rupture",
+          "order": 12,
+          "content": "Rupture par consentement mutuel ou initiative sous conditions. Préavis 3 mois. Faute grave/lourde possible."
+        },
+        {
+          "id": "article12_domicile",
+          "title": "Article 12 : Election de domicile",
+          "order": 13,
+          "content": "Adresses respectives. Notification de tout changement immédiat."
+        },
+        {
+          "id": "article13_juridiction",
+          "title": "Article 13 : Compétence juridiction",
+          "order": 14,
+          "content": "Tribunaux de Casablanca compétents."
+        },
+        {
+          "id": "signature",
+          "title": "Signatures",
+          "order": 15,
+          "content": "Fait à {{contract_location}}, le {{contract_date}}\n\nEmployeur et Salarié, mention \"Lu et approuvé\"."
+        }
+      ],
+      "is_active": true,
+      "created_at": "2026-04-01T00:00:00Z",
+      "updated_at": "2026-04-01T00:00:00Z"
+    }
+  ]
+}

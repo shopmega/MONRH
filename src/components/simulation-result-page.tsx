@@ -3,10 +3,13 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AdSlot } from "@/components/ad-slot";
+import { Suspense, useEffect, useMemo, useState, useSyncExternalStore, useCallback } from "react";
+import { PartnerAdSection } from "@/components/partner-ad-section";
+import { CompanyContextCard } from "@/components/company-context-card";
+import { CompanyTrustSummary } from "@/components/company-trust-summary";
 import { useLanguage } from "@/components/language-provider";
 import { RelatedContent } from "@/components/related-content";
+import { SimulationCaseWorkflow } from "@/components/simulation-case-workflow";
 import { SimulationExplanation } from "@/components/simulation-explanation";
 import { SITE_URL } from "@/lib/seo";
 import {
@@ -14,11 +17,13 @@ import {
   localizeCalculatorDescription,
   localizeCalculatorTitle,
 } from "@/lib/i18n/simulator-localization";
-import { calculatorTypeToPath } from "@/lib/simulations/calculator-path";
-import { ReviewlyPromoCard } from "@/components/reviewly-promo-card";
+import { calculatorTypeToPath, pathToCalculatorType, savedSimulationPathMatches } from "@/lib/simulations/calculator-path";
+import { AvisinePromoCard } from "@/components/avisine-promo-card";
 import { type SimulationResultSnapshot } from "@/lib/simulations/result-snapshot";
+import { buildSimulationResultDocumentLink } from "@/lib/tools/result-document-links";
 import type { PieSlice } from "@/components/charts/breakdown-pie-chart";
 import type { BarEntry } from "@/components/charts/timeline-bar-chart";
+import { getCompanySalaryBenchmarks, type AVisCompanySalaryBenchmarksResult } from "@/lib/avis-api";
 
 const BreakdownPieChart = dynamic(
   () => import("@/components/charts/breakdown-pie-chart").then((m) => ({ default: m.BreakdownPieChart })),
@@ -31,6 +36,14 @@ const TimelineBarChart = dynamic(
 );
 
 type DocumentCTA = { href: string; label: string };
+type EmployerCompanyContext = { id: string; name: string };
+type StoredSimulationItem = {
+  id: string;
+  createdAt: string;
+  calculatorType: string;
+  input: Record<string, unknown>;
+  result: Record<string, unknown>;
+};
 
 const DOCUMENT_CTA_LABELS: Record<string, string> = {
   "labor-inspector-complaint": "Générer la plainte à l'inspection du travail",
@@ -45,132 +58,18 @@ const DOCUMENT_CTA_LABELS: Record<string, string> = {
   "notice-letter": "Générer la lettre de préavis",
 };
 
+import { PrintHeader, PrintFooter } from "@/components/print-layout";
+
 function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): DocumentCTA | null {
-  const params = new URLSearchParams();
-  const breakdown = snapshot.result.breakdown;
-  const input = snapshot.inputPayload ?? {};
-  const calculationDate = typeof input.calculationDate === "string" ? input.calculationDate : "";
-
-  if (snapshot.calculatorType === "licenciement") {
-    const total = typeof breakdown.totalEstimated === "number" ? breakdown.totalEstimated : undefined;
-    const serviceYears =
-      typeof breakdown.totalServiceYears === "number" ? breakdown.totalServiceYears : undefined;
-    if (total !== undefined) {
-      params.set("amount_due", String(total));
-      params.set("request", `Regularisation des indemnites estimees a ${total} MAD.`);
-    } else {
-      params.set("request", "Regularisation des indemnites legales et des conges non regles.");
-    }
-    const isAbusive = Boolean(snapshot.result.breakdown.dommagesAbusif);
-    if (isAbusive) {
-      params.set("issue_summary", "Licenciement abusif et litige indemnites.");
-    } else {
-      params.set("issue_summary", serviceYears ? `Licenciement apres ${serviceYears} an(s) d'anciennete.` : "Litige de licenciement.");
-    }
-    const docId = "labor-inspector-complaint";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
+  const link = buildSimulationResultDocumentLink(snapshot);
+  if (!link) {
+    return null;
   }
 
-  if (snapshot.calculatorType === "unpaid_salary_recovery") {
-    const total =
-      typeof breakdown.totalClaimAmount === "number" ? breakdown.totalClaimAmount : undefined;
-    const unpaidMonths = typeof input.unpaidMonths === "number" ? input.unpaidMonths : undefined;
-    if (calculationDate) params.set("period", unpaidMonths ? `Derniers ${unpaidMonths} mois` : calculationDate);
-    if (total !== undefined) params.set("amount_due", String(total));
-    params.set("issue_summary", "Salaires impayes constates.");
-    const docId = "salary-recovery-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (
-    snapshot.calculatorType === "unpaid_overtime_recovery" ||
-    snapshot.calculatorType === "overtime" ||
-    snapshot.calculatorType === "public_holiday_compensation"
-  ) {
-    const total =
-      typeof breakdown.totalClaimAmount === "number"
-        ? breakdown.totalClaimAmount
-        : typeof breakdown.totalOvertimeAmount === "number"
-          ? breakdown.totalOvertimeAmount
-          : typeof breakdown.compensationAmount === "number"
-            ? breakdown.compensationAmount
-            : undefined;
-    if (calculationDate) params.set("period", calculationDate);
-    if (total !== undefined) params.set("amount_due", String(total));
-    params.set("issue_summary", "Heures supplementaires non regularisees.");
-    const docId = "overtime-claim-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (
-    snapshot.calculatorType === "duree_preavis" ||
-    snapshot.calculatorType === "demission"
-  ) {
-    const contractType =
-      typeof breakdown.contractType === "string" ? breakdown.contractType : "CDI";
-    const workerCategory =
-      typeof breakdown.workerCategory === "string" ? breakdown.workerCategory : "employe";
-    const requiredNoticeMonths =
-      typeof breakdown.requiredNoticeMonths === "number"
-        ? breakdown.requiredNoticeMonths
-        : undefined;
-    const requiredNoticeDays =
-      typeof breakdown.requiredNoticeDays === "number"
-        ? breakdown.requiredNoticeDays
-        : undefined;
-    const leavePayout =
-      typeof breakdown.leavePayout === "number" ? breakdown.leavePayout : undefined;
-    const noticeComp =
-      typeof breakdown.noticeCompensationDue === "number" ? breakdown.noticeCompensationDue : undefined;
-
-    if (calculationDate) params.set("effective_date", calculationDate);
-    if (leavePayout !== undefined) params.set("amount_due", String(leavePayout + (noticeComp ?? 0)));
-    params.set("position", workerCategory);
-    const docId = "resignation-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "harassment_scenario") {
-    if (calculationDate) params.set("period", calculationDate);
-    params.set("issue_summary", "Signalement de faits de harcelement.");
-    const docId = "harassment-report-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "maternity_leave") {
-    if (calculationDate) params.set("effective_date", calculationDate);
-    params.set("request", "Conge maternite legal.");
-    const docId = "maternity-leave-request";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "work_accident") {
-    if (calculationDate) params.set("period", calculationDate);
-    params.set("issue_summary", "Accident du travail survenu.");
-    const docId = "work-accident-declaration";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "leave_accrual") {
-    if (calculationDate) params.set("period", calculationDate);
-    params.set("request", "Demande de conge exceptionnel.");
-    const docId = "unpaid-leave-request";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "fin_cdd") {
-    params.set("request", "Proposition de renouvellement de contrat.");
-    const docId = "contract-renewal-request";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  if (snapshot.calculatorType === "probation_termination") {
-    if (calculationDate) params.set("effective_date", calculationDate);
-    const docId = "notice-letter";
-    return { href: `/documents/${docId}?${params.toString()}`, label: DOCUMENT_CTA_LABELS[docId] };
-  }
-
-  return null;
+  return {
+    href: link.href,
+    label: link.ctaLabel ?? link.title,
+  };
 }
 
 function formatValue(
@@ -244,6 +143,8 @@ function pickKeyMetrics(snapshot: SimulationResultSnapshot): Array<[string, numb
     .slice(0, 3);
 }
 
+
+
 /* ── Chart data helpers ──────────────────────────────────────────────── */
 
 const PIE_CHART_TYPES = new Set(["net_gross", "employer_total_cost"]);
@@ -295,15 +196,146 @@ function buildBarData(
   }));
 }
 
-export function SimulationResultPage({ slug, expectedPath: providedExpectedPath }: { slug: string; expectedPath?: string }) {
+function readStringRecordValue(
+  record: Record<string, unknown>,
+  keys: string[],
+  extraMatchers: Array<(key: string) => boolean> = [],
+) {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  for (const [key, value] of Object.entries(record)) {
+    if (typeof value === "string" && value.trim()) {
+      if (keys.includes(key) || extraMatchers.some((matcher) => matcher(key))) {
+        return value.trim();
+      }
+    }
+  }
+
+  return "";
+}
+
+function extractEmployerCompanyHint(inputPayload?: Record<string, unknown>): EmployerCompanyContext | null {
+  if (!inputPayload) return null;
+
+  const companyId = readStringRecordValue(inputPayload, [
+    "company_id",
+    "companyId",
+    "employer_company_id",
+    "employerCompanyId",
+    "company_name_company_id",
+    "employer_name_company_id",
+  ], [(key) => key.endsWith("_company_id")]);
+
+  const companyName = readStringRecordValue(inputPayload, [
+    "company_name",
+    "companyName",
+    "employer_name",
+    "employerName",
+    "company",
+    "employer",
+  ]);
+
+  if (!companyId && !companyName) return null;
+
+  return {
+    id: companyId,
+    name: companyName,
+  };
+}
+
+function buildSnapshotFromStoredItem(
+  item: StoredSimulationItem,
+  expectedPath: string,
+  locale: string,
+): SimulationResultSnapshot {
+  const breakdown = ((item.result as { breakdown?: Record<string, string | number | boolean> }).breakdown ??
+    {}) as Record<string, string | number | boolean>;
+  const labels = Object.fromEntries(Object.keys(breakdown).map((key) => [key, key]));
+  const resultPayload = item.result as {
+    versionCode?: string;
+    breakdown?: Record<string, string | number | boolean>;
+    explanation?: {
+      summary: string;
+      assumptions: string[];
+      formulas: string[];
+      warnings: string[];
+      nextSteps: string[];
+      confidence?: {
+        level: "low" | "medium" | "high";
+        label?: string;
+        note: string;
+      };
+      sources?: string[];
+      missingInformation?: string[];
+    };
+  };
+
+  return {
+    calculatorPath: expectedPath,
+    calculatorType: item.calculatorType,
+    title: item.calculatorType,
+    description: item.calculatorType,
+    generatedAt: item.createdAt,
+    breakdownLabels: labels,
+    units: {},
+    locale,
+    inputPayload: item.input,
+    result: {
+      versionCode: resultPayload.versionCode ?? "ma_2026",
+      breakdown,
+      explanation: resultPayload.explanation,
+    },
+  };
+}
+
+type SimulationResultPageProps = {
+  slug: string;
+  expectedPath?: string;
+};
+
+export function SimulationResultPage(props: SimulationResultPageProps) {
+  return (
+    <Suspense fallback={null}>
+      <SimulationResultPageContent {...props} />
+    </Suspense>
+  );
+}
+
+function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath }: SimulationResultPageProps) {
   const { language, t, locale } = useLanguage();
   const searchParams = useSearchParams();
-  const expectedPath = providedExpectedPath ?? `/simulateurs/${slug}`;
+  const expectedPath = providedExpectedPath ?? calculatorTypeToPath(slug) ?? `/simulate/${slug}`;
+  const expectedCalculatorType = useMemo(() => pathToCalculatorType(expectedPath), [expectedPath]);
   const simulationId = searchParams.get("simulationId");
   const [mappedRelatedItems, setMappedRelatedItems] = useState<
     Array<{ title: string; description: string; href: string }>
   >([]);
+  const [employerCompany, setEmployerCompany] = useState<EmployerCompanyContext | null>(null);
+  const [salaryBenchmarks, setSalaryBenchmarks] = useState<AVisCompanySalaryBenchmarksResult | null>(null);
   const [copyStatus, setCopyStatus] = useState<string>();
+  const relatedLabels =
+    language === "ar"
+      ? {
+          toolsTitle: "خطوات مرتبطة",
+          toolsDescription: "واصل من النتيجة الى الاداة التالية المناسبة.",
+          modelsTitle: "نماذج مفيدة",
+          modelsDescription: "انتقل مباشرة الى الرسائل والنماذج المرتبطة بهذه النتيجة.",
+          articlesTitle: "شروحات عملية",
+          articlesDescription: "راجع الشرح المختصر قبل المتابعة او التصعيد.",
+        }
+      : {
+          toolsTitle: "Outils lies",
+          toolsDescription: "Passez du resultat a l'outil suivant le plus utile.",
+          modelsTitle: "Modeles utiles",
+          modelsDescription: "Accedez directement aux lettres et modeles lies a ce resultat.",
+          articlesTitle: "Guides pratiques",
+          articlesDescription: "Consultez l'explication utile avant la prochaine etape.",
+        };
   const [historySnapshot, setHistorySnapshot] = useState<SimulationResultSnapshot | null | undefined>(
     simulationId ? undefined : null,
   );
@@ -322,22 +354,48 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
     if (!snapshotRaw) return null;
     try {
       const parsed = JSON.parse(snapshotRaw) as SimulationResultSnapshot;
-      if (!parsed || parsed.calculatorPath !== expectedPath) return null;
+      if (!parsed?.calculatorType) return null;
+      
+      const canonical = calculatorTypeToPath(parsed.calculatorType);
+      const isPathMatch = savedSimulationPathMatches(expectedPath, parsed.calculatorType, canonical);
+      
+      // Fallback: If path matching fails but the calculatorType matches the slug (e.g. net_gross vs net-gross)
+      const normalizedSlug = (slug || "").replace(/-/g, "_");
+      const normalizedType = parsed.calculatorType.replace(/-/g, "_");
+      const isTypeMatch = normalizedSlug === normalizedType;
+
+      if (!isPathMatch && !isTypeMatch) return null;
+      
       return parsed;
     } catch {
       return null;
     }
-  }, [expectedPath, snapshotRaw]);
+  }, [expectedPath, snapshotRaw, slug]);
   const resolvedSnapshot = historySnapshot ?? snapshot;
   const prefilledDocumentCTA = resolvedSnapshot ? buildPrefilledDocumentLink(resolvedSnapshot) : null;
   const keyMetrics = useMemo(() => (resolvedSnapshot ? pickKeyMetrics(resolvedSnapshot) : []), [resolvedSnapshot]);
+  const flattenedBreakdown = useMemo(
+    () => (resolvedSnapshot ? getEffectiveBreakdown(resolvedSnapshot.result) : {}),
+    [resolvedSnapshot],
+  );
+  const breakdownEntries = useMemo(
+    () =>
+      resolvedSnapshot
+        ? Object.entries(flattenedBreakdown).filter(([key]) => (resolvedSnapshot.breakdownLabels ?? {})[key])
+        : [],
+    [flattenedBreakdown, resolvedSnapshot],
+  );
+  const employerHint = useMemo(
+    () => extractEmployerCompanyHint(resolvedSnapshot?.inputPayload),
+    [resolvedSnapshot],
+  );
 
   const showPieChart = resolvedSnapshot ? PIE_CHART_TYPES.has(resolvedSnapshot.calculatorType) : false;
   const showBarChart = resolvedSnapshot ? BAR_CHART_TYPES.has(resolvedSnapshot.calculatorType) : false;
 
   const pieData = useMemo<PieSlice[]>(
-    () => (resolvedSnapshot && showPieChart ? buildPieData(getEffectiveBreakdown(resolvedSnapshot.result)) : []),
-    [resolvedSnapshot, showPieChart],
+    () => (resolvedSnapshot && showPieChart ? buildPieData(flattenedBreakdown) : []),
+    [flattenedBreakdown, resolvedSnapshot, showPieChart],
   );
   const barData = useMemo<BarEntry[]>(
     () =>
@@ -353,59 +411,23 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
     let active = true;
     fetch(`/api/simulations/${encodeURIComponent(simulationId)}`, { cache: "no-store" })
       .then((response) => response.json().then((data) => ({ response, data })))
-      .then(({ response, data }: {
-        response: Response; data: {
-          ok?: boolean; item?: {
-            id: string;
-            createdAt: string;
-            calculatorType: string;
-            input: Record<string, unknown>;
-            result: Record<string, unknown>;
-          }
-        }
-      }) => {
+      .then(({ response, data }: { response: Response; data: { ok?: boolean; item?: StoredSimulationItem } }) => {
         if (!active || !response.ok || !data.ok || !data.item) {
           if (active) setHistorySnapshot(null);
           return;
         }
 
-        const path = calculatorTypeToPath(data.item.calculatorType) ?? expectedPath;
-        if (path !== expectedPath) {
+        const canonical = calculatorTypeToPath(data.item.calculatorType);
+        const isPathMatch = savedSimulationPathMatches(expectedPath, data.item.calculatorType, canonical);
+        const normalizedSlug = (slug || "").replace(/-/g, "_");
+        const normalizedType = data.item.calculatorType.replace(/-/g, "_");
+        const isTypeMatch = normalizedSlug === normalizedType;
+
+        if (!isPathMatch && !isTypeMatch) {
           setHistorySnapshot(null);
           return;
         }
-
-        const breakdown = ((data.item.result as { breakdown?: Record<string, string | number | boolean> }).breakdown ??
-          {}) as Record<string, string | number | boolean>;
-        const labels = Object.fromEntries(Object.keys(breakdown).map((key) => [key, key]));
-        const resultPayload = data.item.result as {
-          versionCode?: string;
-          breakdown?: Record<string, string | number | boolean>;
-          explanation?: {
-            summary: string;
-            assumptions: string[];
-            formulas: string[];
-            warnings: string[];
-            nextSteps: string[];
-          };
-        };
-
-        setHistorySnapshot({
-          calculatorPath: expectedPath,
-          calculatorType: data.item.calculatorType,
-          title: data.item.calculatorType,
-          description: data.item.calculatorType,
-          generatedAt: data.item.createdAt,
-          breakdownLabels: labels,
-          units: {},
-          locale,
-          inputPayload: data.item.input,
-          result: {
-            versionCode: resultPayload.versionCode ?? "ma_2026",
-            breakdown,
-            explanation: resultPayload.explanation,
-          },
-        });
+        setHistorySnapshot(buildSnapshotFromStoredItem(data.item, expectedPath, locale));
       })
       .catch(() => {
         if (active) setHistorySnapshot(null);
@@ -415,6 +437,42 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
       active = false;
     };
   }, [expectedPath, locale, simulationId, snapshot]);
+
+  useEffect(() => {
+    if (simulationId || snapshot) return;
+
+    let active = true;
+    fetch("/api/simulations", { cache: "no-store" })
+      .then((response) => response.json().then((data) => ({ response, data })))
+      .then(
+        ({ response, data }: { response: Response; data: { ok?: boolean; items?: StoredSimulationItem[] } }) => {
+          if (!active || !response.ok || !data.ok || !Array.isArray(data.items)) return;
+
+          const matchedItem = data.items.find((item) => {
+            if (expectedCalculatorType) {
+              return item.calculatorType === expectedCalculatorType;
+            }
+            const canonical = calculatorTypeToPath(item.calculatorType);
+            const isPathMatch = savedSimulationPathMatches(expectedPath, item.calculatorType, canonical);
+            const normalizedSlug = (slug || "").replace(/-/g, "_");
+            const normalizedType = item.calculatorType.replace(/-/g, "_");
+            const isTypeMatch = normalizedSlug === normalizedType;
+
+            return isPathMatch || isTypeMatch;
+          });
+
+          if (!matchedItem) return;
+          setHistorySnapshot(buildSnapshotFromStoredItem(matchedItem, expectedPath, locale));
+        },
+      )
+      .catch(() => {
+        // Best-effort fallback for direct result URL access.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [expectedCalculatorType, expectedPath, locale, simulationId, snapshot]);
 
   useEffect(() => {
     const currentSnapshot = resolvedSnapshot;
@@ -437,6 +495,113 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
       active = false;
     };
   }, [resolvedSnapshot]);
+
+  useEffect(() => {
+    if (!employerHint) {
+      setEmployerCompany(null);
+      return;
+    }
+
+    if (employerHint.id) {
+      setEmployerCompany({
+        id: employerHint.id,
+        name: employerHint.name || "Entreprise",
+      });
+      return;
+    }
+
+    if (!employerHint.name) {
+      setEmployerCompany(null);
+      return;
+    }
+
+    const employerName = employerHint.name;
+    let active = true;
+
+    async function resolveEmployer() {
+      try {
+        const response = await fetch("/api/reviewly/companies/resolve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ companyName: employerName }),
+        });
+
+        if (!response.ok) {
+          if (active) setEmployerCompany({ id: "", name: employerName });
+          return;
+        }
+
+        const data = (await response.json()) as {
+          companyId?: string | null;
+          confidence?: "high" | "medium" | "low" | "none";
+        };
+
+        if (!active) return;
+
+        if (data.companyId && data.confidence === "high") {
+          setEmployerCompany({ id: data.companyId, name: employerName });
+          return;
+        }
+
+        setEmployerCompany({ id: "", name: employerName });
+      } catch {
+        if (active) {
+          setEmployerCompany({ id: "", name: employerName });
+        }
+      }
+    }
+
+    void resolveEmployer();
+
+    return () => {
+      active = false;
+    };
+  }, [employerHint]);
+
+  useEffect(() => {
+    if (!employerCompany?.id || resolvedSnapshot?.calculatorType !== "salaire") {
+      setSalaryBenchmarks(null);
+      return;
+    }
+    let active = true;
+    void (async () => {
+      try {
+        const data = await getCompanySalaryBenchmarks(employerCompany.id);
+        if (active) setSalaryBenchmarks(data);
+      } catch (err) {
+        console.error("Failed to load salary benchmarks", err);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [employerCompany?.id, resolvedSnapshot?.calculatorType]);
+
+  const copySummary = useCallback(async () => {
+    if (!resolvedSnapshot) return;
+
+    const breakdown = getEffectiveBreakdown(resolvedSnapshot.result);
+    const lines = Object.entries(breakdown)
+      .filter(([key]) => (resolvedSnapshot.breakdownLabels ?? {})[key])
+      .map(([key, value]) => {
+        const label = localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language);
+        return `${label}: ${formatValue(value, resolvedSnapshot.locale, t, (resolvedSnapshot.units ?? {})[key])}`;
+      });
+    const payload = [
+      localizeCalculatorTitle(resolvedSnapshot.calculatorType, resolvedSnapshot.title, language),
+      `${t("common.legalVersion")}: ${resolvedSnapshot.result.versionCode}`,
+      ...lines,
+    ].join("\n");
+
+    try {
+      await navigator.clipboard.writeText(payload);
+      setCopyStatus(t("resultPage.copySuccess"));
+      setTimeout(() => setCopyStatus(""), 3000);
+    } catch {
+      setCopyStatus(t("resultPage.copyError"));
+      setTimeout(() => setCopyStatus(""), 3000);
+    }
+  }, [resolvedSnapshot, language, t]);
 
   if (simulationId && !snapshot && historySnapshot === undefined) {
     return (
@@ -466,33 +631,62 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
     );
   }
 
-  const safeSnapshot = resolvedSnapshot;
-
-  async function copySummary() {
-    const breakdown = getEffectiveBreakdown(safeSnapshot.result);
-    const lines = Object.entries(breakdown)
-      .filter(([key]) => (safeSnapshot.breakdownLabels ?? {})[key])
-      .map(([key, value]) => {
-        const label = localizeBreakdownLabel(key, (safeSnapshot.breakdownLabels ?? {})[key] ?? key, language);
-        return `${label}: ${formatValue(value, safeSnapshot.locale, t, (safeSnapshot.units ?? {})[key])}`;
-      });
-    const payload = [
-      localizeCalculatorTitle(safeSnapshot.calculatorType, safeSnapshot.title, language),
-      `${t("common.legalVersion")}: ${safeSnapshot.result.versionCode}`,
-      ...lines,
-    ].join("\n");
-
-    try {
-      await navigator.clipboard.writeText(payload);
-      setCopyStatus(t("resultPage.copySuccess"));
-    } catch {
-      setCopyStatus(t("resultPage.copyError"));
-    }
-  }
+  const explanation = resolvedSnapshot.result.explanation;
+  const explanationWarnings = explanation?.warnings?.slice(0, 3) ?? [];
+  const explanationNextSteps = explanation?.nextSteps?.slice(0, 3) ?? [];
+  const explanationText =
+    language === "ar"
+      ? {
+          title: "خلاصة النتيجة",
+          warnings: "نقاط انتباه",
+          nextSteps: "الخطوات التالية",
+          noWarnings: "لا توجد تحذيرات إضافية.",
+          noNextSteps: "لا توجد خطوات مقترحة.",
+        }
+      : {
+          title: "Synthese du Resultat",
+          warnings: "Points d'Attention",
+          nextSteps: "Prochaines Etapes",
+          noWarnings: "Aucune alerte supplementaire.",
+          noNextSteps: "Aucune etape recommandee.",
+        };
+  const resultState: "success" | "warning" | "empty" =
+    breakdownEntries.length === 0 ? "empty" : explanationWarnings.length > 0 ? "warning" : "success";
+  const resultStateMeta =
+    resultState === "success"
+      ? {
+          badgeClass: "status-success",
+          title: language === "ar" ? "الحالة: نتيجة كاملة" : "Etat: Resultat complet",
+          description:
+            language === "ar"
+              ? "الحساب متاح مع بيانات قابلة للاستغلال."
+              : "Le calcul est disponible avec des donnees exploitables.",
+        }
+      : resultState === "warning"
+        ? {
+            badgeClass: "status-warning",
+            title: language === "ar" ? "الحالة: نقاط انتباه" : "Etat: Points d'attention",
+            description:
+              language === "ar"
+                ? "بعض الفرضيات تتطلب التحقق قبل اتخاذ القرار."
+                : "Certaines hypotheses demandent verification avant decision.",
+          }
+        : {
+            badgeClass: "status-info",
+            title: language === "ar" ? "Etat: Donnees insuffisantes" : "Etat: Donnees insuffisantes",
+            description:
+              language === "ar"
+                ? "Le calcul ne contient pas encore assez de details a exploiter."
+                : "Le calcul ne contient pas encore assez de details a exploiter.",
+          };
 
   return (
     <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-24 sm:px-6 print:pt-0">
+        <PrintHeader 
+          title={localizeCalculatorTitle(resolvedSnapshot.calculatorType, resolvedSnapshot.title, language)} 
+          generatedAt={resolvedSnapshot.generatedAt ? new Date(resolvedSnapshot.generatedAt).toLocaleString(resolvedSnapshot.locale) : undefined} 
+        />
         <section className="soft-card rounded-[2rem] p-5 sm:p-7">
           <p className="section-kicker">{t("resultPage.kicker")}</p>
           <h1 className="display-font mt-2 break-words text-3xl font-semibold sm:text-4xl">
@@ -523,13 +717,50 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
               3. {t("simulator.stepResult")}
             </span>
           </div>
+          <div className={`${resultStateMeta.badgeClass} mt-4 rounded-2xl px-3 py-2 text-sm`}>
+            <p className="font-semibold">{resultStateMeta.title}</p>
+            <p className="mt-1 text-xs">{resultStateMeta.description}</p>
+          </div>
           <Link href={expectedPath} className="mt-3 inline-block text-sm font-semibold text-[var(--accent)] print:hidden">
             {t("resultPage.backToForm")}
           </Link>
         </section>
 
+        {explanation ? (
+          <section className="soft-card mt-4 rounded-3xl p-5">
+            <p className="section-kicker">{explanationText.title}</p>
+            <p className="mt-2 text-sm text-[var(--foreground)]">{explanation.summary}</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <article className="panel-strong rounded-xl p-3">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">{explanationText.warnings}</p>
+                {explanationWarnings.length > 0 ? (
+                  <ul className="mt-2 space-y-1 text-sm text-[var(--foreground)]">
+                    {explanationWarnings.map((warning, index) => (
+                      <li key={`${warning}-${index}`}>- {warning}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-sm text-[var(--ink-soft)]">{explanationText.noWarnings}</p>
+                )}
+              </article>
+              <article className="panel-strong rounded-xl p-3">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">{explanationText.nextSteps}</p>
+                {explanationNextSteps.length > 0 ? (
+                  <ul className="mt-2 space-y-1 text-sm text-[var(--foreground)]">
+                    {explanationNextSteps.map((step, index) => (
+                      <li key={`${step}-${index}`}>{index + 1}. {step}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-sm text-[var(--ink-soft)]">{explanationText.noNextSteps}</p>
+                )}
+              </article>
+            </div>
+          </section>
+        ) : null}
+
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(290px,1fr)] lg:items-start print:grid-cols-1">
-          <section className="space-y-4">
+          <section className="min-w-0 space-y-4">
             {keyMetrics.length > 0 ? (
               <div className="grid gap-2 sm:grid-cols-3">
                 {keyMetrics.map(([key, value]) => (
@@ -547,7 +778,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
 
             {showPieChart && pieData.length > 0 ? (
               <section className="soft-card overflow-hidden min-w-0 rounded-3xl p-5">
-                <p className="section-kicker">Répartition salariale</p>
+                  <p className="section-kicker">{t("resultPage.breakdownTitle")}</p>
                 <div className="mt-3">
                   <BreakdownPieChart data={pieData} />
                 </div>
@@ -556,7 +787,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
 
             {showBarChart && barData.length > 0 ? (
               <section className="soft-card overflow-hidden min-w-0 rounded-3xl p-5">
-                <p className="section-kicker">Projection</p>
+                  <p className="section-kicker">{t("resultPage.breakdownProjection")}</p>
                 <div className="mt-3">
                   <TimelineBarChart data={barData} />
                 </div>
@@ -565,10 +796,9 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
 
             <section className="soft-card min-w-0 rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.breakdownTitle")}</p>
-              <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
-                {Object.entries(getEffectiveBreakdown(resolvedSnapshot.result))
-                  .filter(([key]) => (resolvedSnapshot.breakdownLabels ?? {})[key])
-                  .map(([key, value]) => (
+              {breakdownEntries.length > 0 ? (
+                <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+                  {breakdownEntries.map(([key, value]) => (
                     <div key={key} className="panel-strong min-w-0 rounded-xl p-3">
                       <p className="break-words text-[11px] uppercase tracking-wide text-[var(--ink-soft)]">
                         {localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language)}
@@ -578,14 +808,23 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
                       </p>
                     </div>
                   ))}
-              </div>
+                </div>
+              ) : (
+                <div className="status-info mt-3 rounded-xl px-3 py-2 text-sm">
+                  <p className="text-sm text-[var(--ink-soft)]">
+                      {t("resultPage.noDetailData")}
+                    </p>
+                </div>
+              )}
+
+              <PrintFooter />
             </section>
           </section>
 
-          <aside className="space-y-4 lg:sticky lg:top-20 print:hidden">
+          <aside className="min-w-0 space-y-4 lg:sticky lg:top-20 print:hidden">
             <section className="soft-card min-w-0 rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.actionsTitle")}</p>
-              <div className="mt-3 flex flex-col gap-2 text-sm">
+              <div className="mt-3 flex flex-col gap-2 text-sm break-words">
                 <Link href={expectedPath} className="btn-muted px-4 py-2 text-center">
                   {t("resultPage.editParams")}
                 </Link>
@@ -595,7 +834,7 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
                 <button type="button" onClick={() => window.print()} className="btn-muted px-4 py-2 text-center">
                   {t("resultPage.print")}
                 </button>
-                <Link href="/simulateurs" className="btn-primary px-4 py-2 text-center">
+                <Link href="/simulate" className="btn-primary px-4 py-2 text-center">
                   {t("resultPage.runAnother")}
                 </Link>
                 {prefilledDocumentCTA ? (
@@ -613,25 +852,53 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
             </section>
 
             <section className="soft-card rounded-3xl p-5">
-              <p className="section-kicker">{t("common.partner")}</p>
-              <div className="mt-3">
-                <ReviewlyPromoCard
+              <p className="section-kicker">{t("resultPage.employerContext")}</p>
+              <div className="mt-3 space-y-3">
+                {employerCompany?.id ? (
+                  <CompanyTrustSummary companyId={employerCompany.id} />
+                ) : null}
+                
+                {salaryBenchmarks?.salaryBenchmarks && (
+                  <div className="rounded-2xl border border-[var(--accent-soft)] bg-gradient-to-br from-[var(--surface)] to-[var(--surface-muted)] p-4 shadow-sm">
+                    <p className="section-kicker text-[var(--accent)]">{t("resultPage.marketInsights")}</p>
+                    <p className="mt-1 text-sm font-semibold">
+                      {t("resultPage.medianSalary")} : {salaryBenchmarks.salaryBenchmarks.medianMonthlySalary?.toLocaleString() ?? "N/A"} MAD
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--ink-soft)]">
+                      {t("resultPage.basedOnReviews", { count: salaryBenchmarks.salaryBenchmarks.submissionCount })}
+                      {salaryBenchmarks.salaryBenchmarks.pctAboveCityAvg ? ` (${salaryBenchmarks.salaryBenchmarks.pctAboveCityAvg}% ${t("resultPage.aboveCityAvg")})` : ""}
+                    </p>
+                  </div>
+                )}
+
+                <AvisinePromoCard
                   type={
                     resolvedSnapshot.calculatorType === "licenciement" ||
                       resolvedSnapshot.calculatorType === "unpaid_salary_recovery"
                       ? "conflict"
-                      : "general"
+                      : resolvedSnapshot.calculatorType === "salaire"
+                        ? "salary_benchmark"
+                        : "general"
                   }
+                  company={employerCompany && employerCompany.name ? employerCompany : null}
                 />
+                {employerCompany?.id ? (
+                  <CompanyContextCard
+                    companyId={employerCompany.id}
+                    companyName={employerCompany.name}
+                  />
+                ) : null}
               </div>
             </section>
 
-            <section className="soft-card rounded-3xl p-5">
-              <p className="section-kicker">{t("common.partner")}</p>
-              <div className="mt-3">
-                <AdSlot slot="4545454545" format="auto" />
-              </div>
-            </section>
+            <SimulationCaseWorkflow
+              snapshot={resolvedSnapshot}
+              locale={resolvedSnapshot.locale}
+              sourceSimulationId={simulationId ?? undefined}
+              company={employerCompany}
+            />
+
+            <PartnerAdSection slot="4545454545" />
           </aside>
         </div>
 
@@ -643,19 +910,19 @@ export function SimulationResultPage({ slug, expectedPath: providedExpectedPath 
                 ? mappedRelatedItems
                 : [
                   {
-                    title: t("simulator.relatedSimulatorsTitle"),
-                    description: t("simulator.relatedSimulatorsDesc"),
-                    href: "/simulateurs",
+                    title: relatedLabels.toolsTitle,
+                    description: relatedLabels.toolsDescription,
+                    href: "/salaire",
                   },
                   {
-                    title: t("simulator.relatedDocumentsTitle"),
-                    description: t("simulator.relatedDocumentsDesc"),
-                    href: "/documents",
+                    title: relatedLabels.modelsTitle,
+                    description: relatedLabels.modelsDescription,
+                    href: "/modeles",
                   },
                   {
-                    title: t("simulator.relatedLibraryTitle"),
-                    description: t("simulator.relatedLibraryDesc"),
-                    href: "/bibliotheque",
+                    title: relatedLabels.articlesTitle,
+                    description: relatedLabels.articlesDescription,
+                    href: "/articles",
                   },
                 ]
             }

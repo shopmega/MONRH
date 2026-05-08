@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSocialProtectionRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -13,7 +14,7 @@ export const retirementAdvancedInputSchema = z.object({
   currentGross: z.number().positive(),
   annualRaisePercent: z.number().min(0).max(20).default(3),
   contributionMonths: z.number().int().min(0),
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   desiredMonthlyPension: z.number().min(0).default(0), // for gap calculation
 });
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Article } from "@/lib/content/home-content";
-import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { getPublicSupabaseAdminClient } from "@/lib/server/supabase-admin";
 
 function normalizeArticle(article: Article): Article {
   return {
@@ -39,7 +39,7 @@ function toArticleRow(article: Article) {
 }
 
 export async function listArticles(): Promise<Article[]> {
-  const supabase = getSupabaseAdminClient() as any;
+  const supabase = getPublicSupabaseAdminClient() as any;
   const { data, error } = await supabase
     .from("articles")
     .select(
@@ -48,7 +48,8 @@ export async function listArticles(): Promise<Article[]> {
     .order("last_updated", { ascending: false })
     .limit(1000);
   if (error || !data) {
-    throw new Error(error?.message ?? "articles_list_failed");
+    console.error("[articles-store] listArticles failed:", error?.message ?? "no data");
+    return [];
   }
   return (data as Array<Record<string, unknown>>).map((row) =>
     normalizeArticle({
@@ -103,7 +104,7 @@ export async function upsertArticle(input: {
     content: input.content,
     href: `/articles/${targetSlug}`,
   });
-  const supabase = getSupabaseAdminClient() as any;
+  const supabase = getPublicSupabaseAdminClient() as any;
   const { error } = await supabase.from("articles").upsert(toArticleRow(next), { onConflict: "slug" });
   if (error) {
     throw new Error(error.message ?? "article_upsert_failed");
@@ -112,7 +113,7 @@ export async function upsertArticle(input: {
 }
 
 export async function deleteArticleBySlug(slug: string) {
-  const supabase = getSupabaseAdminClient() as any;
+  const supabase = getPublicSupabaseAdminClient() as any;
   const { error, count } = await supabase
     .from("articles")
     .delete({ count: "exact" })

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 /**
  * AT/MP (Work Accident / Occupational Disease) sector rate ranges.
@@ -14,7 +14,7 @@ const AT_MP_RATES = {
 } as const;
 
 export const employerTotalCostInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   grossSalary: z.number().positive(),
   /** Company headcount — determines formation professionnelle rate (1% or 1.6%) */
   companySize: z.enum(["small", "large"]).default("large"),
@@ -28,7 +28,7 @@ export const employerTotalCostInputSchema = z.object({
   include13thMonth: z.boolean().default(false),
 });
 
-export type EmployerTotalCostInput = z.infer<typeof employerTotalCostInputSchema>;
+export type EmployerTotalCostInput = z.input<typeof employerTotalCostInputSchema>;
 
 export type EmployerTotalCostResult = {
   versionId: string;
@@ -36,6 +36,7 @@ export type EmployerTotalCostResult = {
   breakdown: {
     grossSalary: number;
     cnssEmployer: number;
+    familyAllowanceEmployer: number;
     amoEmployer: number;
     atMpInsurance: number;
     formationPro: number;
@@ -54,6 +55,7 @@ export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): Emp
 
   const contributableBase = Math.min(input.grossSalary, rules.cnssCeiling);
   const cnssEmployer = roundMAD(contributableBase * rules.cnssEmployerRate);
+  const familyAllowanceEmployer = roundMAD(input.grossSalary * rules.familyAllowanceEmployerRate);
   const amoEmployer = roundMAD(input.grossSalary * rules.amoEmployerRate);
 
   const atMpRate = AT_MP_RATES[input.sectorRisk];
@@ -65,11 +67,19 @@ export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): Emp
   const additionalBenefits = roundMAD(input.additionalBenefitsMad);
 
   const monthlyTotalCost = roundMAD(
-    input.grossSalary + cnssEmployer + amoEmployer + atMpInsurance + formationPro + additionalBenefits,
+    input.grossSalary +
+      cnssEmployer +
+      familyAllowanceEmployer +
+      amoEmployer +
+      atMpInsurance +
+      formationPro +
+      additionalBenefits,
   );
 
   const annualTotalCost = roundMAD(monthlyTotalCost * input.months);
-  const bonusMonth = input.include13thMonth ? input.grossSalary + cnssEmployer + amoEmployer + atMpInsurance + formationPro : 0;
+  const bonusMonth = input.include13thMonth
+    ? input.grossSalary + cnssEmployer + familyAllowanceEmployer + amoEmployer + atMpInsurance + formationPro
+    : 0;
   const annualCostWithBonus = roundMAD(annualTotalCost + bonusMonth);
 
   const effectiveBurdenRatePercent = roundMAD(
@@ -82,6 +92,7 @@ export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): Emp
     breakdown: {
       grossSalary: roundMAD(input.grossSalary),
       cnssEmployer,
+      familyAllowanceEmployer,
       amoEmployer,
       atMpInsurance,
       formationPro,
@@ -95,6 +106,7 @@ export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): Emp
       summary: `Cout mensuel employeur: ${monthlyTotalCost} MAD. Annuel: ${annualCostWithBonus} MAD.`,
       assumptions: [
         `CNSS employeur: base plafonnee a ${rules.cnssCeiling} MAD (taux ${roundMAD(rules.cnssEmployerRate * 100)}%).`,
+        `Allocations familiales: taux ${roundMAD(rules.familyAllowanceEmployerRate * 100)}% sur brut total, a la charge de l'employeur.`,
         `AMO employeur: taux ${roundMAD(rules.amoEmployerRate * 100)}% sur brut total.`,
         `AT/MP (secteur ${input.sectorRisk}): taux ${roundMAD(atMpRate * 100)}% — varie selon classification CNSS.`,
         `Formation professionnelle: ${input.companySize === "small" ? "1%" : "1.6%"} (entreprise ${input.companySize === "small" ? "\u2264 20 salaries" : "> 20 salaries"}).`,
@@ -103,10 +115,11 @@ export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): Emp
       ].filter(Boolean),
       formulas: [
         "CNSS employeur = min(brut, plafond CNSS) x taux employeur.",
+        "Allocations familiales = brut x taux allocations familiales employeur.",
         "AMO employeur = brut x taux AMO.",
         "AT/MP = brut x taux secteur.",
         "Formation pro = brut x taux formation.",
-        "Cout mensuel total = brut + CNSS + AMO + AT/MP + formation + avantages.",
+        "Cout mensuel total = brut + CNSS + allocations familiales + AMO + AT/MP + formation + avantages.",
         "Taux de charges = (charges totales / brut) x 100.",
       ],
       warnings: [

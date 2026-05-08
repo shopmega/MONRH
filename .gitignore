@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+.mcp.json
 /data/app-store.json
 tmp_*.pdf
 tmp_*.bin

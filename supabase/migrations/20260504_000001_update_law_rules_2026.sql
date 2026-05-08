@@ -1,0 +1,502 @@
+-- Update MONRH/SIMPAIE legal rule bundle with the verified 2026 payroll rules.
+-- Safe to rerun: this upserts the single app_settings row used by law-rules-store.ts.
+
+insert into public.app_settings (key, value, updated_at)
+values (
+  'law_rules_bundle',
+  $law_rules$
+{
+  "salaryRules": [
+    {
+      "versionId": "ma_2025",
+      "versionCode": "ma_2025",
+      "effectiveFrom": "2025-01-01",
+      "effectiveTo": "2025-12-31",
+      "cnssEmployeeRate": 0.0448,
+      "cnssEmployerRate": 0.0898,
+      "cnssCeiling": 6000,
+      "familyAllowanceEmployerRate": 0.064,
+      "amoEmployeeRate": 0.0226,
+      "amoEmployerRate": 0.0411,
+      "professionalExpenseMode": "legacy_20_percent",
+      "professionalExpenseRate": 0.2,
+      "professionalExpenseCap": 2500,
+      "familyChargeReductionAnnual": 500,
+      "familyChargeReductionCapAnnual": 3000,
+      "formationProRateSmall": 0.01,
+      "formationProRateLarge": 0.016,
+      "taxBracketsMonthly": [
+        {
+          "min": 0,
+          "max": 2500,
+          "rate": 0
+        },
+        {
+          "min": 2500,
+          "max": 4166.67,
+          "rate": 0.1
+        },
+        {
+          "min": 4166.67,
+          "max": 5000,
+          "rate": 0.2
+        },
+        {
+          "min": 5000,
+          "max": 6666.67,
+          "rate": 0.3
+        },
+        {
+          "min": 6666.67,
+          "max": 15000,
+          "rate": 0.34
+        },
+        {
+          "min": 15000,
+          "max": null,
+          "rate": 0.38
+        }
+      ]
+    },
+    {
+      "versionId": "ma_2026",
+      "versionCode": "ma_2026",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": null,
+      "cnssEmployeeRate": 0.0448,
+      "cnssEmployerRate": 0.0898,
+      "cnssCeiling": 6000,
+      "familyAllowanceEmployerRate": 0.064,
+      "amoEmployeeRate": 0.0226,
+      "amoEmployerRate": 0.0411,
+      "professionalExpenseMode": "reform_35_25_percent",
+      "professionalExpenseRate": 0.25,
+      "professionalExpenseCap": 2916.67,
+      "professionalExpenseTiers": [
+        {
+          "maxGrossMonthly": 6500,
+          "rate": 0.35,
+          "monthlyCap": 2500
+        },
+        {
+          "maxGrossMonthly": null,
+          "rate": 0.25,
+          "monthlyCap": 2916.67
+        }
+      ],
+      "familyChargeReductionAnnual": 600,
+      "familyChargeReductionCapAnnual": 3600,
+      "formationProRateSmall": 0.01,
+      "formationProRateLarge": 0.016,
+      "taxBracketsMonthly": [
+        {
+          "min": 0,
+          "max": 3333.33,
+          "rate": 0,
+          "deduction": 0
+        },
+        {
+          "min": 3333.33,
+          "max": 5000,
+          "rate": 0.1,
+          "deduction": 333.33
+        },
+        {
+          "min": 5000,
+          "max": 6666.67,
+          "rate": 0.2,
+          "deduction": 833.33
+        },
+        {
+          "min": 6666.67,
+          "max": 8333.33,
+          "rate": 0.3,
+          "deduction": 1500
+        },
+        {
+          "min": 8333.33,
+          "max": 15000,
+          "rate": 0.34,
+          "deduction": 1833.33
+        },
+        {
+          "min": 15000,
+          "max": null,
+          "rate": 0.37,
+          "deduction": 2283.33
+        }
+      ]
+    }
+  ],
+  "terminationRules": [
+    {
+      "versionId": "ma_2025",
+      "versionCode": "ma_2025",
+      "effectiveFrom": "2025-01-01",
+      "effectiveTo": "2025-12-31",
+      "tranche1HoursPerYear": 96,
+      "tranche2HoursPerYear": 144,
+      "tranche3HoursPerYear": 192,
+      "tranche4HoursPerYear": 240,
+      "minimumSeniorityMonthsForLegalIndemnity": 6,
+      "useFractionalYearsForIndemnity": true,
+      "referenceHoursPerMonth": 191,
+      "abusiveBaseMonthsPerYear": 1,
+      "abusiveCapMonths": 36,
+      "legalIndemnityContractTypes": [
+        "CDI"
+      ],
+      "cddEarlyTerminationCompensation": "remaining_salary_until_contract_end",
+      "forceMajeure": {
+        "preavisDue": false,
+        "damagesDue": false,
+        "legalIndemnityDue": false,
+        "warning": "La force majeure est strictement appreciee. Si elle n'est pas reconnue, la rupture peut etre requalifiee."
+      },
+      "cddNoticeDaysByCategory": {
+        "cadre": 15,
+        "employe": 8,
+        "ouvrier": 8
+      },
+      "cdiNoticeMonthsByCategory": {
+        "cadre": {
+          "lt1": 1,
+          "gte1lt5": 2,
+          "gte5": 3
+        },
+        "employe": {
+          "lt1": 0.27,
+          "gte1lt5": 1,
+          "gte5": 2
+        },
+        "ouvrier": {
+          "lt1": 0.27,
+          "gte1lt5": 1,
+          "gte5": 2
+        }
+      },
+      "cdiNoticeRulesByCategory": {
+        "cadre": [
+          {
+            "minYears": 0,
+            "maxYears": 1,
+            "value": 1,
+            "unit": "month"
+          },
+          {
+            "minYears": 1,
+            "maxYears": 5,
+            "value": 2,
+            "unit": "month"
+          },
+          {
+            "minYears": 5,
+            "maxYears": null,
+            "value": 3,
+            "unit": "month"
+          }
+        ],
+        "employe": [
+          {
+            "minYears": 0,
+            "maxYears": 1,
+            "value": 8,
+            "unit": "day"
+          },
+          {
+            "minYears": 1,
+            "maxYears": 5,
+            "value": 1,
+            "unit": "month"
+          },
+          {
+            "minYears": 5,
+            "maxYears": null,
+            "value": 2,
+            "unit": "month"
+          }
+        ],
+        "ouvrier": [
+          {
+            "minYears": 0,
+            "maxYears": 1,
+            "value": 8,
+            "unit": "day"
+          },
+          {
+            "minYears": 1,
+            "maxYears": 5,
+            "value": 1,
+            "unit": "month"
+          },
+          {
+            "minYears": 5,
+            "maxYears": null,
+            "value": 2,
+            "unit": "month"
+          }
+        ]
+      }
+    },
+    {
+      "versionId": "ma_2026",
+      "versionCode": "ma_2026",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": null,
+      "tranche1HoursPerYear": 96,
+      "tranche2HoursPerYear": 144,
+      "tranche3HoursPerYear": 192,
+      "tranche4HoursPerYear": 240,
+      "minimumSeniorityMonthsForLegalIndemnity": 6,
+      "useFractionalYearsForIndemnity": true,
+      "referenceHoursPerMonth": 191,
+      "abusiveBaseMonthsPerYear": 1,
+      "abusiveCapMonths": 36,
+      "legalIndemnityContractTypes": [
+        "CDI"
+      ],
+      "cddEarlyTerminationCompensation": "remaining_salary_until_contract_end",
+      "forceMajeure": {
+        "preavisDue": false,
+        "damagesDue": false,
+        "legalIndemnityDue": false,
+        "warning": "La force majeure est strictement appreciee. Si elle n'est pas reconnue, la rupture peut etre requalifiee."
+      },
+      "cddNoticeDaysByCategory": {
+        "cadre": 15,
+        "employe": 8,
+        "ouvrier": 8
+      },
+      "cdiNoticeMonthsByCategory": {
+        "cadre": {
+          "lt1": 1,
+          "gte1lt5": 2,
+          "gte5": 3
+        },
+        "employe": {
+          "lt1": 0.27,
+          "gte1lt5": 1,
+          "gte5": 2
+        },
+        "ouvrier": {
+          "lt1": 0.27,
+          "gte1lt5": 1,
+          "gte5": 2
+        }
+      },
+      "cdiNoticeRulesByCategory": {
+        "cadre": [
+          {
+            "minYears": 0,
+            "maxYears": 1,
+            "value": 1,
+            "unit": "month"
+          },
+          {
+            "minYears": 1,
+            "maxYears": 5,
+            "value": 2,
+            "unit": "month"
+          },
+          {
+            "minYears": 5,
+            "maxYears": null,
+            "value": 3,
+            "unit": "month"
+          }
+        ],
+        "employe": [
+          {
+            "minYears": 0,
+            "maxYears": 1,
+            "value": 8,
+            "unit": "day"
+          },
+          {
+            "minYears": 1,
+            "maxYears": 5,
+            "value": 1,
+            "unit": "month"
+          },
+          {
+            "minYears": 5,
+            "maxYears": null,
+            "value": 2,
+            "unit": "month"
+          }
+        ],
+        "ouvrier": [
+          {
+            "minYears": 0,
+            "maxYears": 1,
+            "value": 8,
+            "unit": "day"
+          },
+          {
+            "minYears": 1,
+            "maxYears": 5,
+            "value": 1,
+            "unit": "month"
+          },
+          {
+            "minYears": 5,
+            "maxYears": null,
+            "value": 2,
+            "unit": "month"
+          }
+        ]
+      }
+    }
+  ],
+  "leaveRules": [
+    {
+      "versionId": "ma_2025",
+      "versionCode": "ma_2025",
+      "effectiveFrom": "2025-01-01",
+      "effectiveTo": "2025-12-31",
+      "accrualDaysPerMonth": 1.5,
+      "seniorityBonusDaysPerMonthAfter5Years": 0.08,
+      "seniorityBonusDays": 1.5,
+      "seniorityBonusEveryYears": 5,
+      "maxAnnualDays": 30,
+      "carryoverLimitDays": 45
+    },
+    {
+      "versionId": "ma_2026",
+      "versionCode": "ma_2026",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": null,
+      "accrualDaysPerMonth": 1.5,
+      "seniorityBonusDaysPerMonthAfter5Years": 0.08,
+      "seniorityBonusDays": 1.5,
+      "seniorityBonusEveryYears": 5,
+      "maxAnnualDays": 30,
+      "carryoverLimitDays": 45
+    }
+  ],
+  "smigRules": [
+    {
+      "versionId": "ma_2025",
+      "versionCode": "ma_2025",
+      "effectiveFrom": "2025-01-01",
+      "effectiveTo": "2025-12-31",
+      "smigHourlyMad": 16.29,
+      "smagDailyMad": 88.58,
+      "referenceHoursPerMonth": 191,
+      "referenceDaysPerMonth": 26
+    },
+    {
+      "versionId": "ma_2026",
+      "versionCode": "ma_2026",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": "2026-03-31",
+      "smigHourlyMad": 17.92,
+      "smagDailyMad": 88.58,
+      "referenceHoursPerMonth": 191,
+      "referenceDaysPerMonth": 26
+    },
+    {
+      "versionId": "ma_2026_q2",
+      "versionCode": "ma_2026",
+      "effectiveFrom": "2026-04-01",
+      "effectiveTo": null,
+      "smigHourlyMad": 17.92,
+      "smagDailyMad": 97.44,
+      "referenceHoursPerMonth": 191,
+      "referenceDaysPerMonth": 26
+    }
+  ],
+  "overtimeRules": [
+    {
+      "versionId": "ma_2025",
+      "versionCode": "ma_2025",
+      "effectiveFrom": "2025-01-01",
+      "effectiveTo": "2025-12-31",
+      "dayMultiplier": 1.25,
+      "nightMultiplier": 1.5,
+      "weekendMultiplier": 1.5,
+      "holidayMultiplier": 2,
+      "normalDayDaytimeMultiplier": 1.25,
+      "normalDayNightMultiplier": 1.5,
+      "restOrHolidayDaytimeMultiplier": 1.5,
+      "restOrHolidayNightMultiplier": 2,
+      "monthlyReferenceHours": 191
+    },
+    {
+      "versionId": "ma_2026",
+      "versionCode": "ma_2026",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": null,
+      "dayMultiplier": 1.25,
+      "nightMultiplier": 1.5,
+      "weekendMultiplier": 1.5,
+      "holidayMultiplier": 2,
+      "normalDayDaytimeMultiplier": 1.25,
+      "normalDayNightMultiplier": 1.5,
+      "restOrHolidayDaytimeMultiplier": 1.5,
+      "restOrHolidayNightMultiplier": 2,
+      "monthlyReferenceHours": 191
+    }
+  ],
+  "socialProtectionRules": [
+    {
+      "versionId": "ma_2025",
+      "versionCode": "ma_2025",
+      "effectiveFrom": "2025-01-01",
+      "effectiveTo": "2025-12-31",
+      "sickLeaveWaitingDays": 3,
+      "sickLeaveCnssCoverageRate": 0.6666666667,
+      "sickLeaveMaxCompensatedDays": 365,
+      "sickLeaveMinCnssEligibilityDays": 54,
+      "maternityCnssCoverageRate": 1,
+      "maternityLegalLeaveWeeks": 14,
+      "maternityMinCnssMonths": 3,
+      "pensionMinContributionDays": 1320,
+      "pensionOpeningContributionDays": 1320,
+      "pensionFullContributionDays": 3240,
+      "pensionAccrualStepDays": 216,
+      "pensionBaseReplacementRate": 0.5,
+      "pensionIncrementPerStep": 0.01,
+      "pensionMaxReplacementRate": 0.7,
+      "pensionReferenceSalaryCeiling": 6000,
+      "pensionNormalRetirementAge": 60,
+      "pensionEarlyRetirementFactor": 0.9,
+      "workAccidentTemporaryCoverageRate": 0.6666666667,
+      "workAccidentPermanentCoverageCoefficient": 0.5,
+      "workAccidentFauteInexcusableMultiplier": 2
+    },
+    {
+      "versionId": "ma_2026",
+      "versionCode": "ma_2026",
+      "effectiveFrom": "2026-01-01",
+      "effectiveTo": null,
+      "sickLeaveWaitingDays": 3,
+      "sickLeaveCnssCoverageRate": 0.6666666667,
+      "sickLeaveMaxCompensatedDays": 365,
+      "sickLeaveMinCnssEligibilityDays": 54,
+      "maternityCnssCoverageRate": 1,
+      "maternityLegalLeaveWeeks": 14,
+      "maternityMinCnssMonths": 3,
+      "pensionMinContributionDays": 1320,
+      "pensionOpeningContributionDays": 1320,
+      "pensionFullContributionDays": 3240,
+      "pensionAccrualStepDays": 216,
+      "pensionBaseReplacementRate": 0.5,
+      "pensionIncrementPerStep": 0.01,
+      "pensionMaxReplacementRate": 0.7,
+      "pensionReferenceSalaryCeiling": 6000,
+      "pensionNormalRetirementAge": 60,
+      "pensionEarlyRetirementFactor": 0.9,
+      "workAccidentTemporaryCoverageRate": 0.6666666667,
+      "workAccidentPermanentCoverageCoefficient": 0.5,
+      "workAccidentFauteInexcusableMultiplier": 2
+    }
+  ]
+}
+$law_rules$::jsonb,
+  now()
+)
+on conflict (key) do update
+set
+  value = excluded.value,
+  updated_at = now();

@@ -13,6 +13,15 @@ const simulationResultSchema = z.object({
       formulas: z.array(z.string()),
       warnings: z.array(z.string()),
       nextSteps: z.array(z.string()),
+      confidence: z
+        .object({
+          level: z.enum(["low", "medium", "high"]),
+          label: z.string().optional(),
+          note: z.string(),
+        })
+        .optional(),
+      sources: z.array(z.string()).optional(),
+      missingInformation: z.array(z.string()).optional(),
     })
     .optional(),
 });

@@ -22,6 +22,12 @@ type AdminConfig = {
     };
   };
   toolPolicies: Record<string, ToolPolicy>;
+  evidenceGovernance: {
+    signedUrlTtlSeconds: number;
+    retentionDays: number;
+    maxUploadBytes: number;
+    allowArchivedEvidenceDownload: boolean;
+  };
   updatedAt: string;
 };
 
@@ -75,6 +81,23 @@ export default function AdminToolsPage() {
     });
   }
 
+  function updateEvidenceGovernance<K extends keyof AdminConfig["evidenceGovernance"]>(
+    key: K,
+    value: AdminConfig["evidenceGovernance"][K],
+  ) {
+    setConfig((current) =>
+      current
+        ? {
+            ...current,
+            evidenceGovernance: {
+              ...current.evidenceGovernance,
+              [key]: value,
+            },
+          }
+        : current,
+    );
+  }
+
   async function saveConfig() {
     if (!config) return;
     setSaving(true);
@@ -89,6 +112,7 @@ export default function AdminToolsPage() {
         maintenanceMessage: config.maintenanceMessage,
         websiteSettings: config.websiteSettings,
         toolPolicies: config.toolPolicies,
+        evidenceGovernance: config.evidenceGovernance,
       }),
     });
 
@@ -182,6 +206,76 @@ export default function AdminToolsPage() {
             Affiche une banniere globale sur le site public.
           </p>
         </article>
+      </section>
+
+      <section className="soft-card rounded-3xl p-5">
+        <h3 className="display-font text-xl font-semibold">Gouvernance des preuves</h3>
+        <p className="mt-2 text-sm text-[var(--ink-soft)]">
+          Controle du TTL d'acces, de la retention et des regles de telechargement pour les pieces dossier.
+        </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <label className="text-sm font-semibold">
+            TTL URL signee (secondes)
+            <input
+              type="number"
+              min={30}
+              max={900}
+              className="input-shell mt-1"
+              value={config.evidenceGovernance.signedUrlTtlSeconds}
+              onChange={(event) =>
+                updateEvidenceGovernance(
+                  "signedUrlTtlSeconds",
+                  Math.max(30, Math.min(900, Number(event.target.value) || 30)),
+                )
+              }
+            />
+          </label>
+          <label className="text-sm font-semibold">
+            Retention (jours)
+            <input
+              type="number"
+              min={1}
+              max={3650}
+              className="input-shell mt-1"
+              value={config.evidenceGovernance.retentionDays}
+              onChange={(event) =>
+                updateEvidenceGovernance(
+                  "retentionDays",
+                  Math.max(1, Math.min(3650, Number(event.target.value) || 1)),
+                )
+              }
+            />
+          </label>
+          <label className="text-sm font-semibold">
+            Taille max upload (Mo)
+            <input
+              type="number"
+              min={1}
+              max={50}
+              className="input-shell mt-1"
+              value={Math.round(config.evidenceGovernance.maxUploadBytes / (1024 * 1024))}
+              onChange={(event) =>
+                updateEvidenceGovernance(
+                  "maxUploadBytes",
+                  Math.max(1, Math.min(50, Number(event.target.value) || 1)) * 1024 * 1024,
+                )
+              }
+            />
+          </label>
+          <label className="flex items-center justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface-elevated)] p-3 text-sm">
+            <div>
+              <p className="font-semibold">Telechargement des preuves archivees</p>
+              <p className="mt-1 text-xs text-[var(--ink-soft)]">
+                Autoriser ou bloquer l'ouverture des pieces archivees via URL signee.
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              checked={config.evidenceGovernance.allowArchivedEvidenceDownload}
+              onChange={(event) => updateEvidenceGovernance("allowArchivedEvidenceDownload", event.target.checked)}
+            />
+          </label>
+        </div>
       </section>
 
       <section className="soft-card rounded-3xl p-5">

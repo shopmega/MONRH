@@ -1,16 +1,25 @@
 import type { Metadata } from "next";
 
-export const SITE_NAME = "MON RH";
+export const SITE_NAME = "SIMPAIE";
 export const SITE_DESCRIPTION =
-  "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.";
+  "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc.";
+export const DEFAULT_SITE_URL = "https://simpaie.vercel.app";
 const VERCEL_URL = process.env.VERCEL_URL?.trim();
+function withoutTrailingSlash(url: string) {
+  return url.replace(/\/+$/, "");
+}
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  (VERCEL_URL ? `https://${VERCEL_URL}` : "http://localhost:3000");
+  withoutTrailingSlash(
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+      (VERCEL_URL ? `https://${VERCEL_URL}` : DEFAULT_SITE_URL),
+  );
 export const DEFAULT_OG_IMAGE_PATH = "/opengraph-image";
-export const DEFAULT_OG_IMAGE_ALT = "MON RH - Simulateurs et documents droit du travail au Maroc";
+export const DEFAULT_OG_IMAGE_ALT = "SIMPAIE - Salaire, CNSS, litiges et modeles RH au Maroc";
 
 export function absoluteUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return new URL(normalized, SITE_URL).toString();
 }

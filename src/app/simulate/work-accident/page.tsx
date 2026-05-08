@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Accident du Travail",
@@ -16,13 +16,17 @@ export default function WorkAccidentPage() {
       apiPath="/api/simulate/work-accident"
       calculatorType="work_accident"
       fields={[
-        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "8500", min: 1, step: 0.01 },
-        { key: "temporaryIncapacityDays", label: "Jours incapacite temporaire", type: "number", defaultValue: "20", min: 0, step: 1 },
-        { key: "permanentIncapacityPercent", label: "Taux incapacite permanente (%)", type: "number", defaultValue: "10", min: 0, max: 100, step: 1 },
-        { key: "accidentDeclared", label: "Accident declare dans les 48h", type: "checkbox", defaultValue: true },
-        { key: "fauteInexcusable", label: "Faute inexcusable de l'employeur", type: "checkbox", defaultValue: false },
-        { key: "contractTerminatedDuringAT", label: "Contrat rompu pendant l'AT", type: "checkbox", defaultValue: false },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "calculationDate", label: "Date de calcul", type: "date" },
+        { key: "accidentDate", label: "Date accident", type: "date" },
+        { key: "declarationDate", label: "Date declaration", type: "date" },
+        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "temporaryIncapacityDays", label: "Jours incapacite temporaire", type: "number", min: 0, step: 1 },
+        { key: "permanentIncapacityPercent", label: "Taux incapacite permanente (%)", type: "number", min: 0, max: 100, step: 1 },
+        { key: "accidentDeclared", label: "Accident declare dans les 48h", type: "checkbox" },
+        { key: "hasMedicalCertificate", label: "Certificat medical initial", type: "checkbox" },
+        { key: "hasWitnessReport", label: "Rapport ou temoignage", type: "checkbox" },
+        { key: "fauteInexcusable", label: "Faute inexcusable de l'employeur", type: "checkbox" },
+        { key: "contractTerminatedDuringAT", label: "Contrat rompu pendant l'AT", type: "checkbox" },
       ]}
       breakdownLabels={{
         temporaryCompensation: "Indemnite temporaire",

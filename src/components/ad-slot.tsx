@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useLanguage } from "@/components/language-provider";
 
 declare global {
   interface Window {
@@ -16,6 +15,10 @@ type AdSlotProps = {
   responsive?: boolean;
 };
 
+function isPlaceholderSlot(slot: string) {
+  return /^(\d)\1{9,}$/.test(slot.trim()) || slot.trim() === "1212121212";
+}
+
 export function AdSlot({
   className,
   slot,
@@ -23,8 +26,11 @@ export function AdSlot({
   responsive = true,
 }: AdSlotProps) {
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-  const { t } = useLanguage();
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const slotRef = useRef<HTMLModElement | null>(null);
+  const observerRef = useRef<MutationObserver | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 
   useEffect(() => {
     if (!adsenseClient) {
@@ -32,8 +38,8 @@ export function AdSlot({
     }
 
     const root = rootRef.current;
-    const adNode = root?.querySelector("ins.adsbygoogle") as HTMLElement | null;
-    if (!adNode) {
+    const adNode = slotRef.current;
+    if (!adNode || !root) {
       return;
     }
 
@@ -41,34 +47,72 @@ export function AdSlot({
       return;
     }
 
-    adNode.dataset.adInitialized = "1";
+    const initializeAd = () => {
+      if (adNode.dataset.adInitialized === "1") return true;
+      // Only push if there's space; otherwise AdSense might throw an error or not load
+      // But for responsive, we just push and let it figure it out
+      adNode.dataset.adInitialized = "1";
 
-    try {
-      window.adsbygoogle = window.adsbygoogle || [];
-      window.adsbygoogle.push({});
-    } catch {
-      // Ignore runtime ad-loader errors in local/dev.
-    }
-  }, [adsenseClient, format, responsive, slot]);
+      try {
+        window.adsbygoogle = window.adsbygoogle || [];
+        window.adsbygoogle.push({});
+        return true;
+      } catch {
+        return true;
+      }
+    };
 
-  if (!adsenseClient) {
-    return (
-      <div className={className}>
-        <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface)] px-4 py-8 text-center text-xs text-[var(--ink-soft)]">
-          {t("ad.placeholder")}
-        </div>
-      </div>
-    );
+    // 1. Initial attempt
+    initializeAd();
+
+    // 2. Observer for explicit unfilled status
+    observerRef.current = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === "attributes" && mutation.attributeName === "data-ad-status") {
+          const status = adNode.getAttribute("data-ad-status");
+          if (status === "unfilled") {
+            adNode.style.display = "none";
+            root.style.display = "none";
+          }
+        }
+      });
+    });
+
+    observerRef.current.observe(adNode, { attributes: true });
+
+    // 3. Fallback: Check after 5 seconds if anything actually loaded
+    timeoutRef.current = setTimeout(() => {
+      const iframe = adNode.querySelector("iframe");
+      const hasContent = iframe && (iframe.offsetHeight > 0 || iframe.dataset.adStatus === "filled");
+      const adStatus = adNode.getAttribute("data-ad-status");
+
+      if (!hasContent && adStatus !== "filled") {
+        // If it's not explicitly filled, and we don't see a visible iframe, collapse.
+        adNode.style.display = "none";
+        root.style.display = "none";
+      }
+    }, 5000);
+
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [adsenseClient, slot]);
+
+  if (!adsenseClient || isPlaceholderSlot(slot)) {
+    return null;
   }
 
   return (
-    <div ref={rootRef} className={className}>
+    <div ref={rootRef} className={className} style={{ display: "block" }}>
       <ins
-        className="adsbygoogle block min-h-24 w-full overflow-hidden rounded-2xl bg-white"
+        ref={slotRef}
+        className="adsbygoogle block"
         data-ad-client={adsenseClient}
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive={responsive ? "true" : "false"}
+        style={{ display: "block", height: "auto" }}
       />
     </div>
   );

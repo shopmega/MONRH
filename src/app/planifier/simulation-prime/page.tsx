@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Simulateur Prime / Bonus — Net Reel",
   description: "Calculez le net de votre prime apres pic de taxation IR. Decouvrez le taux effectif reel de votre bonus.",
-  canonicalPath: "/planifier/simulation-prime",
+  canonicalPath: "/salaire/prime-bonus",
 });
 
 export default function BonusSimulatorPage() {
@@ -16,9 +16,8 @@ export default function BonusSimulatorPage() {
       apiPath="/api/simulate/bonus-simulator"
       calculatorType="bonus_simulator"
       fields={[
-        { key: "monthlySalaryGross", label: "Salaire mensuel brut (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "bonusGross", label: "Prime brute (MAD)", type: "number", defaultValue: "5000", min: 1, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
+        { key: "monthlySalaryGross", label: "Salaire mensuel brut (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "bonusGross", label: "Prime brute (MAD)", type: "number", min: 1, step: 0.01 },
       ]}
       breakdownLabels={{
         monthlySalaryGross: "Salaire brut mensuel",

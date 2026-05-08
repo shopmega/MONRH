@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
         maintenanceMessage: configPayload.maintenanceMessage ?? current.maintenanceMessage,
         websiteSettings: configPayload.websiteSettings ?? current.websiteSettings,
         toolPolicies: configPayload.toolPolicies ?? current.toolPolicies,
+        evidenceGovernance: configPayload.evidenceGovernance ?? current.evidenceGovernance,
       });
       await addAdminAuditEvent({
         action: "admin_snapshot_restore_config",

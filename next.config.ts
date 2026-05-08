@@ -1,9 +1,52 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   turbopack: {
     root: path.resolve(__dirname),
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.sentry.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin'
+          },
+          {
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'same-origin'
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload'
+          }
+        ]
+      }
+    ];
   },
   async redirects() {
     return [
@@ -12,31 +55,17 @@ const nextConfig: NextConfig = {
       { source: "/reset-password", destination: "/reinitialiser-mot-de-passe", permanent: true },
       { source: "/simulate", destination: "/simulateurs", permanent: true },
       { source: "/simulate/net-gross", destination: "/simulateurs/brut-net", permanent: true },
-      {
-        source: "/simulate/employer-total-cost",
-        destination: "/simulateurs/cout-employeur-total",
-        permanent: true,
-      },
+      { source: "/simulate/net-gross-enhanced", destination: "/simulateurs/brut-net-avance", permanent: true },
+      { source: "/simulate/employer-total-cost", destination: "/simulateurs/cout-employeur-total", permanent: true },
       { source: "/simulate/annual-income-tax", destination: "/simulateurs/ir-annuel", permanent: true },
       { source: "/simulate/licenciement", destination: "/simulateurs/licenciement", permanent: true },
+      { source: "/simulate/licenciement-enhanced", destination: "/simulateurs/licenciement-avance", permanent: true },
       { source: "/simulate/demission", destination: "/simulateurs/demission", permanent: true },
       { source: "/simulate/duree-preavis", destination: "/simulateurs/duree-preavis", permanent: true },
       { source: "/simulate/fin-cdd", destination: "/simulateurs/fin-cdd", permanent: true },
-      {
-        source: "/simulate/probation-termination",
-        destination: "/simulateurs/rupture-periode-essai",
-        permanent: true,
-      },
-      {
-        source: "/simulate/seniority-growth",
-        destination: "/simulateurs/progression-anciennete",
-        permanent: true,
-      },
-      {
-        source: "/simulate/leave-accrual",
-        destination: "/simulateurs/acquisition-conges",
-        permanent: true,
-      },
+      { source: "/simulate/probation-termination", destination: "/simulateurs/rupture-periode-essai", permanent: true },
+      { source: "/simulate/seniority-growth", destination: "/simulateurs/progression-anciennete", permanent: true },
+      { source: "/simulate/leave-accrual", destination: "/simulateurs/acquisition-conges", permanent: true },
       { source: "/simulate/smig-compliance", destination: "/simulateurs/conformite-smig", permanent: true },
       { source: "/simulate/overtime", destination: "/simulateurs/heures-supplementaires", permanent: true },
       {
@@ -48,11 +77,7 @@ const nextConfig: NextConfig = {
       { source: "/simulate/sick-leave", destination: "/simulateurs/conge-maladie", permanent: true },
       { source: "/simulate/cnss-pension", destination: "/simulateurs/pension-cnss", permanent: true },
       { source: "/simulate/work-accident", destination: "/simulateurs/accident-travail", permanent: true },
-      {
-        source: "/simulate/harassment-scenario",
-        destination: "/simulateurs/scenario-harcelement",
-        permanent: true,
-      },
+      { source: "/simulate/harassment-scenario", destination: "/simulateurs/scenario-harcelement", permanent: true },
       {
         source: "/simulate/unpaid-salary-recovery",
         destination: "/simulateurs/recouvrement-salaire-impaye",
@@ -66,31 +91,15 @@ const nextConfig: NextConfig = {
       { source: "/tools", destination: "/outils", permanent: true },
       { source: "/tools/payslip-detector", destination: "/outils/detecteur-fiche-paie", permanent: true },
       { source: "/tools/salary-delay-alert", destination: "/outils/alerte-retard-salaire", permanent: true },
-      {
-        source: "/tools/compliance-risk-score",
-        destination: "/outils/score-risque-conformite",
-        permanent: true,
-      },
-      {
-        source: "/tools/final-settlement-audit",
-        destination: "/outils/audit-solde-tout-compte",
-        permanent: true,
-      },
+      { source: "/tools/compliance-risk-score", destination: "/outils/score-risque-conformite", permanent: true },
+      { source: "/tools/final-settlement-audit", destination: "/outils/audit-solde-tout-compte", permanent: true },
       {
         source: "/tools/disciplinary-procedure-check",
         destination: "/outils/controle-procedure-disciplinaire",
         permanent: true,
       },
-      {
-        source: "/tools/fixed-term-contract-risk",
-        destination: "/outils/risque-requalification-cdd",
-        permanent: true,
-      },
-      {
-        source: "/tools/pre-litigation-timeline",
-        destination: "/outils/feuille-route-pre-contentieux",
-        permanent: true,
-      },
+      { source: "/tools/fixed-term-contract-risk", destination: "/outils/risque-requalification-cdd", permanent: true },
+      { source: "/tools/pre-litigation-timeline", destination: "/outils/feuille-route-pre-contentieux", permanent: true },
     ];
   },
   async rewrites() {
@@ -98,11 +107,45 @@ const nextConfig: NextConfig = {
       { source: "/connexion", destination: "/login" },
       { source: "/mot-de-passe-oublie", destination: "/forgot-password" },
       { source: "/reinitialiser-mot-de-passe", destination: "/reset-password" },
+      { source: "/salaire/prime-bonus", destination: "/planifier/simulation-prime" },
+      { source: "/salaire/avantages-nature", destination: "/planifier/avantages-nature" },
+      { source: "/salaire/smig-smag", destination: "/simulate/smig-compliance" },
+      { source: "/salaire/bulletin-paie", destination: "/planifier/bulletin-paie" },
+      { source: "/salaire/optimisation-remuneration", destination: "/planifier/optimisation-remuneration" },
+      { source: "/contrat-depart/fin-cdd", destination: "/simulate/fin-cdd" },
+      { source: "/contrat-depart/periode-essai", destination: "/simulate/probation-termination" },
+      { source: "/contrat-depart/anciennete-indemnites", destination: "/simulate/seniority-growth" },
+      { source: "/contrat-depart/lettre-demission", destination: "/documents/resignation-letter" },
+      { source: "/contrat-depart/lettre-preavis", destination: "/documents/notice-letter" },
+      { source: "/contrat-depart/rupture-amiable", destination: "/documents/mutual-termination-proposal" },
+      { source: "/contrat-depart/certificat-travail", destination: "/documents/employment-certificate-request" },
+      { source: "/conges-cnss/conges-acquis", destination: "/simulate/leave-accrual" },
+      { source: "/conges-cnss/jour-ferie", destination: "/simulate/public-holiday-compensation" },
+      { source: "/conges-cnss/conge-sans-solde", destination: "/documents/unpaid-leave-request" },
+      { source: "/conges-cnss/indemnite-chomage", destination: "/planifier/indemnite-chomage" },
+      { source: "/conges-cnss/retraite-cnss", destination: "/planifier/retraite-avancee" },
+      { source: "/conges-cnss/accident-travail", destination: "/simulate/work-accident" },
+      { source: "/conges-cnss/reclamation-cnss", destination: "/documents/cnss-complaint-letter" },
+      { source: "/litiges/harcelement", destination: "/simulate/harassment-scenario" },
+      { source: "/litiges/reclamation-employeur", destination: "/documents/formal-complaint-employer" },
+      { source: "/litiges/inspection-travail", destination: "/documents/labor-inspector-complaint" },
+      { source: "/litiges/pre-contentieux", destination: "/tools/pre-litigation-timeline" },
+      { source: "/litiges/solde-tout-compte", destination: "/tools/final-settlement-audit" },
+      { source: "/litiges/procedure-disciplinaire", destination: "/tools/disciplinary-procedure-check" },
+      { source: "/modeles/tous", destination: "/documents" },
+      { source: "/rh-pro/cout-employeur-total", destination: "/simulate/employer-total-cost" },
+      { source: "/rh-pro/masse-salariale", destination: "/planifier/masse-salariale" },
+      { source: "/rh-pro/cout-recrutement", destination: "/planifier/cout-recrutement" },
+      { source: "/carriere/capacite-credit", destination: "/planifier/capacite-credit" },
+      { source: "/carriere/tarification-freelance", destination: "/planifier/tarification-freelance" },
+      { source: "/carriere/benefice-net", destination: "/planifier/benefice-net" },
       { source: "/simulateurs", destination: "/simulate" },
       { source: "/simulateurs/brut-net", destination: "/simulate/net-gross" },
+      { source: "/simulateurs/brut-net-avance", destination: "/simulate/net-gross-enhanced" },
       { source: "/simulateurs/cout-employeur-total", destination: "/simulate/employer-total-cost" },
       { source: "/simulateurs/ir-annuel", destination: "/simulate/annual-income-tax" },
       { source: "/simulateurs/licenciement", destination: "/simulate/licenciement" },
+      { source: "/simulateurs/licenciement-avance", destination: "/simulate/licenciement-enhanced" },
       { source: "/simulateurs/demission", destination: "/simulate/demission" },
       { source: "/simulateurs/duree-preavis", destination: "/simulate/duree-preavis" },
       { source: "/simulateurs/fin-cdd", destination: "/simulate/fin-cdd" },
@@ -128,7 +171,7 @@ const nextConfig: NextConfig = {
         source: "/simulateurs/recouvrement-heures-supplementaires",
         destination: "/simulate/unpaid-overtime-recovery",
       },
-      { source: "/simulateurs/:slug/result", destination: "/simulate/:slug/result" },
+      { source: "/simulateurs/:slug/result", destination: "/result/simulate/:slug" },
       { source: "/outils", destination: "/tools" },
       { source: "/outils/detecteur-fiche-paie", destination: "/tools/payslip-detector" },
       { source: "/outils/alerte-retard-salaire", destination: "/tools/salary-delay-alert" },
@@ -144,4 +187,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  tunnelRoute: "/monitoring",
+});

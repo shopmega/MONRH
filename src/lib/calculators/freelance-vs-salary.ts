@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -23,6 +24,7 @@ function calcSalaryNet(gross: number, calculationDate: string): { net: number; e
   const contributableBase = Math.min(gross, rules.cnssCeiling);
   const cnssEmployee = contributableBase * rules.cnssEmployeeRate;
   const cnssEmployer = contributableBase * rules.cnssEmployerRate;
+  const familyAllowanceEmployer = gross * rules.familyAllowanceEmployerRate;
   const amoEmployee = gross * rules.amoEmployeeRate;
   const amoEmployer = gross * rules.amoEmployerRate;
   const professionalExpenseDeduction = Math.min(
@@ -32,7 +34,7 @@ function calcSalaryNet(gross: number, calculationDate: string): { net: number; e
   const taxableIncome = Math.max(0, gross - cnssEmployee - amoEmployee - professionalExpenseDeduction);
   const incomeTax = computeTax(taxableIncome, rules.taxBracketsMonthly);
   const net = gross - cnssEmployee - amoEmployee - incomeTax;
-  const employerCost = gross + cnssEmployer + amoEmployer;
+  const employerCost = gross + cnssEmployer + familyAllowanceEmployer + amoEmployer;
   return { net: roundMAD(net), employerCost: roundMAD(employerCost) };
 }
 
@@ -66,7 +68,7 @@ export const freelanceVsSalaryInputSchema = z.object({
   freelanceMonthlyRevenue: z.number().positive(),
   activityType: z.enum(["services", "trade"]).default("services"),
   voluntaryCnssMonthly: z.number().min(0).default(0),
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   // Opportunity cost factors
   paidVacationDaysPerYear: z.number().min(0).max(60).default(18),
   workingMonthsPerYear: z.number().min(1).max(12).default(11),

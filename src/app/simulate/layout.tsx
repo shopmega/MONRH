@@ -1,30 +1,32 @@
 import type { Metadata } from "next";
 import { DEFAULT_OG_IMAGE_PATH, absoluteUrl } from "@/lib/seo";
+import { SectionLayoutWrapper } from "@/components/section-layout-wrapper";
+import { simulatorSidebarGroups } from "@/lib/content/simulators-sidebar";
 
 export const metadata: Metadata = {
-  title: "Simulateurs Droit du Travail",
+  title: "Salaire, conges et droits au travail",
   description:
     "Simulateurs salariaux et juridiques pour salaries au Maroc: net/brut, licenciement, conges, heures supplementaires, CNSS.",
   alternates: {
-    canonical: "/simulateurs",
+    canonical: "/salaire",
   },
   openGraph: {
-    title: "Simulateurs",
+    title: "Salaire et droits",
     description:
       "Estimez vos droits salariaux, indemnites et compensations selon les regles legales.",
-    url: "/simulateurs",
+    url: "/salaire",
     images: [
       {
         url: absoluteUrl(DEFAULT_OG_IMAGE_PATH),
         width: 1200,
         height: 630,
-        alt: "Simulateurs MON RH",
+        alt: "Salaire et droits SIMPAIE",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Simulateurs",
+    title: "Salaire et droits",
     description:
       "Estimez vos droits salariaux, indemnites et compensations selon les regles legales.",
     images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
@@ -36,5 +38,21 @@ export default function SimulateLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return (
+    <SectionLayoutWrapper
+      indexPath="/simulate"
+      sidebarProps={{
+        title: { fr: "Simulateurs", ar: "المحاكيات" },
+        groups: simulatorSidebarGroups.map(group => ({
+          title: group.title,
+          items: [...group.items]
+        })),
+        backHref: "/simulate",
+        backLabel: { fr: "Retour simulateurs", ar: "الرجوع إلى المحاكيات" },
+      }}
+    >
+      {children}
+    </SectionLayoutWrapper>
+  );
 }
+

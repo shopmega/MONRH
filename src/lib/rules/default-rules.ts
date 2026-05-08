@@ -5,7 +5,16 @@ export type TaxBracket = {
   min: number;
   max: number | null;
   rate: number;
+  deduction?: number;
 };
+
+export type ProfessionalExpenseTier = {
+  maxGrossMonthly: number | null;
+  rate: number;
+  monthlyCap: number;
+};
+
+export type ProfessionalExpenseMode = "legacy_20_percent" | "reform_35_25_percent";
 
 export type SalaryRules = {
   versionId: string;
@@ -15,15 +24,34 @@ export type SalaryRules = {
   cnssEmployeeRate: number;
   cnssEmployerRate: number;
   cnssCeiling: number;
+  familyAllowanceEmployerRate: number;
   amoEmployeeRate: number;
   amoEmployerRate: number;
+  professionalExpenseMode: ProfessionalExpenseMode;
   professionalExpenseRate: number;
   professionalExpenseCap: number;
+  professionalExpenseTiers?: ProfessionalExpenseTier[];
+  familyChargeReductionAnnual: number;
+  familyChargeReductionCapAnnual: number;
   taxBracketsMonthly: TaxBracket[];
   /** Formation professionnelle rate for employers with ≤ 20 employees (1%) */
   formationProRateSmall: number;
   /** Formation professionnelle rate for employers with > 20 employees (1.6%) */
   formationProRateLarge: number;
+};
+
+export type NoticeDurationRule = {
+  minYears: number;
+  maxYears: number | null;
+  value: number;
+  unit: "day" | "month";
+};
+
+export type ForceMajeureRules = {
+  preavisDue: boolean;
+  damagesDue: boolean;
+  legalIndemnityDue: boolean;
+  warning: string;
 };
 
 export type TerminationRules = {
@@ -35,9 +63,14 @@ export type TerminationRules = {
   tranche2HoursPerYear: number;
   tranche3HoursPerYear: number;
   tranche4HoursPerYear: number;
+  minimumSeniorityMonthsForLegalIndemnity: number;
+  useFractionalYearsForIndemnity: boolean;
+  referenceHoursPerMonth: number;
   abusiveBaseMonthsPerYear: number;
   abusiveCapMonths: number;
   legalIndemnityContractTypes: Array<"CDI" | "CDD">;
+  cddEarlyTerminationCompensation: "remaining_salary_until_contract_end";
+  forceMajeure: ForceMajeureRules;
   cddNoticeDaysByCategory: {
     cadre: number;
     employe: number;
@@ -48,6 +81,11 @@ export type TerminationRules = {
     employe: { lt1: number; gte1lt5: number; gte5: number };
     ouvrier: { lt1: number; gte1lt5: number; gte5: number };
   };
+  cdiNoticeRulesByCategory: {
+    cadre: NoticeDurationRule[];
+    employe: NoticeDurationRule[];
+    ouvrier: NoticeDurationRule[];
+  };
 };
 
 export type LeaveRules = {
@@ -57,6 +95,9 @@ export type LeaveRules = {
   effectiveTo: string | null;
   accrualDaysPerMonth: number;
   seniorityBonusDaysPerMonthAfter5Years: number;
+  seniorityBonusDays: number;
+  seniorityBonusEveryYears: number;
+  maxAnnualDays: number;
   carryoverLimitDays: number;
 };
 
@@ -80,6 +121,10 @@ export type OvertimeRules = {
   nightMultiplier: number;
   weekendMultiplier: number;
   holidayMultiplier: number;
+  normalDayDaytimeMultiplier: number;
+  normalDayNightMultiplier: number;
+  restOrHolidayDaytimeMultiplier: number;
+  restOrHolidayNightMultiplier: number;
   monthlyReferenceHours: number;
 };
 
@@ -98,6 +143,8 @@ export type SocialProtectionRules = {
   /** Minimum CNSS paid months in last 10 months to be eligible for maternity compensation */
   maternityMinCnssMonths: number;
   pensionMinContributionDays: number;
+  pensionOpeningContributionDays: number;
+  pensionFullContributionDays: number;
   pensionAccrualStepDays: number;
   pensionBaseReplacementRate: number;
   pensionIncrementPerStep: number;
@@ -120,6 +167,32 @@ export type LawRulesBundle = {
   socialProtectionRules: SocialProtectionRules[];
 };
 
+const DEFAULT_FORCE_MAJEURE_RULES: ForceMajeureRules = {
+  preavisDue: false,
+  damagesDue: false,
+  legalIndemnityDue: false,
+  warning:
+    "La force majeure est strictement appreciee. Si elle n'est pas reconnue, la rupture peut etre requalifiee.",
+};
+
+const DEFAULT_CDI_NOTICE_RULES_BY_CATEGORY: TerminationRules["cdiNoticeRulesByCategory"] = {
+  cadre: [
+    { minYears: 0, maxYears: 1, value: 1, unit: "month" },
+    { minYears: 1, maxYears: 5, value: 2, unit: "month" },
+    { minYears: 5, maxYears: null, value: 3, unit: "month" },
+  ],
+  employe: [
+    { minYears: 0, maxYears: 1, value: 8, unit: "day" },
+    { minYears: 1, maxYears: 5, value: 1, unit: "month" },
+    { minYears: 5, maxYears: null, value: 2, unit: "month" },
+  ],
+  ouvrier: [
+    { minYears: 0, maxYears: 1, value: 8, unit: "day" },
+    { minYears: 1, maxYears: 5, value: 1, unit: "month" },
+    { minYears: 5, maxYears: null, value: 2, unit: "month" },
+  ],
+};
+
 export const DEFAULT_SALARY_RULES: SalaryRules[] = [
   {
     versionId: "ma_2025",
@@ -129,19 +202,23 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     cnssEmployeeRate: 0.0448,
     cnssEmployerRate: 0.0898,
     cnssCeiling: 6000,
+    familyAllowanceEmployerRate: 0.064,
     amoEmployeeRate: 0.0226,
     amoEmployerRate: 0.0411,
+    professionalExpenseMode: "legacy_20_percent",
     professionalExpenseRate: 0.2,
     professionalExpenseCap: 2500,
+    familyChargeReductionAnnual: 500,
+    familyChargeReductionCapAnnual: 3000,
     formationProRateSmall: 0.01,
     formationProRateLarge: 0.016,
     taxBracketsMonthly: [
-      { min: 0, max: 2500, rate: 0 },
-      { min: 2500, max: 4166.67, rate: 0.1 },
-      { min: 4166.67, max: 5000, rate: 0.2 },
-      { min: 5000, max: 6666.67, rate: 0.3 },
-      { min: 6666.67, max: 15000, rate: 0.34 },
-      { min: 15000, max: null, rate: 0.38 },
+      { min: 0, max: 3333.33, rate: 0, deduction: 0 },
+      { min: 3333.33, max: 5000, rate: 0.1, deduction: 333.33 },
+      { min: 5000, max: 6666.67, rate: 0.2, deduction: 833.33 },
+      { min: 6666.67, max: 8333.33, rate: 0.3, deduction: 1500 },
+      { min: 8333.33, max: 15000, rate: 0.34, deduction: 1833.33 },
+      { min: 15000, max: null, rate: 0.37, deduction: 2283.33 },
     ],
   },
   {
@@ -152,19 +229,27 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     cnssEmployeeRate: 0.0448,
     cnssEmployerRate: 0.0898,
     cnssCeiling: 6000,
+    familyAllowanceEmployerRate: 0.064,
     amoEmployeeRate: 0.0226,
     amoEmployerRate: 0.0411,
-    professionalExpenseRate: 0.2,
-    professionalExpenseCap: 3333.33,
+    professionalExpenseMode: "reform_35_25_percent",
+    professionalExpenseRate: 0.25,
+    professionalExpenseCap: 2916.67,
+    professionalExpenseTiers: [
+      { maxGrossMonthly: 6500, rate: 0.35, monthlyCap: 2500 },
+      { maxGrossMonthly: null, rate: 0.25, monthlyCap: 2916.67 },
+    ],
+    familyChargeReductionAnnual: 600,
+    familyChargeReductionCapAnnual: 3600,
     formationProRateSmall: 0.01,
     formationProRateLarge: 0.016,
     taxBracketsMonthly: [
-      { min: 0, max: 3333.33, rate: 0 },
-      { min: 3333.33, max: 5000, rate: 0.1 },
-      { min: 5000, max: 6666.67, rate: 0.2 },
-      { min: 6666.67, max: 8333.33, rate: 0.3 },
-      { min: 8333.33, max: 15000, rate: 0.34 },
-      { min: 15000, max: null, rate: 0.37 },
+      { min: 0, max: 3333.33, rate: 0, deduction: 0 },
+      { min: 3333.33, max: 5000, rate: 0.1, deduction: 333.33 },
+      { min: 5000, max: 6666.67, rate: 0.2, deduction: 833.33 },
+      { min: 6666.67, max: 8333.33, rate: 0.3, deduction: 1500 },
+      { min: 8333.33, max: 15000, rate: 0.34, deduction: 1833.33 },
+      { min: 15000, max: null, rate: 0.37, deduction: 2283.33 },
     ],
   },
 ];
@@ -179,9 +264,14 @@ export const DEFAULT_TERMINATION_RULES: TerminationRules[] = [
     tranche2HoursPerYear: 144,
     tranche3HoursPerYear: 192,
     tranche4HoursPerYear: 240,
+    minimumSeniorityMonthsForLegalIndemnity: 6,
+    useFractionalYearsForIndemnity: true,
+    referenceHoursPerMonth: 191,
     abusiveBaseMonthsPerYear: 1,
     abusiveCapMonths: 36,
     legalIndemnityContractTypes: ["CDI"],
+    cddEarlyTerminationCompensation: "remaining_salary_until_contract_end",
+    forceMajeure: DEFAULT_FORCE_MAJEURE_RULES,
     cddNoticeDaysByCategory: {
       cadre: 15,
       employe: 8,
@@ -192,6 +282,7 @@ export const DEFAULT_TERMINATION_RULES: TerminationRules[] = [
       employe: { lt1: 0.27, gte1lt5: 1, gte5: 2 },
       ouvrier: { lt1: 0.27, gte1lt5: 1, gte5: 2 },
     },
+    cdiNoticeRulesByCategory: DEFAULT_CDI_NOTICE_RULES_BY_CATEGORY,
   },
   {
     versionId: "ma_2026",
@@ -202,9 +293,14 @@ export const DEFAULT_TERMINATION_RULES: TerminationRules[] = [
     tranche2HoursPerYear: 144,
     tranche3HoursPerYear: 192,
     tranche4HoursPerYear: 240,
+    minimumSeniorityMonthsForLegalIndemnity: 6,
+    useFractionalYearsForIndemnity: true,
+    referenceHoursPerMonth: 191,
     abusiveBaseMonthsPerYear: 1,
     abusiveCapMonths: 36,
     legalIndemnityContractTypes: ["CDI"],
+    cddEarlyTerminationCompensation: "remaining_salary_until_contract_end",
+    forceMajeure: DEFAULT_FORCE_MAJEURE_RULES,
     cddNoticeDaysByCategory: {
       cadre: 15,
       employe: 8,
@@ -215,6 +311,7 @@ export const DEFAULT_TERMINATION_RULES: TerminationRules[] = [
       employe: { lt1: 0.27, gte1lt5: 1, gte5: 2 },
       ouvrier: { lt1: 0.27, gte1lt5: 1, gte5: 2 },
     },
+    cdiNoticeRulesByCategory: DEFAULT_CDI_NOTICE_RULES_BY_CATEGORY,
   },
 ];
 
@@ -226,6 +323,9 @@ export const DEFAULT_LEAVE_RULES: LeaveRules[] = [
     effectiveTo: "2025-12-31",
     accrualDaysPerMonth: 1.5,
     seniorityBonusDaysPerMonthAfter5Years: 0.08,
+    seniorityBonusDays: 1.5,
+    seniorityBonusEveryYears: 5,
+    maxAnnualDays: 30,
     carryoverLimitDays: 45,
   },
   {
@@ -235,6 +335,9 @@ export const DEFAULT_LEAVE_RULES: LeaveRules[] = [
     effectiveTo: null,
     accrualDaysPerMonth: 1.5,
     seniorityBonusDaysPerMonthAfter5Years: 0.08,
+    seniorityBonusDays: 1.5,
+    seniorityBonusEveryYears: 5,
+    maxAnnualDays: 30,
     carryoverLimitDays: 45,
   },
 ];
@@ -255,7 +358,7 @@ export const DEFAULT_SMIG_RULES: SmigRules[] = [
     versionCode: "ma_2026",
     effectiveFrom: "2026-01-01",
     effectiveTo: "2026-03-31",
-    smigHourlyMad: 17.1,
+    smigHourlyMad: 17.92,
     smagDailyMad: 88.58,
     referenceHoursPerMonth: 191,
     referenceDaysPerMonth: 26,
@@ -265,8 +368,8 @@ export const DEFAULT_SMIG_RULES: SmigRules[] = [
     versionCode: "ma_2026",
     effectiveFrom: "2026-04-01",
     effectiveTo: null,
-    smigHourlyMad: 17.1,
-    smagDailyMad: 93,
+    smigHourlyMad: 17.92,
+    smagDailyMad: 97.44,
     referenceHoursPerMonth: 191,
     referenceDaysPerMonth: 26,
   },
@@ -282,6 +385,10 @@ export const DEFAULT_OVERTIME_RULES: OvertimeRules[] = [
     nightMultiplier: 1.5,
     weekendMultiplier: 1.5,
     holidayMultiplier: 2,
+    normalDayDaytimeMultiplier: 1.25,
+    normalDayNightMultiplier: 1.5,
+    restOrHolidayDaytimeMultiplier: 1.5,
+    restOrHolidayNightMultiplier: 2,
     monthlyReferenceHours: 191,
   },
   {
@@ -293,6 +400,10 @@ export const DEFAULT_OVERTIME_RULES: OvertimeRules[] = [
     nightMultiplier: 1.5,
     weekendMultiplier: 1.5,
     holidayMultiplier: 2,
+    normalDayDaytimeMultiplier: 1.25,
+    normalDayNightMultiplier: 1.5,
+    restOrHolidayDaytimeMultiplier: 1.5,
+    restOrHolidayNightMultiplier: 2,
     monthlyReferenceHours: 191,
   },
 ];
@@ -311,6 +422,8 @@ export const DEFAULT_SOCIAL_PROTECTION_RULES: SocialProtectionRules[] = [
     maternityLegalLeaveWeeks: 14,
     maternityMinCnssMonths: 3,
     pensionMinContributionDays: 1320,
+    pensionOpeningContributionDays: 1320,
+    pensionFullContributionDays: 3240,
     pensionAccrualStepDays: 216,
     pensionBaseReplacementRate: 0.5,
     pensionIncrementPerStep: 0.01,
@@ -335,12 +448,13 @@ export const DEFAULT_SOCIAL_PROTECTION_RULES: SocialProtectionRules[] = [
     maternityLegalLeaveWeeks: 14,
     maternityMinCnssMonths: 3,
     pensionMinContributionDays: 1320,
+    pensionOpeningContributionDays: 1320,
+    pensionFullContributionDays: 3240,
     pensionAccrualStepDays: 216,
     pensionBaseReplacementRate: 0.5,
     pensionIncrementPerStep: 0.01,
     pensionMaxReplacementRate: 0.7,
-    // Updated ceiling to 8000 MAD following CNSS revalorisation (applicable from 2024)
-    pensionReferenceSalaryCeiling: 8000,
+    pensionReferenceSalaryCeiling: 6000,
     pensionNormalRetirementAge: 60,
     pensionEarlyRetirementFactor: 0.9,
     workAccidentTemporaryCoverageRate: 2 / 3,

@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
             ? item.content
             : (item.contentText ?? "")
               .split(/\r?\n\s*\r?\n/g)
-              .map((block) => block.replace(/\s+/g, " ").trim())
+              .map((block) => block.trim())
               .filter(Boolean);
 
         if (normalizedContent.length === 0) {

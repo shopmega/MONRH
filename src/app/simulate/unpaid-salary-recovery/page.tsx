@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Recouvrement Salaire Impaye",
@@ -16,12 +16,14 @@ export default function UnpaidSalaryRecoveryPage() {
       apiPath="/api/simulate/unpaid-salary-recovery"
       calculatorType="unpaid_salary_recovery"
       fields={[
-        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", defaultValue: "7000", min: 1, step: 0.01 },
-        { key: "unpaidMonths", label: "Mois impayes", type: "number", defaultValue: "2", min: 1, step: 1 },
-        { key: "partialPaymentPerMonth", label: "Paiement partiel mensuel (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "monthsSinceFirstDefault", label: "Mois depuis le premier impaye", type: "number", defaultValue: "4", min: 1, max: 120, step: 1 },
-        { key: "penaltyRateAnnual", label: "Taux de penalite annuel (%)", type: "number", defaultValue: "7", min: 0, max: 50, step: 0.1 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
+        { key: "calculationDate", label: "Date de calcul", type: "date" },
+        { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "firstUnpaidDate", label: "Premier mois impaye", type: "date" },
+        { key: "lastUnpaidDate", label: "Dernier mois impaye", type: "date" },
+        { key: "partialPaymentPerMonth", label: "Paiement partiel mensuel (MAD)", type: "number", min: 0, step: 0.01 },
+        { key: "contractualPenaltyRateAnnual", label: "Taux contractuel/judiciaire annuel (%)", type: "number", min: 0, max: 50, step: 0.1 },
+        { key: "hasPayslips", label: "Bulletins de paie disponibles", type: "checkbox" },
+        { key: "hasBankStatements", label: "Releves bancaires disponibles", type: "checkbox" },
       ]}
       breakdownLabels={{
         claimableMonths: "Mois reclamables",

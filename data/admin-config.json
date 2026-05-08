@@ -3,7 +3,7 @@
   "documentAdStepEnabled": true,
   "maintenanceMessage": "",
   "websiteSettings": {
-    "siteName": "Salarie.ma",
+    "siteName": "SIMPAIE",
     "siteDescription": "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.",
     "siteSubtitle": "Labour Clarity Platform",
     "logoUrl": "",
@@ -16,6 +16,238 @@
       "x": ""
     }
   },
-  "toolPolicies": {},
-  "updatedAt": "1970-01-01T00:00:00.000Z"
+  "toolPolicies": {
+    "net_gross": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "employer_total_cost": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "annual_income_tax": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "licenciement": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "demission": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "duree_preavis": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "fin_cdd": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "probation_termination": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "seniority_growth": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "leave_accrual": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "smig_compliance": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "overtime": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "public_holiday_compensation": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "maternity_leave": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "sick_leave": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "cnss_pension": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "work_accident": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "harassment_scenario": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "unpaid_salary_recovery": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "unpaid_overtime_recovery": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "payslip_detector": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "salary_delay_alert": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "compliance_risk_score": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "final_settlement_audit": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "disciplinary_procedure_check": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "fixed_term_contract_risk": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "pre_litigation_timeline": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "auto_entrepreneur": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "avantages_nature": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "bonus_simulator": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "compensation_optimization": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "freelance_pricing": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "freelance_vs_salary": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "hiring_cost": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "igr_detail": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "loan_capacity": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "payroll_mass": {
+      "visible": true,
+      "enabled": true,
+      "audience": "logged"
+    },
+    "payslip": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "profit_expense": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "promotion_scenario": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "retirement_advanced": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "salary_increase": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "unemployment": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "licenciement_enhanced": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    },
+    "net_gross_enhanced": {
+      "visible": true,
+      "enabled": true,
+      "audience": "public"
+    }
+  },
+  "evidenceGovernance": {
+    "signedUrlTtlSeconds": 60,
+    "retentionDays": 90,
+    "maxUploadBytes": 10485760,
+    "allowArchivedEvidenceDownload": false
+  },
+  "updatedAt": "2026-04-04T22:47:30.706Z"
 }

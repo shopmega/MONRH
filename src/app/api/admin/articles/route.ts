@@ -43,7 +43,7 @@ export async function GET() {
   }
   try {
     const items = await listArticles();
-    return NextResponse.json({ ok: true, items });
+    return NextResponse.json(items);
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: mapArticleAdminError(error) },

@@ -1,9 +1,12 @@
 import { z } from "zod";
 import { getSocialProtectionRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const maternityLeaveInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
+  leaveStartDate: z.string().date().optional(),
+  leaveEndDate: z.string().date().optional(),
+  expectedDeliveryDate: z.string().date().optional(),
   monthlySalary: z.number().positive(),
   leaveWeeks: z.number().min(1).max(52).default(14),
   /** CNSS paid months in the 10 months preceding confinement (eligibility check) */
@@ -16,7 +19,7 @@ export const maternityLeaveInputSchema = z.object({
   prematureOrIllNewborn: z.boolean().default(false),
 });
 
-export type MaternityLeaveInput = z.infer<typeof maternityLeaveInputSchema>;
+export type MaternityLeaveInput = z.input<typeof maternityLeaveInputSchema>;
 
 export type MaternityLeaveResult = {
   versionId: string;
@@ -38,6 +41,7 @@ export type MaternityLeaveResult = {
 export function simulateMaternityLeave(rawInput: MaternityLeaveInput): MaternityLeaveResult {
   const input = maternityLeaveInputSchema.parse(rawInput);
   const rules = getSocialProtectionRulesByDate(input.calculationDate);
+  const leaveWeeks = resolveCalendarWeeks(input.leaveStartDate, input.leaveEndDate, input.leaveWeeks);
 
   // Eligibility: at least 3 paid months in the 10 months before confinement
   const cnssEligible = input.cnssContributedMonths >= rules.maternityMinCnssMonths;
@@ -47,8 +51,8 @@ export function simulateMaternityLeave(rawInput: MaternityLeaveInput): Maternity
   if (input.multipleChildBirth) legalLeaveWeeks += 4;
   if (input.prematureOrIllNewborn) legalLeaveWeeks += 6;
 
-  const coveredWeeksByCnss = cnssEligible ? Math.min(input.leaveWeeks, legalLeaveWeeks) : 0;
-  const leaveMonthsEquivalent = roundMAD(input.leaveWeeks / 4.33);
+  const coveredWeeksByCnss = cnssEligible ? Math.min(leaveWeeks, legalLeaveWeeks) : 0;
+  const leaveMonthsEquivalent = roundMAD(leaveWeeks / 4.33);
   const coveredMonthsByCnss = coveredWeeksByCnss / 4.33;
 
   const fullEquivalentIncome = roundMAD(input.monthlySalary * leaveMonthsEquivalent);
@@ -83,13 +87,14 @@ export function simulateMaternityLeave(rawInput: MaternityLeaveInput): Maternity
     },
     explanation: {
       summary: cnssEligible
-        ? `Revenu estime pendant ${input.leaveWeeks} semaines de conge: ${totalEstimatedIncome} MAD (ecart: ${incomeGapPercent}% du salaire equivalent).`
+        ? `Revenu estime pendant ${leaveWeeks} semaines de conge: ${totalEstimatedIncome} MAD (ecart: ${incomeGapPercent}% du salaire equivalent).`
         : `Droits CNSS non ouverts: ${input.cnssContributedMonths} mois cotises sur ${rules.maternityMinCnssMonths} requis dans les 10 derniers mois.`,
       assumptions: [
         `Eligibilite CNSS: ${input.cnssContributedMonths} mois cotises (seuil: ${rules.maternityMinCnssMonths} mois sur 10).`,
         `Conge legal de base: ${rules.maternityLegalLeaveWeeks} semaines (Art. 154 CT).`,
         input.multipleChildBirth ? "+4 semaines pour naissance multiple." : "",
         input.prematureOrIllNewborn ? "+6 semaines pour premature ou nouveau-ne malade." : "",
+        input.expectedDeliveryDate ? `Date prevue d'accouchement: ${input.expectedDeliveryDate}.` : "",
         `Duree totale legale retenue: ${legalLeaveWeeks} semaines.`,
         `Taux CNSS: ${roundMAD(rules.maternityCnssCoverageRate * 100)}% du salaire pendant les semaines couvertes.`,
         input.employerTopUp ? "Complement employeur: couvre l'ecart entre CNSS et salaire integral." : "Aucun complement employeur.",
@@ -104,8 +109,8 @@ export function simulateMaternityLeave(rawInput: MaternityLeaveInput): Maternity
         !cnssEligible
           ? `Non eligible: seulement ${input.cnssContributedMonths} mois cotises — contacter la CNSS pour verification.`
           : "",
-        input.leaveWeeks > legalLeaveWeeks
-          ? `Les ${input.leaveWeeks - legalLeaveWeeks} semaines au-dela du maximum legal ne sont pas couvertes par la CNSS.`
+        leaveWeeks > legalLeaveWeeks
+          ? `Les ${leaveWeeks - legalLeaveWeeks} semaines au-dela du maximum legal ne sont pas couvertes par la CNSS.`
           : "",
         "Les conditions d'ouverture des droits CNSS doivent etre verifiees via le releve de carriere.",
         "Le versement CNSS se fait en une seule fois apres conge — prevoir la tresorerie necessaire.",
@@ -118,4 +123,14 @@ export function simulateMaternityLeave(rawInput: MaternityLeaveInput): Maternity
       ].filter(Boolean),
     },
   };
+}
+
+function resolveCalendarWeeks(startDate?: string, endDate?: string, fallbackWeeks = 14): number {
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const days = Math.floor((end.getTime() - start.getTime()) / 86_400_000) + 1;
+    return Math.max(1, Math.min(52, Math.ceil(days / 7)));
+  }
+  return fallbackWeeks;
 }

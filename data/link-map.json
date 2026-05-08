@@ -13,6 +13,129 @@
     }
   },
   "simulator": {},
-  "document": {},
-  "updatedAt": "2026-02-14T19:02:52.902Z"
+  "document": {
+    "resignation-letter": {
+      "articleSlugs": [],
+      "toolIds": [
+        "demission",
+        "duree_preavis",
+        "final_settlement_audit"
+      ],
+      "documentIds": [
+        "notice-letter"
+      ]
+    },
+    "notice-letter": {
+      "articleSlugs": [],
+      "toolIds": [
+        "duree_preavis",
+        "demission"
+      ],
+      "documentIds": [
+        "resignation-letter"
+      ]
+    },
+    "salary-recovery-letter": {
+      "articleSlugs": [],
+      "toolIds": [
+        "unpaid_salary_recovery",
+        "salary_delay_alert",
+        "pre_litigation_timeline"
+      ],
+      "documentIds": [
+        "formal-complaint-employer",
+        "labor-inspector-complaint"
+      ]
+    },
+    "overtime-claim-letter": {
+      "articleSlugs": [],
+      "toolIds": [
+        "overtime",
+        "unpaid_overtime_recovery",
+        "pre_litigation_timeline"
+      ],
+      "documentIds": [
+        "formal-complaint-employer",
+        "labor-inspector-complaint"
+      ]
+    },
+    "formal-complaint-employer": {
+      "articleSlugs": [],
+      "toolIds": [
+        "pre_litigation_timeline",
+        "compliance_risk_score"
+      ],
+      "documentIds": [
+        "labor-inspector-complaint"
+      ]
+    },
+    "labor-inspector-complaint": {
+      "articleSlugs": [],
+      "toolIds": [
+        "pre_litigation_timeline",
+        "compliance_risk_score"
+      ],
+      "documentIds": [
+        "formal-complaint-employer",
+        "salary-recovery-letter",
+        "overtime-claim-letter"
+      ]
+    },
+    "cnss-complaint-letter": {
+      "articleSlugs": [],
+      "toolIds": [
+        "payslip_detector",
+        "cnss_pension"
+      ],
+      "documentIds": [
+        "formal-complaint-employer"
+      ]
+    },
+    "work-accident-declaration": {
+      "articleSlugs": [],
+      "toolIds": [
+        "work_accident"
+      ],
+      "documentIds": [
+        "formal-complaint-employer"
+      ]
+    },
+    "maternity-leave-request": {
+      "articleSlugs": [],
+      "toolIds": [
+        "maternity_leave"
+      ],
+      "documentIds": [
+        "employment-certificate-request"
+      ]
+    },
+    "contract-renewal-request": {
+      "articleSlugs": [],
+      "toolIds": [
+        "fixed_term_contract_risk",
+        "fin_cdd"
+      ],
+      "documentIds": [
+        "employment-certificate-request"
+      ]
+    },
+    "mutual-termination-proposal": {
+      "articleSlugs": [],
+      "toolIds": [
+        "final_settlement_audit",
+        "duree_preavis"
+      ],
+      "documentIds": [
+        "notice-letter"
+      ]
+    },
+    "employment-certificate-request": {
+      "articleSlugs": [],
+      "toolIds": [],
+      "documentIds": [
+        "contract-renewal-request"
+      ]
+    }
+  },
+  "updatedAt": "2026-04-19T00:00:00.000Z"
 }

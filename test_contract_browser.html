@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Generator Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Contract Generator Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: API Connectivity</h2>
+        <button onclick="testAPI()">Test API Connection</button>
+        <div id="api-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Contract Generation</h2>
+        <button onclick="testGeneration()">Generate Test Contract</button>
+        <div id="generation-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Output Analysis</h2>
+        <button onclick="testOutput()">Analyze Generated Contract</button>
+        <div id="output-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Complete Test Log</h2>
+        <pre id="test-log"></pre>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let testLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            testLog.push(logEntry);
+            document.getElementById('test-log').textContent = testLog.join('\n');
+            console.log(logEntry);
+        }
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<p>Testing API...</p>';
+            
+            try {
+                log('🚀 Starting API Test...');
+                
+                const response = await fetch(`${API_BASE}/contracts/templates`);
+                const data = await response.json();
+                
+                if (!data.ok) {
+                    throw new Error(`API Error: ${data.error}`);
+                }
+                
+                log(`✅ API Connection Successful`);
+                log(`📋 Found ${data.templates.length} templates`);
+                log(`📋 Found ${data.clauses.length} clauses`);
+                log(`📋 Found ${data.validationRules.length} validation rules`);
+                
+                const cdiTemplate = data.templates.find(t => t.contract_type === 'CDI');
+                if (cdiTemplate) {
+                    log(`✅ CDI Template Found: ${cdiTemplate.title}`);
+                    log(`📄 CDI has ${cdiTemplate.sections.length} sections`);
+                } else {
+                    log('❌ CDI Template Not Found', 'error');
+                }
+                
+                resultDiv.innerHTML = `
+                    <p class="success">✅ API Test Passed</p>
+                    <p>Templates: ${data.templates.length}</p>
+                    <p>Clauses: ${data.clauses.length}</p>
+                    <p>Rules: ${data.validationRules.length}</p>
+                `;
+                
+            } catch (error) {
+                log(`❌ API Test Failed: ${error.message}`, 'error');
+                resultDiv.innerHTML = `<p class="error">❌ API Test Failed: ${error.message}</p>`;
+            }
+        }
+
+        async function testGeneration() {
+            const resultDiv = document.getElementById('generation-result');
+            resultDiv.innerHTML = '<p>Generating contract...</p>';
+            
+            const testData = {
+                contract_type: 'CDI',
+                employee_name: 'Mohammed Alami',
+                employee_address: '123 Rue Mohamed V, Casablanca',
+                employee_cin: 'AB123456',
+                employee_cnss: 'CNSS123456',
+                company_name: 'Société Test Maroc',
+                company_address: '456 Avenue Hassan II, Rabat',
+                company_rc: 'RC12345',
+                company_cnss: 'CNSS789012',
+                job_title: 'Développeur Senior',
+                job_description: 'Développement d\'applications web et mobiles',
+                role_level: 'cadre',
+                start_date: '2024-04-01',
+                trial_period_duration: '3 mois',
+                salary_brut: 15000,
+                salary_net: 12000,
+                payment_frequency: 'mensuel',
+                payment_method: 'virement bancaire',
+                work_hours: '44',
+                work_days: '5',
+                work_schedule: '9h00 - 18h00',
+                annual_leave_days: '22',
+                selected_clauses: ['confidentiality', 'non_competition'],
+                clause_variables: {
+                    confidentiality: '2 ans',
+                    non_competition: '100 km'
+                },
+                notice_period_employee: '1 mois',
+                contract_location: 'Casablanca',
+                contract_date: '2024-03-31'
+            };
+            
+            try {
+                log('📝 Starting Contract Generation Test...');
+                
+                const response = await fetch(`${API_BASE}/contracts/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        templateId: 'CDI',
+                        contractData: testData
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.ok) {
+                    throw new Error(`Generation Error: ${data.error}`);
+                }
+                
+                log('✅ Contract Generated Successfully!');
+                log(`📄 Contract ID: ${data.contract.id}`);
+                log(`⚠️  Warnings: ${data.contract.warnings?.length || 0}`);
+                
+                // Store contract for output analysis
+                window.lastGeneratedContract = data.contract;
+                
+                resultDiv.innerHTML = `
+                    <p class="success">✅ Contract Generated</p>
+                    <p>Contract ID: ${data.contract.id}</p>
+                    <p>Content Length: ${data.contract.content.length} characters</p>
+                    <p>Warnings: ${data.contract.warnings?.length || 0}</p>
+                    <button onclick="downloadContract()">📥 Download Contract</button>
+                `;
+                
+            } catch (error) {
+                log(`❌ Generation Test Failed: ${error.message}`, 'error');
+                resultDiv.innerHTML = `<p class="error">❌ Generation Failed: ${error.message}</p>`;
+            }
+        }
+
+        function testOutput() {
+            const resultDiv = document.getElementById('output-result');
+            
+            if (!window.lastGeneratedContract) {
+                resultDiv.innerHTML = '<p class="warning">⚠️ Please generate a contract first</p>';
+                return;
+            }
+            
+            const contract = window.lastGeneratedContract;
+            const content = contract.content;
+            
+            log('🔍 Starting Output Analysis...');
+            
+            const analysis = {
+                totalLength: content.length,
+                lines: content.split('\n').length,
+                words: content.split(/\s+/).length,
+                variablesInjected: 0,
+                variablesMissing: 0,
+                legalElements: 0
+            };
+            
+            // Check variable injection
+            const expectedInjections = [
+                { name: 'company_name', expected: 'Société Test Maroc' },
+                { name: 'employee_name', expected: 'Mohammed Alami' },
+                { name: 'salary_brut', expected: '15000' },
+                { name: 'job_title', expected: 'Développeur Senior' }
+            ];
+            
+            let injectionResults = [];
+            expectedInjections.forEach(variable => {
+                if (content.includes(variable.expected)) {
+                    analysis.variablesInjected++;
+                    injectionResults.push(`✅ ${variable.name}: ${variable.expected}`);
+                    log(`✅ Variable injected: ${variable.name}`);
+                } else {
+                    analysis.variablesMissing++;
+                    injectionResults.push(`❌ ${variable.name}: NOT FOUND`);
+                    log(`❌ Variable not injected: ${variable.name}`, 'error');
+                }
+            });
+            
+            // Check for remaining variables
+            const remainingVars = content.match(/\{\{[^}]+\}\}/g);
+            if (remainingVars) {
+                analysis.variablesMissing += remainingVars.length;
+                log(`⚠️ Unfilled variables: ${remainingVars.join(', ')}`, 'warning');
+            } else {
+                log('✅ All variables filled');
+            }
+            
+            // Check legal elements
+            const legalElements = ['Code du travail', 'CNSS', 'période d\'essai', 'préavis', 'signature'];
+            legalElements.forEach(element => {
+                if (content.toLowerCase().includes(element.toLowerCase())) {
+                    analysis.legalElements++;
+                    log(`✅ Legal element found: ${element}`);
+                } else {
+                    log(`⚠️ Missing legal element: ${element}`, 'warning');
+                }
+            });
+            
+            log('📊 Output Analysis Complete');
+            
+            resultDiv.innerHTML = `
+                <h3>📊 Output Analysis Results</h3>
+                <p><strong>Content Length:</strong> ${analysis.totalLength} characters</p>
+                <p><strong>Lines:</strong> ${analysis.lines}</p>
+                <p><strong>Words:</strong> ${analysis.words}</p>
+                <p><strong>Variables Injected:</strong> <span class="success">${analysis.variablesInjected}</span></p>
+                <p><strong>Variables Missing:</strong> <span class="error">${analysis.variablesMissing}</span></p>
+                <p><strong>Legal Elements:</strong> <span class="success">${analysis.legalElements}</span></p>
+                
+                <h4>Variable Injection Details:</h4>
+                <pre>${injectionResults.join('\n')}</pre>
+                
+                <h4>Contract Preview (first 500 chars):</h4>
+                <pre>${content.substring(0, 500)}...</pre>
+            `;
+        }
+
+        function downloadContract() {
+            if (!window.lastGeneratedContract) {
+                alert('No contract to download');
+                return;
+            }
+            
+            const content = window.lastGeneratedContract.content;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `test_contract_${new Date().getTime()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            log('📥 Contract downloaded');
+        }
+
+        // Auto-run API test on page load
+        window.onload = () => {
+            log('🧪 Contract Generator Test Suite Loaded');
+            log('📋 Click buttons to run tests manually');
+        };
+    </script>
+</body>
+</html>

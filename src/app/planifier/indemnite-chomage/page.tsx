@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Indemnite Chomage CNSS — Eligibilite et Montant",
   description: "Verifiez votre eligibilite, estimez l'indemnite mensuelle CNSS et la duree de prise en charge apres perte d'emploi.",
-  canonicalPath: "/planifier/indemnite-chomage",
+  canonicalPath: "/conges-cnss/indemnite-chomage",
 });
 
 export default function UnemploymentPage() {
@@ -16,10 +16,9 @@ export default function UnemploymentPage() {
       apiPath="/api/simulate/unemployment"
       calculatorType="unemployment"
       fields={[
-        { key: "monthlyGross", label: "Salaire brut de reference (MAD)", type: "number", defaultValue: "8000", min: 1, step: 0.01 },
-        { key: "contributionMonths", label: "Mois de cotisation CNSS", type: "number", defaultValue: "36", min: 0, step: 1 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
-        { key: "monthlyExpenses", label: "Charges mensuelles (MAD)", type: "number", defaultValue: "5000", min: 0, step: 0.01 },
+        { key: "monthlyGross", label: "Salaire brut de reference (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "contributionMonths", label: "Mois de cotisation CNSS", type: "number", min: 0, step: 1 },
+        { key: "monthlyExpenses", label: "Charges mensuelles (MAD)", type: "number", min: 0, step: 0.01 },
       ]}
       breakdownLabels={{
         eligible: "Eligible",

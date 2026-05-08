@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Masse Salariale — Simulation RH",
   description: "Simulez le cout total de votre equipe avec charges employeur, CNSS et formation professionnelle.",
-  canonicalPath: "/planifier/masse-salariale",
+  canonicalPath: "/rh-pro/masse-salariale",
 });
 
 export default function PayrollMassPage() {
@@ -16,10 +16,9 @@ export default function PayrollMassPage() {
       apiPath="/api/simulate/payroll-mass"
       calculatorType="payroll_mass"
       fields={[
-        { key: "employeeCount", label: "Nombre d'employes", type: "number", defaultValue: "10", min: 1, step: 1 },
-        { key: "averageGrossSalary", label: "Salaire brut moyen (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
-        { key: "companySize", label: "Taille entreprise", type: "select", defaultValue: "large", options: [
+        { key: "employeeCount", label: "Nombre d'employes", type: "number", min: 1, step: 1 },
+        { key: "averageGrossSalary", label: "Salaire brut moyen (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "companySize", label: "Taille entreprise", type: "select", options: [
           { label: "Grande (> 20 employes, 1.6% FP)", value: "large" },
           { label: "Petite (≤ 20 employes, 1% FP)", value: "small" },
         ]},

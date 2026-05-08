@@ -34,6 +34,14 @@ const configPatchSchema = z.object({
     })
     .optional(),
   toolPolicies: z.record(z.string(), toolPolicySchema).optional(),
+  evidenceGovernance: z
+    .object({
+      signedUrlTtlSeconds: z.number().int().min(30).max(900),
+      retentionDays: z.number().int().min(1).max(3650),
+      maxUploadBytes: z.number().int().min(1024 * 1024).max(50 * 1024 * 1024),
+      allowArchivedEvidenceDownload: z.boolean(),
+    })
+    .optional(),
 });
 
 export async function GET() {
@@ -75,6 +83,12 @@ export async function PUT(request: NextRequest) {
         };
       };
       toolPolicies?: Record<string, ToolPolicy>;
+      evidenceGovernance?: {
+        signedUrlTtlSeconds: number;
+        retentionDays: number;
+        maxUploadBytes: number;
+        allowArchivedEvidenceDownload: boolean;
+      };
     };
 
     const current = await readAdminConfig();
@@ -90,6 +104,7 @@ export async function PUT(request: NextRequest) {
       maintenanceMessage: body.maintenanceMessage,
       websiteSettings: body.websiteSettings,
       toolPolicies: body.toolPolicies,
+      evidenceGovernance: body.evidenceGovernance,
     });
 
     await addAdminAuditEvent({
@@ -98,6 +113,7 @@ export async function PUT(request: NextRequest) {
       meta: {
         simulatorAdStepEnabled: config.simulatorAdStepEnabled,
         documentAdStepEnabled: config.documentAdStepEnabled,
+        evidenceGovernance: config.evidenceGovernance,
       },
     });
 

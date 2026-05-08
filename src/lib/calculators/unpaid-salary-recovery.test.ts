@@ -8,7 +8,7 @@ describe("simulateUnpaidSalaryRecovery", () => {
       monthlySalary: 7000,
       unpaidMonths: 2,
       monthsSinceFirstDefault: 4,
-      penaltyRatePerMonth: 0.01,
+      penaltyRateAnnual: 12,
     });
 
     expect(result.breakdown.principalAmount).toBe(14000);

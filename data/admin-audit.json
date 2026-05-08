@@ -1,6 +1,22 @@
 {
   "events": [
     {
+      "id": "5abdb7f3-9bc1-4afd-9876-a1923cf85d34",
+      "createdAt": "2026-04-04T22:47:30.817Z",
+      "action": "admin_config_update",
+      "status": "success",
+      "meta": {
+        "simulatorAdStepEnabled": true,
+        "documentAdStepEnabled": true,
+        "evidenceGovernance": {
+          "signedUrlTtlSeconds": 60,
+          "retentionDays": 90,
+          "maxUploadBytes": 10485760,
+          "allowArchivedEvidenceDownload": false
+        }
+      }
+    },
+    {
       "id": "ea7d13cf-a1bd-439a-a8eb-02e8a425f5e8",
       "createdAt": "2026-02-14T19:02:52.912Z",
       "action": "admin_linking_upsert",

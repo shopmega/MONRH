@@ -22,6 +22,12 @@ export type AdminConfig = {
     };
   };
   toolPolicies: Record<string, ToolPolicy>;
+  evidenceGovernance: {
+    signedUrlTtlSeconds: number;
+    retentionDays: number;
+    maxUploadBytes: number;
+    allowArchivedEvidenceDownload: boolean;
+  };
   updatedAt: string;
 };
 
@@ -34,9 +40,9 @@ const DEFAULT_ADMIN_CONFIG: AdminConfig = {
   documentAdStepEnabled: true,
   maintenanceMessage: "",
   websiteSettings: {
-    siteName: "MON RH",
+    siteName: "SIMPAIE",
     siteDescription:
-      "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.",
+      "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc.",
     siteSubtitle: "Labour Clarity Platform",
     logoUrl: "",
     supportEmail: "",
@@ -49,6 +55,12 @@ const DEFAULT_ADMIN_CONFIG: AdminConfig = {
     },
   },
   toolPolicies: createDefaultToolPolicies(),
+  evidenceGovernance: {
+    signedUrlTtlSeconds: 60,
+    retentionDays: 90,
+    maxUploadBytes: 10 * 1024 * 1024,
+    allowArchivedEvidenceDownload: false,
+  },
   updatedAt: new Date(0).toISOString(),
 };
 
@@ -103,6 +115,20 @@ function normalizeConfig(
       },
     },
     toolPolicies: mergedPolicies,
+    evidenceGovernance: {
+      signedUrlTtlSeconds:
+        parsed.evidenceGovernance?.signedUrlTtlSeconds ??
+        DEFAULT_ADMIN_CONFIG.evidenceGovernance.signedUrlTtlSeconds,
+      retentionDays:
+        parsed.evidenceGovernance?.retentionDays ??
+        DEFAULT_ADMIN_CONFIG.evidenceGovernance.retentionDays,
+      maxUploadBytes:
+        parsed.evidenceGovernance?.maxUploadBytes ??
+        DEFAULT_ADMIN_CONFIG.evidenceGovernance.maxUploadBytes,
+      allowArchivedEvidenceDownload:
+        parsed.evidenceGovernance?.allowArchivedEvidenceDownload ??
+        DEFAULT_ADMIN_CONFIG.evidenceGovernance.allowArchivedEvidenceDownload,
+    },
     updatedAt: parsed.updatedAt ?? fallbackUpdatedAt,
   };
 }
@@ -123,7 +149,7 @@ async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
     };
     const { data, error } = await appSettings
       .select("value,updated_at")
-      .eq("name", SETTINGS_KEY)
+      .eq("key", SETTINGS_KEY)
       .maybeSingle();
     if (error) return null;
     if (!data) return DEFAULT_ADMIN_CONFIG;
@@ -140,7 +166,7 @@ async function readAdminConfigFromSupabase(): Promise<AdminConfig | null> {
 async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminConfig> {
   const appSettings = getSupabaseAdminClient().from("app_settings") as unknown as {
     upsert: (
-      values: { name: string; value: unknown; updated_at: string },
+      values: { key: string; value: unknown; updated_at: string },
       options: { onConflict: string },
     ) => {
       select: (columns: string) => {
@@ -157,15 +183,16 @@ async function writeAdminConfigToSupabase(config: AdminConfig): Promise<AdminCon
     maintenanceMessage: config.maintenanceMessage,
     websiteSettings: config.websiteSettings,
     toolPolicies: config.toolPolicies,
+    evidenceGovernance: config.evidenceGovernance,
   };
   const { data, error } = await appSettings
     .upsert(
       {
-        name: SETTINGS_KEY,
+        key: SETTINGS_KEY,
         value: payload,
         updated_at: config.updatedAt,
       },
-      { onConflict: "name" },
+      { onConflict: "key" },
     )
     .select("value,updated_at")
     .single();
@@ -207,6 +234,7 @@ export async function updateAdminConfig(
     maintenanceMessage: patch.maintenanceMessage ?? current.maintenanceMessage,
     websiteSettings: patch.websiteSettings ?? current.websiteSettings,
     toolPolicies: patch.toolPolicies ?? current.toolPolicies,
+    evidenceGovernance: patch.evidenceGovernance ?? current.evidenceGovernance,
     updatedAt: new Date().toISOString(),
   };
   try {
@@ -238,6 +266,7 @@ export async function replaceAdminConfig(
     maintenanceMessage: payload.maintenanceMessage,
     websiteSettings: payload.websiteSettings,
     toolPolicies: payload.toolPolicies,
+    evidenceGovernance: payload.evidenceGovernance,
     updatedAt: new Date().toISOString(),
   };
   try {

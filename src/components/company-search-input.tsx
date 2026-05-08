@@ -1,18 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export type CompanyOption = {
   id: string;
   name: string;
+  slug?: string | null;
   city: string | null;
   overall_rating: number | null;
   category: string | null;
+  is_claimed?: boolean;
 };
 
-const DEBOUNCE_MS = 300;
+const DEBOUNCE_MS = 150;
 const MIN_QUERY_LENGTH = 2;
 
 type CompanySearchInputProps = {
@@ -41,6 +43,7 @@ export function CompanySearchInput({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [lastSearchedQuery, setLastSearchedQuery] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,14 +51,23 @@ export function CompanySearchInput({
   const fetchOptions = useCallback(async (q: string) => {
     if (q.length < MIN_QUERY_LENGTH) {
       setOptions([]);
+      setLastSearchedQuery("");
       return;
     }
+    
+    // Prevent duplicate searches
+    if (q === lastSearchedQuery) {
+      return;
+    }
+    
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
 
     setLoading(true);
+    setLastSearchedQuery(q);
+    
     try {
       const params = new URLSearchParams({ q: q.trim(), limit: "5" });
       const res = await fetch(`/api/reviewly/companies?${params.toString()}`, {
@@ -64,15 +76,27 @@ export function CompanySearchInput({
       if (!res.ok) {
         throw new Error("Failed to fetch");
       }
-      const data = (await res.json()) as { results?: Array<{ id: string; name: string; city?: string | null; overall_rating?: number | null; category?: string | null }> };
+      const data = (await res.json()) as {
+        results?: Array<{
+          id: string;
+          name: string;
+          slug?: string | null;
+          city?: string | null;
+          overall_rating?: number | null;
+          category?: string | null;
+          is_claimed?: boolean;
+        }>;
+      };
       const list = Array.isArray(data.results) ? data.results : [];
       setOptions(
-        list.map((r) => ({
-          id: r.id,
-          name: r.name,
-          city: r.city ?? null,
-          overall_rating: r.overall_rating ?? null,
-          category: r.category ?? null,
+        list.map((result) => ({
+          id: result.id,
+          name: result.name,
+          slug: result.slug ?? null,
+          city: result.city ?? null,
+          overall_rating: result.overall_rating ?? null,
+          category: result.category ?? null,
+          is_claimed: result.is_claimed ?? false,
         })),
       );
       setSelectedIndex(-1);
@@ -84,7 +108,7 @@ export function CompanySearchInput({
         setLoading(false);
       }
     }
-  }, []);
+  }, [lastSearchedQuery]);
 
   useEffect(() => {
     setQuery(value);
@@ -95,8 +119,12 @@ export function CompanySearchInput({
     if (query.trim().length < MIN_QUERY_LENGTH) {
       setOptions([]);
       setOpen(false);
+      setLoading(false);
+      setLastSearchedQuery("");
       return;
     }
+    
+    setLoading(true);
     debounceRef.current = setTimeout(() => {
       fetchOptions(query);
       setOpen(true);
@@ -117,29 +145,43 @@ export function CompanySearchInput({
   }, []);
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = e.target.value;
-    setQuery(v);
-    onChange(v);
-    if (onSelect && !v.trim()) {
-      onSelect({ id: "", name: "", city: null, overall_rating: null, category: null });
+    const nextValue = e.target.value;
+    setQuery(nextValue);
+    onChange(nextValue);
+    if (onSelect && !nextValue.trim()) {
+      setLastSearchedQuery("");
+      onSelect({
+        id: "",
+        name: "",
+        slug: null,
+        city: null,
+        overall_rating: null,
+        category: null,
+        is_claimed: false,
+      });
     }
   }
 
-  function handleSelect(company: CompanyOption) {
+  const handleSelect = useCallback((company: CompanyOption) => {
+    // Prevent re-triggering by checking if already selected
+    if (query === company.name && options.some(opt => opt.id === company.id)) {
+      setOpen(false);
+      return;
+    }
+    
     onChange(company.name);
     setQuery(company.name);
     setOptions([]);
     setOpen(false);
+    setLastSearchedQuery(company.name);
     onSelect?.(company);
-  }
+  }, [query, options, onChange, onSelect]);
 
-  const showDropdown = open && (options.length > 0 || loading);
+  const showDropdown = useMemo(() => open && (options.length > 0 || loading), [open, options.length, loading]);
 
   return (
     <div ref={containerRef} className={`relative block space-y-3 ${className}`}>
-      {label ? (
-        <Label htmlFor={id}>{label}</Label>
-      ) : null}
+      {label ? <Label htmlFor={id}>{label}</Label> : null}
       <Input
         id={id}
         type="text"
@@ -168,7 +210,7 @@ export function CompanySearchInput({
         >
           {options.length === 0 && !loading ? (
             <>
-              <li className="px-3 py-2 text-sm text-[var(--ink-soft)]">Aucun résultat</li>
+              <li className="px-3 py-2 text-sm text-[var(--ink-soft)]">Aucun resultat</li>
               <li className="border-t border-[var(--line)] px-3 py-2 text-xs text-[var(--ink-soft)]">
                 Vous pouvez garder votre saisie pour utiliser ce nom.
               </li>
@@ -184,15 +226,16 @@ export function CompanySearchInput({
                 }`}
                 onMouseDown={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   handleSelect(company);
                 }}
               >
                 <span className="font-medium">{company.name}</span>
                 {(company.city || company.overall_rating != null) && (
                   <span className="ml-2 text-[var(--ink-soft)]">
-                    {[company.city, company.overall_rating != null ? `★ ${company.overall_rating}` : null]
+                    {[company.city, company.overall_rating != null ? `Note ${company.overall_rating}` : null]
                       .filter(Boolean)
-                      .join(" · ")}
+                      .join(" | ")}
                   </span>
                 )}
               </li>

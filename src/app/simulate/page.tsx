@@ -6,7 +6,7 @@ import { useLanguage } from "@/components/language-provider";
 import { usePublicConfig } from "@/components/public-config-provider";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
 import type { ToolPolicy } from "@/lib/tools/tool-catalog";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 type SimulatorItem = {
   title: { fr: string; ar: string };
@@ -207,9 +207,31 @@ const simulatorGroups: SimulatorGroup[] = [
   },
 ];
 
+const TOOL_ID_BY_HREF: Record<string, string> = {
+  "/simulateurs/brut-net": "net_gross",
+  "/simulateurs/cout-employeur-total": "employer_total_cost",
+  "/simulateurs/ir-annuel": "annual_income_tax",
+  "/simulateurs/licenciement": "licenciement",
+  "/simulateurs/demission": "demission",
+  "/simulateurs/duree-preavis": "duree_preavis",
+  "/simulateurs/fin-cdd": "fin_cdd",
+  "/simulateurs/rupture-periode-essai": "probation_termination",
+  "/simulateurs/progression-anciennete": "seniority_growth",
+  "/simulateurs/acquisition-conges": "leave_accrual",
+  "/simulateurs/conformite-smig": "smig_compliance",
+  "/simulateurs/heures-supplementaires": "overtime",
+  "/simulateurs/compensation-jours-feries": "public_holiday_compensation",
+  "/simulateurs/conge-maternite": "maternity_leave",
+  "/simulateurs/conge-maladie": "sick_leave",
+  "/simulateurs/pension-cnss": "cnss_pension",
+  "/simulateurs/accident-travail": "work_accident",
+  "/simulateurs/scenario-harcelement": "harassment_scenario",
+  "/simulateurs/recouvrement-salaire-impaye": "unpaid_salary_recovery",
+  "/simulateurs/recouvrement-heures-supplementaires": "unpaid_overtime_recovery",
+};
+
 function toolIdFromHref(href: string): string {
-  const slug = href.replace("/simulateurs/", "");
-  return slug.replaceAll("-", "_");
+  return TOOL_ID_BY_HREF[href] ?? href.split("/").filter(Boolean).pop()?.replaceAll("-", "_") ?? href;
 }
 
 export default function SimulatePage() {
@@ -221,17 +243,41 @@ export default function SimulatePage() {
   const visibleGroups = useMemo(
     () =>
       simulatorGroups
-        .map((group) => ({
+        .map((group: SimulatorGroup) => ({
           ...group,
-          items: group.items.filter((item) => resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)).visible),
+          items: group.items.filter((item: SimulatorItem) => resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)).visible),
         }))
         .filter((group) => group.items.length > 0),
     [toolPolicies],
   );
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const totalVisibleSimulators = useMemo(
+    () => visibleGroups.reduce((count, group) => count + group.items.length, 0),
+    [visibleGroups],
+  );
+
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) return visibleGroups;
+    
+    const query = searchQuery.toLowerCase();
+    return visibleGroups
+      .map((group) => ({
+        ...group,
+        items: group.items.filter(
+          (item) =>
+            item.title.fr.toLowerCase().includes(query) ||
+            item.title.ar.toLowerCase().includes(query) ||
+            item.description.fr.toLowerCase().includes(query) ||
+            item.description.ar.toLowerCase().includes(query)
+        ),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [visibleGroups, searchQuery]);
+
   return (
-    <main className="paper-bg min-h-screen">
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6">
+    <main className="paper-bg min-h-screen max-w-full overflow-x-hidden">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-24 sm:px-6">
         <section className="soft-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">{t("simulatePage.kicker")}</p>
           <h1 className="display-font mt-2 text-4xl font-semibold leading-tight sm:text-5xl">
@@ -240,6 +286,53 @@ export default function SimulatePage() {
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--ink-soft)]">
             {t("simulatePage.description")}
           </p>
+          <div className="mt-5 grid gap-2 sm:grid-cols-3">
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "المسارات النشطة" : "Parcours actifs"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">{visibleGroups.length}</p>
+            </article>
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "إجمالي المحاكيات" : "Simulateurs"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">{totalVisibleSimulators}</p>
+            </article>
+            <article className="panel-tonal rounded-2xl px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
+                {language === "ar" ? "الارتباطات" : "Connexions"}
+              </p>
+              <p className="mt-1 text-xl font-semibold text-[var(--foreground)]">Tools + Docs</p>
+            </article>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/outils" className="rounded-full bg-[var(--juris-surface-low)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]">
+              {t("nav.tools")}
+            </Link>
+            <Link href="/documents" className="rounded-full bg-[var(--juris-surface-low)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]">
+              {t("nav.documents")}
+            </Link>
+            <Link href="/contrat" className="rounded-full bg-[var(--juris-surface-low)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]">
+              {language === "ar" ? "مولد العقود" : "Generateur de contrats"}
+            </Link>
+          </div>
+          <div className="mt-6">
+            <div className="relative max-w-xl">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <svg className="h-5 w-5 text-[var(--ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder={t("common.searchPlaceholder")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full rounded-2xl border border-transparent bg-[var(--juris-surface-low)] py-3.5 pl-11 pr-4 text-sm font-medium focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+              />
+            </div>
+          </div>
         </section>
 
         <section className="mt-5">
@@ -250,47 +343,124 @@ export default function SimulatePage() {
         </section>
 
         <div className="mt-5 space-y-5">
-          {visibleGroups.map((group, groupIndex) => (
-            <section
-              key={group.titleKey}
-              className={`rounded-3xl p-5 ${groupIndex % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
-            >
-              <div className="mb-4">
-                <p className="section-kicker">{t(group.titleKey)}</p>
-                <p className="mt-1 text-sm text-[var(--ink-soft)]">
-                  {t(group.subtitleKey)} ({t("simulatePage.toolsCount", { count: group.items.length })})
-                </p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {group.items.map((item, index) => (
-                  <article
-                    key={item.href}
-                    className={`rounded-2xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-strong border border-[var(--line)]"}`}
-                  >
-                    <h2 className="display-font text-xl font-semibold leading-tight">{item.title[language]}</h2>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">{item.description[language]}</p>
-                    {canUseTool(resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)), userAuthenticated) ? (
-                      <Link href={item.href} className="btn-primary mt-4 px-4 py-2 text-sm">
-                        {t("common.open")}
-                      </Link>
-                    ) : (
-                      <div className="mt-4 rounded-xl border border-[var(--line)] bg-[var(--surface-muted)] px-3 py-2 text-xs text-[var(--ink-soft)]">
-                        {resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)).enabled
-                          ? "Reserve aux utilisateurs connectes."
-                          : "Desactive par administration."}
-                      </div>
-                    )}
-                  </article>
-                ))}
-              </div>
+          {filteredGroups.length > 0 ? (
+            filteredGroups.map((group, groupIndex) => (
+              <section
+                key={group.titleKey}
+                className={`rounded-3xl p-5 ${groupIndex % 2 === 0 ? "soft-card" : "panel-tonal"}`}
+              >
+                <div className="mb-4">
+                  <p className="section-kicker">{t(group.titleKey)}</p>
+                  <p className="mt-1 text-sm text-[var(--ink-soft)]">
+                    {t(group.subtitleKey)} ({t("simulatePage.toolsCount", { count: group.items.length })})
+                  </p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.items.map((item, index) => (
+                    <article
+                      key={item.href}
+                      className={`rounded-2xl p-4 ${index % 2 === 0 ? "soft-card" : "panel-tonal"}`}
+                    >
+                      <h2 className="display-font text-xl font-semibold leading-tight">{item.title[language]}</h2>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">{item.description[language]}</p>
+                      {canUseTool(resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)), userAuthenticated) ? (
+                        <Link href={item.href} className="btn-primary mt-4 px-4 py-2 text-sm">
+                          {t("common.open")}
+                        </Link>
+                      ) : (
+                        <div className="mt-4 rounded-xl bg-[var(--juris-surface-low)] px-3 py-2 text-xs text-[var(--ink-soft)]">
+                          {resolveToolPolicy(toolPolicies, toolIdFromHref(item.href)).enabled
+                            ? "Reserve aux utilisateurs connectes."
+                            : "Desactive par administration."}
+                        </div>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ))
+          ) : (
+            <section className="soft-card flex flex-col items-center justify-center rounded-[2rem] p-12 text-center">
+              <svg className="mb-4 h-12 w-12 text-[var(--ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-lg font-semibold text-[var(--foreground)]">{t("common.noResults", { query: searchQuery })}</p>
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="mt-4 text-sm font-bold text-[var(--accent)] hover:underline"
+              >
+                {language === "ar" ? "مسح البحث" : "Effacer la recherche"}
+              </button>
             </section>
-          ))}
+          )}
         </div>
 
         <section className="mt-5">
           <p className="section-kicker pl-1">{t("common.partner")}</p>
           <div className="soft-card mt-2 rounded-3xl p-3">
             <AdSlot slot="6666666666" format="auto" />
+          </div>
+        </section>
+
+        {/* Protection Tools Section */}
+        <section className="mt-8">
+          <p className="section-kicker pl-1">{t("simulatePage.relatedTools")}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Link href="/outils/detecteur-fiche-paie" className="soft-card min-w-0 rounded-3xl p-5">
+              <h2 className="display-font break-words text-xl font-semibold">
+                {language === "ar" ? "كاشف ورقة الأجر" : "Détecteur de fiche de paie"}
+              </h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+                {language === "ar" ? "تحقق من مطابقة كشف الأجر والاقتطاعات." : "Vérifiez la cohérence de votre bulletin et des retenues."}
+              </p>
+            </Link>
+            <Link href="/outils/audit-solde-tout-compte" className="soft-card min-w-0 rounded-3xl p-5">
+              <h2 className="display-font break-words text-xl font-semibold">
+                {language === "ar" ? "مراجعة تسوية كل الحسابات" : "Audit solde de tout compte"}
+              </h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+                {language === "ar" ? "تقدير المبالغ المستحقة في التسوية النهائية." : "Estimez les montants qui devraient apparaître dans votre solde final."}
+              </p>
+            </Link>
+            <Link href="/outils/feuille-route-pre-contentieux" className="soft-card min-w-0 rounded-3xl p-5">
+              <h2 className="display-font break-words text-xl font-semibold">
+                {language === "ar" ? "خريطة طريق ما قبل النزاع" : "Feuille route pré-contentieux"}
+              </h2>
+              <p className="mt-2 break-words text-sm text-[var(--ink-soft)]">
+                {language === "ar" ? "خطة عمل قبل رفع دعوى قضائية." : "Obtenez un plan d'action avant saisine judiciaire."}
+              </p>
+            </Link>
+          </div>
+        </section>
+
+        {/* Cross-section Links */}
+        <section className="soft-card mt-10 rounded-[2rem] p-6 sm:p-8">
+          <p className="section-kicker text-center">{t("common.exploreSections")}</p>
+          <div className="mt-6 grid gap-6 sm:grid-cols-3">
+            <Link href="/planifier" className="soft-card group rounded-[2rem] p-6 transition-all hover:-translate-y-1">
+              <p className="section-kicker">{t("nav.plan")}</p>
+              <h3 className="display-font mt-2 text-xl font-bold">{language === "ar" ? "تخطيط مستقبلي" : "Planification Pro"}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--ink-soft)]">{t("common.planifierDesc")}</p>
+              <div className="mt-4 flex items-center text-xs font-bold text-[var(--accent)] group-hover:underline">
+                {t("common.explore")} &rarr;
+              </div>
+            </Link>
+            <Link href="/outils" className="soft-card group rounded-[2rem] p-6 transition-all hover:-translate-y-1">
+              <p className="section-kicker">{t("nav.tools")}</p>
+              <h3 className="display-font mt-2 text-xl font-bold">{language === "ar" ? "أدوات الحماية" : "Outils Protection"}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--ink-soft)]">{t("common.toolsDesc")}</p>
+              <div className="mt-4 flex items-center text-xs font-bold text-[var(--accent)] group-hover:underline">
+                {t("common.explore")} &rarr;
+              </div>
+            </Link>
+            <Link href="/documents" className="soft-card group rounded-[2rem] p-6 transition-all hover:-translate-y-1">
+              <p className="section-kicker">{t("nav.documents")}</p>
+              <h3 className="display-font mt-2 text-xl font-bold">{language === "ar" ? "نماذج قانونية" : "Modèles Docs"}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--ink-soft)]">{t("common.documentsDesc")}</p>
+              <div className="mt-4 flex items-center text-xs font-bold text-[var(--accent)] group-hover:underline">
+                {t("common.explore")} &rarr;
+              </div>
+            </Link>
           </div>
         </section>
       </div>

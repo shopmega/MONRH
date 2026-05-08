@@ -18,18 +18,20 @@ const LanguageContext = createContext<LanguageContextType | null>(null);
 
 function translate(language: AppLanguage, key: string, params?: MessageParams): string {
   const segments = key.split(".");
-  let value: unknown = MESSAGES[language];
+  const resolveValue = (sourceLanguage: AppLanguage) => {
+    let value: unknown = MESSAGES[sourceLanguage];
 
-  for (const segment of segments) {
-    if (!value || typeof value !== "object" || !(segment in value)) {
-      return key;
+    for (const segment of segments) {
+      if (!value || typeof value !== "object" || !(segment in value)) {
+        return null;
+      }
+      value = (value as Record<string, unknown>)[segment];
     }
-    value = (value as Record<string, unknown>)[segment];
-  }
 
-  if (typeof value !== "string") {
-    return key;
-  }
+    return typeof value === "string" ? value : null;
+  };
+
+  const value = resolveValue(language) ?? resolveValue("fr") ?? key;
 
   if (!params) {
     return value;
@@ -50,13 +52,23 @@ export function LanguageProvider({
   initialLanguage?: AppLanguage;
 }) {
   const [language, setLanguage] = useState<AppLanguage>(initialLanguage);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    const storedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (storedLanguage === "ar" || storedLanguage === "fr") {
+      setLanguage(storedLanguage);
+    }
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
     window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     document.cookie = `${LANGUAGE_STORAGE_KEY}=${language}; path=/; max-age=31536000; samesite=lax`;
     document.documentElement.lang = language;
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-  }, [language]);
+  }, [language, ready]);
 
   const contextValue = useMemo(
     () => ({

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "IGR Detail — Taux Marginal et Effectif",
   description: "Detail complet de l'IR mensuel par tranche, taux marginal vs effectif, et reconciliation annuelle.",
-  canonicalPath: "/planifier/igr-detail",
+  canonicalPath: "/salaire/ir-igr",
 });
 
 export default function IGRDetailPage() {
@@ -16,13 +16,11 @@ export default function IGRDetailPage() {
       apiPath="/api/simulate/igr-detail"
       calculatorType="igr_detail"
       fields={[
-        { key: "grossSalary", label: "Salaire brut mensuel (MAD)", type: "number", defaultValue: "15000", min: 1, step: 0.01 },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-01-01" },
-        { key: "includeCimr", label: "Inclure CIMR", type: "checkbox", defaultValue: false },
-        { key: "annualBonusGross", label: "Primes annuelles brutes (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
+        { key: "grossSalary", label: "Salaire brut mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "includeCimr", label: "Inclure CIMR", type: "checkbox" },
+        { key: "annualBonusGross", label: "Primes annuelles brutes (MAD)", type: "number", min: 0, step: 0.01 },
       ]}
       breakdownLabels={{
-        calculationDate: "Date de calcul",
         "monthly.gross": "Salaire brut",
         "monthly.cnssEmployee": "CNSS salarie",
         "monthly.amoEmployee": "AMO salarie",

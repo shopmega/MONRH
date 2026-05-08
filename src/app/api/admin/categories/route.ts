@@ -35,7 +35,8 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
   const items = await buildCategoryStats();
-  return NextResponse.json({ ok: true, items, count: items.length });
+  // Return the array directly so adminFetch<Array<...>> receives the array as result.data
+  return NextResponse.json(items);
 }
 
 export async function POST(request: NextRequest) {

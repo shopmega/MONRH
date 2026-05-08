@@ -36,9 +36,9 @@ const defaultConfig: PublicConfig = {
   documentAdStepEnabled: true,
   maintenanceMessage: "",
   websiteSettings: {
-    siteName: "MON RH",
+    siteName: "SIMPAIE",
     siteDescription:
-      "Simulateurs de droits des salaries au Maroc, generateurs de documents et articles juridiques clairs.",
+      "Salaire, CNSS, litiges et modeles RH pour les salaries au Maroc, avec articles juridiques clairs.",
     siteSubtitle: "Labour Clarity Platform",
     logoUrl: "",
     supportEmail: "",

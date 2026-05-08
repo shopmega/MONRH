@@ -27,7 +27,7 @@ export default function OpenGraphImage() {
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <div
             style={{
-              display: "inline-flex",
+              display: "flex",
               alignItems: "center",
               border: "2px solid #1d4ed8",
               color: "#1d4ed8",
@@ -39,25 +39,32 @@ export default function OpenGraphImage() {
               textTransform: "uppercase",
             }}
           >
-            MON RH
+            SIMPAIE
           </div>
-          <div style={{ fontSize: 66, fontWeight: 800, lineHeight: 1.05 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              fontSize: 66,
+              fontWeight: 800,
+              lineHeight: 1.05,
+            }}
+          >
             Droit du Travail
-            <br />
             Maroc
           </div>
           <div style={{ fontSize: 32, color: "#334155", maxWidth: "88%" }}>
-            Simulateurs legaux 2026, generateurs de lettres et articles pratiques.
+            Salaire, CNSS, litiges et modeles RH pour le travail au Maroc.
           </div>
         </div>
         <div style={{ display: "flex", gap: "14px", fontSize: 26, color: "#0f172a" }}>
           <div style={{ padding: "8px 14px", background: "#e2e8f0", borderRadius: 12 }}>
-            Simulateurs
+            Salaire
           </div>
           <div style={{ padding: "8px 14px", background: "#e2e8f0", borderRadius: 12 }}>
-            Documents
+            Litiges
           </div>
-          <div style={{ padding: "8px 14px", background: "#e2e8f0", borderRadius: 12 }}>Articles</div>
+          <div style={{ padding: "8px 14px", background: "#e2e8f0", borderRadius: 12 }}>Modeles</div>
         </div>
       </div>
     ),

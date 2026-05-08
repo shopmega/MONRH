@@ -2,31 +2,31 @@ import type { Metadata } from "next";
 import { DEFAULT_OG_IMAGE_PATH, absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Planifier — Simulations Financieres et Decisions de Carriere",
+  title: "Carriere, salaire et decisions professionnelles",
   description:
-    "Simulateurs financiers pour salaries au Maroc: augmentation salaire, bonus, credit, retraite, freelance vs salarie, auto-entrepreneur.",
+    "Comparez vos scenarios de carriere, d'augmentation, de freelance ou de retraite avec une lecture simple pour le Maroc.",
   alternates: {
-    canonical: "/planifier",
+    canonical: "/carriere",
   },
   openGraph: {
-    title: "Planifier",
+    title: "Carriere et decisions",
     description:
-      "Comparez, decidez, agissez: outils de planification financiere et de carriere pour les salaries marocains.",
-    url: "/planifier",
+      "Comparez, decidez, agissez: outils de carriere et de projection pour les salaries marocains.",
+    url: "/carriere",
     images: [
       {
         url: absoluteUrl(DEFAULT_OG_IMAGE_PATH),
         width: 1200,
         height: 630,
-        alt: "Planifier — MON RH",
+        alt: "Carriere et decisions SIMPAIE",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Planifier",
+    title: "Carriere et decisions",
     description:
-      "Comparez, decidez, agissez: outils de planification financiere et de carriere pour les salaries marocains.",
+      "Comparez, decidez, agissez: outils de carriere et de projection pour les salaries marocains.",
     images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
   },
 };

@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
       results: data.results,
       query: data.query,
       pagination: data.pagination,
+      meta: data.meta,
     });
   } catch (error) {
     console.error("[reviewly/companies]", error);

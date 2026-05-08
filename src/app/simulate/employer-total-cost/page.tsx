@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Cout Total Employeur",
@@ -16,7 +16,7 @@ export default function EmployerTotalCostPage() {
       apiPath="/api/simulate/employer-total-cost"
       calculatorType="employer_total_cost"
       fields={[
-        { key: "grossSalary", label: "Salaire brut (MAD)", type: "number", defaultValue: "9000", min: 1, step: 0.01 },
+        { key: "grossSalary", label: "Salaire brut (MAD)", type: "number", min: 1, step: 0.01 },
         {
           key: "companySize",
           label: "Taille entreprise",
@@ -39,14 +39,14 @@ export default function EmployerTotalCostPage() {
             { label: "Tres eleve", value: "very_high" },
           ],
         },
-        { key: "additionalBenefitsMad", label: "Avantages complementaires (MAD)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "months", label: "Nombre de mois", type: "number", defaultValue: "12", min: 1, max: 14, step: 1 },
+        { key: "additionalBenefitsMad", label: "Avantages complementaires (MAD)", type: "number", min: 0, step: 0.01, defaultValue: 0 },
+        { key: "months", label: "Nombre de mois", type: "number", min: 1, max: 14, step: 1, defaultValue: 12 },
         { key: "include13thMonth", label: "Inclure 13e mois", type: "checkbox", defaultValue: false },
-        { key: "calculationDate", label: "Date de calcul", type: "date", defaultValue: "2026-02-12" },
       ]}
       breakdownLabels={{
         grossSalary: "Brut",
         cnssEmployer: "CNSS employeur",
+        familyAllowanceEmployer: "Allocations familiales",
         amoEmployer: "AMO employeur",
         atMpInsurance: "AT/MP",
         formationPro: "Formation pro",
@@ -59,6 +59,7 @@ export default function EmployerTotalCostPage() {
       units={{
         grossSalary: "MAD",
         cnssEmployer: "MAD",
+        familyAllowanceEmployer: "MAD",
         amoEmployer: "MAD",
         atMpInsurance: "MAD",
         formationPro: "MAD",

@@ -13,9 +13,62 @@ export type ToolDefinition = {
   href: string;
 };
 
+export type ToolLegalDomain = "code_du_travail" | "payroll_tax" | "social_protection" | "career_finance" | "business_planning";
+
+export const NON_LABOR_LAW_TOOL_IDS = new Set([
+  "auto_entrepreneur",
+  "freelance_pricing",
+  "freelance_vs_salary",
+  "hiring_cost",
+  "loan_capacity",
+  "profit_expense",
+]);
+
+export const PAYROLL_TAX_TOOL_IDS = new Set([
+  "net_gross",
+  "net_gross_enhanced",
+  "annual_income_tax",
+  "igr_detail",
+  "payslip",
+  "payslip_detector",
+  "bonus_simulator",
+  "salary_increase",
+  "promotion_scenario",
+  "payroll_mass",
+  "compensation_optimization",
+  "employer_total_cost",
+]);
+
+export const SOCIAL_PROTECTION_TOOL_IDS = new Set([
+  "cnss_pension",
+  "retirement_advanced",
+  "maternity_leave",
+  "sick_leave",
+  "work_accident",
+  "unemployment",
+]);
+
+export function getToolLegalDomain(toolId: string): ToolLegalDomain {
+  if (NON_LABOR_LAW_TOOL_IDS.has(toolId)) {
+    return toolId === "hiring_cost" || toolId === "profit_expense" ? "business_planning" : "career_finance";
+  }
+  if (PAYROLL_TAX_TOOL_IDS.has(toolId)) {
+    return "payroll_tax";
+  }
+  if (SOCIAL_PROTECTION_TOOL_IDS.has(toolId)) {
+    return "social_protection";
+  }
+  return "code_du_travail";
+}
+
+export function isCodeDuTravailTool(toolId: string): boolean {
+  return getToolLegalDomain(toolId) === "code_du_travail";
+}
+
 export const TOOL_CATALOG: ToolDefinition[] = [
   { id: "net_gross", label: "Net <-> Brut", kind: "simulator", href: "/simulateurs/brut-net" },
   { id: "employer_total_cost", label: "Cout total employeur", kind: "simulator", href: "/simulateurs/cout-employeur-total" },
+
   { id: "annual_income_tax", label: "IR annuel", kind: "simulator", href: "/simulateurs/ir-annuel" },
   { id: "licenciement", label: "Indemnite licenciement", kind: "simulator", href: "/simulateurs/licenciement" },
   { id: "demission", label: "Scenario demission", kind: "simulator", href: "/simulateurs/demission" },
@@ -23,8 +76,10 @@ export const TOOL_CATALOG: ToolDefinition[] = [
   { id: "fin_cdd", label: "Fin de CDD", kind: "simulator", href: "/simulateurs/fin-cdd" },
   { id: "probation_termination", label: "Rupture periode d'essai", kind: "simulator", href: "/simulateurs/rupture-periode-essai" },
   { id: "seniority_growth", label: "Croissance anciennete", kind: "simulator", href: "/simulateurs/progression-anciennete" },
+
   { id: "leave_accrual", label: "Conges acquis", kind: "simulator", href: "/simulateurs/acquisition-conges" },
   { id: "smig_compliance", label: "Conformite SMIG / SMAG", kind: "simulator", href: "/simulateurs/conformite-smig" },
+
   { id: "overtime", label: "Heures supplementaires", kind: "simulator", href: "/simulateurs/heures-supplementaires" },
   { id: "public_holiday_compensation", label: "Travail jour ferie", kind: "simulator", href: "/simulateurs/compensation-jours-feries" },
   { id: "maternity_leave", label: "Conge maternite", kind: "simulator", href: "/simulateurs/conge-maternite" },
@@ -34,6 +89,7 @@ export const TOOL_CATALOG: ToolDefinition[] = [
   { id: "harassment_scenario", label: "Scenario harcelement", kind: "simulator", href: "/simulateurs/scenario-harcelement" },
   { id: "unpaid_salary_recovery", label: "Recouvrement salaire impaye", kind: "simulator", href: "/simulateurs/recouvrement-salaire-impaye" },
   { id: "unpaid_overtime_recovery", label: "Recouvrement heures sup", kind: "simulator", href: "/simulateurs/recouvrement-heures-supplementaires" },
+
   { id: "payslip_detector", label: "Detecteur fiche de paie", kind: "protection", href: "/outils/detecteur-fiche-paie" },
   { id: "salary_delay_alert", label: "Alerte retard salaire", kind: "protection", href: "/outils/alerte-retard-salaire" },
   { id: "compliance_risk_score", label: "Score de conformite", kind: "protection", href: "/outils/score-risque-conformite" },
@@ -41,6 +97,25 @@ export const TOOL_CATALOG: ToolDefinition[] = [
   { id: "disciplinary_procedure_check", label: "Controle procedure disciplinaire", kind: "protection", href: "/outils/controle-procedure-disciplinaire" },
   { id: "fixed_term_contract_risk", label: "Risque requalification CDD", kind: "protection", href: "/outils/risque-requalification-cdd" },
   { id: "pre_litigation_timeline", label: "Feuille route pre-contentieux", kind: "protection", href: "/outils/feuille-route-pre-contentieux" },
+
+  { id: "auto_entrepreneur", label: "Auto-entrepreneur", kind: "simulator", href: "/carriere/auto-entrepreneur" },
+  { id: "avantages_nature", label: "Avantages en nature", kind: "simulator", href: "/planifier/avantages-nature" },
+  { id: "bonus_simulator", label: "Simulateur de prime", kind: "simulator", href: "/planifier/simulation-prime" },
+  { id: "compensation_optimization", label: "Optimisation de la remuneration", kind: "simulator", href: "/planifier/optimisation-remuneration" },
+  { id: "freelance_pricing", label: "Tarification freelance", kind: "simulator", href: "/planifier/tarification-freelance" },
+  { id: "freelance_vs_salary", label: "Freelance vs salarie", kind: "simulator", href: "/carriere/freelance-vs-salarie" },
+  { id: "hiring_cost", label: "Cout de recrutement", kind: "simulator", href: "/planifier/cout-recrutement" },
+  { id: "igr_detail", label: "Calcul IGR detaille", kind: "simulator", href: "/planifier/igr-detail" },
+  { id: "loan_capacity", label: "Capacite d'emprunt", kind: "simulator", href: "/planifier/capacite-credit" },
+  { id: "payroll_mass", label: "Masse salariale", kind: "simulator", href: "/planifier/masse-salariale" },
+  { id: "payslip", label: "Bulletin de paie", kind: "simulator", href: "/planifier/bulletin-paie" },
+  { id: "profit_expense", label: "Benefice et depenses", kind: "simulator", href: "/planifier/benefice-net" },
+  { id: "promotion_scenario", label: "Scenario de promotion", kind: "simulator", href: "/carriere/promotion" },
+  { id: "retirement_advanced", label: "Retraite avancee", kind: "simulator", href: "/planifier/retraite-avancee" },
+  { id: "salary_increase", label: "Augmentation de salaire", kind: "simulator", href: "/carriere/augmentation-salaire" },
+  { id: "unemployment", label: "Indemnite chomage", kind: "simulator", href: "/planifier/indemnite-chomage" },
+  { id: "licenciement_enhanced", label: "Licenciement ameliore", kind: "simulator", href: "/simulateurs/licenciement-avance" },
+  { id: "net_gross_enhanced", label: "Net/Brut ameliore", kind: "simulator", href: "/simulateurs/brut-net-avance" },
 ];
 
 export function createDefaultToolPolicies(): Record<string, ToolPolicy> {

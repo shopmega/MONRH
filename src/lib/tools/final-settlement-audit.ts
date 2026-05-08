@@ -1,13 +1,14 @@
 import { z } from "zod";
 import { getTerminationRulesByDate } from "@/lib/rules/default-rules";
-import { roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, roundMAD, serviceYearsFromPeriod } from "@/lib/calculators/shared";
 
 export const finalSettlementAuditInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   contractType: z.enum(["CDI", "CDD"]).default("CDI"),
   workerCategory: z.enum(["cadre", "employe", "ouvrier"]).default("employe"),
-  yearsOfService: z.number().min(0).max(60),
+  hireDate: z.string().date().optional(),
+  yearsOfService: z.number().min(0).max(60).default(0),
   monthsOfService: z.number().min(0).max(11).default(0),
   unusedLeaveDays: z.number().min(0).max(365).default(0),
   unpaidSalaryMonths: z.number().min(0).max(36).default(0),
@@ -25,6 +26,7 @@ export type FinalSettlementAuditResult = {
   breakdown: {
     contractType: "CDI" | "CDD";
     workerCategory: "cadre" | "employe" | "ouvrier";
+    hireDate?: string;
     totalServiceYears: number;
     indemnityLegale: number;
     indemnitePreavis: number;
@@ -82,7 +84,7 @@ export function auditFinalSettlement(
 ): FinalSettlementAuditResult {
   const input = finalSettlementAuditInputSchema.parse(rawInput);
   const rules = getTerminationRulesByDate(input.calculationDate);
-  const totalServiceYears = input.yearsOfService + input.monthsOfService / 12;
+  const totalServiceYears = serviceYearsFromPeriod(input);
   const hourlySalary = input.monthlySalary / 191;
   const legalHours = indemnityHours(totalServiceYears, rules);
 
@@ -175,6 +177,7 @@ export function auditFinalSettlement(
     breakdown: {
       contractType: input.contractType,
       workerCategory: input.workerCategory,
+      ...(input.hireDate ? { hireDate: input.hireDate } : {}),
       totalServiceYears: roundYears(totalServiceYears),
       indemnityLegale: roundMAD(indemnityLegale),
       indemnitePreavis: roundMAD(indemnitePreavis),

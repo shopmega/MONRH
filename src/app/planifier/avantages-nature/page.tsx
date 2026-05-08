@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo";
-import { SimulatorToolPage } from "@/components/simulator-tool-page";
+import { SimulatorToolPage } from "@/components/simulator-tool-page-wrapper";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Avantages en Nature — Valeur Imposable",
   description: "Calculez la valeur imposable de vos avantages (voiture, logement, repas) et votre remuneration reelle totale.",
-  canonicalPath: "/planifier/avantages-nature",
+  canonicalPath: "/salaire/avantages-nature",
 });
 
 export default function AvantagesNaturePage() {
@@ -16,14 +16,14 @@ export default function AvantagesNaturePage() {
       apiPath="/api/simulate/avantages-nature"
       calculatorType="avantages_nature"
       fields={[
-        { key: "grossSalary", label: "Salaire brut mensuel (MAD)", type: "number", defaultValue: "10000", min: 1, step: 0.01 },
-        { key: "companyVehicle", label: "Vehicule de societe", type: "checkbox", defaultValue: false },
-        { key: "vehicleValue", label: "Valeur vehicule (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "housingProvided", label: "Logement de fonction", type: "checkbox", defaultValue: false },
-        { key: "housingMonthlyValue", label: "Valeur logement (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "mealVouchers", label: "Tickets repas (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "phoneSubscription", label: "Forfait telephone (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
-        { key: "transportAllowance", label: "Indemnite transport (MAD/mois)", type: "number", defaultValue: "0", min: 0, step: 0.01 },
+        { key: "grossSalary", label: "Salaire brut mensuel (MAD)", type: "number", min: 1, step: 0.01 },
+        { key: "companyVehicle", label: "Vehicule de societe", type: "checkbox" },
+        { key: "vehicleValue", label: "Valeur vehicule (MAD/mois)", type: "number", min: 0, step: 0.01 },
+        { key: "housingProvided", label: "Logement de fonction", type: "checkbox" },
+        { key: "housingMonthlyValue", label: "Valeur logement (MAD/mois)", type: "number", min: 0, step: 0.01 },
+        { key: "mealVouchers", label: "Tickets repas (MAD/mois)", type: "number", min: 0, step: 0.01 },
+        { key: "phoneSubscription", label: "Forfait telephone (MAD/mois)", type: "number", min: 0, step: 0.01 },
+        { key: "transportAllowance", label: "Indemnite transport (MAD/mois)", type: "number", min: 0, step: 0.01 },
       ]}
       breakdownLabels={{
         grossSalary: "Salaire brut",

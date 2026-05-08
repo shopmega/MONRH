@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSocialProtectionRulesByDate } from "@/lib/rules/default-rules";
 
 function roundMAD(v: number) {
@@ -10,7 +11,7 @@ function roundMAD(v: number) {
 export const unemploymentInputSchema = z.object({
   monthlyGross: z.number().positive(),  // reference salary for CNSS
   contributionMonths: z.number().int().min(0), // total months contributed to CNSS
-  calculationDate: z.string().date().default("2026-01-01"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlyExpenses: z.number().min(0).default(0), // for financial runway calculation
 });
 

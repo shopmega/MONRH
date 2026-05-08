@@ -1,20 +1,23 @@
 import { z } from "zod";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 /** Harassment type determines legal framework and valid escalation paths */
 export const harassmentScenarioInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
+  firstIncidentDate: z.string().date().optional(),
+  lastIncidentDate: z.string().date().optional(),
   harassmentType: z.enum(["moral", "sexual"]).default("moral"),
   perpetratorRelationship: z.enum(["supervisor", "colleague", "client"]).default("supervisor"),
   incidentsCount: z.number().min(1).max(200),
   witnessesCount: z.number().min(0).max(50).default(0),
   hasWrittenProof: z.boolean().default(false),
+  hasIncidentLog: z.boolean().default(false),
   hasMedicalProof: z.boolean().default(false),
   hrNotified: z.boolean().default(false),
   companySize: z.enum(["small", "large"]).default("large"), // small = <10 employees
 });
 
-export type HarassmentScenarioInput = z.infer<typeof harassmentScenarioInputSchema>;
+export type HarassmentScenarioInput = z.input<typeof harassmentScenarioInputSchema>;
 
 export type HarassmentScenarioResult = {
   versionId: string;
@@ -79,6 +82,7 @@ export function simulateHarassmentScenario(
     Math.min(input.incidentsCount * 4, 40) +
     Math.min(input.witnessesCount * 6, 24) +
     (input.hasWrittenProof ? 20 : 0) +
+    (input.hasIncidentLog ? 10 : 0) +
     (input.hasMedicalProof ? 12 : 0) +
     sexualBonus +
     supervisorBonus +
@@ -89,6 +93,7 @@ export function simulateHarassmentScenario(
   const evidenceReadinessPercent = dossierStrengthScore;
 
   const priorityActions: string[] = [];
+  if (!input.hasIncidentLog && !input.hasWrittenProof) priorityActions.push("Tenir un journal date des incidents.");
   if (!input.hasWrittenProof) priorityActions.push("Constituer des preuves ecrites (emails, SMS, journal date).");
   if (!input.hrNotified && input.harassmentType === "sexual") priorityActions.push("Signaler formellement au RH ou responsable hierarchique superieur.");
   if (!input.hasMedicalProof && dossierStrengthScore < 50) priorityActions.push("Consulter un medecin et conserver le certificat medical.");
@@ -135,6 +140,9 @@ export function simulateHarassmentScenario(
         input.companySize === "small"
           ? "Entreprise < 10 salaries: absence de representants du personnel limite les voies internes."
           : "",
+        input.firstIncidentDate && input.lastIncidentDate
+          ? `Periode declaree: ${input.firstIncidentDate} au ${input.lastIncidentDate}.`
+          : "Dates du premier et dernier incident non renseignees: le dossier reste moins auditables.",
         "Ce score n'est pas une prediction de decision judiciaire.",
       ].filter(Boolean),
       nextSteps: priorityActions.length > 0

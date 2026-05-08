@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Block common bot paths and non-content areas
+Disallow: /_next/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /compte
+Disallow: /*/result
+
+# Allow search engines to crawl main content areas
+Allow: /simulateurs
+Allow: /outils
+Allow: /planifier
+Allow: /documents
+Allow: /articles
+Allow: /bibliotheque
+
+Sitemap: https://www.simpaie.com/sitemap.xml

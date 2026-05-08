@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getTerminationRulesByDate } from "@/lib/rules/default-rules";
-import { type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
 
 export const seniorityGrowthInputSchema = z.object({
-  calculationDate: z.string().date().default("2026-02-12"),
+  calculationDate: z.string().date().default(getCurrentDateISO),
   monthlySalary: z.number().positive(),
   currentYears: z.number().min(0).max(60),
   additionalYears: z.number().min(0).max(20),
