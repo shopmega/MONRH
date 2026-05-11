@@ -42,7 +42,9 @@ export type EmployerTotalCostResult = {
 export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): EmployerTotalCostResult {
   const input = employerTotalCostInputSchema.parse(rawInput);
   const engineResult = calculatePayroll(input.grossSalary, input as unknown as PayrollEngineInput);
+  const rules = getSalaryRulesByDate(input.calculationDate);
 
+  const atMpRate = AT_MP_RATES[input.sectorRisk];
   const atMpInsurance = engineResult.atMpEmployer;
   const additionalBenefits = roundMAD(input.additionalBenefitsMad);
 
