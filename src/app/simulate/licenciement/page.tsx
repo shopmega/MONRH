@@ -48,7 +48,7 @@ export default function LicenciementPage() {
             { value: "ouvrier", label: "Ouvrier" },
           ],
         },
-        { key: "hireDate", label: "Date d'embauche", type: "date" },
+        { key: "hireDate", label: "Date d'embauche", type: "date", required: false },
         { key: "dismissalNotificationDate", label: "Date de notification du licenciement", type: "date", required: false },
         { key: "unusedLeaveDays", label: "Jours de conges restants", type: "number", min: 0, step: 0.5 },
         { key: "procedureCompliant", label: "Procedure de licenciement respectee", type: "checkbox", defaultValue: true },

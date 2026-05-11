@@ -16,9 +16,9 @@ export default function WorkAccidentPage() {
       apiPath="/api/simulate/work-accident"
       calculatorType="work_accident"
       fields={[
-        { key: "calculationDate", label: "Date de calcul", type: "date" },
-        { key: "accidentDate", label: "Date accident", type: "date" },
-        { key: "declarationDate", label: "Date declaration", type: "date" },
+        { key: "calculationDate", label: "Date de calcul", type: "date", required: false },
+        { key: "accidentDate", label: "Date accident", type: "date", required: false },
+        { key: "declarationDate", label: "Date declaration", type: "date", required: false },
         { key: "monthlySalary", label: "Salaire mensuel (MAD)", type: "number", min: 1, step: 0.01 },
         { key: "temporaryIncapacityDays", label: "Jours incapacite temporaire", type: "number", min: 0, step: 1 },
         { key: "permanentIncapacityPercent", label: "Taux incapacite permanente (%)", type: "number", min: 0, max: 100, step: 1 },

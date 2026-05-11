@@ -16,7 +16,7 @@ export default function LeaveAccrualPage() {
       apiPath="/api/simulate/leave-accrual"
       calculatorType="leave_accrual"
       fields={[
-        { key: "hireDate", label: "Date d'embauche", type: "date" },
+        { key: "hireDate", label: "Date d'embauche", type: "date", required: false },
         { key: "usedLeaveDays", label: "Conges utilises (jours)", type: "number", min: 0, step: 0.5 },
         { key: "carriedDays", label: "Reliquat reporte (jours)", type: "number", min: 0, step: 0.5 },
       ]}

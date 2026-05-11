@@ -53,6 +53,7 @@ const nextConfig: NextConfig = {
       { source: "/login", destination: "/connexion", permanent: true },
       { source: "/forgot-password", destination: "/mot-de-passe-oublie", permanent: true },
       { source: "/reset-password", destination: "/reinitialiser-mot-de-passe", permanent: true },
+      // Cleanup: /simulateurs is the primary French path for simulators
       { source: "/simulate", destination: "/simulateurs", permanent: true },
       { source: "/simulate/net-gross", destination: "/simulateurs/brut-net", permanent: true },
       { source: "/simulate/net-gross-enhanced", destination: "/simulateurs/brut-net-avance", permanent: true },
@@ -88,6 +89,7 @@ const nextConfig: NextConfig = {
         destination: "/simulateurs/recouvrement-heures-supplementaires",
         permanent: true,
       },
+      // Cleanup: /outils is the primary French path for tools
       { source: "/tools", destination: "/outils", permanent: true },
       { source: "/tools/payslip-detector", destination: "/outils/detecteur-fiche-paie", permanent: true },
       { source: "/tools/salary-delay-alert", destination: "/outils/alerte-retard-salaire", permanent: true },

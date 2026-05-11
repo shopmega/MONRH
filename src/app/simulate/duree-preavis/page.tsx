@@ -37,8 +37,8 @@ export default function DureePreavisPage() {
             { value: "ouvrier", label: "Ouvrier" },
           ],
         },
-        { key: "hireDate", label: "Date d'embauche", type: "date" },
-        { key: "notificationDate", label: "Date de notification", type: "date" },
+        { key: "hireDate", label: "Date d'embauche", type: "date", required: false },
+        { key: "notificationDate", label: "Date de notification", type: "date", required: false },
         {
           key: "ruptureInitiator",
           label: "Initiateur de la rupture",

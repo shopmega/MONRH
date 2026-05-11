@@ -36,8 +36,8 @@ export default function DemissionPage() {
             { label: "CDD", value: "CDD" },
           ],
         },
-        { key: "hireDate", label: "Date d'embauche", type: "date" },
-        { key: "resignationNotificationDate", label: "Date de notification de la demission", type: "date" },
+        { key: "hireDate", label: "Date d'embauche", type: "date", required: false },
+        { key: "resignationNotificationDate", label: "Date de notification de la demission", type: "date", required: false },
         { key: "unusedLeaveDays", label: "Conges restants (jours)", type: "number", min: 0, step: 0.5 },
         {
           key: "noticeStatus",
