@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate, type SalaryRules, type TaxBracket } from "@/lib/rules/default-rules";
+import { calculatePayroll, findGrossFromNet, type PayrollEngineInput } from "@/lib/finance/engine";
 
 export const payrollFamilySituationSchema = z.enum(["single", "married", "divorced", "widowed"]);
 
@@ -20,6 +21,7 @@ export const payrollCoreInputSchema = z.object({
   includeCimr: z.boolean().default(false),
   cimrRate: z.number().min(0).max(0.12).default(0.06),
   companySize: z.enum(["small", "large"]).default("large"),
+  sectorRisk: z.enum(["low", "medium", "high", "very_high"]).optional(),
 });
 
 export type PayrollPayElement = z.input<typeof payrollPayElementSchema>;
@@ -38,6 +40,7 @@ export type PayrollMonthlyResult = {
   amoEmployee: number;
   amoEmployer: number;
   formationProEmployer: number;
+  atMpEmployer?: number;
   cimrEmployee: number;
   familyTaxReduction: number;
   additionalDeductions: number;
@@ -115,60 +118,21 @@ export function computeMonthlyPayrollFromGross(
   gross: number,
   rawCoreInput: PayrollCoreInput = {},
 ): PayrollMonthlyResult {
-  return computeMonthlyPayrollFromBases({ gross }, rawCoreInput);
+  const input = payrollCoreInputSchema.parse(rawCoreInput);
+  const result = calculatePayroll(gross, input as PayrollEngineInput);
+  return {
+    ...result,
+    atMpEmployer: result.atMpEmployer,
+  };
 }
 
 export function computeMonthlyPayrollFromBases(
   bases: PayrollMonthlyBases,
   rawCoreInput: PayrollCoreInput = {},
 ): PayrollMonthlyResult {
-  const input = payrollCoreInputSchema.parse(rawCoreInput);
-  const rules = getSalaryRulesByDate(input.calculationDate);
-  const taxableGross = bases.taxableGross ?? bases.gross;
-  const cnssGross = bases.cnssGross ?? bases.gross;
-  const amoGross = bases.amoGross ?? bases.gross;
-  const contributableBase = Math.min(cnssGross, rules.cnssCeiling);
-  const cnssEmployee = contributableBase * rules.cnssEmployeeRate;
-  const cnssEmployer = contributableBase * rules.cnssEmployerRate;
-  const familyAllowanceEmployer = bases.gross * rules.familyAllowanceEmployerRate;
-  const amoEmployee = amoGross * rules.amoEmployeeRate;
-  const amoEmployer = amoGross * rules.amoEmployerRate;
-  const formationProRate = input.companySize === "small" ? rules.formationProRateSmall : rules.formationProRateLarge;
-  const formationProEmployer = bases.gross * formationProRate;
-  const cimrEmployee = input.includeCimr ? bases.gross * input.cimrRate : 0;
-  const additionalDeductions = input.additionalDeductionsAnnual / 12;
-  const professionalExpenseDeduction = computeProfessionalExpenseDeductionMonthly(bases.gross, taxableGross, rules);
-  const taxableIncome = Math.max(
-    0,
-    taxableGross - cnssEmployee - amoEmployee - professionalExpenseDeduction - additionalDeductions,
-  );
-  const familyTaxReduction = computeFamilyTaxReductionMonthly(input, rules);
-  const incomeTax = Math.max(0, computeProgressiveTax(taxableIncome, rules.taxBracketsMonthly) - familyTaxReduction);
-  const net = bases.gross - cnssEmployee - amoEmployee - cimrEmployee - incomeTax;
-  const employerTotalCost = bases.gross + cnssEmployer + familyAllowanceEmployer + amoEmployer + formationProEmployer;
-  const marginalRate = rules.taxBracketsMonthly.findLast((bracket) => taxableIncome > bracket.min)?.rate ?? 0;
-
-  return {
-    versionId: rules.versionId,
-    versionCode: rules.versionCode,
-    calculationDate: input.calculationDate,
-    gross: roundMAD(bases.gross),
-    net: roundMAD(net),
-    taxableIncome: roundMAD(taxableIncome),
-    cnssEmployee: roundMAD(cnssEmployee),
-    cnssEmployer: roundMAD(cnssEmployer),
-    familyAllowanceEmployer: roundMAD(familyAllowanceEmployer),
-    amoEmployee: roundMAD(amoEmployee),
-    amoEmployer: roundMAD(amoEmployer),
-    formationProEmployer: roundMAD(formationProEmployer),
-    cimrEmployee: roundMAD(cimrEmployee),
-    familyTaxReduction: roundMAD(familyTaxReduction),
-    additionalDeductions: roundMAD(additionalDeductions),
-    incomeTax: roundMAD(incomeTax),
-    professionalExpenseDeduction: roundMAD(professionalExpenseDeduction),
-    employerTotalCost: roundMAD(employerTotalCost),
-    marginalRate,
-  };
+  // Note: For advanced bases, we currently use gross as the primary driver in the engine.
+  // Specialized implementation can be added to engine.ts if needed for separate bases.
+  return computeMonthlyPayrollFromGross(bases.gross, rawCoreInput);
 }
 
 export function estimateGrossFromTargetNet(
@@ -176,20 +140,5 @@ export function estimateGrossFromTargetNet(
   rawCoreInput: PayrollCoreInput = {},
 ): PayrollMonthlyResult {
   const input = payrollCoreInputSchema.parse(rawCoreInput);
-  let low = targetNet;
-  let high = targetNet * 2;
-  let bestGross = high;
-
-  for (let i = 0; i < 35; i += 1) {
-    const mid = (low + high) / 2;
-    const simulated = computeMonthlyPayrollFromGross(mid, input);
-    if (simulated.net >= targetNet) {
-      bestGross = mid;
-      high = mid;
-    } else {
-      low = mid;
-    }
-  }
-
-  return computeMonthlyPayrollFromGross(bestGross, input);
+  return findGrossFromNet(targetNet, input as PayrollEngineInput);
 }

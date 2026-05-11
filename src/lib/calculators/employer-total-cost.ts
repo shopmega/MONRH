@@ -1,17 +1,7 @@
 import { z } from "zod";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
-
-/**
- * AT/MP (Work Accident / Occupational Disease) sector rate ranges.
- * In Morocco, AT/MP is employer-funded. Rate varies by sector risk class.
- */
-const AT_MP_RATES = {
-  low: 0.005,     // e.g. services, finance, IT
-  medium: 0.02,   // e.g. commerce, transport
-  high: 0.04,     // e.g. construction, manufacturing
-  very_high: 0.06, // e.g. mining, chemicals
-} as const;
+import { calculatePayroll, AT_MP_RATES, type PayrollEngineInput } from "@/lib/finance/engine";
 
 export const employerTotalCostInputSchema = z.object({
   calculationDate: z.string().date().default(getCurrentDateISO),
@@ -51,34 +41,18 @@ export type EmployerTotalCostResult = {
 
 export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): EmployerTotalCostResult {
   const input = employerTotalCostInputSchema.parse(rawInput);
+  const engineResult = calculatePayroll(input.grossSalary, input as unknown as PayrollEngineInput);
   const rules = getSalaryRulesByDate(input.calculationDate);
 
-  const contributableBase = Math.min(input.grossSalary, rules.cnssCeiling);
-  const cnssEmployer = roundMAD(contributableBase * rules.cnssEmployerRate);
-  const familyAllowanceEmployer = roundMAD(input.grossSalary * rules.familyAllowanceEmployerRate);
-  const amoEmployer = roundMAD(input.grossSalary * rules.amoEmployerRate);
-
   const atMpRate = AT_MP_RATES[input.sectorRisk];
-  const atMpInsurance = roundMAD(input.grossSalary * atMpRate);
-
-  const formationRate = input.companySize === "small" ? rules.formationProRateSmall : rules.formationProRateLarge;
-  const formationPro = roundMAD(input.grossSalary * formationRate);
-
+  const atMpInsurance = engineResult.atMpEmployer;
   const additionalBenefits = roundMAD(input.additionalBenefitsMad);
 
-  const monthlyTotalCost = roundMAD(
-    input.grossSalary +
-      cnssEmployer +
-      familyAllowanceEmployer +
-      amoEmployer +
-      atMpInsurance +
-      formationPro +
-      additionalBenefits,
-  );
+  const monthlyTotalCost = roundMAD(engineResult.employerTotalCost + additionalBenefits);
 
   const annualTotalCost = roundMAD(monthlyTotalCost * input.months);
   const bonusMonth = input.include13thMonth
-    ? input.grossSalary + cnssEmployer + familyAllowanceEmployer + amoEmployer + atMpInsurance + formationPro
+    ? roundMAD(engineResult.employerTotalCost - engineResult.gross + engineResult.gross) // Simply gross + all charges
     : 0;
   const annualCostWithBonus = roundMAD(annualTotalCost + bonusMonth);
 
@@ -87,15 +61,15 @@ export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): Emp
   );
 
   return {
-    versionId: rules.versionId,
-    versionCode: rules.versionCode,
+    versionId: engineResult.versionId,
+    versionCode: engineResult.versionCode,
     breakdown: {
-      grossSalary: roundMAD(input.grossSalary),
-      cnssEmployer,
-      familyAllowanceEmployer,
-      amoEmployer,
+      grossSalary: engineResult.gross,
+      cnssEmployer: engineResult.cnssEmployer,
+      familyAllowanceEmployer: engineResult.familyAllowanceEmployer,
+      amoEmployer: engineResult.amoEmployer,
       atMpInsurance,
-      formationPro,
+      formationPro: engineResult.formationProEmployer,
       additionalBenefits,
       monthlyTotalCost,
       annualTotalCost,

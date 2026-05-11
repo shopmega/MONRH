@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, memo } from "react";
 import { 
   Calendar, 
   Coins, 
@@ -47,7 +47,7 @@ const InputWrapper = ({ id, label, required, error, hint, children }: InputWrapp
 );
 
 // --- 1. Date Input ---
-export const SmartDate = ({ 
+export const SmartDate = memo(({
   value, 
   onChange, 
   ...props 
@@ -75,10 +75,11 @@ export const SmartDate = ({
       />
     </InputWrapper>
   );
-};
+});
+SmartDate.displayName = "SmartDate";
 
 // --- 2. Amount (DH) Input ---
-export const SmartAmount = ({ 
+export const SmartAmount = memo(({
   value, 
   onChange, 
   suffix = "DH",
@@ -112,10 +113,11 @@ export const SmartAmount = ({
       <span className="sim-amount-suffix">{suffix}</span>
     </InputWrapper>
   );
-};
+});
+SmartAmount.displayName = "SmartAmount";
 
 // --- 3. Toggle Switch ---
-export const SmartToggle = ({ 
+export const SmartToggle = memo(({
   value, 
   onChange, 
   subtitle,
@@ -150,7 +152,8 @@ export const SmartToggle = ({
       </label>
     </div>
   );
-};
+});
+SmartToggle.displayName = "SmartToggle";
 
 // --- 4. Radio Cards ---
 export const SmartRadioCards = ({ 
@@ -200,7 +203,7 @@ export const SmartRadioCards = ({
 };
 
 // --- 5. Stepper ---
-export const SmartStepper = ({ 
+export const SmartStepper = memo(({
   value, 
   onChange, 
   min = 0, 
@@ -243,7 +246,8 @@ export const SmartStepper = ({
       </div>
     </div>
   );
-};
+});
+SmartStepper.displayName = "SmartStepper";
 
 // --- 6. Tag Input ---
 export const SmartTagInput = ({ 

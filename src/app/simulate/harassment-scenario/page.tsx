@@ -16,9 +16,9 @@ export default function HarassmentScenarioPage() {
       apiPath="/api/simulate/harassment-scenario"
       calculatorType="harassment_scenario"
       fields={[
-        { key: "calculationDate", label: "Date de calcul", type: "date" },
-        { key: "firstIncidentDate", label: "Premier incident", type: "date" },
-        { key: "lastIncidentDate", label: "Dernier incident", type: "date" },
+        { key: "calculationDate", label: "Date de calcul", type: "date", required: false },
+        { key: "firstIncidentDate", label: "Premier incident", type: "date", required: false },
+        { key: "lastIncidentDate", label: "Dernier incident", type: "date", required: false },
         {
           key: "harassmentType", label: "Type de harcelement", type: "select", defaultValue: "moral", options: [
             { value: "moral", label: "Harcelement moral (Art. 40 CT)" },
