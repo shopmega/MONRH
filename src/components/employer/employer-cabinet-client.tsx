@@ -134,10 +134,6 @@ export function EmployerCabinetClient() {
     setPortfolioData(readPortfolioData(nextCompanies));
   }, []);
 
-  if (!activeCompany) return null;
-
-  const capabilities = employerPlanCapabilities[activeCompany.plan];
-  const cabinetUnlocked = activeCompany.plan === "cabinet";
   const portfolioRows = useMemo(
     () => buildPortfolioRows(companies, portfolioData),
     [companies, portfolioData],
@@ -151,6 +147,11 @@ export function EmployerCabinetClient() {
     }),
     [portfolioRows],
   );
+
+  if (!activeCompany) return null;
+
+  const capabilities = employerPlanCapabilities[activeCompany.plan];
+  const cabinetUnlocked = activeCompany.plan === "cabinet";
 
   function selectCompany(company: EmployerCompany) {
     writeActiveEmployerCompanyId(company.id);
