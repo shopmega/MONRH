@@ -9,6 +9,8 @@ import { usePublicConfig } from "@/components/public-config-provider";
 import { RelatedContent } from "@/components/related-content";
 import { JsonLd } from "@/components/json-ld";
 import { trackEvent } from "@/lib/analytics/client";
+import { useAudience } from "@/components/audience-provider";
+import { withAudienceQuery } from "@/lib/audience/audience-mode";
 import { canUseTool, resolveToolPolicy } from "@/lib/tools/tool-access";
 import {
   localizeBreakdownLabel,
@@ -349,6 +351,7 @@ function SimulatorToolPageContent({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { mode: audienceMode } = useAudience();
   const [values, setValues] = useState<ValuesState>(() => createInitialState(fields, searchParams));
   const [touchedFields, setTouchedFields] = useState<Set<string>>(() => createTouchedState(fields, searchParams));
   const [loading, setLoading] = useState(false);
@@ -563,6 +566,7 @@ function SimulatorToolPageContent({
         breakdownLabels: localizedBreakdownLabels,
         units,
         locale,
+        audienceMode,
         inputPayload: payload,
         result: data.result,
       });
@@ -571,7 +575,7 @@ function SimulatorToolPageContent({
         type: "simulation_run",
         path: pathname,
         locale,
-        meta: { calculatorType },
+        meta: { audienceMode, calculatorType },
       });
 
       const metric = pickPrimaryMetric(data.result, localizedBreakdownLabels, units, locale);
@@ -611,7 +615,7 @@ function SimulatorToolPageContent({
       const resultHref = simulationId
         ? `${pathname}/result?simulationId=${encodeURIComponent(simulationId)}`
         : `${pathname}/result`;
-      router.push(resultHref);
+      router.push(withAudienceQuery(resultHref, audienceMode));
 
       setMessageTone("success");
       setMessage(t("simulator.success"));

@@ -13,6 +13,6 @@ describe("simulateEmployerTotalCost", () => {
     expect(result.versionCode).toBe("ma_2026");
     expect(result.breakdown.familyAllowanceEmployer).toBe(640);
     expect(result.breakdown.monthlyTotalCost).toBeGreaterThan(result.breakdown.grossSalary);
-    expect(result.breakdown.monthlyTotalCost).toBe(11949.8);
+    expect(result.breakdown.monthlyTotalCost).toBe(11783.8);
   });
 });

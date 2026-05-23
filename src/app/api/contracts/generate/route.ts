@@ -3,7 +3,8 @@ import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ContractValidationEngine } from "@/lib/contracts/validation-engine";
 import { ContractTemplateEngine } from "@/lib/contracts/template-engine";
-import { ContractTemplate } from "@/lib/contracts/types";
+import { getFallbackContractCatalog } from "@/lib/contracts/fallback-catalog";
+import { ContractTemplate, type ContractFormData } from "@/lib/contracts/types";
 import { syncContractToAvisine } from "@/lib/contracts/salary-sync";
 
 // Error messages that should be translated in the frontend
@@ -14,10 +15,78 @@ const ERROR_MESSAGES = {
   GENERATION_FAILED: "Failed to generate contract",
 } as const;
 
+function generateFallbackContract(templateId: string, contractData: ContractFormData) {
+  const catalog = getFallbackContractCatalog();
+  const template = catalog.templates.find((item) => item.id === templateId || item.contract_type === templateId);
+
+  if (!template) {
+    return NextResponse.json(
+      { ok: false, error: `${ERROR_MESSAGES.TEMPLATE_NOT_FOUND}: ${templateId}` },
+      { status: 404 },
+    );
+  }
+
+  const validationEngine = new ContractValidationEngine(catalog.validationRules);
+  const validationResult = validationEngine.validate(contractData, template.contract_type);
+
+  if (!validationResult.isValid) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: ERROR_MESSAGES.VALIDATION_FAILED,
+        validationErrors: validationResult.errors,
+        warnings: validationResult.warnings,
+      },
+      { status: 400 },
+    );
+  }
+
+  const finalContractData = validationEngine.applyDefaults(contractData, validationResult.defaults);
+  const contractContent = renderFallbackContract(template, finalContractData);
+
+  return NextResponse.json({
+    ok: true,
+    source: "fallback",
+    contract: {
+      id: crypto.randomUUID(),
+      content: contractContent,
+      templateId,
+      contractData: finalContractData,
+      warnings: validationResult.warnings,
+      createdAt: new Date().toISOString(),
+    },
+  });
+}
+
+function renderFallbackContract(template: ContractTemplate, contractData: ContractFormData) {
+  const title =
+    template.contract_type === "CDI"
+      ? "CONTRAT DE TRAVAIL A DUREE INDETERMINEE (CDI)"
+      : "CONTRAT DE TRAVAIL A DUREE DETERMINEE (CDD)";
+  const body = [...template.sections]
+    .sort((a, b) => a.order - b.order)
+    .map((section, index) => {
+      const content = section.content.replace(/{{(\w+)}}/g, (_, key: keyof ContractFormData) => {
+        const value = contractData[key];
+        if (Array.isArray(value)) return value.join(", ");
+        if (value && typeof value === "object") return "";
+        return value === undefined || value === null || value === "" ? "A completer" : String(value);
+      });
+      return `ARTICLE ${index + 1} - ${section.title.toUpperCase()}\n\n${content}`;
+    })
+    .join("\n\n------------------------------------------------------------\n\n");
+
+  return `${title}\n\n${body}\n\nDocument genere par SIMPAIE le ${new Date().toLocaleDateString("fr-MA")}.`;
+}
+
 export async function POST(request: Request) {
+  let templateId = "";
+  let contractData: ContractFormData | null = null;
+
   try {
     const body = await request.json();
-    const { templateId, contractData } = body;
+    templateId = body.templateId;
+    contractData = body.contractData;
 
     if (!templateId || !contractData) {
       return NextResponse.json(
@@ -40,10 +109,7 @@ export async function POST(request: Request) {
 
     if (templateError || !template) {
       console.error("Template not found:", templateId, templateError);
-      return NextResponse.json(
-        { ok: false, error: `${ERROR_MESSAGES.TEMPLATE_NOT_FOUND}: ${templateId}` },
-        { status: 404 }
-      );
+      return generateFallbackContract(templateId, contractData);
     }
 
     // Cast template to proper type
@@ -126,6 +192,9 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error("Contract generation error:", error);
+    if (templateId && contractData) {
+      return generateFallbackContract(templateId, contractData);
+    }
     return NextResponse.json(
       { ok: false, error: ERROR_MESSAGES.GENERATION_FAILED },
       { status: 500 }

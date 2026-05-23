@@ -1,5 +1,7 @@
 "use client";
 
+import type { AudienceMode } from "@/lib/audience/audience-mode";
+
 type GenericSimulationResult = {
   versionCode: string;
   breakdown: Record<string, string | number | boolean>;
@@ -28,6 +30,7 @@ export type SimulationResultSnapshot = {
   breakdownLabels: Record<string, string>;
   units: Record<string, string>;
   locale: string;
+  audienceMode?: AudienceMode;
   inputPayload?: Record<string, unknown>;
   result: GenericSimulationResult;
 };

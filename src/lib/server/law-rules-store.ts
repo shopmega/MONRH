@@ -33,7 +33,11 @@ const baseVersionSchema = z.object({
 });
 
 const salaryRuleSchema = baseVersionSchema.extend({
+  cnssEmployeeShortTermRate: z.number().min(0).default(0.0052),
+  cnssEmployeeLongTermRate: z.number().min(0).default(0.0396),
   cnssEmployeeRate: z.number().min(0),
+  cnssEmployerShortTermRate: z.number().min(0).default(0.0105),
+  cnssEmployerLongTermRate: z.number().min(0).default(0.0793),
   cnssEmployerRate: z.number().min(0),
   cnssCeiling: z.number().min(0),
   familyAllowanceEmployerRate: z.number().min(0).default(0.064),

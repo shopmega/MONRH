@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { CompanySearchInput, type CompanyOption } from "@/components/company-search-input";
+import { readEmployerScopedValue, removeEmployerScopedValue, writeEmployerScopedValue } from "@/lib/employer/company-store";
+import { EMPLOYER_CONTRACT_DRAFT_STORAGE_KEY } from "@/lib/employer/portal-data";
 import type { 
   ContractFormData, 
   ContractTemplate, 
@@ -53,7 +55,7 @@ export function ContractWizard({
     // Load draft from localStorage on initial load
     if (typeof window !== 'undefined') {
       try {
-        const savedDraft = localStorage.getItem('contract_draft');
+        const savedDraft = readEmployerScopedValue(EMPLOYER_CONTRACT_DRAFT_STORAGE_KEY);
         if (savedDraft) {
           const draft = JSON.parse(savedDraft);
           // Validate draft structure
@@ -202,7 +204,7 @@ export function ContractWizard({
           touchedFields: Array.from(touchedFields),
           timestamp: new Date().toISOString()
         };
-        localStorage.setItem('contract_draft', JSON.stringify(draft));
+        writeEmployerScopedValue(EMPLOYER_CONTRACT_DRAFT_STORAGE_KEY, JSON.stringify(draft));
         setLastSaved(new Date());
       } catch (error) {
         console.warn('Failed to save contract draft:', error);
@@ -228,7 +230,7 @@ export function ContractWizard({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const savedDraft = localStorage.getItem('contract_draft');
+        const savedDraft = readEmployerScopedValue(EMPLOYER_CONTRACT_DRAFT_STORAGE_KEY);
         if (savedDraft) {
           const draft = JSON.parse(savedDraft);
           if (draft.currentStep !== undefined) {
@@ -256,7 +258,7 @@ export function ContractWizard({
   const clearDraft = () => {
     if (typeof window !== 'undefined') {
       try {
-        localStorage.removeItem('contract_draft');
+        removeEmployerScopedValue(EMPLOYER_CONTRACT_DRAFT_STORAGE_KEY);
         setLastSaved(null);
       } catch (error) {
         console.warn('Failed to clear contract draft:', error);

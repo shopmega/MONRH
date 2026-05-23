@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { getFallbackContractCatalog } from "@/lib/contracts/fallback-catalog";
 
 export async function GET() {
   try {
@@ -41,13 +42,17 @@ export async function GET() {
       ok: true,
       templates: templates || [],
       clauses: clauses || [],
-      validationRules: rules || []
+      validationRules: rules || [],
+      source: "supabase",
     });
   } catch (error) {
     console.error("Contract templates API error:", error);
-    return NextResponse.json(
-      { ok: false, error: "Failed to fetch contract templates" },
-      { status: 500 }
-    );
+    const fallback = getFallbackContractCatalog();
+    return NextResponse.json({
+      ok: true,
+      ...fallback,
+      source: "fallback",
+      warning: "Supabase contract templates unavailable; using local contract catalog.",
+    });
   }
 }

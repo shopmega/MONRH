@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { useTheme } from "@/components/theme-provider";
+import { useAudience } from "@/components/audience-provider";
 
-type NavKey = "home" | "salaire" | "carriere" | "depart" | "bibliotheque" | "modeles" | "account";
+type NavKey = "home" | "salaire" | "carriere" | "depart" | "bibliotheque" | "modeles" | "employer" | "account";
 
 type NavItem = {
   key: NavKey;
@@ -52,6 +53,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: "file-text",
     label: { fr: "Modèles", ar: "نماذج" },
   },
+  {
+    key: "employer",
+    href: "/employer",
+    icon: "briefcase",
+    label: { fr: "Employeur", ar: "Employeur" },
+  },
   { 
     key: "account", 
     href: "/compte", 
@@ -60,7 +67,7 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-const ARABIC_NAV_LABELS: Record<NavKey, string> = {
+const ARABIC_NAV_LABELS: Partial<Record<NavKey, string>> = {
   home: "الرئيسية",
   salaire: "أجري",
   carriere: "مساري المهني",
@@ -162,6 +169,14 @@ const CustomIcon = ({ icon, className }: { icon: string; className: string }) =>
         <polyline points="10 9 9 9 8 9" />
       </svg>
     ),
+    briefcase: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <rect x="2" y="7" width="20" height="14" rx="2" />
+        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+        <path d="M2 12h20" />
+        <path d="M12 12v2" />
+      </svg>
+    ),
     user: (
       <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -196,6 +211,7 @@ export function SiteNav() {
   const [openMenu, setOpenMenu] = useState(false);
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { setMode } = useAudience();
 
   useEffect(() => {
     if (openMenu) {
@@ -292,7 +308,14 @@ export function SiteNav() {
                 <Link
                   key={item.key}
                   href={item.href}
-                  onClick={closeMenu}
+                  onClick={() => {
+                    if (item.key === "employer") {
+                      setMode("employer");
+                    } else if (item.key !== "account") {
+                      setMode("employee");
+                    }
+                    closeMenu();
+                  }}
                   className={`flex flex-col items-center p-6 rounded-[2rem] transition-all ${
                     isActive(pathname, item.href)
                       ? "bg-[var(--juris-primary)] text-white shadow-xl shadow-juris-primary/20 scale-105"
@@ -303,7 +326,7 @@ export function SiteNav() {
                     <CustomIcon icon={item.icon} className="h-6 w-6" />
                   </div>
                   <span className="text-xs font-bold uppercase tracking-widest">
-                    {language === "ar" ? ARABIC_NAV_LABELS[item.key] : item.label.fr}
+                    {language === "ar" ? ARABIC_NAV_LABELS[item.key] ?? item.label.ar : item.label.fr}
                   </span>
                 </Link>
               ))}
@@ -314,7 +337,10 @@ export function SiteNav() {
                 <Link
                   key={section.key}
                   href={section.href}
-                  onClick={closeMenu}
+                  onClick={() => {
+                    setMode("employee");
+                    closeMenu();
+                  }}
                   className={`flex items-center justify-between gap-3 rounded-[1.5rem] p-4 transition-all ${
                     isActive(pathname, section.href)
                       ? "bg-[var(--juris-primary)] text-white shadow-xl shadow-juris-primary/20"
@@ -343,6 +369,7 @@ export function SiteNav() {
 function DesktopNav() {
   const { language } = useLanguage();
   const pathname = usePathname();
+  const { setMode } = useAudience();
 
   return (
     <nav className="hidden lg:flex items-center space-x-1 overflow-x-hidden">
@@ -350,6 +377,13 @@ function DesktopNav() {
         <Link
           key={item.key}
           href={item.href}
+          onClick={() => {
+            if (item.key === "employer") {
+              setMode("employer");
+            } else if (item.key !== "account") {
+              setMode("employee");
+            }
+          }}
           className={`group relative px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
             isActive(pathname, item.href)
               ? "bg-[var(--accent)] text-white shadow-md"

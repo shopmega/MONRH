@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 import { getCurrentDateISO, type CalculatorExplanation, roundMAD } from "@/lib/calculators/shared";
+import { computeCnssEmployerContribution } from "@/lib/calculators/payroll-core";
 
 /**
  * AT/MP (Work Accident / Occupational Disease) sector rate ranges.
@@ -53,8 +54,7 @@ export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): Emp
   const input = employerTotalCostInputSchema.parse(rawInput);
   const rules = getSalaryRulesByDate(input.calculationDate);
 
-  const contributableBase = Math.min(input.grossSalary, rules.cnssCeiling);
-  const cnssEmployer = roundMAD(contributableBase * rules.cnssEmployerRate);
+  const cnssEmployer = roundMAD(computeCnssEmployerContribution(input.grossSalary, rules).total);
   const familyAllowanceEmployer = roundMAD(input.grossSalary * rules.familyAllowanceEmployerRate);
   const amoEmployer = roundMAD(input.grossSalary * rules.amoEmployerRate);
 
@@ -105,16 +105,16 @@ export function simulateEmployerTotalCost(rawInput: EmployerTotalCostInput): Emp
     explanation: {
       summary: `Cout mensuel employeur: ${monthlyTotalCost} MAD. Annuel: ${annualCostWithBonus} MAD.`,
       assumptions: [
-        `CNSS employeur: base plafonnee a ${rules.cnssCeiling} MAD (taux ${roundMAD(rules.cnssEmployerRate * 100)}%).`,
+        `CNSS employeur: court terme sur le brut et long terme plafonne a ${rules.cnssCeiling} MAD.`,
         `Allocations familiales: taux ${roundMAD(rules.familyAllowanceEmployerRate * 100)}% sur brut total, a la charge de l'employeur.`,
         `AMO employeur: taux ${roundMAD(rules.amoEmployerRate * 100)}% sur brut total.`,
         `AT/MP (secteur ${input.sectorRisk}): taux ${roundMAD(atMpRate * 100)}% — varie selon classification CNSS.`,
-        `Formation professionnelle: ${input.companySize === "small" ? "1%" : "1.6%"} (entreprise ${input.companySize === "small" ? "\u2264 20 salaries" : "> 20 salaries"}).`,
+        `Formation professionnelle: ${roundMAD(formationRate * 100)}%.`,
         input.additionalBenefitsMad > 0 ? `Avantages complementaires: ${additionalBenefits} MAD/mois.` : "",
         input.include13thMonth ? "13e mois inclus dans le cout annuel." : "",
       ].filter(Boolean),
       formulas: [
-        "CNSS employeur = min(brut, plafond CNSS) x taux employeur.",
+        "CNSS employeur = brut x taux court terme + min(brut, plafond CNSS) x taux long terme.",
         "Allocations familiales = brut x taux allocations familiales employeur.",
         "AMO employeur = brut x taux AMO.",
         "AT/MP = brut x taux secteur.",

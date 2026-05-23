@@ -16,7 +16,7 @@ describe("simulateAnnualIncomeTax", () => {
     expect(result.breakdown.annualGrossIncome).toBeGreaterThan(100000);
   });
 
-  it("caps family charge reduction at 3600 MAD per year", () => {
+  it("caps family charge reduction at 2160 MAD per year", () => {
     const result = simulateAnnualIncomeTax({
       calculationDate: "2026-02-12",
       monthlySalary: 9000,
@@ -26,7 +26,7 @@ describe("simulateAnnualIncomeTax", () => {
       familyDependentsCount: 6,
     });
 
-    expect(result.breakdown.familyTaxReduction).toBe(3600);
+    expect(result.breakdown.familyTaxReduction).toBe(2160);
     expect(result.breakdown.annualIncomeTax).toBeGreaterThanOrEqual(0);
   });
 

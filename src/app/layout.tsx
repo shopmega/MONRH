@@ -5,9 +5,8 @@ import { LanguageProvider } from "@/components/language-provider";
 import { MaintenanceBanner } from "@/components/maintenance-banner";
 import { PublicConfigProvider } from "@/components/public-config-provider";
 import { PwaRegistration } from "@/components/pwa-registration";
-import { SiteNav } from "@/components/site-nav";
-import { SiteFooter } from "@/components/site-footer";
-import { CommandCenter } from "@/components/command-center";
+import { AppChrome } from "@/components/app-chrome";
+import { AudienceProvider } from "@/components/audience-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
   DEFAULT_OG_IMAGE_ALT,
@@ -145,17 +144,12 @@ export default function RootLayout({
         <LanguageProvider initialLanguage="fr">
           <ThemeProvider initialTheme="light">
             <PublicConfigProvider>
-              <GoogleAnalytics />
-              <PwaRegistration />
-              <AdsenseScript />
-              <div className="no-print">
-                <SiteNav />
-                <CommandCenter />
-              </div>
-              <div className="pb-24 md:pb-8 print:pb-0">{children}</div>
-              <div className="no-print">
-                <SiteFooter />
-              </div>
+              <AudienceProvider>
+                <GoogleAnalytics />
+                <PwaRegistration />
+                <AdsenseScript />
+                <AppChrome>{children}</AppChrome>
+              </AudienceProvider>
             </PublicConfigProvider>
           </ThemeProvider>
         </LanguageProvider>

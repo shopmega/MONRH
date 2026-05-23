@@ -21,7 +21,11 @@ export type SalaryRules = {
   versionCode: string;
   effectiveFrom: string;
   effectiveTo: string | null;
+  cnssEmployeeShortTermRate?: number;
+  cnssEmployeeLongTermRate?: number;
   cnssEmployeeRate: number;
+  cnssEmployerShortTermRate?: number;
+  cnssEmployerLongTermRate?: number;
   cnssEmployerRate: number;
   cnssCeiling: number;
   familyAllowanceEmployerRate: number;
@@ -199,7 +203,11 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     versionCode: "ma_2025",
     effectiveFrom: "2025-01-01",
     effectiveTo: "2025-12-31",
+    cnssEmployeeShortTermRate: 0.0052,
+    cnssEmployeeLongTermRate: 0.0396,
     cnssEmployeeRate: 0.0448,
+    cnssEmployerShortTermRate: 0.0105,
+    cnssEmployerLongTermRate: 0.0793,
     cnssEmployerRate: 0.0898,
     cnssCeiling: 6000,
     familyAllowanceEmployerRate: 0.064,
@@ -226,30 +234,30 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     versionCode: "ma_2026",
     effectiveFrom: "2026-01-01",
     effectiveTo: null,
+    cnssEmployeeShortTermRate: 0.0052,
+    cnssEmployeeLongTermRate: 0.0396,
     cnssEmployeeRate: 0.0448,
+    cnssEmployerShortTermRate: 0.0105,
+    cnssEmployerLongTermRate: 0.0793,
     cnssEmployerRate: 0.0898,
     cnssCeiling: 6000,
     familyAllowanceEmployerRate: 0.064,
     amoEmployeeRate: 0.0226,
-    amoEmployerRate: 0.0411,
-    professionalExpenseMode: "reform_35_25_percent",
-    professionalExpenseRate: 0.25,
-    professionalExpenseCap: 2916.67,
-    professionalExpenseTiers: [
-      { maxGrossMonthly: 6500, rate: 0.35, monthlyCap: 2500 },
-      { maxGrossMonthly: null, rate: 0.25, monthlyCap: 2916.67 },
-    ],
-    familyChargeReductionAnnual: 600,
-    familyChargeReductionCapAnnual: 3600,
-    formationProRateSmall: 0.01,
+    amoEmployerRate: 0.0203,
+    professionalExpenseMode: "legacy_20_percent",
+    professionalExpenseRate: 0.2,
+    professionalExpenseCap: 2500,
+    familyChargeReductionAnnual: 360,
+    familyChargeReductionCapAnnual: 2160,
+    formationProRateSmall: 0.016,
     formationProRateLarge: 0.016,
     taxBracketsMonthly: [
-      { min: 0, max: 3333.33, rate: 0, deduction: 0 },
-      { min: 3333.33, max: 5000, rate: 0.1, deduction: 333.33 },
-      { min: 5000, max: 6666.67, rate: 0.2, deduction: 833.33 },
-      { min: 6666.67, max: 8333.33, rate: 0.3, deduction: 1500 },
-      { min: 8333.33, max: 15000, rate: 0.34, deduction: 1833.33 },
-      { min: 15000, max: null, rate: 0.37, deduction: 2283.33 },
+      { min: 0, max: 2500, rate: 0, deduction: 0 },
+      { min: 2500, max: 4166.67, rate: 0.1, deduction: 250 },
+      { min: 4166.67, max: 5000, rate: 0.2, deduction: 666.67 },
+      { min: 5000, max: 6666.67, rate: 0.3, deduction: 1166.67 },
+      { min: 6666.67, max: 15000, rate: 0.34, deduction: 1433.33 },
+      { min: 15000, max: null, rate: 0.38, deduction: 2033.33 },
     ],
   },
 ];

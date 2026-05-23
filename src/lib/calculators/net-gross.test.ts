@@ -15,10 +15,10 @@ describe("simulateNetGross", () => {
     expect(result.breakdown.gross).toBe(10000);
     expect(result.breakdown.net).toBeGreaterThan(7000);
     expect(result.breakdown.net).toBeLessThan(10000);
-    expect(result.breakdown.cnssEmployer).toBe(538.8);
+    expect(result.breakdown.cnssEmployer).toBe(580.8);
     expect(result.breakdown.familyAllowanceEmployer).toBe(640);
     expect(result.breakdown.formationProEmployer).toBe(160);
-    expect(result.breakdown.employerTotalCost).toBe(11749.8);
+    expect(result.breakdown.employerTotalCost).toBe(11583.8);
   });
 
   it("estimates gross from target net", () => {
@@ -52,8 +52,8 @@ describe("simulateNetGross", () => {
       familyDependentsCount: 6,
     });
 
-    expect(cappedDependents.breakdown.familyTaxReduction).toBe(300);
-    expect(noDependents.breakdown.incomeTax - cappedDependents.breakdown.incomeTax).toBeCloseTo(300, 2);
-    expect(cappedDependents.breakdown.net - noDependents.breakdown.net).toBeCloseTo(300, 2);
+    expect(cappedDependents.breakdown.familyTaxReduction).toBe(180);
+    expect(noDependents.breakdown.incomeTax - cappedDependents.breakdown.incomeTax).toBeCloseTo(180, 2);
+    expect(cappedDependents.breakdown.net - noDependents.breakdown.net).toBeCloseTo(180, 2);
   });
 });

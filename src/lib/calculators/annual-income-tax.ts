@@ -3,6 +3,7 @@ import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
 import { getCurrentDateISO, type CalculatorExplanation } from "@/lib/calculators/shared";
 import {
   annualizeMonthlyBrackets,
+  computeCnssEmployeeContribution,
   computeFamilyTaxReductionMonthly,
   computeProgressiveTax,
   payrollFamilySituationSchema,
@@ -60,10 +61,10 @@ export function simulateAnnualIncomeTax(
     professionalExpenseRule.cap * 12,
   );
 
-  const contributableBaseMonthly = Math.min(input.monthlySalary, rules.cnssCeiling);
+  const monthlyCnss = computeCnssEmployeeContribution(input.monthlySalary, rules);
   const annualCimrContribution = input.includeCimr ? input.monthlySalary * input.cimrRate * input.paidMonths : 0;
   const annualSocialContributions =
-    contributableBaseMonthly * rules.cnssEmployeeRate * input.paidMonths +
+    monthlyCnss.total * input.paidMonths +
     input.monthlySalary * rules.amoEmployeeRate * input.paidMonths +
     annualCimrContribution;
 

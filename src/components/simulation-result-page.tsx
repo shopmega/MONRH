@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState, useSyncExternalStore, useCallback } from "react";
 import { PartnerAdSection } from "@/components/partner-ad-section";
 import { CompanyContextCard } from "@/components/company-context-card";
@@ -24,6 +24,8 @@ import { buildSimulationResultDocumentLink } from "@/lib/tools/result-document-l
 import type { PieSlice } from "@/components/charts/breakdown-pie-chart";
 import type { BarEntry } from "@/components/charts/timeline-bar-chart";
 import { getCompanySalaryBenchmarks, type AVisCompanySalaryBenchmarksResult } from "@/lib/avis-api";
+import { useAudience } from "@/components/audience-provider";
+import { canShowEmployerResultCta, type AudienceMode } from "@/lib/audience/audience-mode";
 
 const BreakdownPieChart = dynamic(
   () => import("@/components/charts/breakdown-pie-chart").then((m) => ({ default: m.BreakdownPieChart })),
@@ -36,6 +38,7 @@ const TimelineBarChart = dynamic(
 );
 
 type DocumentCTA = { href: string; label: string };
+type ResultCTA = { href: string; label: string; description: string };
 type EmployerCompanyContext = { id: string; name: string };
 type StoredSimulationItem = {
   id: string;
@@ -70,6 +73,56 @@ function buildPrefilledDocumentLink(snapshot: SimulationResultSnapshot): Documen
     href: link.href,
     label: link.ctaLabel ?? link.title,
   };
+}
+
+function buildEmployerResultCTAs(calculatorType: string): ResultCTA[] {
+  if (calculatorType === "overtime") {
+    return [
+      {
+        href: "/employer/time",
+        label: "Ajouter au temps employeur",
+        description: "Poursuivez vers les heures a valider avant la paie.",
+      },
+    ];
+  }
+
+  if (calculatorType === "leave_accrual") {
+    return [
+      {
+        href: "/employer/leave",
+        label: "Ouvrir les conges employeur",
+        description: "Controlez les soldes et les demandes du portail RH.",
+      },
+    ];
+  }
+
+  if (calculatorType === "payslip") {
+    return [
+      {
+        href: "/employer/payroll",
+        label: "Revenir a la paie employeur",
+        description: "Calculez le run mensuel et les bulletins du registre.",
+      },
+      {
+        href: "/employer/cnss",
+        label: "Preparer les declarations",
+        description: "Passez au recap CNSS et aux controles du mois.",
+      },
+    ];
+  }
+
+  return [
+    {
+      href: "/employer/employees",
+      label: "Ouvrir le registre salaries",
+      description: "Utilisez le salaire ou le cout dans le contexte entreprise.",
+    },
+    {
+      href: "/employer/payroll",
+      label: "Lancer une paie employeur",
+      description: "Passez du calcul individuel au run mensuel.",
+    },
+  ];
 }
 
 function formatValue(
@@ -176,6 +229,34 @@ const BAR_FIELD_PRIORITY = [
   "accruedDaysPerYear", "accruedDaysTotal", "totalLeaveDays",
   "seniorityBonus", "annualBonus", "totalAnnualLeave",
 ];
+
+const FALLBACK_BREAKDOWN_LABELS_BY_CALCULATOR: Record<string, Record<string, string>> = {
+  payslip: {
+    "earnings.totalGross": "Total brut",
+    "earnings.baseSalary": "Salaire de base",
+    "earnings.overtimePay": "Heures supplementaires",
+    "earnings.bonus": "Prime",
+    "earnings.allowances": "Indemnites",
+    "deductions.cnssEmployee": "CNSS salarie",
+    "deductions.amoEmployee": "AMO salarie",
+    "deductions.cimrEmployee": "CIMR salarie",
+    "deductions.professionalExpenseDeduction": "Abattement frais professionnels",
+    "deductions.taxableIncome": "Base imposable",
+    "deductions.incomeTax": "IR retenu",
+    "deductions.totalDeductions": "Total retenues",
+    netToPay: "Net a payer",
+    "employerContributions.cnssEmployer": "CNSS employeur",
+    "employerContributions.amoEmployer": "AMO employeur",
+    "employerContributions.formationPro": "Formation professionnelle",
+    "employerContributions.totalEmployerCost": "Cout total employeur",
+  },
+};
+
+const FALLBACK_UNITS_BY_CALCULATOR: Record<string, Record<string, string>> = {
+  payslip: Object.fromEntries(
+    Object.keys(FALLBACK_BREAKDOWN_LABELS_BY_CALCULATOR.payslip).map((key) => [key, "MAD"]),
+  ),
+};
 
 function buildBarData(
   result: any,
@@ -308,7 +389,9 @@ export function SimulationResultPage(props: SimulationResultPageProps) {
 
 function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath }: SimulationResultPageProps) {
   const { language, t, locale } = useLanguage();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { mode: contextAudienceMode } = useAudience();
   const expectedPath = providedExpectedPath ?? calculatorTypeToPath(slug) ?? `/simulate/${slug}`;
   const expectedCalculatorType = useMemo(() => pathToCalculatorType(expectedPath), [expectedPath]);
   const simulationId = searchParams.get("simulationId");
@@ -372,18 +455,49 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
     }
   }, [expectedPath, snapshotRaw, slug]);
   const resolvedSnapshot = historySnapshot ?? snapshot;
+  const effectiveAudienceMode: AudienceMode =
+    contextAudienceMode !== "unknown" ? contextAudienceMode : resolvedSnapshot?.audienceMode ?? "unknown";
   const prefilledDocumentCTA = resolvedSnapshot ? buildPrefilledDocumentLink(resolvedSnapshot) : null;
+  const employerResultCTAs =
+    resolvedSnapshot &&
+    canShowEmployerResultCta({
+      audienceMode: effectiveAudienceMode,
+      calculatorType: resolvedSnapshot.calculatorType,
+      pathname,
+    })
+      ? buildEmployerResultCTAs(resolvedSnapshot.calculatorType)
+      : [];
   const keyMetrics = useMemo(() => (resolvedSnapshot ? pickKeyMetrics(resolvedSnapshot) : []), [resolvedSnapshot]);
   const flattenedBreakdown = useMemo(
     () => (resolvedSnapshot ? getEffectiveBreakdown(resolvedSnapshot.result) : {}),
     [resolvedSnapshot],
   );
+  const effectiveBreakdownLabels = useMemo(
+    () =>
+      resolvedSnapshot
+        ? {
+            ...(FALLBACK_BREAKDOWN_LABELS_BY_CALCULATOR[resolvedSnapshot.calculatorType] ?? {}),
+            ...(resolvedSnapshot.breakdownLabels ?? {}),
+          }
+        : {},
+    [resolvedSnapshot],
+  );
+  const effectiveUnits = useMemo(
+    () =>
+      resolvedSnapshot
+        ? {
+            ...(FALLBACK_UNITS_BY_CALCULATOR[resolvedSnapshot.calculatorType] ?? {}),
+            ...(resolvedSnapshot.units ?? {}),
+          }
+        : {},
+    [resolvedSnapshot],
+  );
   const breakdownEntries = useMemo(
     () =>
       resolvedSnapshot
-        ? Object.entries(flattenedBreakdown).filter(([key]) => (resolvedSnapshot.breakdownLabels ?? {})[key])
+        ? Object.entries(flattenedBreakdown).filter(([key]) => effectiveBreakdownLabels[key])
         : [],
-    [flattenedBreakdown, resolvedSnapshot],
+    [effectiveBreakdownLabels, flattenedBreakdown, resolvedSnapshot],
   );
   const employerHint = useMemo(
     () => extractEmployerCompanyHint(resolvedSnapshot?.inputPayload),
@@ -400,9 +514,9 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
   const barData = useMemo<BarEntry[]>(
     () =>
       resolvedSnapshot && showBarChart
-        ? buildBarData(resolvedSnapshot.result, resolvedSnapshot.breakdownLabels)
+        ? buildBarData(resolvedSnapshot.result, effectiveBreakdownLabels)
         : [],
-    [resolvedSnapshot, showBarChart],
+    [effectiveBreakdownLabels, resolvedSnapshot, showBarChart],
   );
 
   useEffect(() => {
@@ -582,10 +696,10 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
 
     const breakdown = getEffectiveBreakdown(resolvedSnapshot.result);
     const lines = Object.entries(breakdown)
-      .filter(([key]) => (resolvedSnapshot.breakdownLabels ?? {})[key])
+      .filter(([key]) => effectiveBreakdownLabels[key])
       .map(([key, value]) => {
-        const label = localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language);
-        return `${label}: ${formatValue(value, resolvedSnapshot.locale, t, (resolvedSnapshot.units ?? {})[key])}`;
+        const label = localizeBreakdownLabel(key, effectiveBreakdownLabels[key] ?? key, language);
+        return `${label}: ${formatValue(value, resolvedSnapshot.locale, t, effectiveUnits[key])}`;
       });
     const payload = [
       localizeCalculatorTitle(resolvedSnapshot.calculatorType, resolvedSnapshot.title, language),
@@ -601,7 +715,7 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
       setCopyStatus(t("resultPage.copyError"));
       setTimeout(() => setCopyStatus(""), 3000);
     }
-  }, [resolvedSnapshot, language, t]);
+  }, [effectiveBreakdownLabels, effectiveUnits, resolvedSnapshot, language, t]);
 
   if (simulationId && !snapshot && historySnapshot === undefined) {
     return (
@@ -766,10 +880,10 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
                 {keyMetrics.map(([key, value]) => (
                   <article key={key} className="kpi-card rounded-2xl p-4">
                     <p className="break-words text-[11px] uppercase tracking-[0.12em] text-[var(--ink-soft)]">
-                      {localizeBreakdownLabel(key, resolvedSnapshot.breakdownLabels[key] ?? key, language)}
+                      {localizeBreakdownLabel(key, effectiveBreakdownLabels[key] ?? key, language)}
                     </p>
                     <p className="mt-1 break-words text-xl font-semibold text-[var(--foreground)]">
-                      {formatValue(value, resolvedSnapshot.locale, t, resolvedSnapshot.units[key])}
+                      {formatValue(value, resolvedSnapshot.locale, t, effectiveUnits[key])}
                     </p>
                   </article>
                 ))}
@@ -801,10 +915,10 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
                   {breakdownEntries.map(([key, value]) => (
                     <div key={key} className="panel-strong min-w-0 rounded-xl p-3">
                       <p className="break-words text-[11px] uppercase tracking-wide text-[var(--ink-soft)]">
-                        {localizeBreakdownLabel(key, (resolvedSnapshot.breakdownLabels ?? {})[key] ?? key, language)}
+                        {localizeBreakdownLabel(key, effectiveBreakdownLabels[key] ?? key, language)}
                       </p>
                       <p className="mt-1 break-words font-semibold">
-                        {formatValue(value, resolvedSnapshot.locale, t, (resolvedSnapshot.units ?? {})[key])}
+                        {formatValue(value, resolvedSnapshot.locale, t, effectiveUnits[key])}
                       </p>
                     </div>
                   ))}
@@ -850,6 +964,27 @@ function SimulationResultPageContent({ slug, expectedPath: providedExpectedPath 
                 <p className="status-info mt-3 rounded-xl px-3 py-2 text-sm">{copyStatus}</p>
               ) : null}
             </section>
+
+            {employerResultCTAs.length > 0 ? (
+              <section className="soft-card min-w-0 rounded-3xl p-5">
+                <p className="section-kicker">Suite employeur</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
+                  Actions disponibles uniquement dans un contexte MONRH Employeur.
+                </p>
+                <div className="mt-4 grid gap-2">
+                  {employerResultCTAs.map((cta) => (
+                    <Link
+                      key={cta.href}
+                      href={cta.href}
+                      className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 transition hover:border-[var(--accent)] hover:bg-[var(--surface-muted)]"
+                    >
+                      <span className="block text-sm font-semibold text-[var(--foreground)]">{cta.label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[var(--ink-soft)]">{cta.description}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             <section className="soft-card rounded-3xl p-5">
               <p className="section-kicker">{t("resultPage.employerContext")}</p>

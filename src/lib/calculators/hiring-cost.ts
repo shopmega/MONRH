@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
+import { computeCnssEmployerContribution } from "@/lib/calculators/payroll-core";
 
 function roundMAD(v: number) {
   return Math.round(v * 100) / 100;
@@ -54,8 +55,7 @@ export function simulateHiringCost(raw: HiringCostInput): HiringCostResult {
   const input = hiringCostInputSchema.parse(raw);
   const rules = getSalaryRulesByDate(input.calculationDate);
 
-  const contributableBase = Math.min(input.offeredGross, rules.cnssCeiling);
-  const cnssEmployer = roundMAD(contributableBase * rules.cnssEmployerRate);
+  const cnssEmployer = roundMAD(computeCnssEmployerContribution(input.offeredGross, rules).total);
   const familyAllowanceEmployer = roundMAD(input.offeredGross * rules.familyAllowanceEmployerRate);
   const amoEmployer = roundMAD(input.offeredGross * rules.amoEmployerRate);
   const formationProRate = input.companySize === "small" ? rules.formationProRateSmall : rules.formationProRateLarge;

@@ -32,7 +32,11 @@ export type PayrollMonthlyResult = {
   gross: number;
   net: number;
   taxableIncome: number;
+  cnssEmployeeShortTerm: number;
+  cnssEmployeeLongTerm: number;
   cnssEmployee: number;
+  cnssEmployerShortTerm: number;
+  cnssEmployerLongTerm: number;
   cnssEmployer: number;
   familyAllowanceEmployer: number;
   amoEmployee: number;
@@ -86,10 +90,36 @@ export function computeFamilyTaxReductionMonthly(
   const input = payrollCoreInputSchema.parse(coreInput);
   const annualAmount = rules.familyChargeReductionAnnual ?? 0;
   const annualCap = rules.familyChargeReductionCapAnnual ?? 0;
-  const spouseCharge = input.familySituation === "married" ? 1 : 0;
-  const effectiveDependents = input.familyDependentsCount + spouseCharge;
 
-  return Math.min(effectiveDependents * annualAmount, annualCap) / 12;
+  return Math.min(input.familyDependentsCount * annualAmount, annualCap) / 12;
+}
+
+export function computeCnssEmployeeContribution(gross: number, rules: SalaryRules) {
+  const longTermBase = Math.min(gross, rules.cnssCeiling);
+  const shortTermRate = rules.cnssEmployeeShortTermRate ?? 0.0052;
+  const longTermRate = rules.cnssEmployeeLongTermRate ?? Math.max(0, rules.cnssEmployeeRate - shortTermRate);
+  const shortTerm = gross * shortTermRate;
+  const longTerm = longTermBase * longTermRate;
+
+  return {
+    shortTerm,
+    longTerm,
+    total: shortTerm + longTerm,
+  };
+}
+
+export function computeCnssEmployerContribution(gross: number, rules: SalaryRules) {
+  const longTermBase = Math.min(gross, rules.cnssCeiling);
+  const shortTermRate = rules.cnssEmployerShortTermRate ?? 0.0105;
+  const longTermRate = rules.cnssEmployerLongTermRate ?? Math.max(0, rules.cnssEmployerRate - shortTermRate);
+  const shortTerm = gross * shortTermRate;
+  const longTerm = longTermBase * longTermRate;
+
+  return {
+    shortTerm,
+    longTerm,
+    total: shortTerm + longTerm,
+  };
 }
 
 export function resolveProfessionalExpenseRuleMonthly(gross: number, rules: SalaryRules) {
@@ -127,9 +157,10 @@ export function computeMonthlyPayrollFromBases(
   const taxableGross = bases.taxableGross ?? bases.gross;
   const cnssGross = bases.cnssGross ?? bases.gross;
   const amoGross = bases.amoGross ?? bases.gross;
-  const contributableBase = Math.min(cnssGross, rules.cnssCeiling);
-  const cnssEmployee = contributableBase * rules.cnssEmployeeRate;
-  const cnssEmployer = contributableBase * rules.cnssEmployerRate;
+  const employeeCnss = computeCnssEmployeeContribution(cnssGross, rules);
+  const employerCnss = computeCnssEmployerContribution(cnssGross, rules);
+  const cnssEmployee = employeeCnss.total;
+  const cnssEmployer = employerCnss.total;
   const familyAllowanceEmployer = bases.gross * rules.familyAllowanceEmployerRate;
   const amoEmployee = amoGross * rules.amoEmployeeRate;
   const amoEmployer = amoGross * rules.amoEmployerRate;
@@ -155,7 +186,11 @@ export function computeMonthlyPayrollFromBases(
     gross: roundMAD(bases.gross),
     net: roundMAD(net),
     taxableIncome: roundMAD(taxableIncome),
+    cnssEmployeeShortTerm: roundMAD(employeeCnss.shortTerm),
+    cnssEmployeeLongTerm: roundMAD(employeeCnss.longTerm),
     cnssEmployee: roundMAD(cnssEmployee),
+    cnssEmployerShortTerm: roundMAD(employerCnss.shortTerm),
+    cnssEmployerLongTerm: roundMAD(employerCnss.longTerm),
     cnssEmployer: roundMAD(cnssEmployer),
     familyAllowanceEmployer: roundMAD(familyAllowanceEmployer),
     amoEmployee: roundMAD(amoEmployee),

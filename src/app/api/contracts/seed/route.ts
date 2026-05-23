@@ -486,7 +486,7 @@ export async function POST(request: NextRequest) {
           contract_type: 'ALL',
           rule_type: 'warning',
           field_path: 'salary_brut',
-          condition_expression: 'salary_brut < 3111',
+          condition_expression: 'salary_brut < 3500',
           error_message: 'Salary is below the minimum wage (SMIG). Please verify.',
           priority: 5,
           is_active: true

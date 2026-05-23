@@ -39,17 +39,23 @@ export type PayslipResult = {
     totalGross: number;
   };
   deductions: {
+    cnssEmployeeShortTerm: number;
+    cnssEmployeeLongTerm: number;
     cnssEmployee: number;
     amoEmployee: number;
     cimrEmployee: number;
     professionalExpenseDeduction: number;
     taxableIncome: number;
+    familyTaxReduction: number;
     incomeTax: number;
     totalDeductions: number;
   };
   netToPay: number;
   employerContributions: {
+    cnssEmployerShortTerm: number;
+    cnssEmployerLongTerm: number;
     cnssEmployer: number;
+    familyAllowanceEmployer: number;
     amoEmployer: number;
     formationPro: number;
     totalEmployerCost: number;
@@ -99,17 +105,23 @@ export function generatePayslip(raw: PayslipInput): PayslipResult {
       totalGross,
     },
     deductions: {
+      cnssEmployeeShortTerm: payroll.cnssEmployeeShortTerm,
+      cnssEmployeeLongTerm: payroll.cnssEmployeeLongTerm,
       cnssEmployee: payroll.cnssEmployee,
       amoEmployee: payroll.amoEmployee,
       cimrEmployee: payroll.cimrEmployee,
       professionalExpenseDeduction: payroll.professionalExpenseDeduction,
       taxableIncome: payroll.taxableIncome,
+      familyTaxReduction: payroll.familyTaxReduction,
       incomeTax: payroll.incomeTax,
       totalDeductions,
     },
     netToPay: payroll.net,
     employerContributions: {
+      cnssEmployerShortTerm: payroll.cnssEmployerShortTerm,
+      cnssEmployerLongTerm: payroll.cnssEmployerLongTerm,
       cnssEmployer: payroll.cnssEmployer,
+      familyAllowanceEmployer: payroll.familyAllowanceEmployer,
       amoEmployer: payroll.amoEmployer,
       formationPro,
       totalEmployerCost,

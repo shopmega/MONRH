@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getCurrentDateISO } from "@/lib/calculators/shared";
 import { getSalaryRulesByDate } from "@/lib/rules/default-rules";
+import { computeCnssEmployeeContribution, computeCnssEmployerContribution } from "@/lib/calculators/payroll-core";
 
 function roundMAD(v: number) {
   return Math.round(v * 100) / 100;
@@ -21,9 +22,8 @@ function computeTax(
 
 function calcSalaryNet(gross: number, calculationDate: string): { net: number; employerCost: number } {
   const rules = getSalaryRulesByDate(calculationDate);
-  const contributableBase = Math.min(gross, rules.cnssCeiling);
-  const cnssEmployee = contributableBase * rules.cnssEmployeeRate;
-  const cnssEmployer = contributableBase * rules.cnssEmployerRate;
+  const cnssEmployee = computeCnssEmployeeContribution(gross, rules).total;
+  const cnssEmployer = computeCnssEmployerContribution(gross, rules).total;
   const familyAllowanceEmployer = gross * rules.familyAllowanceEmployerRate;
   const amoEmployee = gross * rules.amoEmployeeRate;
   const amoEmployer = gross * rules.amoEmployerRate;

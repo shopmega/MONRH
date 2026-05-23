@@ -1,95 +1,128 @@
 "use client";
 
-import Image, { type ImageProps } from "next/image";
+import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { useLanguage } from "@/components/language-provider";
-import { PartnerAdSection } from "@/components/partner-ad-section";
+import {
+  ArrowRight,
+  BadgeCheck,
+  BriefcaseBusiness,
+  Calculator,
+  CalendarClock,
+  CheckCircle2,
+  FileSpreadsheet,
+  FileText,
+  LockKeyhole,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import { type Article, type Category } from "@/lib/content/home-content";
 
-type SafeImageProps = Omit<ImageProps, "src" | "alt"> & {
-  src?: string;
-  alt: string;
-  className?: string;
-};
-
-const ARABIC_CATEGORY_LABELS: Record<string, string> = {
-  salaire: "الأجر",
-  licenciement: "الفصل",
-  conges: "العطل",
-  cnss: "CNSS",
-  contrats: "العقود",
-  "heures-sup": "الساعات الإضافية",
-  maternite: "الأمومة",
-  litiges: "النزاعات",
-};
-
-const HERO_TOOLS = [
-  {
-    id: "salaire",
-    label: "Salaire net et brut",
-    sublabel: "Calculateur 2026",
-    href: "/salaire",
-    icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-  },
-  {
-    id: "conges",
-    label: "Solde de fin de contrat",
-    sublabel: "Départ",
-    href: "/conges-cnss",
-    icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-  },
-  {
-    id: "carriere",
-    label: "Évolution de carrière",
-    sublabel: "Simulation",
-    href: "/carriere",
-    icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-  },
+const employerModules = [
+  { label: "Registre salaries", detail: "CIN, CNSS, contrats, documents", icon: Users },
+  { label: "Paie Maroc", detail: "CNSS, AMO, IR, bulletins PDF", icon: Calculator },
+  { label: "Conges & pointage", detail: "Soldes, demandes, heures sup", icon: CalendarClock },
+  { label: "Declarations CNSS", detail: "Recaps et CSV Damancom", icon: FileSpreadsheet },
 ];
 
-function ImagePlaceholder({ className }: { className?: string }) {
+const publicTools = [
+  { label: "Calcul brut net", href: "/salaire/brut-net", icon: Calculator },
+  { label: "Bulletin de paie", href: "/planifier/bulletin-paie", icon: FileText },
+  { label: "Contrat de travail", href: "/contrat", icon: BriefcaseBusiness },
+  { label: "Modele de document", href: "/documents", icon: FileText },
+];
+
+const proofPoints = [
+  "Regles paie marocaines structurees",
+  "Exports et PDF gates cote serveur",
+  "Donnees entreprise isolees par compte",
+  "Portail employeur en cours de durcissement production",
+];
+
+function categoryName(slug: string, categories: Category[]) {
+  return categories.find((category) => category.slug === slug)?.name ?? slug;
+}
+
+function SectionHeader({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  description?: string;
+}) {
   return (
-    <div className={`flex items-center justify-center bg-[var(--surface-muted)] ${className ?? ""}`}>
-      <svg className="h-9 w-9 text-[var(--ink-soft)]/35" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
+    <div className="max-w-3xl">
+      <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--accent)]">{eyebrow}</p>
+      <h2 className="mt-3 text-3xl font-black leading-tight text-[var(--heading)] sm:text-4xl">{title}</h2>
+      {description ? <p className="mt-3 text-base leading-7 text-[var(--ink-soft)]">{description}</p> : null}
     </div>
   );
 }
 
-function SafeImage({ src, alt, className, ...props }: SafeImageProps) {
-  const [hasError, setHasError] = useState(false);
-
-  if (hasError || !src) {
-    return <ImagePlaceholder className={className} />;
-  }
-
-  return <Image {...props} src={src} alt={alt} className={className} onError={() => setHasError(true)} />;
-}
-
-function categoryName(slug: string, language: "fr" | "ar", categories: Category[]): string {
-  const fallback = categories.find((category) => category.slug === slug)?.name ?? slug;
-  return language === "ar" ? ARABIC_CATEGORY_LABELS[slug] ?? fallback : fallback;
-}
-
-function SectionHeader({
-  title,
-  href,
-  action,
-}: {
-  title: string;
-  href?: string;
-  action?: string;
-}) {
+function ProductVisual() {
   return (
-    <div className="mb-4 flex items-center justify-between gap-4">
-      <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--accent)]">{title}</p>
-      {href && action ? (
-        <Link href={href} className="shrink-0 text-sm font-bold text-[var(--accent-dark)] hover:text-[var(--accent)]">
-          {action} →
-        </Link>
-      ) : null}
+    <div className="relative min-h-[520px] overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-2xl shadow-black/10">
+      <div className="flex items-center justify-between border-b border-[var(--line)] bg-[var(--surface-muted)] px-5 py-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent)]">
+            <Image src="/logo.svg" alt="SIMPAIE" width={22} height={22} />
+          </span>
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--accent)]">MONRH</p>
+            <p className="text-sm font-black text-[var(--heading)]">Paie Mai 2026</p>
+          </div>
+        </div>
+        <span className="rounded-lg bg-[var(--ok-bg)] px-3 py-1 text-xs font-black text-[var(--ok)]">Pret</span>
+      </div>
+
+      <div className="grid gap-4 p-5">
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            ["Salaries actifs", "24"],
+            ["Masse brute", "286 400 MAD"],
+            ["Net a payer", "214 980 MAD"],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-4">
+              <p className="text-xs font-bold text-[var(--ink-soft)]">{label}</p>
+              <p className="mt-2 text-xl font-black text-[var(--heading)]">{value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="font-black text-[var(--heading)]">Controle paie</p>
+            <ShieldCheck className="h-5 w-5 text-[var(--accent)]" />
+          </div>
+          <div className="space-y-3">
+            {[
+              ["CNSS CT/LT", "Valide"],
+              ["AMO et IR", "Calcule"],
+              ["SMIG", "Aucun ecart"],
+              ["Bulletins PDF", "Generation serveur"],
+            ].map(([label, state]) => (
+              <div key={label} className="flex items-center justify-between gap-4 rounded-lg bg-[var(--surface)] px-4 py-3">
+                <span className="text-sm font-bold text-[var(--heading)]">{label}</span>
+                <span className="text-xs font-black uppercase tracking-[0.12em] text-[var(--accent)]">{state}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg bg-[var(--accent-dark)] p-4 text-[var(--juris-on-primary)]">
+            <p className="text-xs font-black uppercase tracking-[0.14em] opacity-75">Action</p>
+            <p className="mt-2 text-lg font-black text-white">Declarer CNSS</p>
+            <p className="mt-2 text-sm leading-6 opacity-80">CSV prepare depuis le run de paie.</p>
+          </div>
+          <div className="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--accent)]">Alertes</p>
+            <p className="mt-2 text-lg font-black">2 a traiter</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">CDD et dossier RH incomplet.</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -101,185 +134,164 @@ export function HomePageClient({
   initialArticles: Article[];
   categories: Category[];
 }) {
-  const { t, language } = useLanguage();
-  const spotlight = initialArticles[0];
-  const latestArticles = initialArticles.slice(1, 7);
-  const categoryCounts = initialArticles.reduce<Record<string, number>>((acc, article) => {
-    acc[article.categorySlug] = (acc[article.categorySlug] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  const heroTitle =
-    language === "ar"
-      ? "سلطتك في قانون الشغل والموارد البشرية."
-      : "Votre autorité en droit social et gestion RH.";
+  const latestArticles = initialArticles.slice(0, 3);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] pt-20 text-[var(--foreground)] overflow-x-hidden">
-      <section className="border-b border-[var(--line)] bg-[var(--surface)]">
-        <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8 lg:py-16 xl:gap-16 overflow-x-hidden">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+      <section className="border-b border-[var(--line)] bg-[var(--surface-muted)] pt-20">
+        <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_520px] lg:px-8 lg:py-16 xl:gap-16">
           <div className="flex min-w-0 flex-col justify-center">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">{t("home.kicker")}</p>
-            <h1 className="max-w-4xl text-4xl font-black leading-[1.05] tracking-normal text-[var(--heading)] sm:text-5xl lg:text-6xl">
-              {heroTitle}
+            <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[var(--accent)]">
+              <BadgeCheck className="h-4 w-4" />
+              SaaS RH et paie Maroc
+            </div>
+            <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[1.03] text-[var(--heading)] sm:text-5xl lg:text-6xl">
+              SIMPAIE centralise la paie, les RH et les obligations sociales des PME marocaines.
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--ink-soft)] lg:text-lg">{t("home.description")}</p>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--ink-soft)]">
+              Un espace employeur pour gerer les salaries, calculer la paie, preparer les bulletins et suivre les alertes
+              de conformite. Les simulateurs publics restent disponibles pour les salaries et les professionnels RH.
+            </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row flex-wrap">
-              <Link href="/simulate" className="inline-flex min-h-12 items-center justify-center rounded-lg bg-[var(--accent)] px-6 text-sm font-bold text-[var(--juris-on-primary)] shadow-sm transition hover:bg-[var(--accent-dark)]">
-                {language === "ar" ? "محاكاة حقوقي" : t("home.ctaSimulate")}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link
+                href="/employer"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-6 text-sm font-black text-[var(--juris-on-primary)] transition hover:bg-[var(--accent-dark)]"
+              >
+                Ouvrir MONRH
+                <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/planifier" className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--accent-soft)] px-6 text-sm font-bold text-[var(--accent-dark)] transition hover:bg-[var(--surface-strong)]">
-                {language === "ar" ? "تخطيط مساري" : t("home.ctaPlan")}
+              <Link
+                href="/simulate"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-[var(--line)] bg-[var(--surface)] px-6 text-sm font-black text-[var(--heading)] transition hover:bg-[var(--surface-strong)]"
+              >
+                Utiliser les simulateurs
               </Link>
             </div>
 
-            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-4">
-              {[
-                { count: "20+", label: t("home.statsSimulations") },
-                { count: "17", label: t("home.statsPlanifier") },
-                { count: "7", label: t("home.statsTools") },
-                { count: "50+", label: t("home.statsDocuments") },
-              ].map((stat) => (
-                <div key={stat.label} className="rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-4">
-                  <span className="block text-2xl font-black text-[var(--accent)]">{stat.count}</span>
-                  <span className="mt-1 block text-xs font-semibold leading-snug text-[var(--ink-soft)]">{stat.label}</span>
+            <div className="mt-9 grid gap-3 sm:grid-cols-2">
+              {proofPoints.map((point) => (
+                <div key={point} className="flex items-start gap-3 rounded-lg bg-[var(--surface)] p-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--ok)]" />
+                  <span className="text-sm font-bold leading-6 text-[var(--heading)]">{point}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <aside className="rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-5 shadow-sm lg:p-6">
-            <SectionHeader title={language === "ar" ? "الأدوات الأساسية" : "Accès rapide"} />
-            <div className="grid gap-3">
-              {HERO_TOOLS.map((tool) => (
-                <Link key={tool.id} href={tool.href} className="group rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:border-[var(--accent)] hover:shadow-sm">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent-dark)]">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d={tool.icon} />
-                      </svg>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">{tool.sublabel}</p>
-                      <p className="mt-1 text-base font-extrabold text-[var(--heading)]">{tool.label}</p>
-                    </div>
-                    <span className="font-bold text-[var(--accent-dark)] transition group-hover:translate-x-1">→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            <Link href="/outils" className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[var(--accent-dark)] px-4 text-sm font-bold text-[var(--juris-on-primary)] hover:bg-[var(--accent)]">
-              {language === "ar" ? "استعراض كل الأدوات" : "Voir tous les outils"} →
-            </Link>
-          </aside>
+          <ProductVisual />
         </div>
       </section>
 
-      <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8 lg:py-12 overflow-x-hidden">
-        <div className="min-w-0 space-y-8">
-          {spotlight ? (
-            <section>
-              <SectionHeader title={language === "ar" ? "الأداة المميزة" : "Outil vedette"} />
-              <Link href="/salaire" className="group grid overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-sm lg:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="p-6 sm:p-8">
-                  <span className="inline-flex rounded-lg bg-[var(--accent-soft)] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
-                    ★ Recommandé
-                  </span>
-                  <h2 className="mt-5 max-w-xl text-3xl font-black leading-tight text-[var(--heading)] sm:text-4xl">
-                    Simulateur de salaire net et brut
-                  </h2>
-                  <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--ink-soft)]">
-                    Calcul temps réel CNSS, AMO et IR. Passez du brut au net en quelques secondes.
-                  </p>
-                  <span className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-[var(--accent)] px-5 text-sm font-bold text-[var(--juris-on-primary)] transition group-hover:bg-[var(--accent-dark)]">
-                    Calculer →
-                  </span>
+      <section className="border-b border-[var(--line)] bg-[var(--surface)]">
+        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 lg:px-8">
+          <SectionHeader
+            eyebrow="Portail employeur"
+            title="Les operations RH critiques dans un seul espace."
+            description="Le module MONRH couvre les parcours utiles avant facturation: registre salaries, paie, CNSS, contrats, conges, pointage, analytics et cabinet."
+          />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {employerModules.map((module) => {
+              const Icon = module.icon;
+              return (
+                <div key={module.label} className="rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-5">
+                  <Icon className="h-6 w-6 text-[var(--accent)]" />
+                  <h3 className="mt-4 text-lg font-black text-[var(--heading)]">{module.label}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">{module.detail}</p>
                 </div>
-                <div className="relative min-h-56 bg-[var(--accent-dark)] lg:min-h-full">
-                  <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.18),rgba(255,255,255,0))]" />
-                  <div className="relative flex h-full flex-col justify-end p-6 text-[var(--juris-on-primary)]">
-                    <p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/70">Maroc 2026</p>
-                    <p className="mt-3 text-5xl font-black">Net ↔ Brut</p>
-                  </div>
-                </div>
-              </Link>
-            </section>
-          ) : null}
-
-          {categories.length > 0 ? (
-            <section>
-              <SectionHeader title={t("home.categoriesTitle")} href="/articles" action={t("common.all")} />
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
-                {categories.slice(0, 8).map((category) => (
-                  <Link key={category.slug} href={`/articles?category=${category.slug}`} className="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:border-[var(--accent)] hover:shadow-sm">
-                    <p className="text-base font-extrabold leading-snug text-[var(--heading)]">
-                      {categoryName(category.slug, language, categories)}
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-[var(--accent)]">{categoryCounts[category.slug] ?? 0} articles</p>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {spotlight ? (
-            <section>
-              <SectionHeader title={language === "ar" ? "أحدث المقالات" : "Actualités et guides"} href="/articles" action={t("common.all")} />
-              <Link href={spotlight.href} className="group grid overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-sm sm:grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] lg:grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)]">
-                <div className="relative aspect-[16/10] bg-[var(--surface-muted)] md:aspect-auto">
-                  <SafeImage src={spotlight.coverImageUrl || spotlight.thumbnailUrl} alt={spotlight.title} fill className="object-cover" unoptimized />
-                  <div className="absolute bottom-3 left-3">
-                    <span className="rounded-lg bg-[var(--surface)] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.1em] text-[var(--accent)] shadow-sm">
-                      {categoryName(spotlight.categorySlug, language, categories)}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-5 sm:p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--ink-soft)]">{spotlight.readingTime} de lecture</p>
-                  <h3 className="mt-3 text-2xl font-black leading-tight text-[var(--heading)] group-hover:text-[var(--accent-dark)]">
-                    {spotlight.title}
-                  </h3>
-                  <p className="mt-3 line-clamp-3 text-base leading-7 text-[var(--ink-soft)]">{spotlight.excerpt}</p>
-                  <span className="mt-5 inline-flex text-sm font-bold text-[var(--accent-dark)]">{t("common.readFull")} →</span>
-                </div>
-              </Link>
-            </section>
-          ) : null}
+              );
+            })}
+          </div>
         </div>
+      </section>
 
-        <aside className="space-y-8 lg:sticky lg:top-28 lg:self-start w-full">
-          {latestArticles.length > 0 ? (
-            <section>
-              <SectionHeader title={language === "ar" ? "À lire ensuite" : "À lire ensuite"} />
-              <div className="grid gap-3">
-                {latestArticles.map((article) => (
-                  <Link key={article.title} href={article.href} className="group rounded-lg border border-[var(--line)] bg-[var(--surface)] p-3 transition hover:border-[var(--accent)] hover:shadow-sm">
-                    <div className="flex gap-3">
-                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-[var(--surface-muted)]">
-                        <SafeImage src={article.thumbnailUrl || article.coverImageUrl} alt={article.title} fill className="object-cover" unoptimized />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--accent)]">
-                          {categoryName(article.categorySlug, language, categories)}
-                        </p>
-                        <h4 className="mt-1 line-clamp-2 text-sm font-extrabold leading-snug text-[var(--heading)] group-hover:text-[var(--accent-dark)]">
-                          {article.title}
-                        </h4>
-                        <p className="mt-1 text-xs text-[var(--ink-soft)]">{article.readingTime}</p>
-                      </div>
+      <section className="border-b border-[var(--line)] bg-[var(--surface-muted)]">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:px-8">
+          <SectionHeader
+            eyebrow="Acces public"
+            title="Des outils utiles sans ouvrir un dossier complet."
+            description="Les simulateurs, modeles et guides restent le haut de funnel de SIMPAIE."
+          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {publicTools.map((tool) => {
+              const Icon = tool.icon;
+              return (
+                <Link
+                  key={tool.label}
+                  href={tool.href}
+                  className="group rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 transition hover:border-[var(--accent)] hover:shadow-sm"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent)]">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="font-black text-[var(--heading)]">{tool.label}</span>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ) : null}
+                    <ArrowRight className="h-4 w-4 text-[var(--accent)] transition group-hover:translate-x-1" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-          <section className="overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4">
-            <PartnerAdSection slot="2222222222" className="w-full" />
-          </section>
-        </aside>
-      </div>
+      <section className="bg-[var(--surface)]">
+        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <SectionHeader
+              eyebrow="Guides pratiques"
+              title="Articles et reperes pour les cas RH courants."
+              description="Conservez le trafic SEO existant tout en orientant les visiteurs vers le produit."
+            />
+            <Link href="/articles" className="inline-flex h-11 items-center justify-center rounded-lg border border-[var(--line)] px-4 text-sm font-black hover:bg-[var(--surface-muted)]">
+              Tous les articles
+            </Link>
+          </div>
+
+          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            {latestArticles.map((article) => (
+              <Link
+                key={article.slug}
+                href={article.href}
+                className="rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-5 transition hover:border-[var(--accent)]"
+              >
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--accent)]">
+                  {categoryName(article.categorySlug, categories)}
+                </p>
+                <h3 className="mt-3 text-xl font-black leading-tight text-[var(--heading)]">{article.title}</h3>
+                <p className="mt-3 line-clamp-3 text-sm leading-6 text-[var(--ink-soft)]">{article.excerpt}</p>
+                <p className="mt-5 inline-flex items-center gap-2 text-sm font-black text-[var(--accent)]">
+                  Lire
+                  <ArrowRight className="h-4 w-4" />
+                </p>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-10 rounded-lg border border-[var(--line)] bg-[var(--accent-dark)] p-6 text-[var(--juris-on-primary)] sm:p-8">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <div>
+                <div className="flex items-center gap-2 text-white/80">
+                  <LockKeyhole className="h-5 w-5" />
+                  <p className="text-xs font-black uppercase tracking-[0.16em]">Production readiness</p>
+                </div>
+                <h2 className="mt-3 text-3xl font-black text-white">Le socle produit est en train de passer de prototype a SaaS facturable.</h2>
+                <p className="mt-3 max-w-3xl text-base leading-7 text-white/80">
+                  Auth, isolation entreprise, exports serveur, paie 2026 et persistence sont maintenant les priorites visibles du produit.
+                </p>
+              </div>
+              <Link
+                href="/contact"
+                className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-5 text-sm font-black text-[var(--accent-dark)]"
+              >
+                Contacter SIMPAIE
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
