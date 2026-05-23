@@ -11,6 +11,7 @@ import {
   CalendarClock,
   ChartNoAxesCombined,
   ClipboardList,
+  CircleDollarSign,
   FileSpreadsheet,
   FileText,
   LayoutDashboard,
@@ -42,6 +43,8 @@ const workspaceGroups = [
     items: [
       { href: "/employer/payroll", label: "Paie", icon: FileText },
       { href: "/employer/cnss", label: "Declarations", icon: FileSpreadsheet },
+      { href: "/employer/payroll-settings", label: "Parametres paie", icon: Settings },
+      { href: "/employer/reports", label: "Etats", icon: CircleDollarSign },
     ],
   },
   {

@@ -131,6 +131,7 @@ export const EMPLOYER_COMPLIANCE_DISMISSED_STORAGE_KEY = "monrh_employer_complia
 export const EMPLOYER_TIME_ENTRY_STORAGE_KEY = "monrh_employer_time_entries_v1";
 export const EMPLOYER_CNSS_EXPORT_STORAGE_KEY = "monrh_employer_cnss_exports_v1";
 export const EMPLOYER_CONTRACT_RECORD_STORAGE_KEY = "monrh_employer_contract_records_v1";
+export const EMPLOYER_PAYROLL_SETTINGS_STORAGE_KEY = "monrh_employer_payroll_settings_v1";
 export const EMPLOYEE_ACTIVE_PROFILE_STORAGE_KEY = "monrh_employee_active_profile_v1";
 export const EMPLOYER_CONTRACT_DRAFT_STORAGE_KEY = "contract_draft";
 
@@ -223,6 +224,25 @@ export type EmployerPayrollRun = {
   period: string;
   createdAt: string;
   lines: EmployerPayrollLine[];
+};
+
+export type EmployerPayrollRubricCategory = "bonus" | "benefit" | "allowance" | "overtime" | "deduction";
+
+export type EmployerPayrollRubric = {
+  id: string;
+  label: string;
+  category: EmployerPayrollRubricCategory;
+  taxable: boolean;
+  cnssSubject: boolean;
+  amoSubject: boolean;
+  active: boolean;
+};
+
+export type EmployerPayrollSettings = {
+  defaultCompanySize: "small" | "large";
+  includeCimrByDefault: boolean;
+  paymentMethod: "bank_transfer" | "cash" | "mixed";
+  rubrics: EmployerPayrollRubric[];
 };
 
 export type EmployerCnssRow = {
@@ -582,6 +602,49 @@ export const employerLeaveStatusLabels: Record<EmployerLeaveStatus, string> = {
   pending: "A valider",
   approved: "Approuve",
   rejected: "Refuse",
+};
+
+export const employerPayrollRubricCategoryLabels: Record<EmployerPayrollRubricCategory, string> = {
+  bonus: "Prime",
+  benefit: "Avantage en nature",
+  allowance: "Indemnite",
+  overtime: "Heures supplementaires",
+  deduction: "Retenue",
+};
+
+export const defaultEmployerPayrollSettings: EmployerPayrollSettings = {
+  defaultCompanySize: "small",
+  includeCimrByDefault: false,
+  paymentMethod: "bank_transfer",
+  rubrics: [
+    {
+      id: "rubric-prime-performance",
+      label: "Prime de performance",
+      category: "bonus",
+      taxable: true,
+      cnssSubject: true,
+      amoSubject: true,
+      active: true,
+    },
+    {
+      id: "rubric-avantage-logement",
+      label: "Avantage logement",
+      category: "benefit",
+      taxable: true,
+      cnssSubject: true,
+      amoSubject: true,
+      active: true,
+    },
+    {
+      id: "rubric-indemnite-transport",
+      label: "Indemnite transport",
+      category: "allowance",
+      taxable: true,
+      cnssSubject: true,
+      amoSubject: true,
+      active: true,
+    },
+  ],
 };
 
 export const sampleEmployerLeaveRequests: EmployerLeaveRequest[] = [

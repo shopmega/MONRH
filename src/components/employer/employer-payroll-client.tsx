@@ -27,7 +27,14 @@ import {
 } from "@/lib/employer/payroll-store";
 import { readEmployerLeaveRequests } from "@/lib/employer/leave-store";
 import { readEmployerTimeEntries } from "@/lib/employer/time-store";
+import { readEmployerPayrollSettings } from "@/lib/employer/payroll-settings-store";
 import { withAudienceQuery } from "@/lib/audience/audience-mode";
+
+type EmployeeVariableState = {
+  bonus: string;
+  benefit: string;
+  allowance: string;
+};
 
 function defaultPeriod() {
   return new Intl.DateTimeFormat("fr-MA", {
@@ -136,6 +143,7 @@ export function EmployerPayrollClient() {
   const [overtimePay, setOvertimePay] = useState("0");
   const [bonus, setBonus] = useState("0");
   const [allowances, setAllowances] = useState("0");
+  const [employeeVariables, setEmployeeVariables] = useState<Record<string, EmployeeVariableState>>({});
   const [query, setQuery] = useState("");
   const [currentRun, setCurrentRun] = useState<EmployerPayrollRun | null>(null);
   const [runs, setRuns] = useState<EmployerPayrollRun[]>([]);
@@ -150,10 +158,19 @@ export function EmployerPayrollClient() {
     const nextRuns = readEmployerPayrollRuns();
     const nextLeaveRequests = readEmployerLeaveRequests() ?? [];
     const nextTimeEntries = readEmployerTimeEntries() ?? [];
+    const payrollSettings = readEmployerPayrollSettings();
     setEmployees(nextEmployees);
     setActiveCompany(nextActiveCompany);
     setLeaveRequests(nextLeaveRequests);
     setTimeEntries(nextTimeEntries);
+    setCompanySize(payrollSettings.defaultCompanySize);
+    setIncludeCimr(payrollSettings.includeCimrByDefault);
+    setEmployeeVariables(
+      nextEmployees.reduce<Record<string, EmployeeVariableState>>((acc, employee) => {
+        acc[employee.id] = { bonus: "0", benefit: "0", allowance: "0" };
+        return acc;
+      }, {}),
+    );
     setSelectedIds(new Set(nextEmployees.filter((employee) => employee.status === "Actif").map((employee) => employee.id)));
     setRuns(nextRuns);
     setCurrentRun(nextRuns[0] ?? null);
@@ -286,6 +303,16 @@ export function EmployerPayrollClient() {
     setSelectedIds(new Set());
   }
 
+  function updateEmployeeVariable(employeeId: string, key: keyof EmployeeVariableState, value: string) {
+    setEmployeeVariables((current) => ({
+      ...current,
+      [employeeId]: {
+        ...(current[employeeId] ?? { bonus: "0", benefit: "0", allowance: "0" }),
+        [key]: value,
+      },
+    }));
+  }
+
   async function calculatePayrollRun() {
     setMessage(null);
     if (selectedEmployees.length === 0) {
@@ -297,6 +324,13 @@ export function EmployerPayrollClient() {
     try {
       const lines: EmployerPayrollLine[] = [];
       for (const employee of selectedEmployees) {
+        const variables = employeeVariables[employee.id] ?? { bonus: "0", benefit: "0", allowance: "0" };
+        const manualBonus = Number(bonus) || 0;
+        const manualAllowance = Number(allowances) || 0;
+        const bonusAmount = (Number(variables.bonus) || 0) + manualBonus;
+        const benefitAmount = Number(variables.benefit) || 0;
+        const allowanceAmount = (Number(variables.allowance) || 0) + manualAllowance;
+        const overtimeAmount = (Number(overtimePay) || 0) + (approvedOvertimeByEmployee.get(employee.id) ?? 0);
         const response = await fetch("/api/simulate/payslip", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -306,9 +340,15 @@ export function EmployerPayrollClient() {
             period,
             grossSalary: employee.grossSalary,
             familyDependentsCount: employee.childrenCount ?? 0,
-            overtimePay: (Number(overtimePay) || 0) + (approvedOvertimeByEmployee.get(employee.id) ?? 0),
-            bonus: Number(bonus) || 0,
-            allowances: Number(allowances) || 0,
+            overtimePay: overtimeAmount,
+            bonus: bonusAmount,
+            allowances: allowanceAmount + benefitAmount,
+            payElements: [
+              { label: "Heures supplementaires", amount: overtimeAmount, category: "overtime", taxable: true, cnssSubject: true, amoSubject: true },
+              { label: "Prime", amount: bonusAmount, category: "bonus", taxable: true, cnssSubject: true, amoSubject: true },
+              { label: "Avantage en nature", amount: benefitAmount, category: "benefit", taxable: true, cnssSubject: true, amoSubject: true },
+              { label: "Indemnite", amount: allowanceAmount, category: "allowance", taxable: true, cnssSubject: true, amoSubject: true },
+            ].filter((item) => item.amount > 0),
             includeCimr,
             companySize,
             calculationDate: currentDateISO(),
@@ -683,6 +723,32 @@ export function EmployerPayrollClient() {
                     <p className="mt-1 text-sm text-[var(--ink-soft)]">
                       {employee.role} - {employee.contractType} - {formatMoney(employee.grossSalary)}
                     </p>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                      <input
+                        type="number"
+                        min="0"
+                        value={employeeVariables[employee.id]?.bonus ?? "0"}
+                        onChange={(event) => updateEmployeeVariable(employee.id, "bonus", event.target.value)}
+                        className="input-shell h-9 text-xs"
+                        placeholder="Prime"
+                      />
+                      <input
+                        type="number"
+                        min="0"
+                        value={employeeVariables[employee.id]?.benefit ?? "0"}
+                        onChange={(event) => updateEmployeeVariable(employee.id, "benefit", event.target.value)}
+                        className="input-shell h-9 text-xs"
+                        placeholder="Avantage nature"
+                      />
+                      <input
+                        type="number"
+                        min="0"
+                        value={employeeVariables[employee.id]?.allowance ?? "0"}
+                        onChange={(event) => updateEmployeeVariable(employee.id, "allowance", event.target.value)}
+                        className="input-shell h-9 text-xs"
+                        placeholder="Indemnite"
+                      />
+                    </div>
                     {(approvedOvertimeByEmployee.get(employee.id) ?? 0) > 0 ? (
                       <p className="mt-1 text-xs font-bold text-[var(--accent)]">
                         Pointage approuve: {formatMoney(approvedOvertimeByEmployee.get(employee.id) ?? 0)}
