@@ -21,16 +21,32 @@ import { EmployerWorkspaceSyncClient } from "@/components/employer/employer-work
 
 type CompanyFormState = {
   name: string;
+  legalForm: string;
+  address: string;
   ice: string;
+  taxIdentifier: string;
+  rcNumber: string;
   cnssAffiliateNumber: string;
   city: string;
+  contactEmail: string;
+  bankRib: string;
+  signatoryName: string;
+  signatoryRole: string;
 };
 
 const emptyCompanyForm: CompanyFormState = {
   name: "",
+  legalForm: "",
+  address: "",
   ice: "",
+  taxIdentifier: "",
+  rcNumber: "",
   cnssAffiliateNumber: "",
   city: "",
+  contactEmail: "",
+  bankRib: "",
+  signatoryName: "",
+  signatoryRole: "",
 };
 
 const planOrder: EmployerPlan[] = ["free", "pro", "cabinet"];
@@ -39,10 +55,36 @@ function createCompany(form: CompanyFormState, plan: EmployerPlan): EmployerComp
   return {
     id: crypto.randomUUID(),
     name: form.name.trim(),
+    legalForm: form.legalForm.trim() || undefined,
+    address: form.address.trim() || undefined,
     ice: form.ice.trim() || "A completer",
+    taxIdentifier: form.taxIdentifier.trim() || undefined,
+    rcNumber: form.rcNumber.trim() || undefined,
     cnssAffiliateNumber: form.cnssAffiliateNumber.trim() || "A completer",
     city: form.city.trim() || "A completer",
+    contactEmail: form.contactEmail.trim() || undefined,
+    bankRib: form.bankRib.trim() || undefined,
+    signatoryName: form.signatoryName.trim() || undefined,
+    signatoryRole: form.signatoryRole.trim() || undefined,
     plan,
+  };
+}
+
+function companyToForm(company: EmployerCompany | null): CompanyFormState {
+  if (!company) return emptyCompanyForm;
+  return {
+    name: company.name,
+    legalForm: company.legalForm ?? "",
+    address: company.address ?? "",
+    ice: company.ice === "A completer" ? "" : company.ice,
+    taxIdentifier: company.taxIdentifier ?? "",
+    rcNumber: company.rcNumber ?? "",
+    cnssAffiliateNumber: company.cnssAffiliateNumber === "A completer" ? "" : company.cnssAffiliateNumber,
+    city: company.city === "A completer" ? "" : company.city,
+    contactEmail: company.contactEmail ?? "",
+    bankRib: company.bankRib ?? "",
+    signatoryName: company.signatoryName ?? "",
+    signatoryRole: company.signatoryRole ?? "",
   };
 }
 
@@ -56,6 +98,7 @@ export function EmployerSettingsClient() {
   const [companies, setCompanies] = useState<EmployerCompany[]>([]);
   const [activeCompanyId, setActiveCompanyId] = useState("");
   const [form, setForm] = useState<CompanyFormState>(emptyCompanyForm);
+  const [profileForm, setProfileForm] = useState<CompanyFormState>(emptyCompanyForm);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,6 +129,10 @@ export function EmployerSettingsClient() {
   );
   const activeCapabilities = employerPlanCapabilities[activeCompany?.plan ?? "free"];
   const addAllowed = activeCompany ? canAddEmployerCompany(companies, activeCompany) : true;
+
+  useEffect(() => {
+    setProfileForm(companyToForm(activeCompany));
+  }, [activeCompany?.id]);
 
   async function persistCompany(company: EmployerCompany) {
     try {
@@ -122,6 +169,47 @@ export function EmployerSettingsClient() {
         selectCompany(savedCompany.id);
         setForm(emptyCompanyForm);
         setMessage(`${savedCompany.name} a ete ajoutee.`);
+      })
+      .catch(() => undefined);
+  }
+
+  function updateProfileForm<K extends keyof CompanyFormState>(key: K, value: CompanyFormState[K]) {
+    setProfileForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateCompanyProfile(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activeCompany) return;
+    if (!profileForm.name.trim()) {
+      setMessage("Le nom de l'entreprise est requis.");
+      return;
+    }
+    const email = profileForm.contactEmail.trim();
+    if (email && !email.includes("@")) {
+      setMessage("L'email de contact doit etre valide.");
+      return;
+    }
+
+    const nextCompany: EmployerCompany = {
+      ...activeCompany,
+      name: profileForm.name.trim(),
+      legalForm: profileForm.legalForm.trim() || undefined,
+      address: profileForm.address.trim() || undefined,
+      ice: profileForm.ice.trim() || "A completer",
+      taxIdentifier: profileForm.taxIdentifier.trim() || undefined,
+      rcNumber: profileForm.rcNumber.trim() || undefined,
+      cnssAffiliateNumber: profileForm.cnssAffiliateNumber.trim() || "A completer",
+      city: profileForm.city.trim() || "A completer",
+      contactEmail: email || undefined,
+      bankRib: profileForm.bankRib.trim() || undefined,
+      signatoryName: profileForm.signatoryName.trim() || undefined,
+      signatoryRole: profileForm.signatoryRole.trim() || undefined,
+    };
+
+    persistCompany(nextCompany)
+      .then((savedCompany) => {
+        setProfileForm(companyToForm(savedCompany));
+        setMessage("Profil entreprise sauvegarde.");
       })
       .catch(() => undefined);
   }
@@ -181,6 +269,21 @@ export function EmployerSettingsClient() {
               onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
               className="input-shell"
               placeholder="Nom entreprise"
+              required
+              disabled={!addAllowed}
+            />
+            <input
+              value={form.legalForm}
+              onChange={(event) => setForm((current) => ({ ...current, legalForm: event.target.value }))}
+              className="input-shell"
+              placeholder="Forme juridique (SARL, SA...)"
+              disabled={!addAllowed}
+            />
+            <input
+              value={form.address}
+              onChange={(event) => setForm((current) => ({ ...current, address: event.target.value }))}
+              className="input-shell"
+              placeholder="Adresse siege"
               disabled={!addAllowed}
             />
             <input
@@ -237,6 +340,122 @@ export function EmployerSettingsClient() {
             </span>
           </div>
         </div>
+
+        {activeCompany ? (
+          <form onSubmit={updateCompanyProfile} className="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Profil entreprise</p>
+            <h2 className="mt-2 text-xl font-black">Informations legales et paie</h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Raison sociale</span>
+                <input
+                  value={profileForm.name}
+                  onChange={(event) => updateProfileForm("name", event.target.value)}
+                  className="input-shell mt-1"
+                  required
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Forme juridique</span>
+                <input
+                  value={profileForm.legalForm}
+                  onChange={(event) => updateProfileForm("legalForm", event.target.value)}
+                  className="input-shell mt-1"
+                  placeholder="SARL, SA, SNC..."
+                />
+              </label>
+              <label className="block md:col-span-2">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Adresse siege</span>
+                <input
+                  value={profileForm.address}
+                  onChange={(event) => updateProfileForm("address", event.target.value)}
+                  className="input-shell mt-1"
+                  placeholder="Adresse complete"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">ICE</span>
+                <input
+                  value={profileForm.ice}
+                  onChange={(event) => updateProfileForm("ice", event.target.value)}
+                  className="input-shell mt-1"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Identifiant fiscal</span>
+                <input
+                  value={profileForm.taxIdentifier}
+                  onChange={(event) => updateProfileForm("taxIdentifier", event.target.value)}
+                  className="input-shell mt-1"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">RC</span>
+                <input
+                  value={profileForm.rcNumber}
+                  onChange={(event) => updateProfileForm("rcNumber", event.target.value)}
+                  className="input-shell mt-1"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Affiliation CNSS</span>
+                <input
+                  value={profileForm.cnssAffiliateNumber}
+                  onChange={(event) => updateProfileForm("cnssAffiliateNumber", event.target.value)}
+                  className="input-shell mt-1"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Ville</span>
+                <input
+                  value={profileForm.city}
+                  onChange={(event) => updateProfileForm("city", event.target.value)}
+                  className="input-shell mt-1"
+                  required
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Email contact RH</span>
+                <input
+                  type="email"
+                  value={profileForm.contactEmail}
+                  onChange={(event) => updateProfileForm("contactEmail", event.target.value)}
+                  className="input-shell mt-1"
+                />
+              </label>
+              <label className="block md:col-span-2">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">RIB entreprise</span>
+                <input
+                  value={profileForm.bankRib}
+                  onChange={(event) => updateProfileForm("bankRib", event.target.value)}
+                  className="input-shell mt-1"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Signataire</span>
+                <input
+                  value={profileForm.signatoryName}
+                  onChange={(event) => updateProfileForm("signatoryName", event.target.value)}
+                  className="input-shell mt-1"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Fonction signataire</span>
+                <input
+                  value={profileForm.signatoryRole}
+                  onChange={(event) => updateProfileForm("signatoryRole", event.target.value)}
+                  className="input-shell mt-1"
+                />
+              </label>
+            </div>
+            <button
+              type="submit"
+              className="mt-5 inline-flex h-10 items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-bold text-[var(--juris-on-primary)]"
+            >
+              Sauvegarder le profil
+            </button>
+          </form>
+        ) : null}
 
         <div className="grid gap-4 lg:grid-cols-3">
           {planOrder.map((plan) => {

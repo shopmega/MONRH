@@ -4,11 +4,18 @@ import { useEffect, useState } from "react";
 import { Plus, Save, Settings2 } from "lucide-react";
 import {
   employerPayrollRubricCategoryLabels,
+  type EmployerPayrollAccountingAccounts,
   type EmployerPayrollRubric,
   type EmployerPayrollRubricCategory,
   type EmployerPayrollSettings,
 } from "@/lib/employer/portal-data";
-import { readEmployerPayrollSettings, writeEmployerPayrollSettings } from "@/lib/employer/payroll-settings-store";
+import { getActiveEmployerCompany, readEmployerCompanies } from "@/lib/employer/company-store";
+import {
+  fetchEmployerPayrollSettingsFromCloud,
+  readEmployerPayrollSettings,
+  saveEmployerPayrollSettingsToCloud,
+  writeEmployerPayrollSettings,
+} from "@/lib/employer/payroll-settings-store";
 
 const emptyRubric: Omit<EmployerPayrollRubric, "id"> = {
   label: "",
@@ -21,11 +28,30 @@ const emptyRubric: Omit<EmployerPayrollRubric, "id"> = {
 
 export function EmployerPayrollSettingsClient() {
   const [settings, setSettings] = useState<EmployerPayrollSettings | null>(null);
+  const [companyId, setCompanyId] = useState("");
   const [rubricForm, setRubricForm] = useState(emptyRubric);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    const activeCompany = getActiveEmployerCompany(readEmployerCompanies());
+    setCompanyId(activeCompany?.id ?? "");
     setSettings(readEmployerPayrollSettings());
+    if (!activeCompany) return;
+
+    let cancelled = false;
+    fetchEmployerPayrollSettingsFromCloud(activeCompany.id)
+      .then((cloudSettings) => {
+        if (cancelled || !cloudSettings) return;
+        setSettings(cloudSettings);
+        writeEmployerPayrollSettings(cloudSettings);
+      })
+      .catch(() => {
+        if (!cancelled) setMessage("Parametres de paie cloud indisponibles, donnees locales conservees.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (!settings) return null;
@@ -35,10 +61,28 @@ export function EmployerPayrollSettingsClient() {
     setSettings(nextSettings);
     writeEmployerPayrollSettings(nextSettings);
     setMessage(successMessage);
+    if (!companyId) return;
+    saveEmployerPayrollSettingsToCloud(companyId, nextSettings)
+      .then((savedSettings) => {
+        if (!savedSettings) return;
+        setSettings(savedSettings);
+        writeEmployerPayrollSettings(savedSettings);
+      })
+      .catch(() => setMessage("Parametres sauvegardes localement, synchro cloud impossible."));
   }
 
   function updateSetting<K extends keyof EmployerPayrollSettings>(key: K, value: EmployerPayrollSettings[K]) {
     persist({ ...currentSettings, [key]: value });
+  }
+
+  function updateAccountingAccount(key: keyof EmployerPayrollAccountingAccounts, value: string) {
+    persist({
+      ...currentSettings,
+      accountingAccounts: {
+        ...currentSettings.accountingAccounts,
+        [key]: value.trim(),
+      },
+    });
   }
 
   function addRubric() {
@@ -106,7 +150,46 @@ export function EmployerPayrollSettingsClient() {
               />
               Inclure CIMR par defaut
             </label>
+            <label className="block">
+              <span className="text-xs font-bold text-[var(--ink-soft)]">Format journal comptable</span>
+              <select
+                value={settings.accountingExportTemplate}
+                onChange={(event) =>
+                  updateSetting("accountingExportTemplate", event.target.value as EmployerPayrollSettings["accountingExportTemplate"])
+                }
+                className="input-shell mt-1"
+              >
+                <option value="generic">Generique CSV</option>
+                <option value="sage">Sage</option>
+                <option value="odoo">Odoo</option>
+                <option value="webisoft">Webisoft</option>
+              </select>
+            </label>
             {message ? <p className="rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--ink-soft)]">{message}</p> : null}
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent)]">Comptabilite</p>
+          <h2 className="mt-2 text-xl font-black">Comptes paie</h2>
+          <div className="mt-4 space-y-3">
+            {[
+              ["grossSalaryExpense", "Charges salaires bruts"],
+              ["employerSocialChargesExpense", "Charges sociales patronales"],
+              ["socialPayable", "Organismes sociaux a payer"],
+              ["incomeTaxPayable", "IR salaires a payer"],
+              ["cimrPayable", "CIMR a payer"],
+              ["netSalaryPayable", "Salaires nets a payer"],
+            ].map(([key, label]) => (
+              <label key={key} className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">{label}</span>
+                <input
+                  value={settings.accountingAccounts[key as keyof EmployerPayrollAccountingAccounts]}
+                  onChange={(event) => updateAccountingAccount(key as keyof EmployerPayrollAccountingAccounts, event.target.value)}
+                  className="input-shell mt-1"
+                />
+              </label>
+            ))}
           </div>
         </section>
 

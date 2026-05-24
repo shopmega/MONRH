@@ -32,7 +32,16 @@ function formatMoney(value: number) {
   }).format(value);
 }
 
-function buildCnssRows(run: EmployerPayrollRun | null, employees: EmployerEmployee[]): EmployerCnssRow[] {
+function clampDeclaredDays(value: number) {
+  if (!Number.isFinite(value)) return DEFAULT_CNSS_DECLARED_DAYS;
+  return Math.min(31, Math.max(0, Math.round(value)));
+}
+
+function buildCnssRows(
+  run: EmployerPayrollRun | null,
+  employees: EmployerEmployee[],
+  declaredDaysByEmployee: Record<string, number>,
+): EmployerCnssRow[] {
   if (!run) {
     return employees.map((employee) => ({
       employeeId: employee.id,
@@ -41,7 +50,7 @@ function buildCnssRows(run: EmployerPayrollRun | null, employees: EmployerEmploy
       cnssNumber: employee.cnssNumber,
       contractType: employee.contractType,
       gross: employee.grossSalary,
-      declaredDays: DEFAULT_CNSS_DECLARED_DAYS,
+      declaredDays: clampDeclaredDays(declaredDaysByEmployee[employee.id] ?? DEFAULT_CNSS_DECLARED_DAYS),
       cnssBase: Math.min(employee.grossSalary, 6000),
       cnssEmployee: 0,
       cnssEmployer: 0,
@@ -60,7 +69,7 @@ function buildCnssRows(run: EmployerPayrollRun | null, employees: EmployerEmploy
       cnssNumber: employee?.cnssNumber ?? "A completer",
       contractType: employee?.contractType ?? "-",
       gross: line.result.earnings.totalGross,
-      declaredDays: DEFAULT_CNSS_DECLARED_DAYS,
+      declaredDays: clampDeclaredDays(declaredDaysByEmployee[line.employeeId] ?? DEFAULT_CNSS_DECLARED_DAYS),
       cnssBase: Math.min(line.result.earnings.totalGross, 6000),
       cnssEmployee,
       cnssEmployer,
@@ -115,6 +124,7 @@ export function EmployerCnssClient() {
   const [selectedRunId, setSelectedRunId] = useState("");
   const [activeCompany, setActiveCompany] = useState<EmployerCompany | null>(null);
   const [query, setQuery] = useState("");
+  const [declaredDaysByEmployee, setDeclaredDaysByEmployee] = useState<Record<string, number>>({});
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -152,7 +162,26 @@ export function EmployerCnssClient() {
   );
 
   const period = selectedRun?.period ?? "Brouillon registre";
-  const rows = useMemo(() => buildCnssRows(selectedRun, employees), [employees, selectedRun]);
+  const selectedExport = exports.find((item) =>
+    selectedRun ? item.payrollRunId === selectedRun.id : item.period === period,
+  );
+  useEffect(() => {
+    if (!selectedExport) {
+      setDeclaredDaysByEmployee({});
+      return;
+    }
+    setDeclaredDaysByEmployee(
+      selectedExport.rows.reduce<Record<string, number>>((acc, row) => {
+        acc[row.employeeId] = clampDeclaredDays(row.declaredDays);
+        return acc;
+      }, {}),
+    );
+  }, [selectedExport?.id]);
+
+  const rows = useMemo(
+    () => buildCnssRows(selectedRun, employees, declaredDaysByEmployee),
+    [declaredDaysByEmployee, employees, selectedRun],
+  );
   const filteredRows = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) return rows;
@@ -177,9 +206,6 @@ export function EmployerCnssClient() {
   const company = activeCompany;
 
   const canExportCsv = employerPlanCapabilities[company.plan].canExportCsv;
-  const selectedExport = exports.find((item) =>
-    selectedRun ? item.payrollRunId === selectedRun.id : item.period === period,
-  );
   const incomeTaxWithheld = selectedRun?.lines.reduce((sum, line) => sum + line.result.deductions.incomeTax, 0) ?? 0;
   const declarationStatus = !selectedRun
     ? {
@@ -205,6 +231,13 @@ export function EmployerCnssClient() {
             detail: "La paie source et les numeros CNSS sont controles pour ce mois.",
           };
 
+  function updateDeclaredDays(employeeId: string, value: string) {
+    setDeclaredDaysByEmployee((current) => ({
+      ...current,
+      [employeeId]: clampDeclaredDays(Number(value)),
+    }));
+  }
+
   function createExport(filename: string): EmployerCnssExport {
     return {
       id: crypto.randomUUID(),
@@ -225,6 +258,10 @@ export function EmployerCnssClient() {
     }
     if (rows.length === 0) {
       setMessage("Aucune ligne CNSS a exporter.");
+      return;
+    }
+    if (!selectedRun) {
+      setMessage("Selectionnez une paie calculee avant de telecharger le CSV CNSS.");
       return;
     }
     const safePeriod = period.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "periode";
@@ -284,6 +321,7 @@ export function EmployerCnssClient() {
             <button
               type="button"
               onClick={exportCsv}
+              disabled={!canExportCsv || !selectedRun || totals.missingCnss > 0}
               className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-bold text-[var(--juris-on-primary)] transition hover:bg-[var(--accent-dark)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Download className="mr-2 h-4 w-4" />
@@ -442,12 +480,13 @@ export function EmployerCnssClient() {
           </div>
 
           <div className="max-w-full overflow-x-auto">
-            <table className="w-full min-w-[980px] text-left">
+            <table className="w-full min-w-[1080px] text-left">
               <thead className="bg-[var(--surface-muted)] text-xs font-black uppercase tracking-[0.12em] text-[var(--ink-soft)]">
                 <tr>
                   <th className="px-5 py-3">Salarie</th>
                   <th className="px-5 py-3">CNSS</th>
                   <th className="px-5 py-3">Contrat</th>
+                  <th className="px-5 py-3">Jours</th>
                   <th className="px-5 py-3">Brut</th>
                   <th className="px-5 py-3">Base CNSS</th>
                   <th className="px-5 py-3">Part salarie</th>
@@ -464,6 +503,17 @@ export function EmployerCnssClient() {
                       <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-bold text-[var(--accent)]">
                         {row.contractType}
                       </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <input
+                        type="number"
+                        min="0"
+                        max="31"
+                        value={row.declaredDays}
+                        onChange={(event) => updateDeclaredDays(row.employeeId, event.target.value)}
+                        className="input-shell h-9 w-20 text-sm"
+                        aria-label={`Jours declares ${row.employeeName}`}
+                      />
                     </td>
                     <td className="px-5 py-4">{formatMoney(row.gross)}</td>
                     <td className="px-5 py-4">{formatMoney(row.cnssBase)}</td>

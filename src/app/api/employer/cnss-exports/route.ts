@@ -6,6 +6,10 @@ import {
   replaceEmployerCnssExports,
   upsertEmployerCnssExport,
 } from "@/lib/server/employer-core-store";
+import {
+  canonicalizeEmployerCnssExportsForCompany,
+  isEmployerPayrollValidationError,
+} from "@/lib/server/employer-payroll-validation";
 import { getCurrentUserId } from "@/lib/server/user-session";
 
 const cnssRowSchema = z.object({
@@ -90,11 +94,15 @@ export async function POST(request: Request) {
     }
 
     const payload = saveCnssExportsSchema.parse(await request.json());
-    const items = await replaceEmployerCnssExports(userId, payload.companyId, payload.items);
+    const canonicalItems = await canonicalizeEmployerCnssExportsForCompany(userId, payload.companyId, payload.items);
+    const items = await replaceEmployerCnssExports(userId, payload.companyId, canonicalItems);
     return NextResponse.json({ ok: true, items });
   } catch (error) {
     if (isEmployerCompanyAccessError(error)) {
       return NextResponse.json({ ok: false, error: error.code }, { status: 403 });
+    }
+    if (isEmployerPayrollValidationError(error)) {
+      return NextResponse.json({ ok: false, error: error.code, message: error.message }, { status: 422 });
     }
     return NextResponse.json(
       {
@@ -117,11 +125,15 @@ export async function PATCH(request: Request) {
     }
 
     const payload = saveCnssExportSchema.parse(await request.json());
-    const item = await upsertEmployerCnssExport(userId, payload.companyId, payload.item);
+    const [canonicalItem] = await canonicalizeEmployerCnssExportsForCompany(userId, payload.companyId, [payload.item]);
+    const item = await upsertEmployerCnssExport(userId, payload.companyId, canonicalItem);
     return NextResponse.json({ ok: true, item });
   } catch (error) {
     if (isEmployerCompanyAccessError(error)) {
       return NextResponse.json({ ok: false, error: error.code }, { status: 403 });
+    }
+    if (isEmployerPayrollValidationError(error)) {
+      return NextResponse.json({ ok: false, error: error.code, message: error.message }, { status: 422 });
     }
     return NextResponse.json(
       {

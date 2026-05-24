@@ -1,3 +1,4 @@
+import { defaultEmployerPayrollSettings } from "@/lib/employer/portal-data";
 import type {
   EmployerCompany,
   EmployerComplianceDismissal,
@@ -5,18 +6,27 @@ import type {
   EmployerContractRecord,
   EmployerEmployee,
   EmployerLeaveRequest,
+  EmployerPayrollSettings,
   EmployerPayrollRun,
   EmployerTimeEntry,
 } from "@/lib/employer/portal-data";
-import { getEmployerSubscriptionPlan } from "@/lib/server/employer-subscription-store";
+import { getEmployerPlanLimit, getEmployerSubscriptionPlan } from "@/lib/server/employer-subscription-store";
 import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
 
 type CompanyRow = {
   id: string;
   name: string;
+  legal_form: string | null;
+  address: string | null;
   ice: string;
+  tax_identifier: string | null;
+  rc_number: string | null;
   cnss_affiliate_number: string;
   city: string;
+  contact_email: string | null;
+  bank_rib: string | null;
+  signatory_name: string | null;
+  signatory_role: string | null;
   plan: EmployerCompany["plan"];
 };
 
@@ -42,6 +52,10 @@ type PayrollRunRow = {
   period: string;
   run_created_at: string;
   lines: EmployerPayrollRun["lines"];
+};
+
+type PayrollSettingsRow = {
+  settings: Partial<EmployerPayrollSettings> | null;
 };
 
 type LeaveRequestRow = {
@@ -119,6 +133,18 @@ export function isEmployerCompanyAccessError(error: unknown): error is EmployerC
   return error instanceof EmployerCompanyAccessError;
 }
 
+export class EmployerPlanLimitError extends Error {
+  code = "employer_plan_limit_exceeded";
+
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+export function isEmployerPlanLimitError(error: unknown): error is EmployerPlanLimitError {
+  return error instanceof EmployerPlanLimitError;
+}
+
 async function assertEmployerCompanyAccess(userId: string, companyId: string) {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await (supabase as any)
@@ -132,13 +158,30 @@ async function assertEmployerCompanyAccess(userId: string, companyId: string) {
   if (!data) throw new EmployerCompanyAccessError(companyId);
 }
 
+async function assertCompanyCountWithinPlan(userId: string, nextCompanyCount: number) {
+  const plan = await getEmployerSubscriptionPlan(userId);
+  const maxCompanies = getEmployerPlanLimit(plan, "maxCompanies");
+  if (nextCompanyCount > maxCompanies) {
+    throw new EmployerPlanLimitError(`plan_${plan}_allows_${maxCompanies}_companies`);
+  }
+  return plan;
+}
+
 function mapCompany(row: CompanyRow): EmployerCompany {
   return {
     id: row.id,
     name: row.name,
+    legalForm: row.legal_form ?? undefined,
+    address: row.address ?? undefined,
     ice: row.ice,
+    taxIdentifier: row.tax_identifier ?? undefined,
+    rcNumber: row.rc_number ?? undefined,
     cnssAffiliateNumber: row.cnss_affiliate_number,
     city: row.city,
+    contactEmail: row.contact_email ?? undefined,
+    bankRib: row.bank_rib ?? undefined,
+    signatoryName: row.signatory_name ?? undefined,
+    signatoryRole: row.signatory_role ?? undefined,
     plan: row.plan,
   };
 }
@@ -169,6 +212,24 @@ function mapPayrollRun(row: PayrollRunRow): EmployerPayrollRun {
     createdAt: row.run_created_at,
     lines: row.lines ?? [],
   };
+}
+
+function normalizeEmployerPayrollSettings(settings: Partial<EmployerPayrollSettings> | null): EmployerPayrollSettings {
+  return {
+    ...defaultEmployerPayrollSettings,
+    ...(settings ?? {}),
+    accountingAccounts: {
+      ...defaultEmployerPayrollSettings.accountingAccounts,
+      ...(settings?.accountingAccounts ?? {}),
+    },
+    rubrics: Array.isArray(settings?.rubrics) && settings.rubrics.length > 0
+      ? settings.rubrics
+      : defaultEmployerPayrollSettings.rubrics,
+  };
+}
+
+function mapPayrollSettings(row: PayrollSettingsRow | null): EmployerPayrollSettings {
+  return normalizeEmployerPayrollSettings(row?.settings ?? null);
 }
 
 function mapLeaveRequest(row: LeaveRequestRow): EmployerLeaveRequest {
@@ -244,12 +305,50 @@ function mapContractRecord(row: ContractRecordRow): EmployerContractRecord {
   };
 }
 
+async function deleteEmployerChildRowsExcept(
+  table: string,
+  userId: string,
+  companyId: string,
+  nextIds: Set<string>,
+  idColumn = "id",
+) {
+  const supabase = getSupabaseAdminClient();
+  if (nextIds.size === 0) {
+    const { error } = await (supabase as any)
+      .from(table)
+      .delete()
+      .eq("user_id", userId)
+      .eq("company_id", companyId);
+    if (error) throw new Error(`${table}_replace_delete_failed: ${error.message}`);
+    return;
+  }
+
+  const { data, error: selectError } = await (supabase as any)
+    .from(table)
+    .select(idColumn)
+    .eq("user_id", userId)
+    .eq("company_id", companyId);
+  if (selectError) throw new Error(`${table}_replace_select_failed: ${selectError.message}`);
+
+  for (const row of (data ?? []) as Array<Record<string, string>>) {
+    const id = row[idColumn];
+    if (nextIds.has(id)) continue;
+    const { error: deleteError } = await (supabase as any)
+      .from(table)
+      .delete()
+      .eq("user_id", userId)
+      .eq("company_id", companyId)
+      .eq(idColumn, id);
+    if (deleteError) throw new Error(`${table}_replace_delete_failed: ${deleteError.message}`);
+  }
+}
+
 export async function listEmployerCompanies(userId: string): Promise<EmployerCompany[]> {
   const supabase = getSupabaseAdminClient();
   const plan = await getEmployerSubscriptionPlan(userId);
   const { data, error } = await (supabase as any)
     .from("employer_companies")
-    .select("id,name,ice,cnss_affiliate_number,city,plan")
+    .select("id,name,legal_form,address,ice,tax_identifier,rc_number,cnss_affiliate_number,city,contact_email,bank_rib,signatory_name,signatory_role,plan")
     .eq("user_id", userId)
     .order("created_at", { ascending: true });
 
@@ -265,6 +364,31 @@ export async function replaceEmployerCompanies(
   const existingCompanies = await listEmployerCompanies(userId);
   const existingPlans = new Map(existingCompanies.map((company) => [company.id, company.plan]));
   const nextCompanyIds = new Set(companies.map((company) => company.id));
+  const plan = await assertCompanyCountWithinPlan(userId, nextCompanyIds.size);
+
+  if (companies.length > 0) {
+    const rows = companies.map((company) => ({
+      user_id: userId,
+      id: company.id,
+      name: company.name,
+      legal_form: company.legalForm ?? null,
+      address: company.address ?? null,
+      ice: company.ice,
+      tax_identifier: company.taxIdentifier ?? null,
+      rc_number: company.rcNumber ?? null,
+      cnss_affiliate_number: company.cnssAffiliateNumber,
+      city: company.city,
+      contact_email: company.contactEmail ?? null,
+      bank_rib: company.bankRib ?? null,
+      signatory_name: company.signatoryName ?? null,
+      signatory_role: company.signatoryRole ?? null,
+      plan: existingPlans.get(company.id) ?? plan,
+    }));
+    const { error: upsertError } = await (supabase as any)
+      .from("employer_companies")
+      .upsert(rows, { onConflict: "user_id,id" });
+    if (upsertError) throw new Error(`employer_companies_replace_failed: ${upsertError.message}`);
+  }
 
   for (const company of existingCompanies) {
     if (!nextCompanyIds.has(company.id)) {
@@ -277,29 +401,11 @@ export async function replaceEmployerCompanies(
     }
   }
 
-  if (companies.length > 0) {
-    const plan = await getEmployerSubscriptionPlan(userId);
-    const rows = companies.map((company) => ({
-      user_id: userId,
-      id: company.id,
-      name: company.name,
-      ice: company.ice,
-      cnss_affiliate_number: company.cnssAffiliateNumber,
-      city: company.city,
-      plan: existingPlans.get(company.id) ?? plan,
-    }));
-    const { error: upsertError } = await (supabase as any)
-      .from("employer_companies")
-      .upsert(rows, { onConflict: "user_id,id" });
-    if (upsertError) throw new Error(`employer_companies_replace_failed: ${upsertError.message}`);
-  }
-
   return listEmployerCompanies(userId);
 }
 
 export async function upsertEmployerCompany(userId: string, company: EmployerCompany): Promise<EmployerCompany> {
   const supabase = getSupabaseAdminClient();
-  const plan = await getEmployerSubscriptionPlan(userId);
   const { data: existing, error: existingError } = await (supabase as any)
     .from("employer_companies")
     .select("plan")
@@ -308,21 +414,32 @@ export async function upsertEmployerCompany(userId: string, company: EmployerCom
     .maybeSingle();
 
   if (existingError) throw new Error(`employer_company_upsert_failed: ${existingError.message}`);
+  const existingCompanies = await listEmployerCompanies(userId);
+  const isNewCompany = !existingCompanies.some((item) => item.id === company.id);
+  const plan = await assertCompanyCountWithinPlan(userId, existingCompanies.length + (isNewCompany ? 1 : 0));
 
   const row = {
     user_id: userId,
     id: company.id,
     name: company.name,
+    legal_form: company.legalForm ?? null,
+    address: company.address ?? null,
     ice: company.ice,
+    tax_identifier: company.taxIdentifier ?? null,
+    rc_number: company.rcNumber ?? null,
     cnss_affiliate_number: company.cnssAffiliateNumber,
     city: company.city,
+    contact_email: company.contactEmail ?? null,
+    bank_rib: company.bankRib ?? null,
+    signatory_name: company.signatoryName ?? null,
+    signatory_role: company.signatoryRole ?? null,
     plan: (existing as { plan?: EmployerCompany["plan"] } | null)?.plan ?? plan,
   };
 
   const { data, error } = await (supabase as any)
     .from("employer_companies")
     .upsert(row, { onConflict: "user_id,id" })
-    .select("id,name,ice,cnss_affiliate_number,city,plan")
+    .select("id,name,legal_form,address,ice,tax_identifier,rc_number,cnss_affiliate_number,city,contact_email,bank_rib,signatory_name,signatory_role,plan")
     .single();
   if (error) throw new Error(`employer_company_upsert_failed: ${error.message}`);
   return { ...mapCompany(data as CompanyRow), plan };
@@ -349,12 +466,6 @@ export async function replaceEmployerEmployees(
 ): Promise<EmployerEmployee[]> {
   await assertEmployerCompanyAccess(userId, companyId);
   const supabase = getSupabaseAdminClient();
-  const { error: deleteError } = await (supabase as any)
-    .from("employer_employees")
-    .delete()
-    .eq("user_id", userId)
-    .eq("company_id", companyId);
-  if (deleteError) throw new Error(`employer_employees_replace_failed: ${deleteError.message}`);
 
   if (employees.length > 0) {
     const rows = employees.map((employee) => ({
@@ -375,9 +486,17 @@ export async function replaceEmployerEmployees(
       documents: employee.documents ?? [],
       status: employee.status,
     }));
-    const { error: insertError } = await (supabase as any).from("employer_employees").insert(rows);
+    const { error: insertError } = await (supabase as any)
+      .from("employer_employees")
+      .upsert(rows, { onConflict: "user_id,company_id,id" });
     if (insertError) throw new Error(`employer_employees_replace_failed: ${insertError.message}`);
   }
+  await deleteEmployerChildRowsExcept(
+    "employer_employees",
+    userId,
+    companyId,
+    new Set(employees.map((employee) => employee.id)),
+  );
 
   return listEmployerEmployees(userId, companyId);
 }
@@ -437,12 +556,6 @@ export async function replaceEmployerPayrollRuns(
 ): Promise<EmployerPayrollRun[]> {
   await assertEmployerCompanyAccess(userId, companyId);
   const supabase = getSupabaseAdminClient();
-  const { error: deleteError } = await (supabase as any)
-    .from("employer_payroll_runs")
-    .delete()
-    .eq("user_id", userId)
-    .eq("company_id", companyId);
-  if (deleteError) throw new Error(`employer_payroll_runs_replace_failed: ${deleteError.message}`);
 
   if (runs.length > 0) {
     const rows = runs.map((run) => ({
@@ -453,9 +566,17 @@ export async function replaceEmployerPayrollRuns(
       run_created_at: run.createdAt,
       lines: run.lines,
     }));
-    const { error: insertError } = await (supabase as any).from("employer_payroll_runs").insert(rows);
+    const { error: insertError } = await (supabase as any)
+      .from("employer_payroll_runs")
+      .upsert(rows, { onConflict: "user_id,company_id,id" });
     if (insertError) throw new Error(`employer_payroll_runs_replace_failed: ${insertError.message}`);
   }
+  await deleteEmployerChildRowsExcept(
+    "employer_payroll_runs",
+    userId,
+    companyId,
+    new Set(runs.map((run) => run.id)),
+  );
 
   return listEmployerPayrollRuns(userId, companyId);
 }
@@ -484,6 +605,47 @@ export async function upsertEmployerPayrollRun(
   return mapPayrollRun(data as PayrollRunRow);
 }
 
+export async function getEmployerPayrollSettings(
+  userId: string,
+  companyId: string,
+): Promise<EmployerPayrollSettings> {
+  await assertEmployerCompanyAccess(userId, companyId);
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await (supabase as any)
+    .from("employer_payroll_settings")
+    .select("settings")
+    .eq("user_id", userId)
+    .eq("company_id", companyId)
+    .maybeSingle();
+
+  if (error) throw new Error(`employer_payroll_settings_get_failed: ${error.message}`);
+  return mapPayrollSettings(data as PayrollSettingsRow | null);
+}
+
+export async function upsertEmployerPayrollSettings(
+  userId: string,
+  companyId: string,
+  settings: EmployerPayrollSettings,
+): Promise<EmployerPayrollSettings> {
+  await assertEmployerCompanyAccess(userId, companyId);
+  const supabase = getSupabaseAdminClient();
+  const normalizedSettings = normalizeEmployerPayrollSettings(settings);
+  const { data, error } = await (supabase as any)
+    .from("employer_payroll_settings")
+    .upsert(
+      {
+        user_id: userId,
+        company_id: companyId,
+        settings: normalizedSettings,
+      },
+      { onConflict: "user_id,company_id" },
+    )
+    .select("settings")
+    .single();
+  if (error) throw new Error(`employer_payroll_settings_upsert_failed: ${error.message}`);
+  return mapPayrollSettings(data as PayrollSettingsRow);
+}
+
 export async function listEmployerLeaveRequests(userId: string, companyId: string): Promise<EmployerLeaveRequest[]> {
   await assertEmployerCompanyAccess(userId, companyId);
   const supabase = getSupabaseAdminClient();
@@ -505,12 +667,6 @@ export async function replaceEmployerLeaveRequests(
 ): Promise<EmployerLeaveRequest[]> {
   await assertEmployerCompanyAccess(userId, companyId);
   const supabase = getSupabaseAdminClient();
-  const { error: deleteError } = await (supabase as any)
-    .from("employer_leave_requests")
-    .delete()
-    .eq("user_id", userId)
-    .eq("company_id", companyId);
-  if (deleteError) throw new Error(`employer_leave_requests_replace_failed: ${deleteError.message}`);
 
   if (requests.length > 0) {
     const rows = requests.map((request) => ({
@@ -528,9 +684,17 @@ export async function replaceEmployerLeaveRequests(
       request_created_at: request.createdAt,
       decided_at: request.decidedAt ?? null,
     }));
-    const { error: insertError } = await (supabase as any).from("employer_leave_requests").insert(rows);
+    const { error: insertError } = await (supabase as any)
+      .from("employer_leave_requests")
+      .upsert(rows, { onConflict: "user_id,company_id,id" });
     if (insertError) throw new Error(`employer_leave_requests_replace_failed: ${insertError.message}`);
   }
+  await deleteEmployerChildRowsExcept(
+    "employer_leave_requests",
+    userId,
+    companyId,
+    new Set(requests.map((request) => request.id)),
+  );
 
   return listEmployerLeaveRequests(userId, companyId);
 }
@@ -589,12 +753,6 @@ export async function replaceEmployerTimeEntries(
 ): Promise<EmployerTimeEntry[]> {
   await assertEmployerCompanyAccess(userId, companyId);
   const supabase = getSupabaseAdminClient();
-  const { error: deleteError } = await (supabase as any)
-    .from("employer_time_entries")
-    .delete()
-    .eq("user_id", userId)
-    .eq("company_id", companyId);
-  if (deleteError) throw new Error(`employer_time_entries_replace_failed: ${deleteError.message}`);
 
   if (entries.length > 0) {
     const rows = entries.map((entry) => ({
@@ -615,9 +773,17 @@ export async function replaceEmployerTimeEntries(
       entry_created_at: entry.createdAt,
       decided_at: entry.decidedAt ?? null,
     }));
-    const { error: insertError } = await (supabase as any).from("employer_time_entries").insert(rows);
+    const { error: insertError } = await (supabase as any)
+      .from("employer_time_entries")
+      .upsert(rows, { onConflict: "user_id,company_id,id" });
     if (insertError) throw new Error(`employer_time_entries_replace_failed: ${insertError.message}`);
   }
+  await deleteEmployerChildRowsExcept(
+    "employer_time_entries",
+    userId,
+    companyId,
+    new Set(entries.map((entry) => entry.id)),
+  );
 
   return listEmployerTimeEntries(userId, companyId);
 }
@@ -679,12 +845,6 @@ export async function replaceEmployerCnssExports(
 ): Promise<EmployerCnssExport[]> {
   await assertEmployerCompanyAccess(userId, companyId);
   const supabase = getSupabaseAdminClient();
-  const { error: deleteError } = await (supabase as any)
-    .from("employer_cnss_exports")
-    .delete()
-    .eq("user_id", userId)
-    .eq("company_id", companyId);
-  if (deleteError) throw new Error(`employer_cnss_exports_replace_failed: ${deleteError.message}`);
 
   if (exports.length > 0) {
     const rows = exports.map((item) => ({
@@ -699,9 +859,17 @@ export async function replaceEmployerCnssExports(
       rows: item.rows,
       totals: item.totals,
     }));
-    const { error: insertError } = await (supabase as any).from("employer_cnss_exports").insert(rows);
+    const { error: insertError } = await (supabase as any)
+      .from("employer_cnss_exports")
+      .upsert(rows, { onConflict: "user_id,company_id,id" });
     if (insertError) throw new Error(`employer_cnss_exports_replace_failed: ${insertError.message}`);
   }
+  await deleteEmployerChildRowsExcept(
+    "employer_cnss_exports",
+    userId,
+    companyId,
+    new Set(exports.map((item) => item.id)),
+  );
 
   return listEmployerCnssExports(userId, companyId);
 }
@@ -808,12 +976,6 @@ export async function replaceEmployerContractRecords(
 ): Promise<EmployerContractRecord[]> {
   await assertEmployerCompanyAccess(userId, companyId);
   const supabase = getSupabaseAdminClient();
-  const { error: deleteError } = await (supabase as any)
-    .from("employer_contract_records")
-    .delete()
-    .eq("user_id", userId)
-    .eq("company_id", companyId);
-  if (deleteError) throw new Error(`employer_contract_records_replace_failed: ${deleteError.message}`);
 
   if (records.length > 0) {
     const rows = records.map((record) => ({
@@ -832,9 +994,17 @@ export async function replaceEmployerContractRecords(
       warnings: record.warnings ?? [],
       record_created_at: record.createdAt,
     }));
-    const { error: insertError } = await (supabase as any).from("employer_contract_records").insert(rows);
+    const { error: insertError } = await (supabase as any)
+      .from("employer_contract_records")
+      .upsert(rows, { onConflict: "user_id,company_id,id" });
     if (insertError) throw new Error(`employer_contract_records_replace_failed: ${insertError.message}`);
   }
+  await deleteEmployerChildRowsExcept(
+    "employer_contract_records",
+    userId,
+    companyId,
+    new Set(records.map((record) => record.id)),
+  );
 
   return listEmployerContractRecords(userId, companyId);
 }

@@ -18,6 +18,10 @@ export type EmployerWorkspaceSnapshot = {
   storage: Record<string, string>;
 };
 
+export const EMPLOYER_WORKSPACE_MAX_KEYS = 80;
+export const EMPLOYER_WORKSPACE_MAX_BYTES = 750_000;
+export const EMPLOYER_WORKSPACE_MAX_VALUE_BYTES = 250_000;
+
 const EMPLOYER_STORAGE_PREFIXES = [
   "monrh_employer_",
   `${EMPLOYER_EMPLOYEE_STORAGE_KEY}:`,
@@ -44,7 +48,7 @@ const EMPLOYER_STORAGE_KEYS = new Set([
   EMPLOYER_TIME_ENTRY_STORAGE_KEY,
 ]);
 
-function isEmployerStorageKey(key: string) {
+export function isEmployerStorageKey(key: string) {
   return EMPLOYER_STORAGE_KEYS.has(key) || EMPLOYER_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 

@@ -42,6 +42,108 @@ function exportCsv(filename: string, rows: string[][]) {
   URL.revokeObjectURL(url);
 }
 
+function csvAmount(value: number) {
+  return value.toFixed(2);
+}
+
+type AccountingJournalLine = {
+  journal: string;
+  date: string;
+  period: string;
+  matricule?: string;
+  employeeName?: string;
+  account: string;
+  label: string;
+  debit: number;
+  credit: number;
+};
+
+function accountingTemplateSuffix(template: ReturnType<typeof readEmployerPayrollSettings>["accountingExportTemplate"]) {
+  return template === "generic" ? "generic" : template;
+}
+
+function formatAccountingJournalRows(
+  lines: AccountingJournalLine[],
+  template: ReturnType<typeof readEmployerPayrollSettings>["accountingExportTemplate"],
+  perEmployee: boolean,
+) {
+  if (template === "odoo") {
+    return [
+      ["Date", "Journal", "Account", "Partner", "Label", "Debit", "Credit", "Analytic Account"],
+      ...lines.map((line) => [
+        line.date,
+        line.journal,
+        line.account,
+        line.employeeName ?? "",
+        line.label,
+        csvAmount(line.debit),
+        csvAmount(line.credit),
+        line.matricule ?? "",
+      ]),
+    ];
+  }
+
+  if (template === "sage") {
+    return [
+      ["Code journal", "Date piece", "Numero compte", "Libelle ecriture", "Debit", "Credit", "Section analytique"],
+      ...lines.map((line) => [
+        line.journal,
+        line.date,
+        line.account,
+        line.label,
+        csvAmount(line.debit),
+        csvAmount(line.credit),
+        line.matricule ?? "",
+      ]),
+    ];
+  }
+
+  if (template === "webisoft") {
+    return [
+      ["Journal", "Date", "Compte", "Libelle", "Debit", "Credit", "Matricule", "Salarie"],
+      ...lines.map((line) => [
+        line.journal,
+        line.date,
+        line.account,
+        line.label,
+        csvAmount(line.debit),
+        csvAmount(line.credit),
+        line.matricule ?? "",
+        line.employeeName ?? "",
+      ]),
+    ];
+  }
+
+  return [
+    perEmployee
+      ? ["Journal", "Date", "Periode", "Matricule", "Salarie", "Compte", "Libelle", "Debit", "Credit"]
+      : ["Journal", "Date", "Periode", "Compte", "Libelle", "Debit", "Credit"],
+    ...lines.map((line) =>
+      perEmployee
+        ? [
+            line.journal,
+            line.date,
+            line.period,
+            line.matricule ?? "",
+            line.employeeName ?? "",
+            line.account,
+            line.label,
+            csvAmount(line.debit),
+            csvAmount(line.credit),
+          ]
+        : [
+            line.journal,
+            line.date,
+            line.period,
+            line.account,
+            line.label,
+            csvAmount(line.debit),
+            csvAmount(line.credit),
+          ],
+    ),
+  ];
+}
+
 export function EmployerReportsClient() {
   const [company, setCompany] = useState<EmployerCompany | null>(null);
   const [employees, setEmployees] = useState<EmployerEmployee[]>([]);
@@ -144,6 +246,77 @@ export function EmployerReportsClient() {
     ]);
   }
 
+  function exportAccountingJournal() {
+    if (!latestRun) return;
+    const accounts = settings.accountingAccounts;
+    const lines = latestRun.lines;
+    const gross = lines.reduce((sum, line) => sum + line.result.earnings.totalGross, 0);
+    const net = lines.reduce((sum, line) => sum + line.result.netToPay, 0);
+    const cnssEmployee = lines.reduce((sum, line) => sum + line.result.deductions.cnssEmployee, 0);
+    const amoEmployee = lines.reduce((sum, line) => sum + line.result.deductions.amoEmployee, 0);
+    const cimrEmployee = lines.reduce((sum, line) => sum + (line.result.deductions.cimrEmployee ?? 0), 0);
+    const ir = lines.reduce((sum, line) => sum + line.result.deductions.incomeTax, 0);
+    const cnssEmployer = lines.reduce((sum, line) => sum + line.result.employerContributions.cnssEmployer, 0);
+    const amoEmployer = lines.reduce((sum, line) => sum + line.result.employerContributions.amoEmployer, 0);
+    const formation = lines.reduce((sum, line) => sum + line.result.employerContributions.formationPro, 0);
+    const employerCharges = cnssEmployer + amoEmployer + formation;
+    const socialPayable = cnssEmployee + amoEmployee + cnssEmployer + amoEmployer + formation;
+    const journalDate = new Date(latestRun.createdAt).toISOString().slice(0, 10);
+    const label = `Paie ${latestRun.period}`;
+    const rows: AccountingJournalLine[] = [
+      { journal: "PAIE", date: journalDate, period: latestRun.period, account: accounts.grossSalaryExpense, label: `${label} - salaires bruts`, debit: gross, credit: 0 },
+      { journal: "PAIE", date: journalDate, period: latestRun.period, account: accounts.employerSocialChargesExpense, label: `${label} - charges sociales patronales`, debit: employerCharges, credit: 0 },
+      { journal: "PAIE", date: journalDate, period: latestRun.period, account: accounts.socialPayable, label: `${label} - CNSS/AMO/OFPPT a payer`, debit: 0, credit: socialPayable },
+      { journal: "PAIE", date: journalDate, period: latestRun.period, account: accounts.incomeTaxPayable, label: `${label} - IR salaires a payer`, debit: 0, credit: ir },
+      ...(cimrEmployee > 0
+        ? [{ journal: "PAIE", date: journalDate, period: latestRun.period, account: accounts.cimrPayable, label: `${label} - CIMR a payer`, debit: 0, credit: cimrEmployee }]
+        : []),
+      { journal: "PAIE", date: journalDate, period: latestRun.period, account: accounts.netSalaryPayable, label: `${label} - salaires nets a payer`, debit: 0, credit: net },
+    ];
+    exportCsv(
+      `journal-paie-${accountingTemplateSuffix(settings.accountingExportTemplate)}-${latestRun.period.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}.csv`,
+      formatAccountingJournalRows(rows, settings.accountingExportTemplate, false),
+    );
+  }
+
+  function exportEmployeeAccountingJournal() {
+    if (!latestRun) return;
+    const accounts = settings.accountingAccounts;
+    const journalDate = new Date(latestRun.createdAt).toISOString().slice(0, 10);
+    const rows = latestRun.lines.flatMap((line) => {
+      const employee = employees.find((item) => item.id === line.employeeId);
+      const employeeRef = employee?.employeeNumber ?? line.employeeId;
+      const gross = line.result.earnings.totalGross;
+      const net = line.result.netToPay;
+      const cnssEmployee = line.result.deductions.cnssEmployee;
+      const amoEmployee = line.result.deductions.amoEmployee;
+      const cimrEmployee = line.result.deductions.cimrEmployee ?? 0;
+      const ir = line.result.deductions.incomeTax;
+      const cnssEmployer = line.result.employerContributions.cnssEmployer;
+      const amoEmployer = line.result.employerContributions.amoEmployer;
+      const formation = line.result.employerContributions.formationPro;
+      const employerCharges = cnssEmployer + amoEmployer + formation;
+      const socialPayable = cnssEmployee + amoEmployee + cnssEmployer + amoEmployer + formation;
+      const label = `Paie ${latestRun.period} - ${employeeRef} - ${line.employeeName}`;
+
+      return [
+        { journal: "PAIE", date: journalDate, period: latestRun.period, matricule: employeeRef, employeeName: line.employeeName, account: accounts.grossSalaryExpense, label: `${label} - salaire brut`, debit: gross, credit: 0 },
+        { journal: "PAIE", date: journalDate, period: latestRun.period, matricule: employeeRef, employeeName: line.employeeName, account: accounts.employerSocialChargesExpense, label: `${label} - charges patronales`, debit: employerCharges, credit: 0 },
+        { journal: "PAIE", date: journalDate, period: latestRun.period, matricule: employeeRef, employeeName: line.employeeName, account: accounts.socialPayable, label: `${label} - CNSS/AMO/OFPPT`, debit: 0, credit: socialPayable },
+        { journal: "PAIE", date: journalDate, period: latestRun.period, matricule: employeeRef, employeeName: line.employeeName, account: accounts.incomeTaxPayable, label: `${label} - IR salaire`, debit: 0, credit: ir },
+        ...(cimrEmployee > 0
+          ? [{ journal: "PAIE", date: journalDate, period: latestRun.period, matricule: employeeRef, employeeName: line.employeeName, account: accounts.cimrPayable, label: `${label} - CIMR`, debit: 0, credit: cimrEmployee }]
+          : []),
+        { journal: "PAIE", date: journalDate, period: latestRun.period, matricule: employeeRef, employeeName: line.employeeName, account: accounts.netSalaryPayable, label: `${label} - net a payer`, debit: 0, credit: net },
+      ];
+    });
+
+    exportCsv(
+      `journal-paie-par-salarie-${accountingTemplateSuffix(settings.accountingExportTemplate)}-${latestRun.period.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}.csv`,
+      formatAccountingJournalRows(rows, settings.accountingExportTemplate, true),
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-4">
@@ -162,10 +335,30 @@ export function EmployerReportsClient() {
             <h2 className="text-xl font-black">Livre de paie</h2>
             <p className="mt-1 text-sm text-[var(--ink-soft)]">Historique detaille des runs de paie par salarie.</p>
           </div>
-          <button type="button" onClick={exportPayrollBook} className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--line)] px-3 text-sm font-black hover:bg-[var(--surface-muted)]">
-            <Download className="h-4 w-4" />
-            CSV
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={exportPayrollBook} className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--line)] px-3 text-sm font-black hover:bg-[var(--surface-muted)]">
+              <Download className="h-4 w-4" />
+              CSV
+            </button>
+            <button
+              type="button"
+              onClick={exportAccountingJournal}
+              disabled={!latestRun}
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--line)] px-3 text-sm font-black hover:bg-[var(--surface-muted)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Journal comptable
+            </button>
+            <button
+              type="button"
+              onClick={exportEmployeeAccountingJournal}
+              disabled={!latestRun}
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--line)] px-3 text-sm font-black hover:bg-[var(--surface-muted)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Journal par salarie
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[920px] text-left text-sm">

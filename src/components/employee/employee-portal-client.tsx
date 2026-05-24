@@ -267,11 +267,14 @@ export function EmployeePortalClient() {
           companyId: activeCompany.id,
           company: {
             name: activeCompany.name,
+            address: activeCompany.address ?? "",
             ice: activeCompany.ice,
+            taxIdentifier: activeCompany.taxIdentifier ?? "",
             cnssAffiliateNumber: activeCompany.cnssAffiliateNumber,
             city: activeCompany.city,
           },
           employee: {
+            id: activeEmployee.id,
             fullName: activeEmployee.fullName,
             employeeNumber: activeEmployee.employeeNumber ?? activeEmployee.id,
             cin: activeEmployee.cin ?? "",
@@ -281,6 +284,7 @@ export function EmployeePortalClient() {
             dependents: String(activeEmployee.childrenCount ?? 0),
           },
           period: line.result.period,
+          payElements: line.payElements ?? [],
           annualTotals: getAnnualPayslipTotals(line, payrollLines),
           result: line.result,
         }),

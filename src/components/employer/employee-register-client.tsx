@@ -9,6 +9,7 @@ import {
   FileText,
   Plus,
   Search,
+  Upload,
   UserCheck,
   Users,
   X,
@@ -30,9 +31,11 @@ import {
   normalizeEmployerEmployee,
   normalizeEmployerEmployeeDocuments,
   readEmployerEmployees,
+  saveEmployerEmployeesToCloud,
   saveEmployerEmployeeToCloud,
   writeEmployerEmployees,
 } from "@/lib/employer/employee-store";
+import { parseCsvNumber, parseCsvRecords, readCsvField } from "@/lib/employer/csv";
 import type { ContractFormData } from "@/lib/contracts/types";
 
 type EmployeeFormState = {
@@ -138,6 +141,17 @@ function buildRegisterCsv(employees: EmployerEmployee[]) {
     .join("\n");
 }
 
+function downloadCsv(filename: string, rows: string[][]) {
+  const csv = rows.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(";")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 function getContractDurationMonths(startDate: string, endDate?: string) {
   if (!endDate) return undefined;
   const started = new Date(startDate);
@@ -159,8 +173,8 @@ function buildContractDraft(employee: EmployerEmployee, company: EmployerCompany
     employee_cin: employee.cin ?? "",
     employee_cnss: employee.cnssNumber === "A completer" ? "" : employee.cnssNumber,
     company_name: company.name,
-    company_address: company.city,
-    company_rc: company.ice,
+    company_address: company.address ?? company.city,
+    company_rc: company.rcNumber ?? company.ice,
     company_cnss: company.cnssAffiliateNumber,
     job_title: employee.role,
     job_description: employee.role,
@@ -190,6 +204,34 @@ function replaceEmployeeInList(employees: EmployerEmployee[], employee: Employer
   return employees.some((item) => item.id === employee.id)
     ? employees.map((item) => (item.id === employee.id ? employee : item))
     : [employee, ...employees];
+}
+
+function normalizeKey(value: string | undefined) {
+  return (value ?? "").trim().toLowerCase();
+}
+
+function parseContractType(value: string): EmployerEmployee["contractType"] {
+  const normalized = normalizeKey(value);
+  if (normalized === "cdd") return "CDD";
+  if (normalized === "stage") return "Stage";
+  if (normalized === "interim" || normalized === "interim") return "Interim";
+  return "CDI";
+}
+
+function parseEmployeeStatus(value: string): EmployerEmployee["status"] {
+  const normalized = normalizeKey(value);
+  if (normalized === "suspendu" || normalized === "suspended") return "Suspendu";
+  if (normalized === "sorti" || normalized === "exited" || normalized === "inactive") return "Sorti";
+  return "Actif";
+}
+
+function parseDateField(value: string) {
+  if (!value.trim()) return "";
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+  const match = value.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (!match) return value;
+  return `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
 }
 
 export function EmployeeRegisterClient() {
@@ -282,6 +324,11 @@ export function EmployeeRegisterClient() {
     event.preventDefault();
     const grossSalary = Number(form.grossSalary);
     if (!form.fullName.trim() || !form.role.trim() || !form.startDate || !Number.isFinite(grossSalary) || grossSalary <= 0) {
+      setMessage("Nom, poste, date de debut et salaire brut positif sont requis.");
+      return;
+    }
+    if (form.contractType !== "CDI" && !form.endDate) {
+      setMessage("Une date de fin est requise pour les contrats non CDI.");
       return;
     }
 
@@ -333,8 +380,7 @@ export function EmployeeRegisterClient() {
   }
 
   function exportCsv() {
-    const csv = buildRegisterCsv(employees);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([buildRegisterCsv(employees)], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -342,6 +388,101 @@ export function EmployeeRegisterClient() {
     anchor.click();
     URL.revokeObjectURL(url);
     setMessage("Export CSV du registre genere.");
+  }
+
+  function downloadWagesTemplate() {
+    downloadCsv("modele-import-salaires.csv", [
+      ["Matricule interne", "Nom", "CIN", "Poste", "Contrat", "Date debut", "Date fin", "Salaire brut", "CNSS", "Enfants", "Email", "Statut"],
+      ["SAL-001", "Sara El Mansouri", "BK123456", "Responsable paie", "CDI", "2026-01-01", "", "6500", "123456789", "0", "sara@entreprise.ma", "Actif"],
+    ]);
+  }
+
+  async function importWagesCsv(file: File | null) {
+    if (!file) return;
+    setMessage(null);
+    const previousEmployees = employees;
+    try {
+      const records = parseCsvRecords(await file.text());
+      if (records.length === 0) {
+        setMessage("CSV vide ou en-tetes introuvables.");
+        return;
+      }
+
+      let created = 0;
+      let updated = 0;
+      let skipped = 0;
+      const nextEmployees = [...employees];
+
+      for (const record of records) {
+        const employeeNumber = readCsvField(record, ["Matricule interne", "Matricule", "employeeNumber", "employee_number"]);
+        const fullName = readCsvField(record, ["Nom", "Nom complet", "Salarie", "fullName", "employeeName"]);
+        const cnssNumber = readCsvField(record, ["CNSS", "Numero CNSS", "cnssNumber"]);
+        const grossSalaryValue = readCsvField(record, ["Salaire brut", "Salaire brut mensuel", "Gross salary", "grossSalary"]);
+        const grossSalary = parseCsvNumber(grossSalaryValue);
+        const existingIndex = nextEmployees.findIndex(
+          (employee) =>
+            (employeeNumber && normalizeKey(employee.employeeNumber) === normalizeKey(employeeNumber)) ||
+            (cnssNumber && normalizeKey(employee.cnssNumber) === normalizeKey(cnssNumber)) ||
+            (fullName && normalizeKey(employee.fullName) === normalizeKey(fullName)),
+        );
+        const existing = existingIndex >= 0 ? nextEmployees[existingIndex] : null;
+        const role = readCsvField(record, ["Poste", "Fonction", "Role", "role"]) || existing?.role || "";
+        const startDate = parseDateField(readCsvField(record, ["Date debut", "Date d embauche", "startDate"])) || existing?.startDate || "";
+        const contractType = parseContractType(readCsvField(record, ["Contrat", "contractType"]) || existing?.contractType || "CDI");
+
+        if (!existing && (!fullName || !role || !startDate || grossSalary <= 0)) {
+          skipped += 1;
+          continue;
+        }
+
+        const importedEmployee = normalizeEmployee({
+          id: existing?.id ?? crypto.randomUUID(),
+          employeeNumber: employeeNumber || existing?.employeeNumber,
+          fullName: fullName || existing?.fullName || "",
+          cin: readCsvField(record, ["CIN", "cin"]) || existing?.cin || "",
+          role,
+          contractType,
+          startDate,
+          endDate: parseDateField(readCsvField(record, ["Date fin", "endDate"])) || existing?.endDate,
+          grossSalary: grossSalary > 0 ? grossSalary : existing?.grossSalary ?? 0,
+          cnssNumber: cnssNumber || existing?.cnssNumber || "A completer",
+          childrenCount: Math.max(
+            0,
+            Math.min(6, Math.trunc(parseCsvNumber(readCsvField(record, ["Enfants", "childrenCount"])) || existing?.childrenCount || 0)),
+          ),
+          email: readCsvField(record, ["Email", "email"]) || existing?.email,
+          documents: existing?.documents ?? normalizeDocuments(),
+          status: parseEmployeeStatus(readCsvField(record, ["Statut", "status"]) || existing?.status || "Actif"),
+        });
+
+        if (existingIndex >= 0) {
+          nextEmployees[existingIndex] = importedEmployee;
+          updated += 1;
+        } else {
+          nextEmployees.unshift(importedEmployee);
+          created += 1;
+        }
+      }
+
+      if (created + updated === 0) {
+        setMessage(`Aucune ligne importee. ${skipped} ligne(s) ignoree(s).`);
+        return;
+      }
+
+      setEmployees(nextEmployees);
+      writeEmployerEmployees(nextEmployees);
+      setSelectedEmployeeId((current) => current || nextEmployees[0]?.id || "");
+      const saved = await saveEmployerEmployeesToCloud(company.id, nextEmployees);
+      if (!saved?.ok || !Array.isArray(saved.items)) throw new Error("Sauvegarde cloud du registre impossible.");
+      const normalizedItems = saved.items.map(normalizeEmployee);
+      setEmployees(normalizedItems);
+      writeEmployerEmployees(normalizedItems);
+      setMessage(`${created} salarie(s) ajoute(s), ${updated} mis a jour. ${skipped} ligne(s) ignoree(s).`);
+    } catch (error) {
+      setEmployees(previousEmployees);
+      writeEmployerEmployees(previousEmployees);
+      setMessage(error instanceof Error ? error.message : "Import salaires impossible.");
+    }
   }
 
   function prepareContractDraft(employee: EmployerEmployee) {
@@ -388,6 +529,7 @@ export function EmployeeRegisterClient() {
                 onChange={(event) => updateForm("fullName", event.target.value)}
                 className="input-shell mt-1"
                 placeholder="Ex: Sara El Mansouri"
+                required
               />
             </label>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -427,6 +569,7 @@ export function EmployeeRegisterClient() {
                 onChange={(event) => updateForm("role", event.target.value)}
                 className="input-shell mt-1"
                 placeholder="Ex: Responsable paie"
+                required
               />
             </label>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -450,6 +593,7 @@ export function EmployeeRegisterClient() {
                   value={form.startDate}
                   onChange={(event) => updateForm("startDate", event.target.value)}
                   className="input-shell mt-1"
+                  required
                 />
               </label>
             </div>
@@ -460,6 +604,7 @@ export function EmployeeRegisterClient() {
                 value={form.endDate}
                 onChange={(event) => updateForm("endDate", event.target.value)}
                 className="input-shell mt-1"
+                required={form.contractType !== "CDI"}
               />
             </label>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -472,6 +617,7 @@ export function EmployeeRegisterClient() {
                   onChange={(event) => updateForm("grossSalary", event.target.value)}
                   className="input-shell mt-1"
                   placeholder="6500"
+                  required
                 />
               </label>
               <label className="block">
@@ -495,6 +641,9 @@ export function EmployeeRegisterClient() {
                 />
               </label>
             </div>
+            <p className="text-xs text-[var(--ink-soft)]">
+              Les champs manquants bloquants sont signales ici; les informations CNSS/CIN peuvent etre completees ensuite dans la fiche.
+            </p>
             <button
               type="submit"
               className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-bold text-[var(--juris-on-primary)] transition hover:bg-[var(--accent-dark)]"
@@ -551,6 +700,26 @@ export function EmployeeRegisterClient() {
             >
               <Download className="mr-2 h-4 w-4" />
               CSV
+            </button>
+            <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 text-sm font-bold text-[var(--foreground)] transition hover:bg-[var(--surface-muted)]">
+              <Upload className="mr-2 h-4 w-4" />
+              Import salaires
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                className="sr-only"
+                onChange={(event) => {
+                  void importWagesCsv(event.target.files?.[0] ?? null);
+                  event.target.value = "";
+                }}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={downloadWagesTemplate}
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 text-sm font-bold text-[var(--foreground)] transition hover:bg-[var(--surface-muted)]"
+            >
+              Modele
             </button>
           </div>
           {message ? <p className="text-sm font-bold text-[var(--ok)]">{message}</p> : null}
@@ -657,6 +826,31 @@ export function EmployeeRegisterClient() {
                   <h4 className="font-black">Contrat & paie</h4>
                 </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <label className="block sm:col-span-2">
+                    <span className="text-xs font-bold text-[var(--ink-soft)]">Nom complet</span>
+                    <input
+                      value={selectedEmployee.fullName}
+                      onChange={(event) => updateEmployee(selectedEmployee.id, { fullName: event.target.value })}
+                      className="input-shell mt-1"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-bold text-[var(--ink-soft)]">Poste</span>
+                    <input
+                      value={selectedEmployee.role}
+                      onChange={(event) => updateEmployee(selectedEmployee.id, { role: event.target.value })}
+                      className="input-shell mt-1"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-bold text-[var(--ink-soft)]">Email professionnel</span>
+                    <input
+                      type="email"
+                      value={selectedEmployee.email ?? ""}
+                      onChange={(event) => updateEmployee(selectedEmployee.id, { email: event.target.value || undefined })}
+                      className="input-shell mt-1"
+                    />
+                  </label>
                   <label className="block">
                     <span className="text-xs font-bold text-[var(--ink-soft)]">Matricule interne</span>
                     <input
@@ -670,6 +864,32 @@ export function EmployeeRegisterClient() {
                     <input
                       value={selectedEmployee.cin ?? ""}
                       onChange={(event) => updateEmployee(selectedEmployee.id, { cin: event.target.value })}
+                      className="input-shell mt-1"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-bold text-[var(--ink-soft)]">Contrat</span>
+                    <select
+                      value={selectedEmployee.contractType}
+                      onChange={(event) =>
+                        updateEmployee(selectedEmployee.id, {
+                          contractType: event.target.value as EmployerEmployee["contractType"],
+                        })
+                      }
+                      className="input-shell mt-1"
+                    >
+                      <option value="CDI">CDI</option>
+                      <option value="CDD">CDD</option>
+                      <option value="Stage">Stage</option>
+                      <option value="Interim">Interim</option>
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-bold text-[var(--ink-soft)]">Date debut</span>
+                    <input
+                      type="date"
+                      value={selectedEmployee.startDate}
+                      onChange={(event) => updateEmployee(selectedEmployee.id, { startDate: event.target.value })}
                       className="input-shell mt-1"
                     />
                   </label>

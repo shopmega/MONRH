@@ -116,9 +116,17 @@ export type EmployerTimeEntry = {
 export type EmployerCompany = {
   id: string;
   name: string;
+  legalForm?: string;
+  address?: string;
   ice: string;
+  taxIdentifier?: string;
+  rcNumber?: string;
   cnssAffiliateNumber: string;
   city: string;
+  contactEmail?: string;
+  bankRib?: string;
+  signatoryName?: string;
+  signatoryRole?: string;
   plan: EmployerPlan;
 };
 
@@ -216,6 +224,7 @@ export type EmployerPayrollResult = {
 export type EmployerPayrollLine = {
   employeeId: string;
   employeeName: string;
+  payElements?: EmployerPayrollPayElement[];
   result: EmployerPayrollResult;
 };
 
@@ -238,11 +247,31 @@ export type EmployerPayrollRubric = {
   active: boolean;
 };
 
+export type EmployerPayrollPayElement = {
+  label: string;
+  amount: number;
+  category: Exclude<EmployerPayrollRubricCategory, "deduction">;
+  taxable: boolean;
+  cnssSubject: boolean;
+  amoSubject: boolean;
+};
+
 export type EmployerPayrollSettings = {
   defaultCompanySize: "small" | "large";
   includeCimrByDefault: boolean;
   paymentMethod: "bank_transfer" | "cash" | "mixed";
+  accountingExportTemplate: "generic" | "sage" | "odoo" | "webisoft";
+  accountingAccounts: EmployerPayrollAccountingAccounts;
   rubrics: EmployerPayrollRubric[];
+};
+
+export type EmployerPayrollAccountingAccounts = {
+  grossSalaryExpense: string;
+  employerSocialChargesExpense: string;
+  socialPayable: string;
+  incomeTaxPayable: string;
+  cimrPayable: string;
+  netSalaryPayable: string;
 };
 
 export type EmployerCnssRow = {
@@ -584,9 +613,17 @@ export const sampleEmployerCompanies: EmployerCompany[] = [
   {
     id: "company-demo-1",
     name: "Atlas Services SARL",
+    legalForm: "SARL",
+    address: "Casablanca",
     ice: "002154789000041",
+    taxIdentifier: "1547890",
+    rcNumber: "104578",
     cnssAffiliateNumber: "CNSS-EMP-104578",
     city: "Casablanca",
+    contactEmail: "rh@atlas.example",
+    bankRib: "",
+    signatoryName: "",
+    signatoryRole: "Gerant",
     plan: "free",
   },
 ];
@@ -616,6 +653,15 @@ export const defaultEmployerPayrollSettings: EmployerPayrollSettings = {
   defaultCompanySize: "small",
   includeCimrByDefault: false,
   paymentMethod: "bank_transfer",
+  accountingExportTemplate: "generic",
+  accountingAccounts: {
+    grossSalaryExpense: "617100",
+    employerSocialChargesExpense: "617410",
+    socialPayable: "443200",
+    incomeTaxPayable: "445500",
+    cimrPayable: "444100",
+    netSalaryPayable: "443400",
+  },
   rubrics: [
     {
       id: "rubric-prime-performance",

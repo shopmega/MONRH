@@ -34,6 +34,10 @@ import {
   fetchEmployerContractRecordsFromCloud,
   writeEmployerContractRecords,
 } from "@/lib/employer/contract-record-store";
+import {
+  fetchEmployerPayrollSettingsFromCloud,
+  writeEmployerPayrollSettings,
+} from "@/lib/employer/payroll-settings-store";
 
 async function hydrateList<T>(
   companyId: string,
@@ -100,6 +104,9 @@ export function EmployerDataBootstrapClient({ children }: { children: ReactNode 
             fetchEmployerContractRecordsFromCloud,
             writeEmployerContractRecords,
           ),
+          fetchEmployerPayrollSettingsFromCloud(activeCompany.id).then((settings) => {
+            if (settings) writeEmployerPayrollSettings(settings);
+          }),
         ]);
       } finally {
         if (!cancelled) {

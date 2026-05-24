@@ -46,6 +46,15 @@ function daysBetween(startDate: string, endDate: string) {
   return Math.max(diff, 0);
 }
 
+function dateRangesOverlap(leftStart: string, leftEnd: string, rightStart: string, rightEnd: string) {
+  const leftStartTime = new Date(leftStart).getTime();
+  const leftEndTime = new Date(leftEnd).getTime();
+  const rightStartTime = new Date(rightStart).getTime();
+  const rightEndTime = new Date(rightEnd).getTime();
+  if ([leftStartTime, leftEndTime, rightStartTime, rightEndTime].some(Number.isNaN)) return false;
+  return leftStartTime <= rightEndTime && rightStartTime <= leftEndTime;
+}
+
 function accruedPaidLeave(startDate: string) {
   const started = new Date(startDate);
   if (Number.isNaN(started.getTime())) return 0;
@@ -180,9 +189,37 @@ export function EmployerLeaveClient() {
 
   function submitLeave(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setMessage(null);
     const employee = employees.find((item) => item.id === form.employeeId);
     const days = Number(form.days);
-    if (!employee || !form.startDate || !form.endDate || !Number.isFinite(days) || days <= 0) return;
+    if (!employee) {
+      setMessage("Selectionnez un salarie avant d ajouter une demande.");
+      return;
+    }
+    if (!form.startDate || !form.endDate) {
+      setMessage("Renseignez les dates de debut et de fin.");
+      return;
+    }
+    if (new Date(form.endDate) < new Date(form.startDate)) {
+      setMessage("La date de fin doit etre posterieure ou egale a la date de debut.");
+      return;
+    }
+    if (!Number.isFinite(days) || days <= 0) {
+      setMessage("Renseignez un nombre de jours valide.");
+      return;
+    }
+    const overlappingRequest = requests.find(
+      (request) =>
+        request.employeeId === employee.id &&
+        request.status !== "rejected" &&
+        dateRangesOverlap(form.startDate, form.endDate, request.startDate, request.endDate),
+    );
+    if (overlappingRequest) {
+      setMessage(
+        `Cette periode chevauche deja une demande ${employerLeaveStatusLabels[overlappingRequest.status].toLowerCase()} pour ${employee.fullName}.`,
+      );
+      return;
+    }
 
     const nextRequest: EmployerLeaveRequest = {
       id: crypto.randomUUID(),
@@ -260,6 +297,7 @@ export function EmployerLeaveClient() {
                 <span className="text-xs font-bold text-[var(--ink-soft)]">Debut</span>
                 <input
                   type="date"
+                  required
                   value={form.startDate}
                   onChange={(event) => updateForm("startDate", event.target.value)}
                   className="input-shell mt-1"
@@ -269,6 +307,7 @@ export function EmployerLeaveClient() {
                 <span className="text-xs font-bold text-[var(--ink-soft)]">Fin</span>
                 <input
                   type="date"
+                  required
                   value={form.endDate}
                   onChange={(event) => updateForm("endDate", event.target.value)}
                   className="input-shell mt-1"
@@ -282,6 +321,7 @@ export function EmployerLeaveClient() {
                 type="number"
                 min="0.5"
                 step="0.5"
+                required
                 value={form.days}
                 onChange={(event) => updateForm("days", event.target.value)}
                 className="input-shell mt-1"
@@ -305,6 +345,9 @@ export function EmployerLeaveClient() {
             >
               Ajouter a valider
             </button>
+            {message ? (
+              <p className="rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--ink-soft)]">{message}</p>
+            ) : null}
           </form>
         </section>
 

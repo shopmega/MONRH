@@ -4,14 +4,17 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Calculator, CheckCircle2, Download, FileText, Loader2, Lock, Search, ShieldCheck } from "lucide-react";
 import {
+  defaultEmployerPayrollSettings,
   employerPlanCapabilities,
   employerPlanLabels,
   type EmployerCompany,
   type EmployerEmployee,
   type EmployerLeaveRequest,
+  type EmployerPayrollPayElement,
   type EmployerPayrollResult,
   type EmployerPayrollRun,
   type EmployerPayrollLine,
+  type EmployerPayrollSettings,
   type EmployerTimeEntry,
 } from "@/lib/employer/portal-data";
 import {
@@ -31,9 +34,7 @@ import { readEmployerPayrollSettings } from "@/lib/employer/payroll-settings-sto
 import { withAudienceQuery } from "@/lib/audience/audience-mode";
 
 type EmployeeVariableState = {
-  bonus: string;
-  benefit: string;
-  allowance: string;
+  rubricAmounts: Record<string, string>;
 };
 
 function defaultPeriod() {
@@ -143,6 +144,7 @@ export function EmployerPayrollClient() {
   const [overtimePay, setOvertimePay] = useState("0");
   const [bonus, setBonus] = useState("0");
   const [allowances, setAllowances] = useState("0");
+  const [payrollSettings, setPayrollSettings] = useState<EmployerPayrollSettings>(defaultEmployerPayrollSettings);
   const [employeeVariables, setEmployeeVariables] = useState<Record<string, EmployeeVariableState>>({});
   const [query, setQuery] = useState("");
   const [currentRun, setCurrentRun] = useState<EmployerPayrollRun | null>(null);
@@ -165,9 +167,10 @@ export function EmployerPayrollClient() {
     setTimeEntries(nextTimeEntries);
     setCompanySize(payrollSettings.defaultCompanySize);
     setIncludeCimr(payrollSettings.includeCimrByDefault);
+    setPayrollSettings(payrollSettings);
     setEmployeeVariables(
       nextEmployees.reduce<Record<string, EmployeeVariableState>>((acc, employee) => {
-        acc[employee.id] = { bonus: "0", benefit: "0", allowance: "0" };
+        acc[employee.id] = { rubricAmounts: {} };
         return acc;
       }, {}),
     );
@@ -265,6 +268,11 @@ export function EmployerPayrollClient() {
     };
   }, [leaveRequests, selectedEmployeeIds, selectedEmployees, selectedPeriod, timeEntries]);
 
+  const activePayrollRubrics = useMemo(
+    () => payrollSettings.rubrics.filter((rubric) => rubric.active && rubric.category !== "deduction"),
+    [payrollSettings.rubrics],
+  );
+
   const currentTotals = useMemo(() => {
     const lines = currentRun?.lines ?? [];
     return {
@@ -303,14 +311,62 @@ export function EmployerPayrollClient() {
     setSelectedIds(new Set());
   }
 
-  function updateEmployeeVariable(employeeId: string, key: keyof EmployeeVariableState, value: string) {
+  function updateEmployeeRubricAmount(employeeId: string, rubricId: string, value: string) {
     setEmployeeVariables((current) => ({
       ...current,
       [employeeId]: {
-        ...(current[employeeId] ?? { bonus: "0", benefit: "0", allowance: "0" }),
-        [key]: value,
+        ...(current[employeeId] ?? { rubricAmounts: {} }),
+        rubricAmounts: {
+          ...(current[employeeId]?.rubricAmounts ?? {}),
+          [rubricId]: value,
+        },
       },
     }));
+  }
+
+  function buildPayElements(
+    employeeId: string,
+    overtimeAmount: number,
+    manualBonus: number,
+    manualAllowance: number,
+  ): EmployerPayrollPayElement[] {
+    const variables = employeeVariables[employeeId] ?? { rubricAmounts: {} };
+    const manualPayElements: EmployerPayrollPayElement[] = [
+      {
+        label: "Heures supplementaires",
+        amount: overtimeAmount,
+        category: "overtime",
+        taxable: true,
+        cnssSubject: true,
+        amoSubject: true,
+      },
+      {
+        label: "Prime manuelle",
+        amount: manualBonus,
+        category: "bonus",
+        taxable: true,
+        cnssSubject: true,
+        amoSubject: true,
+      },
+      {
+        label: "Indemnite manuelle",
+        amount: manualAllowance,
+        category: "allowance",
+        taxable: true,
+        cnssSubject: true,
+        amoSubject: true,
+      },
+    ];
+    const rubricPayElements = activePayrollRubrics.map((rubric) => ({
+      label: rubric.label,
+      amount: Number(variables.rubricAmounts[rubric.id]) || 0,
+      category: rubric.category as EmployerPayrollPayElement["category"],
+      taxable: rubric.taxable,
+      cnssSubject: rubric.cnssSubject,
+      amoSubject: rubric.amoSubject,
+    }));
+
+    return [...manualPayElements, ...rubricPayElements].filter((item) => item.amount > 0);
   }
 
   async function calculatePayrollRun() {
@@ -324,13 +380,10 @@ export function EmployerPayrollClient() {
     try {
       const lines: EmployerPayrollLine[] = [];
       for (const employee of selectedEmployees) {
-        const variables = employeeVariables[employee.id] ?? { bonus: "0", benefit: "0", allowance: "0" };
         const manualBonus = Number(bonus) || 0;
         const manualAllowance = Number(allowances) || 0;
-        const bonusAmount = (Number(variables.bonus) || 0) + manualBonus;
-        const benefitAmount = Number(variables.benefit) || 0;
-        const allowanceAmount = (Number(variables.allowance) || 0) + manualAllowance;
         const overtimeAmount = (Number(overtimePay) || 0) + (approvedOvertimeByEmployee.get(employee.id) ?? 0);
+        const payElements = buildPayElements(employee.id, overtimeAmount, manualBonus, manualAllowance);
         const response = await fetch("/api/simulate/payslip", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -340,15 +393,10 @@ export function EmployerPayrollClient() {
             period,
             grossSalary: employee.grossSalary,
             familyDependentsCount: employee.childrenCount ?? 0,
-            overtimePay: overtimeAmount,
-            bonus: bonusAmount,
-            allowances: allowanceAmount + benefitAmount,
-            payElements: [
-              { label: "Heures supplementaires", amount: overtimeAmount, category: "overtime", taxable: true, cnssSubject: true, amoSubject: true },
-              { label: "Prime", amount: bonusAmount, category: "bonus", taxable: true, cnssSubject: true, amoSubject: true },
-              { label: "Avantage en nature", amount: benefitAmount, category: "benefit", taxable: true, cnssSubject: true, amoSubject: true },
-              { label: "Indemnite", amount: allowanceAmount, category: "allowance", taxable: true, cnssSubject: true, amoSubject: true },
-            ].filter((item) => item.amount > 0),
+            overtimePay: 0,
+            bonus: 0,
+            allowances: 0,
+            payElements,
             includeCimr,
             companySize,
             calculationDate: currentDateISO(),
@@ -358,7 +406,7 @@ export function EmployerPayrollClient() {
         if (!response.ok || !data.ok || !data.result) {
           throw new Error(data.message || data.error || `Calcul impossible pour ${employee.fullName}`);
         }
-        lines.push({ employeeId: employee.id, employeeName: employee.fullName, result: data.result });
+        lines.push({ employeeId: employee.id, employeeName: employee.fullName, payElements, result: data.result });
       }
 
       const nextRun: EmployerPayrollRun = {
@@ -405,11 +453,14 @@ export function EmployerPayrollClient() {
           companyId: company.id,
           company: {
             name: company.name,
+            address: company.address ?? "",
             ice: company.ice,
+            taxIdentifier: company.taxIdentifier ?? "",
             cnssAffiliateNumber: company.cnssAffiliateNumber,
             city: company.city,
           },
           employee: {
+            id: line.employeeId,
             fullName: employee?.fullName ?? line.employeeName,
             employeeNumber: employee?.employeeNumber ?? employee?.id ?? line.employeeId,
             cin: employee?.cin ?? "",
@@ -420,6 +471,7 @@ export function EmployerPayrollClient() {
             hireDate: employee?.startDate ?? "",
           },
           period: line.result.period,
+          payElements: line.payElements ?? [],
           annualTotals: getAnnualPayslipTotals(line, runs),
           result: {
             ...line.result,
@@ -723,32 +775,28 @@ export function EmployerPayrollClient() {
                     <p className="mt-1 text-sm text-[var(--ink-soft)]">
                       {employee.role} - {employee.contractType} - {formatMoney(employee.grossSalary)}
                     </p>
-                    <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                      <input
-                        type="number"
-                        min="0"
-                        value={employeeVariables[employee.id]?.bonus ?? "0"}
-                        onChange={(event) => updateEmployeeVariable(employee.id, "bonus", event.target.value)}
-                        className="input-shell h-9 text-xs"
-                        placeholder="Prime"
-                      />
-                      <input
-                        type="number"
-                        min="0"
-                        value={employeeVariables[employee.id]?.benefit ?? "0"}
-                        onChange={(event) => updateEmployeeVariable(employee.id, "benefit", event.target.value)}
-                        className="input-shell h-9 text-xs"
-                        placeholder="Avantage nature"
-                      />
-                      <input
-                        type="number"
-                        min="0"
-                        value={employeeVariables[employee.id]?.allowance ?? "0"}
-                        onChange={(event) => updateEmployeeVariable(employee.id, "allowance", event.target.value)}
-                        className="input-shell h-9 text-xs"
-                        placeholder="Indemnite"
-                      />
-                    </div>
+                    {activePayrollRubrics.length > 0 ? (
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                        {activePayrollRubrics.map((rubric) => (
+                          <div key={rubric.id} className="block">
+                            <span className="mb-1 block truncate text-[0.68rem] font-bold text-[var(--ink-soft)]">
+                              {rubric.label}
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={employeeVariables[employee.id]?.rubricAmounts[rubric.id] ?? "0"}
+                              onChange={(event) => updateEmployeeRubricAmount(employee.id, rubric.id, event.target.value)}
+                              className="input-shell h-9 text-xs"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-3 rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-xs text-[var(--ink-soft)]">
+                        Aucun element variable actif. Ajoutez des rubriques dans les parametres paie.
+                      </p>
+                    )}
                     {(approvedOvertimeByEmployee.get(employee.id) ?? 0) > 0 ? (
                       <p className="mt-1 text-xs font-bold text-[var(--accent)]">
                         Pointage approuve: {formatMoney(approvedOvertimeByEmployee.get(employee.id) ?? 0)}

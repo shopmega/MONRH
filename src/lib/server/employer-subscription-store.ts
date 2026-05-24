@@ -9,9 +9,19 @@ type EmployerSubscriptionRow = {
 
 const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
 
+const EMPLOYER_PLAN_LIMITS: Record<EmployerPlan, { maxCompanies: number }> = {
+  free: { maxCompanies: 1 },
+  pro: { maxCompanies: 1 },
+  cabinet: { maxCompanies: 25 },
+};
+
 export function planAllowsFeature(plan: EmployerPlan, feature: "payslip_pdf" | "cnss_csv" | "multi_company") {
   if (feature === "multi_company") return plan === "cabinet";
   return plan === "pro" || plan === "cabinet";
+}
+
+export function getEmployerPlanLimit(plan: EmployerPlan, limit: "maxCompanies") {
+  return EMPLOYER_PLAN_LIMITS[plan][limit];
 }
 
 export async function getEmployerSubscriptionPlan(userId: string): Promise<EmployerPlan> {

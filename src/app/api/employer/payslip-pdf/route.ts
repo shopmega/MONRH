@@ -3,6 +3,10 @@ import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
 import { z } from "zod";
 import { listEmployerCompanies } from "@/lib/server/employer-core-store";
 import {
+  canonicalizePayslipPdfResult,
+  isEmployerPayrollValidationError,
+} from "@/lib/server/employer-payroll-validation";
+import {
   isEmployerPlanFeatureRequiredError,
   requireEmployerPlanFeature,
 } from "@/lib/server/employer-subscription-store";
@@ -11,6 +15,15 @@ import { getCurrentUserId } from "@/lib/server/user-session";
 export const runtime = "nodejs";
 
 const moneySchema = z.number().finite();
+
+const payrollPayElementSchema = z.object({
+  label: z.string().min(1).max(120),
+  amount: moneySchema.nonnegative(),
+  category: z.enum(["overtime", "bonus", "allowance", "benefit"]),
+  taxable: z.boolean(),
+  cnssSubject: z.boolean(),
+  amoSubject: z.boolean(),
+});
 
 const payslipPdfSchema = z.object({
   companyId: z.string().min(1).max(120),
@@ -23,6 +36,7 @@ const payslipPdfSchema = z.object({
     city: z.string().max(80).default(""),
   }),
   employee: z.object({
+    id: z.string().min(1).max(120),
     fullName: z.string().min(1).max(160),
     employeeNumber: z.string().max(80).default(""),
     cin: z.string().max(80).default(""),
@@ -36,6 +50,7 @@ const payslipPdfSchema = z.object({
     bankRib: z.string().max(180).default(""),
   }),
   period: z.string().min(1).max(80),
+  payElements: z.array(payrollPayElementSchema).max(100).optional(),
   payPeriod: z
     .object({
       from: z.string().max(40).default(""),
@@ -481,16 +496,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "employer_company_access_denied" }, { status: 403 });
     }
     await requireEmployerPlanFeature(userId, "payslip_pdf");
+    const { employee, result, annualTotals } = await canonicalizePayslipPdfResult(
+      userId,
+      company.id,
+      payload.employee.id,
+      payload.period,
+      {
+        ...payload.result,
+        period: payload.period,
+        employeeName: payload.employee.fullName,
+      },
+      payload.payElements,
+    );
 
     const pdfPayload = {
       ...payload,
       company: {
         ...payload.company,
         name: company.name,
+        address: company.address ?? payload.company.address,
         ice: company.ice,
+        taxIdentifier: company.taxIdentifier ?? payload.company.taxIdentifier,
         cnssAffiliateNumber: company.cnssAffiliateNumber,
         city: company.city,
       },
+      employee: {
+        ...payload.employee,
+        fullName: employee.fullName,
+        employeeNumber: employee.employeeNumber ?? employee.id,
+        cin: employee.cin ?? "",
+        role: employee.role,
+        contractType: employee.contractType,
+        cnssNumber: employee.cnssNumber,
+        dependents: String(employee.childrenCount ?? 0),
+        hireDate: employee.startDate,
+      },
+      result,
+      annualTotals,
     };
     const pdf = await createPayslipPdf(pdfPayload);
     const filename = `bulletin-${safeFilename(pdfPayload.employee.fullName)}-${safeFilename(pdfPayload.period)}.pdf`;
@@ -506,6 +548,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (isEmployerPlanFeatureRequiredError(error)) {
       return NextResponse.json({ ok: false, error: "payslip_pdf_plan_required" }, { status: 403 });
+    }
+    if (isEmployerPayrollValidationError(error)) {
+      return NextResponse.json({ ok: false, error: error.code, message: error.message }, { status: 422 });
     }
     return NextResponse.json(
       {

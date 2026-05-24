@@ -53,6 +53,9 @@ export async function POST(request: NextRequest) {
     if (cnssExport.rows.length === 0) {
       return NextResponse.json({ ok: false, error: "cnss_export_empty" }, { status: 400 });
     }
+    if (cnssExport.rows.some((row) => !row.cnssNumber.trim() || row.cnssNumber === "A completer")) {
+      return NextResponse.json({ ok: false, error: "cnss_employee_numbers_required" }, { status: 400 });
+    }
 
     const headers = [
       "periode",

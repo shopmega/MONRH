@@ -3,10 +3,16 @@ import { z } from "zod";
 import { getCurrentUserId } from "@/lib/server/user-session";
 import {
   isEmployerCompanyAccessError,
+  listEmployerEmployees,
   listEmployerPayrollRuns,
   replaceEmployerPayrollRuns,
   upsertEmployerPayrollRun,
 } from "@/lib/server/employer-core-store";
+import {
+  canonicalizeEmployerPayrollRun,
+  canonicalizeEmployerPayrollRunsForCompany,
+  isEmployerPayrollValidationError,
+} from "@/lib/server/employer-payroll-validation";
 
 const payrollResultSchema = z.object({
   period: z.string().min(1),
@@ -47,6 +53,15 @@ const payrollResultSchema = z.object({
   }).optional(),
 });
 
+const payrollPayElementSchema = z.object({
+  label: z.string().min(1).max(120),
+  amount: z.number().finite().nonnegative(),
+  category: z.enum(["overtime", "bonus", "allowance", "benefit"]),
+  taxable: z.boolean(),
+  cnssSubject: z.boolean(),
+  amoSubject: z.boolean(),
+});
+
 const payrollRunSchema = z.object({
   id: z.string().min(1).max(120),
   period: z.string().min(1).max(80),
@@ -54,6 +69,7 @@ const payrollRunSchema = z.object({
   lines: z.array(z.object({
     employeeId: z.string().min(1).max(120),
     employeeName: z.string().min(1).max(180),
+    payElements: z.array(payrollPayElementSchema).max(100).optional(),
     result: payrollResultSchema,
   })).max(5000),
 });
@@ -105,11 +121,15 @@ export async function POST(request: Request) {
     }
 
     const payload = savePayrollRunsSchema.parse(await request.json());
-    const items = await replaceEmployerPayrollRuns(userId, payload.companyId, payload.items);
+    const canonicalItems = await canonicalizeEmployerPayrollRunsForCompany(userId, payload.companyId, payload.items);
+    const items = await replaceEmployerPayrollRuns(userId, payload.companyId, canonicalItems);
     return NextResponse.json({ ok: true, items });
   } catch (error) {
     if (isEmployerCompanyAccessError(error)) {
       return NextResponse.json({ ok: false, error: error.code }, { status: 403 });
+    }
+    if (isEmployerPayrollValidationError(error)) {
+      return NextResponse.json({ ok: false, error: error.code, message: error.message }, { status: 422 });
     }
     return NextResponse.json(
       {
@@ -132,11 +152,16 @@ export async function PATCH(request: Request) {
     }
 
     const payload = savePayrollRunSchema.parse(await request.json());
-    const item = await upsertEmployerPayrollRun(userId, payload.companyId, payload.item);
+    const employees = await listEmployerEmployees(userId, payload.companyId);
+    const canonicalItem = canonicalizeEmployerPayrollRun(payload.companyId, employees, payload.item);
+    const item = await upsertEmployerPayrollRun(userId, payload.companyId, canonicalItem);
     return NextResponse.json({ ok: true, item });
   } catch (error) {
     if (isEmployerCompanyAccessError(error)) {
       return NextResponse.json({ ok: false, error: error.code }, { status: 403 });
+    }
+    if (isEmployerPayrollValidationError(error)) {
+      return NextResponse.json({ ok: false, error: error.code, message: error.message }, { status: 422 });
     }
     return NextResponse.json(
       {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Clock3, Search, Timer, XCircle } from "lucide-react";
+import { CheckCircle2, Clock3, Search, Timer, Upload, XCircle } from "lucide-react";
 import {
   employerTimeEntryStatusLabels,
   type EmployerCompany,
@@ -15,9 +15,11 @@ import { readEmployerEmployees } from "@/lib/employer/employee-store";
 import {
   fetchEmployerTimeEntriesFromCloud,
   readEmployerTimeEntries,
+  saveEmployerTimeEntriesToCloud,
   saveEmployerTimeEntryToCloud,
   writeEmployerTimeEntries,
 } from "@/lib/employer/time-store";
+import { parseCsvNumber, parseCsvRecords, readCsvField } from "@/lib/employer/csv";
 
 type TimeFormState = {
   employeeId: string;
@@ -95,10 +97,54 @@ function calculateOvertimeAmount(employee: EmployerEmployee | undefined, form: T
   );
 }
 
+function overtimeHours(form: TimeFormState) {
+  return (
+    toNumber(form.overtimeDayHours) +
+    toNumber(form.overtimeNightHours) +
+    toNumber(form.overtimeRestOrHolidayDayHours) +
+    toNumber(form.overtimeRestOrHolidayNightHours)
+  );
+}
+
 function replaceTimeEntryInList(entries: EmployerTimeEntry[], entry: EmployerTimeEntry) {
   return entries.some((item) => item.id === entry.id)
     ? entries.map((item) => (item.id === entry.id ? entry : item))
     : [entry, ...entries];
+}
+
+function downloadCsv(filename: string, rows: string[][]) {
+  const csv = rows.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(";")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function normalizeKey(value: string | undefined) {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function parseTimeEntryStatus(value: string): EmployerTimeEntryStatus {
+  const normalized = normalizeKey(value);
+  if (normalized === "approved" || normalized === "approuve" || normalized === "approuvee") return "approved";
+  if (normalized === "rejected" || normalized === "refuse" || normalized === "refusee") return "rejected";
+  return "draft";
+}
+
+function parseDateField(value: string) {
+  if (!value.trim()) return "";
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+  const match = value.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (!match) return value;
+  return `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
 }
 
 export function EmployerTimeClient() {
@@ -192,8 +238,38 @@ export function EmployerTimeClient() {
 
   function submitEntry(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setMessage(null);
     const employee = activeEmployees.find((item) => item.id === form.employeeId);
-    if (!employee || !form.weekStart) return;
+    if (!employee) {
+      setMessage("Selectionnez un salarie avant d ajouter un pointage.");
+      return;
+    }
+    if (!form.weekStart) {
+      setMessage("Renseignez la semaine de pointage.");
+      return;
+    }
+    const numericValues = [
+      form.regularHours,
+      form.overtimeDayHours,
+      form.overtimeNightHours,
+      form.overtimeRestOrHolidayDayHours,
+      form.overtimeRestOrHolidayNightHours,
+    ].map(toNumber);
+    if (numericValues.some((value) => value < 0)) {
+      setMessage("Les heures saisies ne peuvent pas etre negatives.");
+      return;
+    }
+    if (toNumber(form.regularHours) <= 0 && overtimeHours(form) <= 0) {
+      setMessage("Renseignez au moins des heures normales ou supplementaires.");
+      return;
+    }
+    const duplicateEntry = entries.find(
+      (entry) => entry.employeeId === employee.id && entry.weekStart === form.weekStart && entry.status !== "rejected",
+    );
+    if (duplicateEntry) {
+      setMessage(`Un pointage existe deja pour ${employee.fullName} sur cette semaine.`);
+      return;
+    }
 
     const nextEntry: EmployerTimeEntry = {
       id: crypto.randomUUID(),
@@ -215,6 +291,119 @@ export function EmployerTimeClient() {
     setEntries((current) => [nextEntry, ...current]);
     setForm({ ...emptyForm, employeeId: employee.id, weekStart: form.weekStart });
     void persistTimeEntry(nextEntry, previousEntries, `Pointage ajoute pour ${employee.fullName}.`);
+  }
+
+  async function importPointageCsv(file: File | null) {
+    if (!file) return;
+    if (!activeCompany) {
+      setMessage("Selectionnez une entreprise avant d importer le pointage.");
+      return;
+    }
+    setMessage(null);
+    const previousEntries = entries;
+    try {
+      const records = parseCsvRecords(await file.text());
+      if (records.length === 0) {
+        setMessage("CSV vide ou en-tetes introuvables.");
+        return;
+      }
+
+      let imported = 0;
+      let skipped = 0;
+      const nextEntries = [...entries];
+
+      for (const record of records) {
+        const employeeRef = readCsvField(record, ["Matricule", "Matricule interne", "employeeNumber", "employeeId"]);
+        const employeeName = readCsvField(record, ["Salarie", "Nom", "Nom complet", "employeeName"]);
+        const employee = activeEmployees.find(
+          (item) =>
+            normalizeKey(item.id) === normalizeKey(employeeRef) ||
+            normalizeKey(item.employeeNumber) === normalizeKey(employeeRef) ||
+            normalizeKey(item.fullName) === normalizeKey(employeeName),
+        );
+        const weekStart = parseDateField(readCsvField(record, ["Semaine", "Semaine du", "weekStart", "date"]));
+        if (!employee || !weekStart) {
+          skipped += 1;
+          continue;
+        }
+
+        const importedForm: TimeFormState = {
+          employeeId: employee.id,
+          weekStart,
+          regularHours: String(parseCsvNumber(readCsvField(record, ["Heures normales", "Normales", "regularHours"])) || 0),
+          overtimeDayHours: String(parseCsvNumber(readCsvField(record, ["Sup jour", "overtimeDayHours"])) || 0),
+          overtimeNightHours: String(parseCsvNumber(readCsvField(record, ["Sup nuit", "overtimeNightHours"])) || 0),
+          overtimeRestOrHolidayDayHours: String(parseCsvNumber(readCsvField(record, ["Repos ferie jour", "Repos/ferie jour", "overtimeRestOrHolidayDayHours"])) || 0),
+          overtimeRestOrHolidayNightHours: String(parseCsvNumber(readCsvField(record, ["Repos ferie nuit", "Repos/ferie nuit", "overtimeRestOrHolidayNightHours"])) || 0),
+          note: readCsvField(record, ["Note", "Commentaire", "note"]) || "Import CSV",
+        };
+        if (toNumber(importedForm.regularHours) <= 0 && overtimeHours(importedForm) <= 0) {
+          skipped += 1;
+          continue;
+        }
+
+        const existingIndex = nextEntries.findIndex((entry) => entry.employeeId === employee.id && entry.weekStart === weekStart);
+        const existing = existingIndex >= 0 ? nextEntries[existingIndex] : null;
+        const nextEntry: EmployerTimeEntry = {
+          id: existing?.id ?? crypto.randomUUID(),
+          employeeId: employee.id,
+          employeeName: employee.fullName,
+          weekStart,
+          regularHours: toNumber(importedForm.regularHours),
+          overtimeDayHours: toNumber(importedForm.overtimeDayHours),
+          overtimeNightHours: toNumber(importedForm.overtimeNightHours),
+          overtimeRestOrHolidayDayHours: toNumber(importedForm.overtimeRestOrHolidayDayHours),
+          overtimeRestOrHolidayNightHours: toNumber(importedForm.overtimeRestOrHolidayNightHours),
+          overtimeAmount: calculateOvertimeAmount(employee, importedForm),
+          status: parseTimeEntryStatus(readCsvField(record, ["Statut", "status"])),
+          note: importedForm.note,
+          createdAt: existing?.createdAt ?? new Date().toISOString(),
+          decidedAt: existing?.decidedAt,
+        };
+
+        if (existingIndex >= 0) {
+          nextEntries[existingIndex] = nextEntry;
+        } else {
+          nextEntries.unshift(nextEntry);
+        }
+        imported += 1;
+      }
+
+      if (imported === 0) {
+        setMessage(`Aucun pointage importe. ${skipped} ligne(s) ignoree(s).`);
+        return;
+      }
+
+      setEntries(nextEntries);
+      writeEmployerTimeEntries(nextEntries);
+      const saved = await saveEmployerTimeEntriesToCloud(activeCompany.id, nextEntries);
+      if (!saved?.ok || !Array.isArray(saved.items)) throw new Error("Sauvegarde cloud du pointage impossible.");
+      setEntries(saved.items);
+      writeEmployerTimeEntries(saved.items);
+      setMessage(`${imported} pointage(s) importe(s). ${skipped} ligne(s) ignoree(s).`);
+    } catch (error) {
+      setEntries(previousEntries);
+      writeEmployerTimeEntries(previousEntries);
+      setMessage(error instanceof Error ? error.message : "Import pointage impossible.");
+    }
+  }
+
+  function downloadPointageTemplate() {
+    downloadCsv("modele-import-pointage.csv", [
+      [
+        "Matricule",
+        "Salarie",
+        "Semaine",
+        "Heures normales",
+        "Sup jour",
+        "Sup nuit",
+        "Repos ferie jour",
+        "Repos ferie nuit",
+        "Statut",
+        "Note",
+      ],
+      ["SAL-001", "Sara El Mansouri", defaultWeekStart(), "44", "2", "0", "0", "0", "draft", "Import CSV"],
+    ]);
   }
 
   function decideEntry(entryId: string, status: Exclude<EmployerTimeEntryStatus, "draft">) {
@@ -259,6 +448,7 @@ export function EmployerTimeClient() {
                 <span className="text-xs font-bold text-[var(--ink-soft)]">Semaine du</span>
                 <input
                   type="date"
+                  required
                   value={form.weekStart}
                   onChange={(event) => updateForm("weekStart", event.target.value)}
                   className="input-shell mt-1"
@@ -270,6 +460,7 @@ export function EmployerTimeClient() {
                   type="number"
                   min="0"
                   step="0.5"
+                  required
                   value={form.regularHours}
                   onChange={(event) => updateForm("regularHours", event.target.value)}
                   className="input-shell mt-1"
@@ -284,6 +475,7 @@ export function EmployerTimeClient() {
                   type="number"
                   min="0"
                   step="0.5"
+                  required
                   value={form.overtimeDayHours}
                   onChange={(event) => updateForm("overtimeDayHours", event.target.value)}
                   className="input-shell mt-1"
@@ -295,6 +487,7 @@ export function EmployerTimeClient() {
                   type="number"
                   min="0"
                   step="0.5"
+                  required
                   value={form.overtimeNightHours}
                   onChange={(event) => updateForm("overtimeNightHours", event.target.value)}
                   className="input-shell mt-1"
@@ -306,6 +499,7 @@ export function EmployerTimeClient() {
                   type="number"
                   min="0"
                   step="0.5"
+                  required
                   value={form.overtimeRestOrHolidayDayHours}
                   onChange={(event) => updateForm("overtimeRestOrHolidayDayHours", event.target.value)}
                   className="input-shell mt-1"
@@ -317,6 +511,7 @@ export function EmployerTimeClient() {
                   type="number"
                   min="0"
                   step="0.5"
+                  required
                   value={form.overtimeRestOrHolidayNightHours}
                   onChange={(event) => updateForm("overtimeRestOrHolidayNightHours", event.target.value)}
                   className="input-shell mt-1"
@@ -345,6 +540,9 @@ export function EmployerTimeClient() {
             >
               Ajouter au pointage
             </button>
+            {message ? (
+              <p className="rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--ink-soft)]">{message}</p>
+            ) : null}
           </form>
         </section>
 
@@ -388,6 +586,26 @@ export function EmployerTimeClient() {
             >
               Ouvrir paie
             </Link>
+            <label className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg border border-[var(--line)] px-3 text-sm font-bold hover:bg-[var(--surface-muted)]">
+              <Upload className="mr-2 h-4 w-4" />
+              Import CSV
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                className="sr-only"
+                onChange={(event) => {
+                  void importPointageCsv(event.target.files?.[0] ?? null);
+                  event.target.value = "";
+                }}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={downloadPointageTemplate}
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-[var(--line)] px-3 text-sm font-bold hover:bg-[var(--surface-muted)]"
+            >
+              Modele
+            </button>
           </div>
         </div>
 
