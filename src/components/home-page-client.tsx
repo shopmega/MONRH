@@ -8,34 +8,69 @@ import {
   BriefcaseBusiness,
   Calculator,
   CalendarClock,
-  CheckCircle2,
-  FileSpreadsheet,
   FileText,
-  LockKeyhole,
+  Scale,
+  Search,
   ShieldCheck,
   Users,
 } from "lucide-react";
 import { type Article, type Category } from "@/lib/content/home-content";
 
-const employerModules = [
-  { label: "Registre salaries", detail: "CIN, CNSS, contrats, documents", icon: Users },
-  { label: "Paie Maroc", detail: "CNSS, AMO, IR, bulletins PDF", icon: Calculator },
-  { label: "Conges & pointage", detail: "Soldes, demandes, heures sup", icon: CalendarClock },
-  { label: "Declarations CNSS", detail: "Recaps et CSV Damancom", icon: FileSpreadsheet },
+const primaryTools = [
+  {
+    label: "Salaire brut net",
+    detail: "Estimez le net, les retenues CNSS/AMO et l'IR mensuel.",
+    href: "/salaire/brut-net",
+    icon: Calculator,
+  },
+  {
+    label: "Bulletin de paie",
+    detail: "Preparez une fiche de paie lisible avec detail des retenues.",
+    href: "/planifier/bulletin-paie",
+    icon: FileText,
+  },
+  {
+    label: "Contrat de travail",
+    detail: "Generez un CDI, CDD ou stage avec les mentions utiles.",
+    href: "/contrat",
+    icon: BriefcaseBusiness,
+  },
+  {
+    label: "Conges & CNSS",
+    detail: "Calculez conges acquis, arret maladie et droits CNSS.",
+    href: "/conges-cnss",
+    icon: CalendarClock,
+  },
 ];
 
-const publicTools = [
-  { label: "Calcul brut net", href: "/salaire/brut-net", icon: Calculator },
-  { label: "Bulletin de paie", href: "/planifier/bulletin-paie", icon: FileText },
-  { label: "Contrat de travail", href: "/contrat", icon: BriefcaseBusiness },
-  { label: "Modele de document", href: "/documents", icon: FileText },
+const audiences = [
+  {
+    title: "Salaries",
+    copy: "Comprendre son salaire, ses conges, son preavis et ses droits avant une decision.",
+    href: "/salaire",
+    icon: Users,
+  },
+  {
+    title: "Employeurs",
+    copy: "Gerer les salaries, la paie, les bulletins, la CNSS et les etats RH depuis MONRH.",
+    href: "/employer",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Fiduciaires",
+    copy: "Suivre plusieurs clients et consolider les operations paie et declarations.",
+    href: "/employer/cabinet",
+    icon: BriefcaseBusiness,
+  },
 ];
 
-const proofPoints = [
-  "Regles paie marocaines structurees",
-  "Exports et PDF gates cote serveur",
-  "Donnees entreprise isolees par compte",
-  "Portail employeur en cours de durcissement production",
+const legalAreas = [
+  "SMIG, brut/net et IR",
+  "CNSS, AMO et prestations",
+  "Contrats CDI, CDD, stage",
+  "Conges, preavis et depart",
+  "Heures supplementaires",
+  "Litiges et salaire impaye",
 ];
 
 function categoryName(slug: string, categories: Category[]) {
@@ -60,67 +95,44 @@ function SectionHeader({
   );
 }
 
-function ProductVisual() {
+function HeroPanel() {
   return (
-    <div className="relative min-h-[520px] overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-2xl shadow-black/10">
-      <div className="flex items-center justify-between border-b border-[var(--line)] bg-[var(--surface-muted)] px-5 py-4">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent)]">
-            <Image src="/logo.svg" alt="SIMPAIE" width={22} height={22} />
-          </span>
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--accent)]">MONRH</p>
-            <p className="text-sm font-black text-[var(--heading)]">Paie Mai 2026</p>
-          </div>
+    <div className="relative overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 shadow-xl shadow-black/10">
+      <div className="flex items-center gap-3 border-b border-[var(--line)] pb-4">
+        <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--accent)]">
+          <Image src="/logo.svg" alt="SIMPAIE" width={26} height={26} priority />
+        </span>
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--accent)]">SIMPAIE</p>
+          <p className="text-sm font-black text-[var(--heading)]">Repere paie & RH Maroc</p>
         </div>
-        <span className="rounded-lg bg-[var(--ok-bg)] px-3 py-1 text-xs font-black text-[var(--ok)]">Pret</span>
       </div>
 
-      <div className="grid gap-4 p-5">
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            ["Salaries actifs", "24"],
-            ["Masse brute", "286 400 MAD"],
-            ["Net a payer", "214 980 MAD"],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-4">
-              <p className="text-xs font-bold text-[var(--ink-soft)]">{label}</p>
-              <p className="mt-2 text-xl font-black text-[var(--heading)]">{value}</p>
+      <div className="mt-5 rounded-lg bg-[var(--surface-muted)] p-4">
+        <div className="flex items-center gap-2 text-sm font-black text-[var(--heading)]">
+          <Search className="h-4 w-4 text-[var(--accent)]" />
+          Que voulez-vous verifier ?
+        </div>
+        <div className="mt-4 grid gap-2">
+          {["Mon net a payer", "Mes conges acquis", "Un contrat CDD", "Une fiche de paie"].map((item) => (
+            <div key={item} className="flex items-center justify-between rounded-lg bg-[var(--surface)] px-4 py-3">
+              <span className="text-sm font-bold text-[var(--heading)]">{item}</span>
+              <ArrowRight className="h-4 w-4 text-[var(--accent)]" />
             </div>
           ))}
         </div>
+      </div>
 
-        <div className="rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-4">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="font-black text-[var(--heading)]">Controle paie</p>
-            <ShieldCheck className="h-5 w-5 text-[var(--accent)]" />
-          </div>
-          <div className="space-y-3">
-            {[
-              ["CNSS CT/LT", "Valide"],
-              ["AMO et IR", "Calcule"],
-              ["SMIG", "Aucun ecart"],
-              ["Bulletins PDF", "Generation serveur"],
-            ].map(([label, state]) => (
-              <div key={label} className="flex items-center justify-between gap-4 rounded-lg bg-[var(--surface)] px-4 py-3">
-                <span className="text-sm font-bold text-[var(--heading)]">{label}</span>
-                <span className="text-xs font-black uppercase tracking-[0.12em] text-[var(--accent)]">{state}</span>
-              </div>
-            ))}
-          </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-lg border border-[var(--line)] p-4">
+          <Calculator className="h-5 w-5 text-[var(--accent)]" />
+          <p className="mt-3 text-2xl font-black">40+</p>
+          <p className="mt-1 text-sm text-[var(--ink-soft)]">simulateurs et outils</p>
         </div>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-lg bg-[var(--accent-dark)] p-4 text-[var(--juris-on-primary)]">
-            <p className="text-xs font-black uppercase tracking-[0.14em] opacity-75">Action</p>
-            <p className="mt-2 text-lg font-black text-white">Declarer CNSS</p>
-            <p className="mt-2 text-sm leading-6 opacity-80">CSV prepare depuis le run de paie.</p>
-          </div>
-          <div className="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--accent)]">Alertes</p>
-            <p className="mt-2 text-lg font-black">2 a traiter</p>
-            <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">CDD et dossier RH incomplet.</p>
-          </div>
+        <div className="rounded-lg border border-[var(--line)] p-4">
+          <Scale className="h-5 w-5 text-[var(--accent)]" />
+          <p className="mt-3 text-2xl font-black">Maroc</p>
+          <p className="mt-1 text-sm text-[var(--ink-soft)]">paie, travail et CNSS</p>
         </div>
       </div>
     </div>
@@ -139,66 +151,65 @@ export function HomePageClient({
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <section className="border-b border-[var(--line)] bg-[var(--surface-muted)] pt-20">
-        <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_520px] lg:px-8 lg:py-16 xl:gap-16">
+        <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_440px] lg:px-8 lg:py-16 xl:gap-16">
           <div className="flex min-w-0 flex-col justify-center">
             <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[var(--accent)]">
               <BadgeCheck className="h-4 w-4" />
-              SaaS RH et paie Maroc
+              Droit du travail & paie Maroc
             </div>
             <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[1.03] text-[var(--heading)] sm:text-5xl lg:text-6xl">
-              SIMPAIE centralise la paie, les RH et les obligations sociales des PME marocaines.
+              Calculez, comprenez et preparez vos decisions RH au Maroc.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--ink-soft)]">
-              Un espace employeur pour gerer les salaries, calculer la paie, preparer les bulletins et suivre les alertes
-              de conformite. Les simulateurs publics restent disponibles pour les salaries et les professionnels RH.
+              SIMPAIE rassemble des simulateurs, modeles et guides pratiques pour les salaires, contrats,
+              conges, CNSS, litiges et obligations employeur.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
-                href="/employer"
+                href="/simulate"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-6 text-sm font-black text-[var(--juris-on-primary)] transition hover:bg-[var(--accent-dark)]"
               >
-                Ouvrir MONRH
+                Lancer un simulateur
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/simulate"
+                href="/employer"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-[var(--line)] bg-[var(--surface)] px-6 text-sm font-black text-[var(--heading)] transition hover:bg-[var(--surface-strong)]"
               >
-                Utiliser les simulateurs
+                Espace employeur MONRH
               </Link>
-            </div>
-
-            <div className="mt-9 grid gap-3 sm:grid-cols-2">
-              {proofPoints.map((point) => (
-                <div key={point} className="flex items-start gap-3 rounded-lg bg-[var(--surface)] p-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--ok)]" />
-                  <span className="text-sm font-bold leading-6 text-[var(--heading)]">{point}</span>
-                </div>
-              ))}
             </div>
           </div>
 
-          <ProductVisual />
+          <HeroPanel />
         </div>
       </section>
 
       <section className="border-b border-[var(--line)] bg-[var(--surface)]">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 lg:px-8">
           <SectionHeader
-            eyebrow="Portail employeur"
-            title="Les operations RH critiques dans un seul espace."
-            description="Le module MONRH couvre les parcours utiles avant facturation: registre salaries, paie, CNSS, contrats, conges, pointage, analytics et cabinet."
+            eyebrow="Outils principaux"
+            title="Les calculs et documents les plus demandes."
+            description="Accedez directement aux parcours utiles sans passer par un tableau de bord."
           />
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {employerModules.map((module) => {
-              const Icon = module.icon;
+            {primaryTools.map((tool) => {
+              const Icon = tool.icon;
               return (
-                <div key={module.label} className="rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-5">
+                <Link
+                  key={tool.label}
+                  href={tool.href}
+                  className="group rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-5 transition hover:border-[var(--accent)] hover:bg-[var(--surface)]"
+                >
                   <Icon className="h-6 w-6 text-[var(--accent)]" />
-                  <h3 className="mt-4 text-lg font-black text-[var(--heading)]">{module.label}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">{module.detail}</p>
-                </div>
+                  <h3 className="mt-4 text-lg font-black text-[var(--heading)]">{tool.label}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">{tool.detail}</p>
+                  <p className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[var(--accent)]">
+                    Ouvrir
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </p>
+                </Link>
               );
             })}
           </div>
@@ -206,33 +217,41 @@ export function HomePageClient({
       </section>
 
       <section className="border-b border-[var(--line)] bg-[var(--surface-muted)]">
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-6 lg:grid-cols-[420px_minmax(0,1fr)] lg:px-8">
           <SectionHeader
-            eyebrow="Acces public"
-            title="Des outils utiles sans ouvrir un dossier complet."
-            description="Les simulateurs, modeles et guides restent le haut de funnel de SIMPAIE."
+            eyebrow="Pour qui ?"
+            title="Un point d'entree clair selon votre besoin."
+            description="Salarie, dirigeant de PME ou fiduciaire: chaque parcours mene vers les outils adaptes."
           />
-          <div className="grid gap-4 sm:grid-cols-2">
-            {publicTools.map((tool) => {
-              const Icon = tool.icon;
+          <div className="grid gap-4 md:grid-cols-3">
+            {audiences.map((audience) => {
+              const Icon = audience.icon;
               return (
-                <Link
-                  key={tool.label}
-                  href={tool.href}
-                  className="group rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 transition hover:border-[var(--accent)] hover:shadow-sm"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--accent-soft)] text-[var(--accent)]">
-                        <Icon className="h-5 w-5" />
-                      </span>
-                      <span className="font-black text-[var(--heading)]">{tool.label}</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-[var(--accent)] transition group-hover:translate-x-1" />
-                  </div>
+                <Link key={audience.title} href={audience.href} className="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 hover:border-[var(--accent)]">
+                  <Icon className="h-6 w-6 text-[var(--accent)]" />
+                  <h3 className="mt-4 text-lg font-black text-[var(--heading)]">{audience.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">{audience.copy}</p>
                 </Link>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-[var(--line)] bg-[var(--surface)]">
+        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 lg:px-8">
+          <SectionHeader
+            eyebrow="Domaines couverts"
+            title="Paie, contrat, conges et litiges en langage clair."
+            description="Les contenus et calculateurs sont organises autour des situations RH courantes au Maroc."
+          />
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {legalAreas.map((area) => (
+              <div key={area} className="flex items-center gap-3 rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-4">
+                <BadgeCheck className="h-5 w-5 shrink-0 text-[var(--accent)]" />
+                <span className="font-bold text-[var(--heading)]">{area}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -242,8 +261,8 @@ export function HomePageClient({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <SectionHeader
               eyebrow="Guides pratiques"
-              title="Articles et reperes pour les cas RH courants."
-              description="Conservez le trafic SEO existant tout en orientant les visiteurs vers le produit."
+              title="Lire avant d'agir."
+              description="Des articles courts pour cadrer une question avant de lancer un calcul ou preparer un document."
             />
             <Link href="/articles" className="inline-flex h-11 items-center justify-center rounded-lg border border-[var(--line)] px-4 text-sm font-black hover:bg-[var(--surface-muted)]">
               Tous les articles
@@ -273,20 +292,17 @@ export function HomePageClient({
           <div className="mt-10 rounded-lg border border-[var(--line)] bg-[var(--accent-dark)] p-6 text-[var(--juris-on-primary)] sm:p-8">
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
               <div>
-                <div className="flex items-center gap-2 text-white/80">
-                  <LockKeyhole className="h-5 w-5" />
-                  <p className="text-xs font-black uppercase tracking-[0.16em]">Production readiness</p>
-                </div>
-                <h2 className="mt-3 text-3xl font-black text-white">Le socle produit est en train de passer de prototype a SaaS facturable.</h2>
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-white/75">Employeurs et cabinets</p>
+                <h2 className="mt-3 text-3xl font-black text-white">MONRH centralise la gestion employeur.</h2>
                 <p className="mt-3 max-w-3xl text-base leading-7 text-white/80">
-                  Auth, isolation entreprise, exports serveur, paie 2026 et persistence sont maintenant les priorites visibles du produit.
+                  Registre salaries, paie mensuelle, bulletins, CNSS, conges, pointage et etats de paie dans un espace dedie.
                 </p>
               </div>
               <Link
-                href="/contact"
+                href="/employer"
                 className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-5 text-sm font-black text-[var(--accent-dark)]"
               >
-                Contacter SIMPAIE
+                Ouvrir MONRH
               </Link>
             </div>
           </div>
