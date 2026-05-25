@@ -228,6 +228,16 @@ export function EmployerPayrollClient() {
     (sum, employee) => sum + (approvedOvertimeByEmployee.get(employee.id) ?? 0),
     0,
   );
+
+  const approvedUnpaidLeaveByEmployee = useMemo(() => {
+    return leaveRequests
+      .filter((req) => req.status === "approved" && req.type === "unpaid" && leaveTouchesPeriod(req, selectedPeriod))
+      .reduce<Map<string, number>>((acc, req) => {
+        acc.set(req.employeeId, (acc.get(req.employeeId) ?? 0) + req.days);
+        return acc;
+      }, new Map());
+  }, [leaveRequests, selectedPeriod]);
+
   const payrollReadiness = useMemo(() => {
     const missingCnss = selectedEmployees.filter((employee) => !employee.cnssNumber.trim()).length;
     const invalidSalary = selectedEmployees.filter(
@@ -383,7 +393,26 @@ export function EmployerPayrollClient() {
         const manualBonus = Number(bonus) || 0;
         const manualAllowance = Number(allowances) || 0;
         const overtimeAmount = (Number(overtimePay) || 0) + (approvedOvertimeByEmployee.get(employee.id) ?? 0);
+
+        // Calculate Unpaid Leave Deduction
+        const unpaidDays = approvedUnpaidLeaveByEmployee.get(employee.id) ?? 0;
+        const effectiveGross = unpaidDays > 0
+          ? Math.round(employee.grossSalary * (1 - unpaidDays / 26))
+          : employee.grossSalary;
+
         const payElements = buildPayElements(employee.id, overtimeAmount, manualBonus, manualAllowance);
+
+        if (unpaidDays > 0) {
+          payElements.push({
+            label: `Absence non payee (${unpaidDays} j)`,
+            amount: -Math.round(employee.grossSalary * (unpaidDays / 26)),
+            category: "allowance", // Using allowance category for adjustment
+            taxable: true,
+            cnssSubject: true,
+            amoSubject: true,
+          });
+        }
+
         const response = await fetch("/api/simulate/payslip", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -392,6 +421,7 @@ export function EmployerPayrollClient() {
             employerId: company.id,
             period,
             grossSalary: employee.grossSalary,
+            familySituation: employee.familySituation,
             familyDependentsCount: employee.childrenCount ?? 0,
             overtimePay: 0,
             bonus: 0,

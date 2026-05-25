@@ -51,6 +51,8 @@ export type EmployerSaasModule = {
   icon: LucideIcon;
 };
 
+export type EmployerFamilySituation = "single" | "married" | "divorced" | "widowed";
+
 export type EmployerEmployee = {
   id: string;
   employeeNumber?: string;
@@ -62,8 +64,11 @@ export type EmployerEmployee = {
   endDate?: string;
   grossSalary: number;
   cnssNumber: string;
-  childrenCount?: number;
+  familySituation: EmployerFamilySituation;
+  childrenCount: number;
   email?: string;
+  rib?: string;
+  address?: string;
   documents?: EmployerEmployeeDocument[];
   status: "Actif" | "Suspendu" | "Sorti";
 };
@@ -576,6 +581,8 @@ export const sampleEmployerEmployees: EmployerEmployee[] = [
     startDate: "2023-03-01",
     grossSalary: 9200,
     cnssNumber: "CNSS-2489157",
+    familySituation: "single",
+    childrenCount: 0,
     email: "sara@atlas.example",
     documents: employerDocumentChecklist.map((document) => ({ ...document, attached: document.type !== "medical" })),
     status: "Actif",
@@ -588,6 +595,8 @@ export const sampleEmployerEmployees: EmployerEmployee[] = [
     startDate: "2025-10-15",
     grossSalary: 6800,
     cnssNumber: "CNSS-7812044",
+    familySituation: "single",
+    childrenCount: 0,
     email: "youssef@atlas.example",
     documents: employerDocumentChecklist.map((document) => ({
       ...document,
@@ -603,6 +612,8 @@ export const sampleEmployerEmployees: EmployerEmployee[] = [
     startDate: "2021-06-10",
     grossSalary: 11500,
     cnssNumber: "CNSS-5460182",
+    familySituation: "married",
+    childrenCount: 2,
     email: "nadia@atlas.example",
     documents: employerDocumentChecklist.map((document) => ({ ...document, attached: true })),
     status: "Actif",

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, BadgeCheck, CalendarClock, CheckCircle2, FileText, Search, ShieldAlert } from "lucide-react";
+import { AlertTriangle, BadgeCheck, CalendarClock, CheckCircle2, FileText, Info, Search, ShieldAlert } from "lucide-react";
 import {
   EMPLOYER_EMPLOYEE_STORAGE_KEY,
   EMPLOYER_LEAVE_REQUEST_STORAGE_KEY,
@@ -13,6 +13,7 @@ import {
   type EmployerLeaveRequest,
   type EmployerPayrollRun,
 } from "@/lib/employer/portal-data";
+import { getSmigRulesByDate } from "@/lib/rules/default-rules";
 import { getActiveEmployerCompany, readEmployerCompanies, readEmployerScopedValue } from "@/lib/employer/company-store";
 import {
   clearEmployerComplianceDismissalsInCloud,
@@ -33,8 +34,6 @@ type ComplianceAlert = {
   href: string;
   dueLabel: string;
 };
-
-const SMIG_MONTHLY_REFERENCE = 3500;
 
 function parseList<T>(value: string | null): T[] | null {
   if (!value) return null;
@@ -72,6 +71,23 @@ function buildAlerts(
 ): ComplianceAlert[] {
   const alerts: ComplianceAlert[] = [];
   const activeEmployees = employees.filter((employee) => employee.status !== "Sorti");
+
+  const today = new Date().toISOString().slice(0, 10);
+  const smigRules = getSmigRulesByDate(today);
+  const smigMonthlyRef = Math.round(smigRules.smigHourlyMad * smigRules.referenceHoursPerMonth * 100) / 100;
+
+  // Global SMIG Reform Alert for 2026
+  if (today.startsWith("2026")) {
+    alerts.push({
+      id: "smig-reform-2026",
+      title: "Reevaluation du SMIG 2026",
+      detail: `Le SMIG horaire est passe a ${smigRules.smigHourlyMad} MAD. Verifiez que vos bas salaires respectent le nouveau minimum mensuel de ${smigMonthlyRef} MAD.`,
+      category: "Reforme",
+      severity: "medium",
+      href: "/employer/payroll-settings",
+      dueLabel: "Janvier 2026",
+    });
+  }
 
   activeEmployees.forEach((employee) => {
     if (employee.contractType === "CDD") {
@@ -118,11 +134,11 @@ function buildAlerts(
       });
     }
 
-    if (employee.grossSalary > 0 && employee.grossSalary < SMIG_MONTHLY_REFERENCE) {
+    if (employee.grossSalary > 0 && employee.grossSalary < smigMonthlyRef) {
       alerts.push({
         id: `smig-${employee.id}-${employee.grossSalary}`,
         title: `Salaire a verifier - ${employee.fullName}`,
-        detail: `Salaire brut ${employee.grossSalary} MAD sous la reference SMIG mensuelle ${SMIG_MONTHLY_REFERENCE} MAD.`,
+        detail: `Salaire brut ${employee.grossSalary} MAD sous la reference SMIG mensuelle ${smigMonthlyRef} MAD (Ref: ${smigRules.smigHourlyMad} MAD/h).`,
         category: "Paie",
         severity: "high",
         href: "/employer/employees",
@@ -330,7 +346,13 @@ export function EmployerComplianceClient() {
           <div className="mt-4 space-y-3 text-sm text-[var(--ink-soft)]">
             <p>CDD avec date de fin proche ou manquante.</p>
             <p>Dossier RH incomplet: contrat, CIN, CNSS, RIB, certificat medical.</p>
-            <p>Reference SMIG mensuelle: {SMIG_MONTHLY_REFERENCE} MAD.</p>
+            <div className="flex items-start gap-2 rounded-lg bg-[var(--surface-muted)] p-2 text-xs">
+              <Info className="h-4 w-4 shrink-0 text-[var(--accent)]" />
+              <p>
+                Ref SMIG: {getSmigRulesByDate(new Date().toISOString().slice(0, 10)).smigHourlyMad} MAD/h
+                soit env. {Math.round(getSmigRulesByDate(new Date().toISOString().slice(0, 10)).smigHourlyMad * 191)} MAD/mois.
+              </p>
+            </div>
             <p>CNSS a verifier apres chaque paie calculee.</p>
           </div>
         </section>

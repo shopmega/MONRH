@@ -1,6 +1,3 @@
-import * as fs from "node:fs";
-import path from "node:path";
-
 export type TaxBracket = {
   min: number;
   max: number | null;
@@ -244,20 +241,24 @@ export const DEFAULT_SALARY_RULES: SalaryRules[] = [
     familyAllowanceEmployerRate: 0.064,
     amoEmployeeRate: 0.0226,
     amoEmployerRate: 0.0203,
-    professionalExpenseMode: "legacy_20_percent",
-    professionalExpenseRate: 0.2,
+    professionalExpenseMode: "reform_35_25_percent",
+    professionalExpenseRate: 0.35,
     professionalExpenseCap: 2500,
+    professionalExpenseTiers: [
+      { maxGrossMonthly: 6500, rate: 0.35, monthlyCap: 2275 },
+      { maxGrossMonthly: null, rate: 0.25, monthlyCap: 2500 },
+    ],
     familyChargeReductionAnnual: 360,
     familyChargeReductionCapAnnual: 2160,
     formationProRateSmall: 0.016,
     formationProRateLarge: 0.016,
     taxBracketsMonthly: [
-      { min: 0, max: 2500, rate: 0, deduction: 0 },
-      { min: 2500, max: 4166.67, rate: 0.1, deduction: 250 },
-      { min: 4166.67, max: 5000, rate: 0.2, deduction: 666.67 },
-      { min: 5000, max: 6666.67, rate: 0.3, deduction: 1166.67 },
-      { min: 6666.67, max: 15000, rate: 0.34, deduction: 1433.33 },
-      { min: 15000, max: null, rate: 0.38, deduction: 2033.33 },
+      { min: 0, max: 3333.33, rate: 0, deduction: 0 },
+      { min: 3333.33, max: 5000, rate: 0.1, deduction: 333.33 },
+      { min: 5000, max: 6666.67, rate: 0.2, deduction: 833.33 },
+      { min: 6666.67, max: 8333.33, rate: 0.3, deduction: 1500 },
+      { min: 8333.33, max: 15000, rate: 0.34, deduction: 1833.33 },
+      { min: 15000, max: null, rate: 0.38, deduction: 2433.33 },
     ],
   },
 ];
@@ -485,61 +486,6 @@ function pickRulesByDate<T extends { effectiveFrom: string; effectiveTo: string 
   return match ?? rules[rules.length - 1];
 }
 
-const LAW_RULES_PATH = path.join(process.cwd(), "data", "law-rules.json");
-let cachedRuntimeRules: Partial<LawRulesBundle> | null | undefined;
-let cachedResolvedBundle: LawRulesBundle | null = null;
-
-function readRuntimeRules(): Partial<LawRulesBundle> | null {
-  if (cachedRuntimeRules !== undefined) {
-    return cachedRuntimeRules;
-  }
-  try {
-    if (!fs.existsSync(LAW_RULES_PATH)) {
-      cachedRuntimeRules = null;
-      return cachedRuntimeRules;
-    }
-    const raw = fs.readFileSync(LAW_RULES_PATH, "utf8");
-    cachedRuntimeRules = JSON.parse(raw) as Partial<LawRulesBundle>;
-    return cachedRuntimeRules;
-  } catch {
-    cachedRuntimeRules = null;
-    return cachedRuntimeRules;
-  }
-}
-
-function resolveRuleSet<T>(runtimeRules: Partial<LawRulesBundle> | null, key: keyof LawRulesBundle, fallback: T[]): T[] {
-  const runtime = runtimeRules?.[key];
-  if (!Array.isArray(runtime) || runtime.length === 0) {
-    return fallback;
-  }
-  return runtime as T[];
-}
-
-function getResolvedBundle(): LawRulesBundle {
-  if (cachedResolvedBundle) {
-    return cachedResolvedBundle;
-  }
-  const runtimeRules = readRuntimeRules();
-  cachedResolvedBundle = {
-    salaryRules: resolveRuleSet<SalaryRules>(runtimeRules, "salaryRules", DEFAULT_SALARY_RULES),
-    terminationRules: resolveRuleSet<TerminationRules>(runtimeRules, "terminationRules", DEFAULT_TERMINATION_RULES),
-    leaveRules: resolveRuleSet<LeaveRules>(runtimeRules, "leaveRules", DEFAULT_LEAVE_RULES),
-    smigRules: resolveRuleSet<SmigRules>(runtimeRules, "smigRules", DEFAULT_SMIG_RULES),
-    overtimeRules: resolveRuleSet<OvertimeRules>(runtimeRules, "overtimeRules", DEFAULT_OVERTIME_RULES),
-    socialProtectionRules: resolveRuleSet<SocialProtectionRules>(
-      runtimeRules,
-      "socialProtectionRules",
-      DEFAULT_SOCIAL_PROTECTION_RULES,
-    ),
-  };
-  return cachedResolvedBundle;
-}
-
-export function invalidateRulesCache() {
-  cachedRuntimeRules = undefined;
-  cachedResolvedBundle = null;
-}
-
 export function getDefaultRulesBundle(): LawRulesBundle {
   return {
     salaryRules: DEFAULT_SALARY_RULES,
@@ -552,29 +498,29 @@ export function getDefaultRulesBundle(): LawRulesBundle {
 }
 
 export function getRulesBundle(): LawRulesBundle {
-  return getResolvedBundle();
+  return getDefaultRulesBundle();
 }
 
 export function getSalaryRulesByDate(dateISO: string): SalaryRules {
-  return pickRulesByDate(dateISO, getResolvedBundle().salaryRules);
+  return pickRulesByDate(dateISO, DEFAULT_SALARY_RULES);
 }
 
 export function getTerminationRulesByDate(dateISO: string): TerminationRules {
-  return pickRulesByDate(dateISO, getResolvedBundle().terminationRules);
+  return pickRulesByDate(dateISO, DEFAULT_TERMINATION_RULES);
 }
 
 export function getLeaveRulesByDate(dateISO: string): LeaveRules {
-  return pickRulesByDate(dateISO, getResolvedBundle().leaveRules);
+  return pickRulesByDate(dateISO, DEFAULT_LEAVE_RULES);
 }
 
 export function getSmigRulesByDate(dateISO: string): SmigRules {
-  return pickRulesByDate(dateISO, getResolvedBundle().smigRules);
+  return pickRulesByDate(dateISO, DEFAULT_SMIG_RULES);
 }
 
 export function getOvertimeRulesByDate(dateISO: string): OvertimeRules {
-  return pickRulesByDate(dateISO, getResolvedBundle().overtimeRules);
+  return pickRulesByDate(dateISO, DEFAULT_OVERTIME_RULES);
 }
 
 export function getSocialProtectionRulesByDate(dateISO: string): SocialProtectionRules {
-  return pickRulesByDate(dateISO, getResolvedBundle().socialProtectionRules);
+  return pickRulesByDate(dateISO, DEFAULT_SOCIAL_PROTECTION_RULES);
 }

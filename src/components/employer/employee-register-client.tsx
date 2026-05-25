@@ -48,8 +48,11 @@ type EmployeeFormState = {
   endDate: string;
   grossSalary: string;
   cnssNumber: string;
+  familySituation: EmployerEmployee["familySituation"];
   childrenCount: string;
   email: string;
+  rib: string;
+  address: string;
 };
 
 const emptyForm: EmployeeFormState = {
@@ -62,8 +65,11 @@ const emptyForm: EmployeeFormState = {
   endDate: "",
   grossSalary: "",
   cnssNumber: "",
+  familySituation: "single",
   childrenCount: "0",
   email: "",
+  rib: "",
+  address: "",
 };
 
 function formatMoney(value: number) {
@@ -243,6 +249,29 @@ export function EmployeeRegisterClient() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check for "Contract to Employee" conversion request
+    const params = new URLSearchParams(window.location.search);
+    const convertId = params.get("convert_contract");
+    if (convertId) {
+      const records = readEmployerContractRecords();
+      const record = records.find(r => r.id === convertId || r.generatedContractId === convertId);
+      if (record) {
+        const data = record.contractData as any;
+        setForm({
+          ...emptyForm,
+          fullName: record.employeeName,
+          role: data.job_title || "",
+          contractType: record.contractType === "INTERIM" ? "Interim" : (record.contractType as any),
+          startDate: data.start_date || "",
+          endDate: data.end_date || "",
+          grossSalary: String(data.salary_brut || "0"),
+          cin: data.employee_cin || "",
+          cnssNumber: data.employee_cnss || "",
+        });
+        setMessage(`Informations du contrat de ${record.employeeName} pre-remplies.`);
+      }
+    }
+
     const stored = readEmployerEmployees();
     const nextEmployees = stored ?? [];
     const nextCompanies = readEmployerCompanies();
@@ -343,8 +372,11 @@ export function EmployeeRegisterClient() {
       endDate: form.endDate || undefined,
       grossSalary,
       cnssNumber: form.cnssNumber.trim() || "A completer",
+      familySituation: form.familySituation,
       childrenCount: Math.max(0, Math.min(6, Math.trunc(Number(form.childrenCount) || 0))),
       email: form.email.trim() || undefined,
+      rib: form.rib.trim() || undefined,
+      address: form.address.trim() || undefined,
       documents: normalizeDocuments(),
       status: "Actif",
     };
@@ -628,6 +660,19 @@ export function EmployeeRegisterClient() {
                   className="input-shell mt-1"
                   placeholder="Optionnel"
                 />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-[var(--ink-soft)]">Situation familiale</span>
+                <select
+                  value={form.familySituation}
+                  onChange={(event) => updateForm("familySituation", event.target.value as EmployerEmployee["familySituation"])}
+                  className="input-shell mt-1"
+                >
+                  <option value="single">Celibataire</option>
+                  <option value="married">Marie(e)</option>
+                  <option value="divorced">Divorce(e)</option>
+                  <option value="widowed">Veuf/Veuve</option>
+                </select>
               </label>
               <label className="block">
                 <span className="text-xs font-bold text-[var(--ink-soft)]">Enfants</span>
@@ -945,6 +990,23 @@ export function EmployeeRegisterClient() {
                     />
                   </label>
                   <label className="block">
+                    <span className="text-xs font-bold text-[var(--ink-soft)]">Situation familiale</span>
+                    <select
+                      value={selectedEmployee.familySituation}
+                      onChange={(event) =>
+                        updateEmployee(selectedEmployee.id, {
+                          familySituation: event.target.value as EmployerEmployee["familySituation"],
+                        })
+                      }
+                      className="input-shell mt-1"
+                    >
+                      <option value="single">Celibataire</option>
+                      <option value="married">Marie(e)</option>
+                      <option value="divorced">Divorce(e)</option>
+                      <option value="widowed">Veuf/Veuve</option>
+                    </select>
+                  </label>
+                  <label className="block">
                     <span className="text-xs font-bold text-[var(--ink-soft)]">Enfants</span>
                     <input
                       type="number"
@@ -957,6 +1019,24 @@ export function EmployeeRegisterClient() {
                         })
                       }
                       className="input-shell mt-1"
+                    />
+                  </label>
+                  <label className="block sm:col-span-2">
+                    <span className="text-xs font-bold text-[var(--ink-soft)]">RIB (24 chiffres)</span>
+                    <input
+                      value={selectedEmployee.rib ?? ""}
+                      onChange={(event) => updateEmployee(selectedEmployee.id, { rib: event.target.value })}
+                      className="input-shell mt-1"
+                      placeholder="000 000 0000000000000000 00"
+                    />
+                  </label>
+                  <label className="block sm:col-span-2">
+                    <span className="text-xs font-bold text-[var(--ink-soft)]">Adresse personnelle</span>
+                    <textarea
+                      value={selectedEmployee.address ?? ""}
+                      onChange={(event) => updateEmployee(selectedEmployee.id, { address: event.target.value })}
+                      className="input-shell mt-1 min-h-[60px] py-2"
+                      placeholder="Rue, Quartier, Ville"
                     />
                   </label>
                 </div>
