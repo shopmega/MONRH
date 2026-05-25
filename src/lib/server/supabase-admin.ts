@@ -45,20 +45,25 @@ export function getSupabaseAdminClient() {
   if (cachedClient) {
     return cachedClient;
   }
-  const serviceRoleKey = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
-  validateServiceRoleKey(serviceRoleKey);
-  cachedClient = createClient(
-    requiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    serviceRoleKey,
-    {
-      db: { schema: getSupabaseSchema() },
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    } as any,
-  );
-  return cachedClient;
+  try {
+    const serviceRoleKey = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
+    validateServiceRoleKey(serviceRoleKey);
+    cachedClient = createClient(
+      requiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
+      serviceRoleKey,
+      {
+        db: { schema: getSupabaseSchema() },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      } as any,
+    );
+    return cachedClient;
+  } catch (error) {
+    console.error("Failed to initialize Supabase Admin Client:", error);
+    throw error;
+  }
 }
 
 /**
