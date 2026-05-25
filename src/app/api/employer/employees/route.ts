@@ -26,8 +26,11 @@ const employeeSchema = z.object({
   endDate: z.string().optional(),
   grossSalary: z.number().nonnegative(),
   cnssNumber: z.string().min(1).max(100),
-  childrenCount: z.number().int().min(0).max(6).optional(),
+  familySituation: z.enum(["single", "married", "divorced", "widowed"]).default("single"),
+  childrenCount: z.number().int().min(0).max(6).default(0),
   email: z.string().email().optional(),
+  rib: z.string().optional(),
+  address: z.string().optional(),
   documents: z.array(employeeDocumentSchema).optional(),
   status: z.enum(["Actif", "Suspendu", "Sorti"]),
 });

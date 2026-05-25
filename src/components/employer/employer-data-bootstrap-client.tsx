@@ -11,6 +11,16 @@ import {
   writeEmployerCompanies,
 } from "@/lib/employer/company-store";
 import {
+  sampleEmployerCompanies,
+  sampleEmployerEmployees,
+  sampleEmployerLeaveRequests,
+  sampleEmployerTimeEntries,
+  EMPLOYER_EMPLOYEE_STORAGE_KEY,
+  EMPLOYER_LEAVE_REQUEST_STORAGE_KEY,
+  EMPLOYER_TIME_ENTRY_STORAGE_KEY,
+} from "@/lib/employer/portal-data";
+import { writeEmployerScopedValue } from "@/lib/employer/company-store";
+import {
   fetchEmployerEmployeesFromCloud,
   writeEmployerEmployees,
 } from "@/lib/employer/employee-store";
@@ -61,10 +71,14 @@ export function EmployerDataBootstrapClient({ children }: { children: ReactNode 
       let nextHasCompany = false;
       try {
         let companies = readEmployerCompanies();
-        const cloudCompanies = await fetchEmployerCompaniesFromCloud();
-        if (cloudCompanies !== null) {
-          companies = cloudCompanies;
-          writeEmployerCompanies(cloudCompanies);
+        try {
+          const cloudCompanies = await fetchEmployerCompaniesFromCloud();
+          if (cloudCompanies !== null) {
+            companies = cloudCompanies;
+            writeEmployerCompanies(cloudCompanies);
+          }
+        } catch (error) {
+          console.error("Cloud companies hydration failed, falling back to local:", error);
         }
 
         const activeCompanyId = readActiveEmployerCompanyId(companies);
@@ -73,41 +87,45 @@ export function EmployerDataBootstrapClient({ children }: { children: ReactNode 
         nextHasCompany = Boolean(activeCompany);
         if (!activeCompany) return;
 
-        await Promise.allSettled([
-          hydrateList(
-            activeCompany.id,
-            fetchEmployerEmployeesFromCloud,
-            writeEmployerEmployees,
-          ),
-          hydrateList(
-            activeCompany.id,
-            fetchEmployerPayrollRunsFromCloud,
-            writeEmployerPayrollRuns,
-          ),
-          hydrateList(
-            activeCompany.id,
-            fetchEmployerLeaveRequestsFromCloud,
-            writeEmployerLeaveRequests,
-          ),
-          hydrateList(
-            activeCompany.id,
-            fetchEmployerTimeEntriesFromCloud,
-            writeEmployerTimeEntries,
-          ),
-          hydrateList(
-            activeCompany.id,
-            fetchEmployerCnssExportsFromCloud,
-            writeEmployerCnssExports,
-          ),
-          hydrateList(
-            activeCompany.id,
-            fetchEmployerContractRecordsFromCloud,
-            writeEmployerContractRecords,
-          ),
-          fetchEmployerPayrollSettingsFromCloud(activeCompany.id).then((settings) => {
-            if (settings) writeEmployerPayrollSettings(settings);
-          }),
-        ]);
+        try {
+          await Promise.allSettled([
+            hydrateList(
+              activeCompany.id,
+              fetchEmployerEmployeesFromCloud,
+              writeEmployerEmployees,
+            ),
+            hydrateList(
+              activeCompany.id,
+              fetchEmployerPayrollRunsFromCloud,
+              writeEmployerPayrollRuns,
+            ),
+            hydrateList(
+              activeCompany.id,
+              fetchEmployerLeaveRequestsFromCloud,
+              writeEmployerLeaveRequests,
+            ),
+            hydrateList(
+              activeCompany.id,
+              fetchEmployerTimeEntriesFromCloud,
+              writeEmployerTimeEntries,
+            ),
+            hydrateList(
+              activeCompany.id,
+              fetchEmployerCnssExportsFromCloud,
+              writeEmployerCnssExports,
+            ),
+            hydrateList(
+              activeCompany.id,
+              fetchEmployerContractRecordsFromCloud,
+              writeEmployerContractRecords,
+            ),
+            fetchEmployerPayrollSettingsFromCloud(activeCompany.id).then((settings) => {
+              if (settings) writeEmployerPayrollSettings(settings);
+            }),
+          ]);
+        } catch (error) {
+          console.warn("Partial cloud data hydration failed:", error);
+        }
       } finally {
         if (!cancelled) {
           setHasCompany(nextHasCompany);
@@ -147,12 +165,39 @@ export function EmployerDataBootstrapClient({ children }: { children: ReactNode 
           Le compte ne contient encore aucune entreprise. Les modules RH et paie restent fermes tant que le contexte
           employeur n'est pas cree.
         </p>
-        <Link
-          href="/employer/settings"
-          className="mt-5 inline-flex h-10 items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-bold text-[var(--juris-on-primary)]"
-        >
-          Ouvrir les parametres
-        </Link>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href="/employer/settings"
+            className="inline-flex h-10 items-center justify-center rounded-lg bg-[var(--accent)] px-4 text-sm font-bold text-[var(--juris-on-primary)]"
+          >
+            Ouvrir les parametres
+          </Link>
+          <button
+            onClick={() => {
+              writeEmployerCompanies(sampleEmployerCompanies);
+              writeActiveEmployerCompanyId(sampleEmployerCompanies[0].id);
+              writeEmployerScopedValue(
+                EMPLOYER_EMPLOYEE_STORAGE_KEY,
+                JSON.stringify(sampleEmployerEmployees),
+                sampleEmployerCompanies[0].id,
+              );
+              writeEmployerScopedValue(
+                EMPLOYER_LEAVE_REQUEST_STORAGE_KEY,
+                JSON.stringify(sampleEmployerLeaveRequests),
+                sampleEmployerCompanies[0].id,
+              );
+              writeEmployerScopedValue(
+                EMPLOYER_TIME_ENTRY_STORAGE_KEY,
+                JSON.stringify(sampleEmployerTimeEntries),
+                sampleEmployerCompanies[0].id,
+              );
+              window.location.reload();
+            }}
+            className="inline-flex h-10 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-bold text-[var(--foreground)] transition hover:bg-[var(--surface-muted)]"
+          >
+            Utiliser les donnees de demo (Audit)
+          </button>
+        </div>
       </section>
     );
   }

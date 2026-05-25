@@ -43,16 +43,19 @@ export async function GET() {
     const items = await listEmployerCompanies(userId);
     return NextResponse.json({ ok: true, items });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     if (isEmployerPlanLimitError(error)) {
-      return NextResponse.json({ ok: false, error: error.code, message: error.message }, { status: 403 });
+      return NextResponse.json({ ok: false, error: error.code, message }, { status: 403 });
     }
+    const isConfigError = message.includes("Missing environment variable") || message.includes("Invalid SUPABASE_SERVICE_ROLE_KEY");
+
     return NextResponse.json(
       {
         ok: false,
-        error: "employer_companies_unavailable",
-        message: error instanceof Error ? error.message : "Unknown error",
+        error: isConfigError ? "employer_config_error" : "employer_companies_unavailable",
+        message,
       },
-      { status: 503 },
+      { status: isConfigError ? 500 : 503 },
     );
   }
 }

@@ -22,6 +22,7 @@ export function normalizeEmployerEmployee(employee: EmployerEmployee): EmployerE
     ...employee,
     employeeNumber: employee.employeeNumber?.trim() || employee.id,
     cin: employee.cin?.trim() || "",
+    familySituation: employee.familySituation || "single",
     childrenCount: Math.max(0, Math.min(6, Math.trunc(employee.childrenCount ?? 0))),
     documents: normalizeEmployerEmployeeDocuments(employee.documents),
   };

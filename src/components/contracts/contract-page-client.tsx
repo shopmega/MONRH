@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback, type ReactNode } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { ContractWizard } from "@/components/contract-wizard";
@@ -402,6 +403,12 @@ export function ContractPageClient({ embedded = false }: { embedded?: boolean })
                 >
                   Nouveau contrat
                 </button>
+                  <Link
+                    href={`/employer/employees?convert_contract=${generatedContract.id}`}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-[var(--ok-bg)] px-5 py-2.5 text-sm font-semibold text-[var(--ok)] transition hover:bg-[var(--ok)] hover:text-white"
+                  >
+                    Convertir en salarie
+                  </Link>
               </div>
             </div>
 
