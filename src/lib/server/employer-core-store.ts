@@ -42,7 +42,10 @@ type EmployeeRow = {
   gross_salary: number | string;
   cnss_number: string;
   children_count: number | string;
+  family_situation: EmployerEmployee["familySituation"];
   email: string | null;
+  rib: string | null;
+  address: string | null;
   documents: EmployerEmployee["documents"];
   status: EmployerEmployee["status"];
 };
@@ -198,8 +201,11 @@ function mapEmployee(row: EmployeeRow): EmployerEmployee {
     endDate: row.end_date ?? undefined,
     grossSalary: Number(row.gross_salary),
     cnssNumber: row.cnss_number,
+    familySituation: row.family_situation,
     childrenCount: Number(row.children_count),
     email: row.email ?? undefined,
+    rib: row.rib ?? undefined,
+    address: row.address ?? undefined,
     documents: row.documents ?? [],
     status: row.status,
   };
@@ -450,7 +456,7 @@ export async function listEmployerEmployees(userId: string, companyId: string): 
   const supabase = getSupabaseAdminClient();
   const { data, error } = await (supabase as any)
     .from("employer_employees")
-    .select("id,employee_number,full_name,cin,role,contract_type,start_date,end_date,gross_salary,cnss_number,children_count,email,documents,status")
+    .select("id,employee_number,full_name,cin,role,contract_type,start_date,end_date,gross_salary,cnss_number,family_situation,children_count,email,rib,address,documents,status")
     .eq("user_id", userId)
     .eq("company_id", companyId)
     .order("created_at", { ascending: true });
@@ -481,8 +487,11 @@ export async function replaceEmployerEmployees(
       end_date: employee.endDate ?? null,
       gross_salary: employee.grossSalary,
       cnss_number: employee.cnssNumber,
+      family_situation: employee.familySituation,
       children_count: employee.childrenCount ?? 0,
       email: employee.email ?? null,
+      rib: employee.rib ?? null,
+      address: employee.address ?? null,
       documents: employee.documents ?? [],
       status: employee.status,
     }));
@@ -521,15 +530,18 @@ export async function upsertEmployerEmployee(
     end_date: employee.endDate ?? null,
     gross_salary: employee.grossSalary,
     cnss_number: employee.cnssNumber,
+    family_situation: employee.familySituation,
     children_count: employee.childrenCount ?? 0,
     email: employee.email ?? null,
+    rib: employee.rib ?? null,
+    address: employee.address ?? null,
     documents: employee.documents ?? [],
     status: employee.status,
   };
   const { data, error } = await (supabase as any)
     .from("employer_employees")
     .upsert(row, { onConflict: "user_id,company_id,id" })
-    .select("id,employee_number,full_name,cin,role,contract_type,start_date,end_date,gross_salary,cnss_number,children_count,email,documents,status")
+    .select("id,employee_number,full_name,cin,role,contract_type,start_date,end_date,gross_salary,cnss_number,family_situation,children_count,email,rib,address,documents,status")
     .single();
   if (error) throw new Error(`employer_employee_upsert_failed: ${error.message}`);
   return mapEmployee(data as EmployeeRow);

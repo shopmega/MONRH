@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback, type ReactNode } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { ContractWizard } from "@/components/contract-wizard";

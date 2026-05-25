@@ -35,6 +35,7 @@ import {
   saveEmployerEmployeeToCloud,
   writeEmployerEmployees,
 } from "@/lib/employer/employee-store";
+import { readEmployerContractRecords } from "@/lib/employer/contract-record-store";
 import { parseCsvNumber, parseCsvRecords, readCsvField } from "@/lib/employer/csv";
 import type { ContractFormData } from "@/lib/contracts/types";
 
@@ -478,11 +479,14 @@ export function EmployeeRegisterClient() {
           endDate: parseDateField(readCsvField(record, ["Date fin", "endDate"])) || existing?.endDate,
           grossSalary: grossSalary > 0 ? grossSalary : existing?.grossSalary ?? 0,
           cnssNumber: cnssNumber || existing?.cnssNumber || "A completer",
+          familySituation: (readCsvField(record, ["Situation", "Situation familiale", "familySituation"]) as any) || existing?.familySituation || "single",
           childrenCount: Math.max(
             0,
             Math.min(6, Math.trunc(parseCsvNumber(readCsvField(record, ["Enfants", "childrenCount"])) || existing?.childrenCount || 0)),
           ),
           email: readCsvField(record, ["Email", "email"]) || existing?.email,
+          rib: readCsvField(record, ["RIB", "rib"]) || existing?.rib,
+          address: readCsvField(record, ["Adresse", "address"]) || existing?.address,
           documents: existing?.documents ?? normalizeDocuments(),
           status: parseEmployeeStatus(readCsvField(record, ["Statut", "status"]) || existing?.status || "Actif"),
         });

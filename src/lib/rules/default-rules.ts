@@ -497,6 +497,10 @@ export function getDefaultRulesBundle(): LawRulesBundle {
   };
 }
 
+export function invalidateRulesCache() {
+  // No-op in this version
+}
+
 export function getRulesBundle(): LawRulesBundle {
   return getDefaultRulesBundle();
 }
